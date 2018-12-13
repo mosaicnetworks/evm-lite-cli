@@ -149,7 +149,6 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
         try {
             const signed = await decrypted.signTransaction(tx);
-
             const response = JSONBig.parse(await connection.sendRaw(signed.rawTransaction));
 
             tx.txHash = response.txHash;

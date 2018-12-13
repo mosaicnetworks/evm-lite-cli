@@ -35,7 +35,7 @@ describe('command: accounts list', () => {
             }
         };
         const result: StagedOutput<Message> = await stage(args, session);
-
+        console.log(result)
         assert.equal(result.type, Staging.SUCCESS);
 
         assert.equal(result.message instanceof ASCIITable, true)

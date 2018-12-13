@@ -5,3 +5,4 @@ test/assets/config.toml
 test/assets/db.json
 docs
 .idea
+lib

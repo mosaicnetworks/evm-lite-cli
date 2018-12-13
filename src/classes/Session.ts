@@ -1,6 +1,5 @@
 import * as path from "path";
 
-
 import {Config, Controller, Database, DataDirectory, Keystore, Log} from 'evm-lite-lib';
 
 
