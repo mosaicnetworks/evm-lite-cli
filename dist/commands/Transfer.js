@@ -1,6 +1,6 @@
 "use strict";
 /**
- * @file List.ts
+ * @file Transfer.ts
  * @module evm-lite-lit <https://github.com/mosaicnetworks/evm-lite-lib>
  * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @author Danu Kumanan <https://github.com/danu3006>
