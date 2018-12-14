@@ -1,7 +1,9 @@
 "use strict";
 /**
  * @file AccountsCreate.ts
+ * @module evm-lite-lit <https://github.com/mosaicnetworks/evm-lite-lib>
  * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @author Danu Kumanan <https://github.com/danu3006>
  * @date 2018
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {

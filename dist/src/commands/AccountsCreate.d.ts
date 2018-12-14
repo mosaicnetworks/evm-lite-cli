@@ -1,8 +1,6 @@
 /**
  * @file AccountsCreate.ts
- * @module evm-lite-lit <https://github.com/mosaicnetworks/evm-lite-lib>
  * @author Mosaic Networks <https://github.com/mosaicnetworks>
- * @author Danu Kumanan <https://github.com/danu3006>
  * @date 2018
  */
 import * as Vorpal from "vorpal";

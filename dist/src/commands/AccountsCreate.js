@@ -1,22 +1,23 @@
+"use strict";
 /**
  * @file AccountsCreate.ts
- * @module evm-lite-lit <https://github.com/mosaicnetworks/evm-lite-lib>
  * @author Mosaic Networks <https://github.com/mosaicnetworks>
- * @author Danu Kumanan <https://github.com/danu3006>
  * @date 2018
  */
-
-import * as fs from "fs";
-import * as inquirer from 'inquirer';
-import * as JSONBig from 'json-bigint';
-import * as Vorpal from "vorpal";
-
-import {Directory} from "evm-lite-lib";
-
-import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
-
-import Session from "../classes/Session";
-
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs = require("fs");
+const inquirer = require("inquirer");
+const JSONBig = require("json-bigint");
+const evm_lite_lib_1 = require("evm-lite-lib");
+const Staging_1 = require("../classes/Staging");
 /**
  * Should return either a Staged error or success.
  *
@@ -30,11 +31,9 @@ import Session from "../classes/Session";
  *
  * @alpha
  */
-export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
-    return new Promise<StagedOutput<Message>>(async (resolve) => {
-
-        const {error, success} = Staging.getStagingFunctions(args);
-
+exports.stage = (args, session) => {
+    return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+        const { error, success } = Staging_1.default.getStagingFunctions(args);
         const interactive = !args.options.pwd || session.interactive;
         const verbose = args.options.verbose || false;
         const questions = [
@@ -55,45 +54,39 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
                 type: 'password'
             }
         ];
-
         if (interactive) {
-            const {output, password, verifyPassword} = await inquirer.prompt(questions);
+            const { output, password, verifyPassword } = yield inquirer.prompt(questions);
             if (!(password && verifyPassword && (password === verifyPassword))) {
-                resolve(error(Staging.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
+                resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
                 return;
             }
-
             args.options.pwd = password.trim();
             args.options.output = output;
-        } else {
-            if (!Directory.exists(args.options.pwd)) {
-                resolve(error(Staging.ERRORS.PATH_NOT_EXIST, 'Password file provided does not exist.'));
+        }
+        else {
+            if (!evm_lite_lib_1.Directory.exists(args.options.pwd)) {
+                resolve(error(Staging_1.default.ERRORS.PATH_NOT_EXIST, 'Password file provided does not exist.'));
                 return;
             }
-
-            if (Directory.isDirectory(args.options.pwd)) {
-                resolve(error(Staging.ERRORS.IS_DIRECTORY, 'Password file path provided is a directory.'));
+            if (evm_lite_lib_1.Directory.isDirectory(args.options.pwd)) {
+                resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'Password file path provided is a directory.'));
                 return;
             }
-
             args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8').trim();
         }
-
         args.options.output = args.options.output || session.config.data.defaults.keystore;
-        if (!Directory.exists(args.options.output)) {
-            resolve(error(Staging.ERRORS.DIRECTORY_NOT_EXIST, 'Output directory does not exist.'));
+        if (!evm_lite_lib_1.Directory.exists(args.options.output)) {
+            resolve(error(Staging_1.default.ERRORS.DIRECTORY_NOT_EXIST, 'Output directory does not exist.'));
             return;
         }
-        if (!Directory.isDirectory(args.options.output)) {
-            resolve(error(Staging.ERRORS.IS_FILE, 'Output path is not a directory.'));
+        if (!evm_lite_lib_1.Directory.isDirectory(args.options.output)) {
+            resolve(error(Staging_1.default.ERRORS.IS_FILE, 'Output path is not a directory.'));
             return;
         }
-
-        const account = JSONBig.parse(await session.keystore.create(args.options.pwd, args.options.output));
+        const account = JSONBig.parse(yield session.keystore.create(args.options.pwd, args.options.output));
         resolve(success(verbose ? account : `0x${account.address}`));
-    })
+    }));
 };
-
 /**
  * Should construct a Vorpal.Command instance for the command `accounts create`.
  *
@@ -114,20 +107,19 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
  *
  * @alpha
  */
-export default function commandAccountsCreate(evmlc: Vorpal, session: Session): Vorpal.Command {
-
-    const description =
-        'Allows you to create and encrypt accounts locally. Created accounts will either be placed in the' +
+function commandAccountsCreate(evmlc, session) {
+    const description = 'Allows you to create and encrypt accounts locally. Created accounts will either be placed in the' +
         ' keystore folder inside the data directory provided by the global --datadir, -d flag or if no flag is' +
         ' provided, in the keystore specified in the configuration file.';
-
     return evmlc.command('accounts create').alias('a c')
         .description(description)
         .option('-o, --output <path>', 'keystore file output path')
         .option('-v, --verbose', 'show verbose output')
         .option('--pwd <file_path>', 'password file path')
         .types({
-            string: ['pwd', 'o', 'output']
-        })
-        .action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
-};
+        string: ['pwd', 'o', 'output']
+    })
+        .action((args) => Staging_1.execute(exports.stage, args, session));
+}
+exports.default = commandAccountsCreate;
+;
