@@ -2,7 +2,7 @@
 
 /**
  * @file AccountsCreate.ts
- * @module evm-lite-cli <https://github.com/mosaicnetworks/evm-lite-cli>
+ * @module evm-lite-cli
  * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @author Danu Kumanan <https://github.com/danu3006>
  * @date 2018
