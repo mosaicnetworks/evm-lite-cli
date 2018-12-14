@@ -1,7 +1,7 @@
 "use strict";
 /**
  * @file ConfigView.ts
- * @module evm-lite-lit <https://github.com/mosaicnetworks/evm-lite-lib>
+ * @module evm-lite-cli <https://github.com/mosaicnetworks/evm-lite-cli>
  * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @author Danu Kumanan <https://github.com/danu3006>
  * @date 2018
