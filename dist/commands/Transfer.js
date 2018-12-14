@@ -137,8 +137,9 @@ exports.stage = (args, session) => {
         tx.chainId = 1;
         tx.nonce = (yield session.keystore.fetch(decrypted.address, connection)).nonce;
         try {
+            const transaction = session.connection.prepareTransfer(tx.to, tx.value, tx.from);
             const signed = yield decrypted.signTransaction(tx);
-            const response = JSONBig.parse(yield connection.sendRaw(signed.rawTransaction));
+            const response = JSONBig.parse(yield transaction.sendRaw(signed.rawTransaction));
             tx.txHash = response.txHash;
             session.database.transactions.add(tx);
             yield session.database.save();

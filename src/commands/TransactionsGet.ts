@@ -8,7 +8,7 @@ import * as ASCIITable from 'ascii-table';
 import * as inquirer from 'inquirer';
 import * as Vorpal from "vorpal";
 
-import {TXReceipt} from "evm-lite-lib";
+import {Transaction, TXReceipt} from "evm-lite-lib";
 
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
 
@@ -60,7 +60,8 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             return;
         }
 
-        const receipt: TXReceipt = await connection.getReceipt(args.hash);
+        const transaction = new Transaction(null, session.connection.host, session.connection.port, false);
+        const receipt: TXReceipt = await transaction.getReceipt(args.hash);
         if (!receipt) {
             resolve(error(Staging.ERRORS.FETCH_FAILED, 'Could not fetch receipt for hash: ' + args.hash));
             return;

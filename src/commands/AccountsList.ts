@@ -7,7 +7,7 @@
 import * as ASCIITable from 'ascii-table';
 import * as Vorpal from "vorpal";
 
-import {Controller} from "evm-lite-lib"
+import {EVMLC} from "evm-lite-lib"
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
 
 import Session from "../classes/Session";
@@ -35,7 +35,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         const formatted = args.options.formatted || false;
         const table = new ASCIITable();
 
-        let connection: Controller = null;
+        let connection: EVMLC = null;
         if (verbose || remote) {
             connection = await session.connect(args.options.host, args.options.port);
             if (!connection) {

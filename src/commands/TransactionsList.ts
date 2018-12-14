@@ -7,7 +7,7 @@
 import * as ASCIITable from 'ascii-table';
 import * as Vorpal from "vorpal";
 
-import {TXReceipt} from "evm-lite-lib";
+import {Transaction, TXReceipt} from "evm-lite-lib";
 
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
 
@@ -60,7 +60,8 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
         for (const tx of transactions) {
             const txDate = new Date(tx.date);
-            const receipt: TXReceipt = await connection.getReceipt(tx.txHash);
+            const transaction = new Transaction(null, session.connection.host, session.connection.port, false);
+            const receipt: TXReceipt = await transaction.getReceipt(tx.txHash);
 
             const date = txDate.getFullYear() + '-' + (txDate.getMonth() + 1) + '-' + txDate.getDate();
             const time = txDate.getHours() + ":" + txDate.getMinutes() + ":" + txDate.getSeconds();

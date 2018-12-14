@@ -14,6 +14,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const ASCIITable = require("ascii-table");
+const evm_lite_lib_1 = require("evm-lite-lib");
 const Staging_1 = require("../classes/Staging");
 /**
  * Should return either a Staged error or success.
@@ -56,7 +57,8 @@ exports.stage = (args, session) => {
         }
         for (const tx of transactions) {
             const txDate = new Date(tx.date);
-            const receipt = yield connection.getReceipt(tx.txHash);
+            const transaction = new evm_lite_lib_1.Transaction(null, session.connection.host, session.connection.port, false);
+            const receipt = yield transaction.getReceipt(tx.txHash);
             const date = txDate.getFullYear() + '-' + (txDate.getMonth() + 1) + '-' + txDate.getDate();
             const time = txDate.getHours() + ":" + txDate.getMinutes() + ":" + txDate.getSeconds();
             if (verbose) {

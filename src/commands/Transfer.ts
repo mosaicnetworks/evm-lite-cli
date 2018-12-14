@@ -148,8 +148,9 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         tx.nonce = (await session.keystore.fetch(decrypted.address, connection)).nonce;
 
         try {
+            const transaction = session.connection.prepareTransfer(tx.to, tx.value, tx.from);
             const signed = await decrypted.signTransaction(tx);
-            const response = JSONBig.parse(await connection.sendRaw(signed.rawTransaction));
+            const response = JSONBig.parse(await transaction.sendRaw(signed.rawTransaction));
 
             tx.txHash = response.txHash;
 

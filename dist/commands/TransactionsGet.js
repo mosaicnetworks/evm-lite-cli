@@ -15,6 +15,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const ASCIITable = require("ascii-table");
 const inquirer = require("inquirer");
+const evm_lite_lib_1 = require("evm-lite-lib");
 const Staging_1 = require("../classes/Staging");
 /**
  * Should return either a Staged error or success.
@@ -56,7 +57,8 @@ exports.stage = (args, session) => {
             resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Provide a transaction hash.'));
             return;
         }
-        const receipt = yield connection.getReceipt(args.hash);
+        const transaction = new evm_lite_lib_1.Transaction(null, session.connection.host, session.connection.port, false);
+        const receipt = yield transaction.getReceipt(args.hash);
         if (!receipt) {
             resolve(error(Staging_1.default.ERRORS.FETCH_FAILED, 'Could not fetch receipt for hash: ' + args.hash));
             return;

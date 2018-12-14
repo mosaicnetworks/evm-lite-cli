@@ -16,7 +16,7 @@ class Session {
     connect(forcedHost, forcedPort) {
         const host = forcedHost || this.config.data.defaults.host || '127.0.0.1';
         const port = forcedPort || this.config.data.defaults.port || 8080;
-        const node = new evm_lite_lib_1.Controller(host, port, {
+        const node = new evm_lite_lib_1.EVMLC(host, port, {
             from: '',
             gas: 0,
             gasPrice: 0
