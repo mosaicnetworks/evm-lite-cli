@@ -8,7 +8,6 @@
 
 import * as fs from "fs";
 import * as inquirer from 'inquirer';
-import * as JSONBig from 'json-bigint';
 import * as Vorpal from "vorpal";
 
 import {Account, Static} from "evm-lite-lib"
@@ -95,7 +94,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             return;
         }
 
-        const keystore = session.keystore.get(args.options.from);
+        const keystore = await session.keystore.get(args.options.from);
         if (!keystore) {
             resolve(error(Staging.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address: ${tx.from}.`));
             return;
@@ -137,33 +136,26 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
         tx.from = args.options.from;
         tx.to = args.options.to || undefined;
-        tx.value = args.options.value || undefined;
-        tx.gas = args.options.gas || session.config.data.defaults.gas || 100000;
-        tx.gasPrice = args.options.gasprice || session.config.data.defaults.gasPrice || 0;
+        tx.value = parseInt(args.options.value, 10) || undefined;
+        tx.gas = parseInt(args.options.gas || session.config.data.defaults.gas || 100000, 10);
+        tx.gasPrice = parseInt(args.options.gasprice || session.config.data.defaults.gasPrice || 0, 10);
 
         if ((!tx.to) || !tx.value) {
             resolve(error(Staging.ERRORS.BLANK_FIELD, 'Provide an address to send to and a value.'));
             return;
         }
 
-        tx.chainId = 1;
-        tx.nonce = (await session.connection.getAccount(decrypted.address)).nonce;
-
         try {
-            const transaction = session.connection.prepareTransfer(tx.to, tx.value, tx.from);
-            const signed = await decrypted.signTransaction(tx);
-            const response = JSONBig.parse(await transaction.sendRaw(signed.rawTransaction));
+            const transaction = (await session.connection.prepareTransfer(tx.to, tx.value, tx.from))
+                .gas(tx.gas)
+                .gasPrice(tx.gasPrice)
+            const signedTransaction = await decrypted.signTransaction(transaction);
+            const response = await transaction.sendRaw(signedTransaction.rawTransaction);
 
-            tx.txHash = response.txHash;
-
-            // session.database.transactions.add(tx);
-            // await session.database.save();
-
-            resolve(success(`Transaction submitted: ${tx.txHash}`));
+            resolve(success(`Transaction submitted: ${response.txHash}`));
         } catch (e) {
             resolve(error(Staging.ERRORS.OTHER, (e.text) ? e.text : e.message));
         }
-
     });
 };
 

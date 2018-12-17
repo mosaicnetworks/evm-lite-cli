@@ -17,7 +17,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const inquirer = require("inquirer");
-const JSONBig = require("json-bigint");
 const evm_lite_lib_1 = require("evm-lite-lib");
 const Staging_1 = require("../classes/Staging");
 /**
@@ -92,7 +91,7 @@ exports.stage = (args, session) => {
             resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, '`From` address cannot be blank.'));
             return;
         }
-        const keystore = session.keystore.get(args.options.from);
+        const keystore = yield session.keystore.get(args.options.from);
         if (!keystore) {
             resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address: ${tx.from}.`));
             return;
@@ -129,23 +128,20 @@ exports.stage = (args, session) => {
         }
         tx.from = args.options.from;
         tx.to = args.options.to || undefined;
-        tx.value = args.options.value || undefined;
-        tx.gas = args.options.gas || session.config.data.defaults.gas || 100000;
-        tx.gasPrice = args.options.gasprice || session.config.data.defaults.gasPrice || 0;
+        tx.value = parseInt(args.options.value, 10) || undefined;
+        tx.gas = parseInt(args.options.gas || session.config.data.defaults.gas || 100000, 10);
+        tx.gasPrice = parseInt(args.options.gasprice || session.config.data.defaults.gasPrice || 0, 10);
         if ((!tx.to) || !tx.value) {
             resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Provide an address to send to and a value.'));
             return;
         }
-        tx.chainId = 1;
-        tx.nonce = (yield session.connection.getAccount(decrypted.address)).nonce;
         try {
-            const transaction = session.connection.prepareTransfer(tx.to, tx.value, tx.from);
-            const signed = yield decrypted.signTransaction(tx);
-            const response = JSONBig.parse(yield transaction.sendRaw(signed.rawTransaction));
-            tx.txHash = response.txHash;
-            // session.database.transactions.add(tx);
-            // await session.database.save();
-            resolve(success(`Transaction submitted: ${tx.txHash}`));
+            const transaction = (yield session.connection.prepareTransfer(tx.to, tx.value, tx.from))
+                .gas(tx.gas)
+                .gasPrice(tx.gasPrice);
+            const signedTransaction = yield decrypted.signTransaction(transaction);
+            const response = yield transaction.sendRaw(signedTransaction.rawTransaction);
+            resolve(success(`Transaction submitted: ${response.txHash}`));
         }
         catch (e) {
             resolve(error(Staging_1.default.ERRORS.OTHER, (e.text) ? e.text : e.message));
