@@ -1,6 +1,7 @@
 import * as path from "path";
 
-import {Config, Database, DataDirectory, EVMLC, Keystore, Log} from 'evm-lite-lib';
+import {DataDirectory, EVMLC} from 'evm-lite-lib';
+import Globals from "./Globals";
 
 
 export default class Session {
@@ -10,33 +11,36 @@ export default class Session {
 
     public directory: DataDirectory;
     public connection: EVMLC;
-    public keystore: Keystore;
-    public config: Config;
-    public database: Database;
-    public logs: Log[];
 
 
     constructor(dataDirPath: string) {
         this.interactive = false;
         this.connection = null;
-        this.logs = [];
 
         this.logpath = path.join(dataDirPath, 'logs');
 
         this.directory = new DataDirectory(dataDirPath);
-        this.database = new Database(path.join(dataDirPath, 'db.json'));
 
-        this.config = this.directory.config;
-        this.keystore = this.directory.keystore;
+
+    }
+
+    get keystore() {
+        return this.directory.keystore
+    }
+
+    get config() {
+        return this.directory.config
     }
 
     public connect(forcedHost: string, forcedPort: number): Promise<EVMLC> {
-        const host: string = forcedHost || this.config.data.defaults.host || '127.0.0.1';
-        const port: number = forcedPort || this.config.data.defaults.port || 8080;
+        const {data} = this.directory.config;
+
+        const host: string = forcedHost || data.connection.host || '127.0.0.1';
+        const port: number = forcedPort || data.connection.port || 8080;
         const node = new EVMLC(host, port, {
-            from: '',
-            gas: 0,
-            gasPrice: 0
+            from: data.defaults.from,
+            gas: data.defaults.gas,
+            gasPrice: data.defaults.gasPrice
         });
 
         return node.testConnection()
@@ -54,12 +58,10 @@ export default class Session {
                     return null;
                 }
             })
+            .catch(() => {
+                Globals.error('Could not connect to node.');
+                return null
+            })
     };
-
-    public log(): Log {
-        const log = new Log(this.logpath);
-        this.logs.push(log);
-        return log;
-    }
 
 }

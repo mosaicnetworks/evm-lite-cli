@@ -2,8 +2,8 @@
 /**
  * @file TransactionGet.ts
  * @module evm-lite-cli
- * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @author Danu Kumanan <https://github.com/danu3006>
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @date 2018
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -81,7 +81,8 @@ exports.stage = (args, session) => {
                 }
             }
         }
-        const tx = session.database.transactions.get(args.hash);
+        // TODO: here
+        const tx = null;
         if (!tx) {
             resolve(error(Staging_1.default.ERRORS.FETCH_FAILED, 'Could not find transaction in list.'));
             return;

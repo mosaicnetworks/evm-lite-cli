@@ -2,8 +2,8 @@
 /**
  * @file AccountsCreate.ts
  * @module evm-lite-cli
- * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @author Danu Kumanan <https://github.com/danu3006>
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @date 2018
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -66,22 +66,22 @@ exports.stage = (args, session) => {
             args.options.output = output;
         }
         else {
-            if (!evm_lite_lib_1.Directory.exists(args.options.pwd)) {
+            if (!evm_lite_lib_1.Static.exists(args.options.pwd)) {
                 resolve(error(Staging_1.default.ERRORS.PATH_NOT_EXIST, 'Password file provided does not exist.'));
                 return;
             }
-            if (evm_lite_lib_1.Directory.isDirectory(args.options.pwd)) {
+            if (evm_lite_lib_1.Static.isDirectory(args.options.pwd)) {
                 resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'Password file path provided is a directory.'));
                 return;
             }
             args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8').trim();
         }
-        args.options.output = args.options.output || session.config.data.defaults.keystore;
-        if (!evm_lite_lib_1.Directory.exists(args.options.output)) {
+        args.options.output = args.options.output || session.config.data.storage.keystore;
+        if (!evm_lite_lib_1.Static.exists(args.options.output)) {
             resolve(error(Staging_1.default.ERRORS.DIRECTORY_NOT_EXIST, 'Output directory does not exist.'));
             return;
         }
-        if (!evm_lite_lib_1.Directory.isDirectory(args.options.output)) {
+        if (!evm_lite_lib_1.Static.isDirectory(args.options.output)) {
             resolve(error(Staging_1.default.ERRORS.IS_FILE, 'Output path is not a directory.'));
             return;
         }

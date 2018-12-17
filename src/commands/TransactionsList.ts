@@ -1,8 +1,8 @@
 /**
  * @file TransactionList.ts
  * @module evm-lite-cli
- * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @author Danu Kumanan <https://github.com/danu3006>
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @date 2018
  */
 
@@ -42,14 +42,14 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         const verbose = args.options.verbose || false;
         const table = new ASCIITable();
 
-        const transactions = session.database.transactions.all();
+        const transactions = null;
         if (!transactions.length) {
             resolve(success([]));
             return;
         }
 
         if (!formatted) {
-            resolve(success(session.database.transactions.all()));
+            resolve(success(null));
             return;
         }
 

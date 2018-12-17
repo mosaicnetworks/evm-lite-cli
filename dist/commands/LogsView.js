@@ -13,9 +13,9 @@ function commandLogsShow(evmlc, session) {
             const current = args.options.session || false;
             if (current) {
                 if (interactive) {
-                    for (const log of session.logs) {
-                        log.show();
-                    }
+                    // for (const log of session.logs) {
+                    //     log.show();
+                    // }
                 }
                 else {
                     Globals_1.default.warning('Cannot print session log when not in interactive mode.');

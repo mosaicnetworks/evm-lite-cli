@@ -2,8 +2,8 @@
 /**
  * @file Transfer.ts
  * @module evm-lite-cli
- * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @author Danu Kumanan <https://github.com/danu3006>
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @date 2018
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -42,7 +42,7 @@ exports.stage = (args, session) => {
             return;
         }
         const interactive = args.options.interactive || session.interactive;
-        const accounts = yield session.keystore.all();
+        const accounts = yield session.keystore.list();
         const fromQ = [
             {
                 choices: accounts.map((account) => account.address),
@@ -102,11 +102,11 @@ exports.stage = (args, session) => {
             args.options.pwd = password;
         }
         else {
-            if (!evm_lite_lib_1.Directory.exists(args.options.pwd)) {
+            if (!evm_lite_lib_1.Static.exists(args.options.pwd)) {
                 resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, 'Password file path provided does not exist.'));
                 return;
             }
-            if (evm_lite_lib_1.Directory.isDirectory(args.options.pwd)) {
+            if (evm_lite_lib_1.Static.isDirectory(args.options.pwd)) {
                 resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'Password file path provided is not a file.'));
                 return;
             }
@@ -137,14 +137,14 @@ exports.stage = (args, session) => {
             return;
         }
         tx.chainId = 1;
-        tx.nonce = (yield session.keystore.fetch(decrypted.address, connection)).nonce;
+        tx.nonce = (yield session.connection.getAccount(decrypted.address)).nonce;
         try {
             const transaction = session.connection.prepareTransfer(tx.to, tx.value, tx.from);
             const signed = yield decrypted.signTransaction(tx);
             const response = JSONBig.parse(yield transaction.sendRaw(signed.rawTransaction));
             tx.txHash = response.txHash;
-            session.database.transactions.add(tx);
-            yield session.database.save();
+            // session.database.transactions.add(tx);
+            // await session.database.save();
             resolve(success(`Transaction submitted: ${tx.txHash}`));
         }
         catch (e) {

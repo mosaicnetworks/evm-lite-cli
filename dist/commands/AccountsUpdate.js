@@ -2,8 +2,8 @@
 /**
  * @file AccountsCreate.ts
  * @module evm-lite-cli
- * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @author Danu Kumanan <https://github.com/danu3006>
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @date 2018
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -17,7 +17,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const inquirer = require("inquirer");
-const JSONBig = require("json-bigint");
 const evm_lite_lib_1 = require("evm-lite-lib");
 const Staging_1 = require("../classes/Staging");
 /**
@@ -37,7 +36,7 @@ exports.stage = (args, session) => {
     return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
         const { error, success } = Staging_1.default.getStagingFunctions(args);
         const interactive = args.options.interactive || session.interactive;
-        const accounts = yield session.keystore.all();
+        const accounts = yield session.keystore.list();
         const addressQ = [
             {
                 choices: accounts.map((account) => account.address),
@@ -83,19 +82,18 @@ exports.stage = (args, session) => {
             args.options.old = password.trim();
         }
         else {
-            if (!evm_lite_lib_1.Directory.exists(args.options.old)) {
+            if (!evm_lite_lib_1.Static.exists(args.options.old)) {
                 resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, 'Old password file path provided does not exist.'));
                 return;
             }
-            if (evm_lite_lib_1.Directory.isDirectory(args.options.old)) {
+            if (evm_lite_lib_1.Static.isDirectory(args.options.old)) {
                 resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'Old password file path provided is not a file.'));
                 return;
             }
             args.options.old = fs.readFileSync(args.options.old, 'utf8').trim();
         }
-        let decrypted = null;
         try {
-            decrypted = evm_lite_lib_1.Account.decrypt(keystore, args.options.old);
+            evm_lite_lib_1.Account.decrypt(keystore, args.options.old);
         }
         catch (err) {
             resolve(error(Staging_1.default.ERRORS.DECRYPTION, 'Failed decryption of account with the password provided.'));
@@ -110,11 +108,11 @@ exports.stage = (args, session) => {
             args.options.new = password.trim();
         }
         else {
-            if (!evm_lite_lib_1.Directory.exists(args.options.new)) {
+            if (!evm_lite_lib_1.Static.exists(args.options.new)) {
                 resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, 'New password file path provided does not exist.'));
                 return;
             }
-            if (evm_lite_lib_1.Directory.isDirectory(args.options.new)) {
+            if (evm_lite_lib_1.Static.isDirectory(args.options.new)) {
                 resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'New password file path provided is not a file.'));
                 return;
             }
@@ -124,9 +122,8 @@ exports.stage = (args, session) => {
             resolve(error(Staging_1.default.ERRORS.OTHER, 'New password is the same as old.'));
             return;
         }
-        const newKeystore = decrypted.encrypt(args.options.new);
-        fs.writeFileSync(session.keystore.getFilePathForAddress(args.address), JSONBig.stringify(newKeystore));
-        resolve(success(newKeystore));
+        const response = yield session.keystore.update(args.address, args.options.old, args.options.new);
+        resolve(success(response));
     }));
 };
 /**

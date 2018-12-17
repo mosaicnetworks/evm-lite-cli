@@ -3,8 +3,8 @@
 /**
  * @file AccountsCreate.ts
  * @module evm-lite-cli
- * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @author Danu Kumanan <https://github.com/danu3006>
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @date 2018
  */
 
@@ -12,7 +12,7 @@ import * as figlet from 'figlet';
 import * as mkdir from 'mkdirp';
 import * as Vorpal from "vorpal";
 
-import {Directory} from 'evm-lite-lib';
+import {Static} from 'evm-lite-lib';
 
 import Globals, {CommandFunction} from "./classes/Globals";
 
@@ -27,17 +27,17 @@ import ConfigSet from "./commands/ConfigSet";
 import ConfigView from "./commands/ConfigView";
 import Info from "./commands/Info";
 import Interactive from "./commands/Interactive";
-import LogsClear from "./commands/LogsClear";
-import LogsView from "./commands/LogsView";
+// import LogsClear from "./commands/LogsClear";
+// import LogsView from "./commands/LogsView";
 import Test from "./commands/Test";
-import TransactionsGet from "./commands/TransactionsGet";
-import TransactionsList from "./commands/TransactionsList";
+// import TransactionsGet from "./commands/TransactionsGet";
+// import TransactionsList from "./commands/TransactionsList";
 import Transfer from "./commands/Transfer";
 
 const __VERSION = '0.1.1';
 const init = (): Promise<void> => {
     return new Promise<void>(resolve => {
-        if (!Directory.exists(Globals.evmlcDir)) {
+        if (!Static.exists(Globals.evmlcDir)) {
             mkdir.mkdirp(Globals.evmlcDir);
         }
         resolve();
@@ -59,7 +59,7 @@ init()
         if ((process.argv[2] === '--datadir' || process.argv[2] === '-d')) {
             dataDirPath = process.argv[3];
 
-            if (!Directory.exists(process.argv[3])) {
+            if (!Static.exists(process.argv[3])) {
                 Globals.warning('Data directory file path provided does not exist and hence will created...');
             }
 
@@ -91,10 +91,10 @@ init()
             Transfer,
             Info,
             Test,
-            TransactionsList,
-            TransactionsGet,
-            LogsView,
-            LogsClear,
+            // TransactionsList,
+            // TransactionsGet,
+            // LogsView,
+            // LogsClear,
             Clear,
         ].forEach((command: CommandFunction) => {
             command(evmlc, session);
@@ -131,5 +131,4 @@ init()
             cli.instance.parse(process.argv);
         }
     })
-    // catch errors.
     .catch(err => console.log(err));

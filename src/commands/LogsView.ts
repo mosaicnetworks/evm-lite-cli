@@ -17,9 +17,9 @@ export default function commandLogsShow(evmlc: Vorpal, session: Session) {
 
                 if (current) {
                     if (interactive) {
-                        for (const log of session.logs) {
-                            log.show();
-                        }
+                        // for (const log of session.logs) {
+                        //     log.show();
+                        // }
                     } else {
                         Globals.warning('Cannot print session log when not in interactive mode.');
                     }

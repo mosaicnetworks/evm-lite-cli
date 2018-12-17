@@ -4,6 +4,7 @@ import * as Vorpal from "vorpal";
 
 import Session from "./Session";
 
+
 export type CommandFunction = (evmlc: Vorpal, session: Session) => Vorpal.Command;
 
 export default class Globals {

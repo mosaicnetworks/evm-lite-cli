@@ -1,8 +1,8 @@
 /**
  * @file ConfigSet.ts
  * @module evm-lite-cli
- * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @author Danu Kumanan <https://github.com/danu3006>
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @date 2018
  */
 
@@ -66,17 +66,23 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             return;
         }
 
-        for (const key in args.options) {
-            if (args.options.hasOwnProperty(key)) {
-                if (session.config.data.defaults[key] !== args.options[key] && key !== 'interactive') {
-                    session.config.data.defaults[key] = args.options[key]
-                }
+        const newConfig = {
+            connection: {
+                host: args.options.host,
+                port: args.options.port,
+            },
+            defaults: {
+                from: args.options.from,
+                gas: parseInt(args.options.gas, 10),
+                gasPrice: parseInt(args.options.gasprice, 10)
+            },
+            storage: {
+                keystore: args.options.keystore
             }
-        }
+        };
 
-        const saved = await session.config.save();
-
-        resolve(success(saved ? 'Configuration saved.' : 'No changes detected.'));
+        const saved = await session.config.save(newConfig);
+        resolve(success(saved));
     });
 };
 

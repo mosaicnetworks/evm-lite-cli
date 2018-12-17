@@ -2,24 +2,28 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
 const evm_lite_lib_1 = require("evm-lite-lib");
+const Globals_1 = require("./Globals");
 class Session {
     constructor(dataDirPath) {
         this.interactive = false;
         this.connection = null;
-        this.logs = [];
         this.logpath = path.join(dataDirPath, 'logs');
         this.directory = new evm_lite_lib_1.DataDirectory(dataDirPath);
-        this.database = new evm_lite_lib_1.Database(path.join(dataDirPath, 'db.json'));
-        this.config = this.directory.config;
-        this.keystore = this.directory.keystore;
+    }
+    get keystore() {
+        return this.directory.keystore;
+    }
+    get config() {
+        return this.directory.config;
     }
     connect(forcedHost, forcedPort) {
-        const host = forcedHost || this.config.data.defaults.host || '127.0.0.1';
-        const port = forcedPort || this.config.data.defaults.port || 8080;
+        const { data } = this.directory.config;
+        const host = forcedHost || data.connection.host || '127.0.0.1';
+        const port = forcedPort || data.connection.port || 8080;
         const node = new evm_lite_lib_1.EVMLC(host, port, {
-            from: '',
-            gas: 0,
-            gasPrice: 0
+            from: data.defaults.from,
+            gas: data.defaults.gas,
+            gasPrice: data.defaults.gasPrice
         });
         return node.testConnection()
             .then((success) => {
@@ -35,13 +39,12 @@ class Session {
             else {
                 return null;
             }
+        })
+            .catch(() => {
+            Globals_1.default.error('Could not connect to node.');
+            return null;
         });
     }
     ;
-    log() {
-        const log = new evm_lite_lib_1.Log(this.logpath);
-        this.logs.push(log);
-        return log;
-    }
 }
 exports.default = Session;

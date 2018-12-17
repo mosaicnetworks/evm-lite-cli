@@ -1,8 +1,8 @@
 /**
  * @file Transfer.ts
  * @module evm-lite-cli
- * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @author Danu Kumanan <https://github.com/danu3006>
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @date 2018
  */
 
@@ -11,7 +11,7 @@ import * as inquirer from 'inquirer';
 import * as JSONBig from 'json-bigint';
 import * as Vorpal from "vorpal";
 
-import {Account, Directory} from "evm-lite-lib"
+import {Account, Static} from "evm-lite-lib"
 
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
 
@@ -42,7 +42,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         const interactive = args.options.interactive || session.interactive;
-        const accounts = await session.keystore.all();
+        const accounts = await session.keystore.list();
         const fromQ = [
             {
                 choices: accounts.map((account) => account.address),
@@ -105,12 +105,12 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             const {password} = await inquirer.prompt(passwordQ);
             args.options.pwd = password;
         } else {
-            if (!Directory.exists(args.options.pwd)) {
+            if (!Static.exists(args.options.pwd)) {
                 resolve(error(Staging.ERRORS.FILE_NOT_FOUND, 'Password file path provided does not exist.'));
                 return;
             }
 
-            if (Directory.isDirectory(args.options.pwd)) {
+            if (Static.isDirectory(args.options.pwd)) {
                 resolve(error(Staging.ERRORS.IS_DIRECTORY, 'Password file path provided is not a file.'));
                 return;
             }
@@ -147,7 +147,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         tx.chainId = 1;
-        tx.nonce = (await session.keystore.fetch(decrypted.address, connection)).nonce;
+        tx.nonce = (await session.connection.getAccount(decrypted.address)).nonce;
 
         try {
             const transaction = session.connection.prepareTransfer(tx.to, tx.value, tx.from);
@@ -156,8 +156,8 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
             tx.txHash = response.txHash;
 
-            session.database.transactions.add(tx);
-            await session.database.save();
+            // session.database.transactions.add(tx);
+            // await session.database.save();
 
             resolve(success(`Transaction submitted: ${tx.txHash}`));
         } catch (e) {

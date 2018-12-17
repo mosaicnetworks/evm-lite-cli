@@ -2,8 +2,8 @@
 /**
  * @file TransactionList.ts
  * @module evm-lite-cli
- * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @author Danu Kumanan <https://github.com/danu3006>
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @date 2018
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -42,13 +42,13 @@ exports.stage = (args, session) => {
         const formatted = args.options.formatted || false;
         const verbose = args.options.verbose || false;
         const table = new ASCIITable();
-        const transactions = session.database.transactions.all();
+        const transactions = null;
         if (!transactions.length) {
             resolve(success([]));
             return;
         }
         if (!formatted) {
-            resolve(success(session.database.transactions.all()));
+            resolve(success(null));
             return;
         }
         if (verbose) {

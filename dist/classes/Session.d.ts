@@ -1,14 +1,11 @@
-import { Config, Database, DataDirectory, EVMLC, Keystore, Log } from 'evm-lite-lib';
+import { DataDirectory, EVMLC } from 'evm-lite-lib';
 export default class Session {
     interactive: boolean;
     logpath: string;
     directory: DataDirectory;
     connection: EVMLC;
-    keystore: Keystore;
-    config: Config;
-    database: Database;
-    logs: Log[];
     constructor(dataDirPath: string);
+    readonly keystore: import("evm-lite-lib/dist/tools/classes/Keystore").default;
+    readonly config: import("evm-lite-lib/dist/tools/classes/Config").default;
     connect(forcedHost: string, forcedPort: number): Promise<EVMLC>;
-    log(): Log;
 }

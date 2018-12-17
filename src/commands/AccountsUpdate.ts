@@ -1,17 +1,16 @@
 /**
  * @file AccountsCreate.ts
  * @module evm-lite-cli
- * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @author Danu Kumanan <https://github.com/danu3006>
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @date 2018
  */
 
 import * as fs from "fs";
 import * as inquirer from 'inquirer';
-import * as JSONBig from 'json-bigint';
 import * as Vorpal from "vorpal";
 
-import {Account, Directory} from "evm-lite-lib";
+import {Account, Static} from "evm-lite-lib";
 
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
 
@@ -35,7 +34,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         const {error, success} = Staging.getStagingFunctions(args);
 
         const interactive = args.options.interactive || session.interactive;
-        const accounts = await session.keystore.all();
+        const accounts = await session.keystore.list();
         const addressQ = [
             {
                 choices: accounts.map((account) => account.address),
@@ -84,12 +83,12 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             const {password} = await inquirer.prompt(passwordQ);
             args.options.old = password.trim();
         } else {
-            if (!Directory.exists(args.options.old)) {
+            if (!Static.exists(args.options.old)) {
                 resolve(error(Staging.ERRORS.FILE_NOT_FOUND, 'Old password file path provided does not exist.'));
                 return;
             }
 
-            if (Directory.isDirectory(args.options.old)) {
+            if (Static.isDirectory(args.options.old)) {
                 resolve(error(Staging.ERRORS.IS_DIRECTORY, 'Old password file path provided is not a file.'));
                 return;
             }
@@ -97,9 +96,8 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             args.options.old = fs.readFileSync(args.options.old, 'utf8').trim();
         }
 
-        let decrypted: Account = null;
         try {
-            decrypted = Account.decrypt(keystore, args.options.old);
+            Account.decrypt(keystore, args.options.old);
         } catch (err) {
             resolve(error(
                 Staging.ERRORS.DECRYPTION,
@@ -116,12 +114,12 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             }
             args.options.new = password.trim();
         } else {
-            if (!Directory.exists(args.options.new)) {
+            if (!Static.exists(args.options.new)) {
                 resolve(error(Staging.ERRORS.FILE_NOT_FOUND, 'New password file path provided does not exist.'));
                 return;
             }
 
-            if (Directory.isDirectory(args.options.new)) {
+            if (Static.isDirectory(args.options.new)) {
                 resolve(error(Staging.ERRORS.IS_DIRECTORY, 'New password file path provided is not a file.'));
                 return;
             }
@@ -134,10 +132,8 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             return;
         }
 
-        const newKeystore = decrypted.encrypt(args.options.new);
-
-        fs.writeFileSync(session.keystore.getFilePathForAddress(args.address), JSONBig.stringify(newKeystore));
-        resolve(success(newKeystore));
+        const response = await session.keystore.update(args.address, args.options.old, args.options.new);
+        resolve(success(response));
     })
 };
 

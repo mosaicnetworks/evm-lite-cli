@@ -24,16 +24,16 @@ const ConfigSet_1 = require("./commands/ConfigSet");
 const ConfigView_1 = require("./commands/ConfigView");
 const Info_1 = require("./commands/Info");
 const Interactive_1 = require("./commands/Interactive");
-const LogsClear_1 = require("./commands/LogsClear");
-const LogsView_1 = require("./commands/LogsView");
+// import LogsClear from "./commands/LogsClear";
+// import LogsView from "./commands/LogsView";
 const Test_1 = require("./commands/Test");
-const TransactionsGet_1 = require("./commands/TransactionsGet");
-const TransactionsList_1 = require("./commands/TransactionsList");
+// import TransactionsGet from "./commands/TransactionsGet";
+// import TransactionsList from "./commands/TransactionsList";
 const Transfer_1 = require("./commands/Transfer");
 const __VERSION = '0.1.1';
 const init = () => {
     return new Promise(resolve => {
-        if (!evm_lite_lib_1.Directory.exists(Globals_1.default.evmlcDir)) {
+        if (!evm_lite_lib_1.Static.exists(Globals_1.default.evmlcDir)) {
             mkdir.mkdirp(Globals_1.default.evmlcDir);
         }
         resolve();
@@ -51,7 +51,7 @@ init()
     let dataDirPath = Globals_1.default.evmlcDir;
     if ((process.argv[2] === '--datadir' || process.argv[2] === '-d')) {
         dataDirPath = process.argv[3];
-        if (!evm_lite_lib_1.Directory.exists(process.argv[3])) {
+        if (!evm_lite_lib_1.Static.exists(process.argv[3])) {
             Globals_1.default.warning('Data directory file path provided does not exist and hence will created...');
         }
         process.argv.splice(2, 2);
@@ -77,10 +77,10 @@ init()
         Transfer_1.default,
         Info_1.default,
         Test_1.default,
-        TransactionsList_1.default,
-        TransactionsGet_1.default,
-        LogsView_1.default,
-        LogsClear_1.default,
+        // TransactionsList,
+        // TransactionsGet,
+        // LogsView,
+        // LogsClear,
         Clear_1.default,
     ].forEach((command) => {
         command(evmlc, session);
@@ -113,5 +113,4 @@ init()
         cli.instance.parse(process.argv);
     }
 }))
-    // catch errors.
     .catch(err => console.log(err));
