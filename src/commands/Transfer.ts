@@ -148,7 +148,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         try {
             const transaction = (await session.connection.prepareTransfer(tx.to, tx.value, tx.from))
                 .gas(tx.gas)
-                .gasPrice(tx.gasPrice)
+                .gasPrice(tx.gasPrice);
             const signedTransaction = await decrypted.signTransaction(transaction);
             const response = await transaction.sendRaw(signedTransaction.rawTransaction);
 
