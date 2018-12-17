@@ -42,7 +42,7 @@ exports.stage = (args, session) => {
         const formatted = args.options.formatted || false;
         const verbose = args.options.verbose || false;
         const table = new ASCIITable();
-        const transactions = null;
+        const transactions = yield session.database.transactions.list();
         if (!transactions.length) {
             resolve(success([]));
             return;

@@ -42,7 +42,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         const verbose = args.options.verbose || false;
         const table = new ASCIITable();
 
-        const transactions = null;
+        const transactions = await session.database.transactions.list();
         if (!transactions.length) {
             resolve(success([]));
             return;

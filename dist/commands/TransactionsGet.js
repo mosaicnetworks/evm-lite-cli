@@ -81,8 +81,7 @@ exports.stage = (args, session) => {
                 }
             }
         }
-        // TODO: here
-        const tx = null;
+        const tx = yield session.database.transactions.get(args.hash);
         if (!tx) {
             resolve(error(Staging_1.default.ERRORS.FETCH_FAILED, 'Could not find transaction in list.'));
             return;

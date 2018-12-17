@@ -27,8 +27,8 @@ const Interactive_1 = require("./commands/Interactive");
 // import LogsClear from "./commands/LogsClear";
 // import LogsView from "./commands/LogsView";
 const Test_1 = require("./commands/Test");
-// import TransactionsGet from "./commands/TransactionsGet";
-// import TransactionsList from "./commands/TransactionsList";
+const TransactionsGet_1 = require("./commands/TransactionsGet");
+const TransactionsList_1 = require("./commands/TransactionsList");
 const Transfer_1 = require("./commands/Transfer");
 const __VERSION = '0.1.1';
 const init = () => {
@@ -77,8 +77,8 @@ init()
         Transfer_1.default,
         Info_1.default,
         Test_1.default,
-        // TransactionsList,
-        // TransactionsGet,
+        TransactionsList_1.default,
+        TransactionsGet_1.default,
         // LogsView,
         // LogsClear,
         Clear_1.default,

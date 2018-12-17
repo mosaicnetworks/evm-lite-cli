@@ -30,8 +30,8 @@ import Interactive from "./commands/Interactive";
 // import LogsClear from "./commands/LogsClear";
 // import LogsView from "./commands/LogsView";
 import Test from "./commands/Test";
-// import TransactionsGet from "./commands/TransactionsGet";
-// import TransactionsList from "./commands/TransactionsList";
+import TransactionsGet from "./commands/TransactionsGet";
+import TransactionsList from "./commands/TransactionsList";
 import Transfer from "./commands/Transfer";
 
 const __VERSION = '0.1.1';
@@ -91,8 +91,8 @@ init()
             Transfer,
             Info,
             Test,
-            // TransactionsList,
-            // TransactionsGet,
+            TransactionsList,
+            TransactionsGet,
             // LogsView,
             // LogsClear,
             Clear,

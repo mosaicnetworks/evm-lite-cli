@@ -87,8 +87,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
             }
         }
 
-        // TODO: here
-        const tx = null;
+        const tx = await session.database.transactions.get(args.hash);
         if (!tx) {
             resolve(error(Staging.ERRORS.FETCH_FAILED, 'Could not find transaction in list.'));
             return;

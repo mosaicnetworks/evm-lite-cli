@@ -10,6 +10,9 @@ class Session {
         this.logpath = path.join(dataDirPath, 'logs');
         this.directory = new evm_lite_lib_1.DataDirectory(dataDirPath);
     }
+    get database() {
+        return this.directory.database;
+    }
     get keystore() {
         return this.directory.keystore;
     }
