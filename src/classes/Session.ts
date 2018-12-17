@@ -24,6 +24,10 @@ export default class Session {
 
     }
 
+    get database() {
+        return this.directory.database;
+    }
+
     get keystore() {
         return this.directory.keystore
     }
