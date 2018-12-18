@@ -141,6 +141,11 @@ exports.stage = (args, session) => {
                 .gasPrice(tx.gasPrice);
             const signedTransaction = yield decrypted.signTransaction(transaction);
             const response = yield transaction.sendRaw(signedTransaction.rawTransaction);
+            tx.txHash = response.txHash;
+            tx.date = new Date();
+            console.log(tx);
+            const txSchema = session.database.transactions.create(tx);
+            yield session.database.transactions.add(txSchema);
             resolve(success(`Transaction submitted: ${response.txHash}`));
         }
         catch (e) {

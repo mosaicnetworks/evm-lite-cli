@@ -17,6 +17,13 @@ import Staging, {execute, Message, StagedOutput, StagingFunction} from "../class
 
 import Session from "../classes/Session";
 
+
+interface AccountsCreatePrompt {
+    output: string;
+    password: string;
+    verifyPassword: string;
+}
+
 /**
  * Should return either a Staged error or success.
  *
@@ -57,7 +64,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         ];
 
         if (interactive) {
-            const {output, password, verifyPassword} = await inquirer.prompt(questions);
+            const {output, password, verifyPassword} = await inquirer.prompt<AccountsCreatePrompt>(questions);
             if (!(password && verifyPassword && (password === verifyPassword))) {
                 resolve(error(Staging.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
                 return;

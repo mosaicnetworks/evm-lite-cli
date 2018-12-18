@@ -6,13 +6,18 @@
  * @date 2018
  */
 
-import * as ASCIITable from 'ascii-table';
+import * as ASCIITable from "ascii-table";
 import * as inquirer from 'inquirer';
 import * as Vorpal from "vorpal";
 
 import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
 
 import Session from "../classes/Session";
+
+
+interface AccountsGetPrompt {
+    address: string;
+}
 
 /**
  * Should return either a Staged error or success.
@@ -50,7 +55,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         ];
 
         if (interactive && !args.address) {
-            const {address} = await inquirer.prompt(questions);
+            const {address} = await inquirer.prompt<AccountsGetPrompt>(questions);
             args.address = address;
         }
 

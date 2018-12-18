@@ -16,6 +16,22 @@ import Staging, {execute, Message, StagedOutput, StagingFunction} from "../class
 
 import Session from "../classes/Session";
 
+
+interface TransferFromAddressPrompt {
+    from: string;
+}
+
+interface TransferDecryptPrompt {
+    password: string;
+}
+
+interface TransferOtherQuestionsPrompt {
+    to: string;
+    value: string;
+    gas: string;
+    gasPrice: string;
+}
+
 /**
  * Should return either a Staged error or success.
  *
@@ -85,7 +101,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         const tx: any = {};
 
         if (interactive) {
-            const {from} = await inquirer.prompt(fromQ);
+            const {from} = await inquirer.prompt<TransferFromAddressPrompt>(fromQ);
             args.options.from = from;
         }
 
@@ -101,7 +117,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         if (!args.options.pwd) {
-            const {password} = await inquirer.prompt(passwordQ);
+            const {password} = await inquirer.prompt<TransferDecryptPrompt>(passwordQ);
             args.options.pwd = password;
         } else {
             if (!Static.exists(args.options.pwd)) {
@@ -126,7 +142,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         if (interactive) {
-            const answers = await inquirer.prompt(restOfQs);
+            const answers = await inquirer.prompt<TransferOtherQuestionsPrompt>(restOfQs);
 
             args.options.to = answers.to;
             args.options.value = answers.value;
@@ -151,6 +167,13 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
                 .gasPrice(tx.gasPrice);
             const signedTransaction = await decrypted.signTransaction(transaction);
             const response = await transaction.sendRaw(signedTransaction.rawTransaction);
+
+            tx.txHash = response.txHash;
+            tx.date = new Date();
+
+            console.log(tx);
+            const txSchema = session.database.transactions.create(tx);
+            await session.database.transactions.add(txSchema);
 
             resolve(success(`Transaction submitted: ${response.txHash}`));
         } catch (e) {

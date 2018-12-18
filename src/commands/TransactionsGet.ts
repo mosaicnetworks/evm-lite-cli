@@ -16,6 +16,11 @@ import Staging, {execute, Message, StagedOutput, StagingFunction} from "../class
 
 import Session from "../classes/Session";
 
+
+interface TransactionsGetPrompt {
+    hash: string;
+}
+
 /**
  * Should return either a Staged error or success.
  *
@@ -53,7 +58,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         ];
 
         if (interactive && !args.hash) {
-            const {hash} = await inquirer.prompt(questions);
+            const {hash} = await inquirer.prompt<TransactionsGetPrompt>(questions);
             args.hash = hash;
         }
 

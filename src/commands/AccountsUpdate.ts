@@ -16,6 +16,20 @@ import Staging, {execute, Message, StagedOutput, StagingFunction} from "../class
 
 import Session from "../classes/Session";
 
+
+interface AccountsUpdateAddressPrompt {
+    address: string;
+}
+
+interface AccountsUpdateDecrytPrompt {
+    password: string;
+}
+
+interface AccountsUpdateNewPasswordPrompt {
+    password: string;
+    verifyPassword: string;
+}
+
 /**
  * Should return either a Staged error or success.
  *
@@ -64,7 +78,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         ];
 
         if (interactive && !args.address) {
-            const {address} = await inquirer.prompt(addressQ);
+            const {address} = await inquirer.prompt<AccountsUpdateAddressPrompt>(addressQ);
             args.address = address;
         }
 
@@ -80,7 +94,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         if (!args.options.old) {
-            const {password} = await inquirer.prompt(passwordQ);
+            const {password} = await inquirer.prompt<AccountsUpdateDecrytPrompt>(passwordQ);
             args.options.old = password.trim();
         } else {
             if (!Static.exists(args.options.old)) {
@@ -107,7 +121,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
         }
 
         if (!args.options.new) {
-            const {password, verifyPassword} = await inquirer.prompt(newPasswordQ);
+            const {password, verifyPassword} = await inquirer.prompt<AccountsUpdateNewPasswordPrompt>(newPasswordQ);
             if (!(password && verifyPassword && (password === verifyPassword))) {
                 resolve(error(Staging.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
                 return;
