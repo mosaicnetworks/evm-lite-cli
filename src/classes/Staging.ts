@@ -85,7 +85,8 @@ export const execute = (fn: StagingFunction, args: Args, session: Session): Prom
                     message = output.message;
                     break;
                 case 'object':
-                    message = (output.message instanceof ASCIITable) ? output.message.toString() : JSONBig.stringify(output.message);
+                    message = (output.message instanceof ASCIITable) ?
+                        output.message.toString() : JSONBig.stringify(output.message);
                     break;
             }
         } else {

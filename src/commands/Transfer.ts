@@ -173,7 +173,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
             console.log(tx);
             const txSchema = session.database.transactions.create(tx);
-            await session.database.transactions.add(txSchema);
+            await session.database.transactions.insert(txSchema);
 
             resolve(success(`Transaction submitted: ${response.txHash}`));
         } catch (e) {

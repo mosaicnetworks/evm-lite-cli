@@ -145,7 +145,7 @@ exports.stage = (args, session) => {
             tx.date = new Date();
             console.log(tx);
             const txSchema = session.database.transactions.create(tx);
-            yield session.database.transactions.add(txSchema);
+            yield session.database.transactions.insert(txSchema);
             resolve(success(`Transaction submitted: ${response.txHash}`));
         }
         catch (e) {
