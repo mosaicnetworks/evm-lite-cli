@@ -1,6 +1,6 @@
 {
   "name": "evml-cli",
-  "version": "1.0.0",
+  "version": "0.1.2",
   "description": "A CLI to interact with EVM-Lite node.",
   "main": "./dist/index.js",
   "scripts": {
@@ -17,7 +17,6 @@
     "inquirer": "latest",
     "install": "^0.12.2",
     "json-bigint": "^0.3.0",
-    "lowdb": "^1.0.0",
     "mkdirp": "^0.5.1",
     "npm": "^6.5.0",
     "toml": "^2.3.3",
