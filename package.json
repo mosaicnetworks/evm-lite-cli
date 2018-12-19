@@ -4,7 +4,7 @@
   "description": "A CLI to interact with EVM-Lite node.",
   "main": "./dist/index.js",
   "scripts": {
-    "test": "mocha -r ts-node/register test/**/*.ts || true"
+    "test": "mocha -r ts-node/register __test__/**/*.ts || true"
   },
   "keywords": [],
   "author": "",

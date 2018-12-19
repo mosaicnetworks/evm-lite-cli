@@ -1,6 +1,6 @@
-# EVM-Lite Library (Javascript)
+# EVM-Lite CLI
 
-A Javascript client library and Command Line Interface to interact with
+A Command Line Interface to interact with
 EVM-Lite.
 
 ## Configuration
