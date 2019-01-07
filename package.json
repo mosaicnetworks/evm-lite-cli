@@ -1,6 +1,6 @@
 {
-	"name": "evml-cli",
-	"version": "0.1.2",
+	"name": "evm-lite-cli",
+	"version": "0.1.0",
 	"description": "A CLI to interact with EVM-Lite node.",
 	"main": "./dist/index.js",
 	"scripts": {
