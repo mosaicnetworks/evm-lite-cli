@@ -5,8 +5,8 @@ export default class Session {
     directory: DataDirectory;
     connection: EVMLC;
     constructor(dataDirPath: string);
-    readonly database: import("evm-lite-lib/tools/database/Database").default;
-    readonly keystore: import("evm-lite-lib/tools/classes/Keystore").default;
-    readonly config: import("evm-lite-lib/tools/classes/Config").default;
+    readonly database: import("evm-lite-lib").Database;
+    readonly keystore: import("evm-lite-lib").Keystore;
+    readonly config: import("evm-lite-lib").Config;
     connect(forcedHost: string, forcedPort: number): Promise<EVMLC>;
 }

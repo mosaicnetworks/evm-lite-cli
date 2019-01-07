@@ -3,8 +3,43 @@
 A Command Line Interface to interact with
 EVM-Lite.
 
-# Installation
+## Installation
+To begin with, you will need to install Node and NPM, which are bundled together
+in the installation package from the [Node website](https://nodejs.org/en/).
 
+This project was built with Node version 10.10.0 and NPM version 6.1.0.
+
+### Makefile
+
+To download Javascript dependencies and install `evmlc`, run:
+
+```
+$ make
+```
+
+If the `make` was successful you should now be able to run `evmlc`:
+
+```bash
+$ evmlc
+
+  A Command Line Interface to interact with EVM-Lite.
+
+  Current Data Directory: [...]/.evmlc
+
+  Commands:
+
+    help [command...]                 Provides help for a given command.
+    exit                              Exits application.
+    config view                       Output current configuration file as JSON.
+    config set [options]              Set values of the configuration inside the data directory.
+    accounts create [options]         Allows you to create and encrypt accounts locally. Created accounts will either be placed in the keystore folder inside the data directory provided by the global --datadir, -d flag or if no flag is provided, in the keystore
+                                      specified in the configuration file.
+    accounts list [options]           List all accounts in the local keystore directory provided by the configuration file. This command will also get a balance and nonce for all the accounts from the node if a valid connection is established.
+    accounts get [options] [address]  Gets account balance and nonce from a node with a valid connection.
+    interactive                       Enter into interactive mode with data directory provided by --datadir, -d or default.
+    transfer [options]                Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the configuration file.
+    info [options]                    Testing purposes.
+```
 
 ## Configuration
 

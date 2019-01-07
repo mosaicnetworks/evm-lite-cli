@@ -1,6 +1,6 @@
 import * as ASCIITable from 'ascii-table';
 import { BaseAccount, SentTX, TXReceipt, V3JSONKeyStore } from 'evm-lite-lib';
-import Session from "./Session";
+import Session from './Session';
 export interface Args {
     options: {
         [key: string]: any;
@@ -30,6 +30,7 @@ export default class Staging {
         OTHER: string;
         PATH_NOT_EXIST: string;
     };
+    constructor();
     static success(args: Args, message: Message): {
         args: Args;
         message: any;
@@ -45,6 +46,5 @@ export default class Staging {
         error: (subtype: string, message?: Message) => StagedOutput<Message>;
         success: (message: Message) => StagedOutput<Message>;
     };
-    constructor();
 }
 export declare const execute: (fn: StagingFunction, args: Args, session: Session) => Promise<void>;
