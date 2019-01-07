@@ -48,7 +48,7 @@ exports.stage = (args, session) => {
                 message: 'Transaction Hash: ',
                 name: 'hash',
                 required: true,
-                type: 'input',
+                type: 'input'
             }
         ];
         if (interactive && !args.hash) {

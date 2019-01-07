@@ -3,6 +3,9 @@
 A Command Line Interface to interact with
 EVM-Lite.
 
+# Installation
+
+
 ## Configuration
 
 The first time it runs, and if no options are specified, `evmlc` creates a

@@ -81,7 +81,7 @@ init()
         TransactionsGet_1.default,
         // LogsView,
         // LogsClear,
-        Clear_1.default,
+        Clear_1.default
     ].forEach((command) => {
         command(evmlc, session);
     });

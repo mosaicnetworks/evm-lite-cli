@@ -7,11 +7,11 @@
  */
 
 import * as inquirer from 'inquirer';
-import * as Vorpal from "vorpal";
+import * as Vorpal from 'vorpal';
 
-import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
+import Staging, { execute, Message, StagedOutput, StagingFunction } from '../classes/Staging';
 
-import Session from "../classes/Session";
+import Session from '../classes/Session';
 
 /**
  * Should return either a Staged error or success.
@@ -27,63 +27,63 @@ import Session from "../classes/Session";
  * @alpha
  */
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
-    return new Promise<StagedOutput<Message>>(async (resolve) => {
-        const {error, success} = Staging.getStagingFunctions(args);
+	return new Promise<StagedOutput<Message>>(async (resolve) => {
+		const { error, success } = Staging.getStagingFunctions(args);
 
-        const interactive = args.options.interactive || session.interactive;
-        const questions = [];
+		const interactive = args.options.interactive || session.interactive;
+		const questions = [];
 
-        function populateQuestions(object) {
-            for (const key in object) {
-                if (object.hasOwnProperty(key)) {
-                    if (typeof object[key] === 'object') {
-                        populateQuestions(object[key]);
-                    } else {
-                        questions.push({
-                            default: object[key],
-                            message: `${key.charAt(0).toUpperCase() + key.slice(1)}: `,
-                            name: key,
-                            type: 'input',
-                        });
-                    }
-                }
-            }
-        }
+		function populateQuestions(object) {
+			for (const key in object) {
+				if (object.hasOwnProperty(key)) {
+					if (typeof object[key] === 'object') {
+						populateQuestions(object[key]);
+					} else {
+						questions.push({
+							default: object[key],
+							message: `${key.charAt(0).toUpperCase() + key.slice(1)}: `,
+							name: key,
+							type: 'input'
+						});
+					}
+				}
+			}
+		}
 
-        populateQuestions(session.config.data);
+		populateQuestions(session.config.data);
 
-        if (interactive) {
-            const answers = await inquirer.prompt(questions);
-            for (const key in answers) {
-                if (answers.hasOwnProperty(key)) {
-                    args.options[key.toLowerCase()] = answers[key];
-                }
-            }
-        }
+		if (interactive) {
+			const answers = await inquirer.prompt(questions);
+			for (const key in answers) {
+				if (answers.hasOwnProperty(key)) {
+					args.options[key.toLowerCase()] = answers[key];
+				}
+			}
+		}
 
-        if (!Object.keys(args.options).length) {
-            resolve(error(Staging.ERRORS.BLANK_FIELD, 'No options provided.'));
-            return;
-        }
+		if (!Object.keys(args.options).length) {
+			resolve(error(Staging.ERRORS.BLANK_FIELD, 'No options provided.'));
+			return;
+		}
 
-        const newConfig = {
-            connection: {
-                host: args.options.host,
-                port: args.options.port,
-            },
-            defaults: {
-                from: args.options.from,
-                gas: parseInt(args.options.gas, 10),
-                gasPrice: parseInt(args.options.gasprice, 10)
-            },
-            storage: {
-                keystore: args.options.keystore
-            }
-        };
+		const newConfig = {
+			connection: {
+				host: args.options.host,
+				port: args.options.port
+			},
+			defaults: {
+				from: args.options.from,
+				gas: parseInt(args.options.gas, 10),
+				gasPrice: parseInt(args.options.gasprice, 10)
+			},
+			storage: {
+				keystore: args.options.keystore
+			}
+		};
 
-        const saved = await session.config.save(newConfig);
-        resolve(success(saved));
-    });
+		const saved = await session.config.save(newConfig);
+		resolve(success(saved));
+	});
 };
 
 /**
@@ -105,22 +105,22 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
  */
 export default function commandConfigSet(evmlc: Vorpal, session: Session) {
 
-    const description =
-        'Set values of the configuration inside the data directory.';
+	const description =
+		'Set values of the configuration inside the data directory.';
 
-    return evmlc.command('config set').alias('c s')
-        .description(description)
-        .option('-i, --interactive', 'enter into interactive command')
-        .option('-h, --host <host>', 'default host')
-        .option('-p, --port <port>', 'default port')
-        .option('--from <from>', 'default from')
-        .option('--gas <gas>', 'default gas')
-        .option('--gasPrice <gasprice>', 'gas price')
-        .option('--keystore <path>', 'keystore path')
-        .option('--pwd <path>', 'password path')
-        .types({
-            string: ['h', 'host', 'from', 'keystore', 'pwd']
-        })
-        .action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
+	return evmlc.command('config set').alias('c s')
+		.description(description)
+		.option('-i, --interactive', 'enter into interactive command')
+		.option('-h, --host <host>', 'default host')
+		.option('-p, --port <port>', 'default port')
+		.option('--from <from>', 'default from')
+		.option('--gas <gas>', 'default gas')
+		.option('--gasPrice <gasprice>', 'gas price')
+		.option('--keystore <path>', 'keystore path')
+		.option('--pwd <path>', 'password path')
+		.types({
+			string: ['h', 'host', 'from', 'keystore', 'pwd']
+		})
+		.action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
 
 };

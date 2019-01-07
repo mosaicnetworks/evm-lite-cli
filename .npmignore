@@ -1,7 +1,11 @@
-node_modules
-test
-CHANGELOG.md
-src/*.ts
-docs
+src
 tsconfig.json
+tslint.json
 .npmignore
+yarn.lock
+.idea
+.prettierignore
+.prettierrc
+.gitignore
+.editorconfig
+tests

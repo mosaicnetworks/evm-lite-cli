@@ -18,7 +18,7 @@ class Staging {
         return {
             args,
             message,
-            type: Staging.SUCCESS,
+            type: Staging.SUCCESS
         };
     }
     static error(args, subtype, message = null) {
@@ -26,7 +26,7 @@ class Staging {
             args,
             message,
             subtype,
-            type: Staging.ERROR,
+            type: Staging.ERROR
         };
     }
     static getStagingFunctions(args) {
@@ -48,7 +48,7 @@ Staging.ERRORS = {
     IS_DIRECTORY: 'Should not be a directory',
     IS_FILE: 'Should be a directory',
     OTHER: 'Something went wrong',
-    PATH_NOT_EXIST: 'Path(s) should exist',
+    PATH_NOT_EXIST: 'Path(s) should exist'
 };
 exports.default = Staging;
 exports.execute = (fn, args, session) => {

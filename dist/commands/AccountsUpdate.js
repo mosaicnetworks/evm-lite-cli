@@ -56,12 +56,12 @@ exports.stage = (args, session) => {
             {
                 message: 'Enter a new password: ',
                 name: 'password',
-                type: 'password',
+                type: 'password'
             },
             {
                 message: 'Re-enter new password: ',
                 name: 'verifyPassword',
-                type: 'password',
+                type: 'password'
             }
         ];
         if (interactive && !args.address) {

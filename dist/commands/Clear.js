@@ -5,7 +5,7 @@ function commandClear(evmlc, session) {
         .description('Clears interactive mode console output.')
         .action((args) => {
         return new Promise((resolve) => {
-            process.stdout.write("\u001B[2J\u001B[0;0f");
+            process.stdout.write('\u001B[2J\u001B[0;0f');
             resolve();
         });
     });

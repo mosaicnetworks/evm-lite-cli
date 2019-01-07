@@ -7,13 +7,13 @@
  */
 
 import * as ASCIITable from 'ascii-table';
-import * as Vorpal from "vorpal";
+import * as Vorpal from 'vorpal';
 
-import {Transaction, TXReceipt} from "evm-lite-lib";
+import { Transaction, TXReceipt } from 'evm-lite-lib';
 
-import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
+import Staging, { execute, Message, StagedOutput, StagingFunction } from '../classes/Staging';
 
-import Session from "../classes/Session";
+import Session from '../classes/Session';
 
 /**
  * Should return either a Staged error or success.
@@ -29,56 +29,56 @@ import Session from "../classes/Session";
  * @alpha
  */
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
-    return new Promise<StagedOutput<Message>>(async (resolve) => {
-        const {error, success} = Staging.getStagingFunctions(args);
+	return new Promise<StagedOutput<Message>>(async (resolve) => {
+		const { error, success } = Staging.getStagingFunctions(args);
 
-        const connection = await session.connect(args.options.host, args.options.port);
-        if (!connection) {
-            resolve(error(Staging.ERRORS.INVALID_CONNECTION));
-            return;
-        }
+		const connection = await session.connect(args.options.host, args.options.port);
+		if (!connection) {
+			resolve(error(Staging.ERRORS.INVALID_CONNECTION));
+			return;
+		}
 
-        const formatted = args.options.formatted || false;
-        const verbose = args.options.verbose || false;
-        const table = new ASCIITable();
+		const formatted = args.options.formatted || false;
+		const verbose = args.options.verbose || false;
+		const table = new ASCIITable();
 
-        const transactions = await session.database.transactions.list();
-        if (!transactions.length) {
-            resolve(success([]));
-            return;
-        }
+		const transactions = await session.database.transactions.list();
+		if (!transactions.length) {
+			resolve(success([]));
+			return;
+		}
 
-        if (!formatted) {
-            resolve(success(null));
-            return;
-        }
+		if (!formatted) {
+			resolve(success(null));
+			return;
+		}
 
 
-        if (verbose) {
-            table.setHeading('Date Time', 'Hash', 'From', 'To', 'Value', 'Gas', 'Gas Price', 'Status');
-        } else {
-            table.setHeading('From', 'To', 'Value', 'Status');
-        }
+		if (verbose) {
+			table.setHeading('Date Time', 'Hash', 'From', 'To', 'Value', 'Gas', 'Gas Price', 'Status');
+		} else {
+			table.setHeading('From', 'To', 'Value', 'Status');
+		}
 
-        for (const tx of transactions) {
-            const txDate = new Date(tx.date);
-            const transaction = new Transaction(null, session.connection.host, session.connection.port, false);
-            const receipt: TXReceipt = await transaction.getReceipt(tx.txHash);
+		for (const tx of transactions) {
+			const txDate = new Date(tx.date);
+			const transaction = new Transaction(null, session.connection.host, session.connection.port, false);
+			const receipt: TXReceipt = await transaction.getReceipt(tx.txHash);
 
-            const date = txDate.getFullYear() + '-' + (txDate.getMonth() + 1) + '-' + txDate.getDate();
-            const time = txDate.getHours() + ":" + txDate.getMinutes() + ":" + txDate.getSeconds();
+			const date = txDate.getFullYear() + '-' + (txDate.getMonth() + 1) + '-' + txDate.getDate();
+			const time = txDate.getHours() + ':' + txDate.getMinutes() + ':' + txDate.getSeconds();
 
-            if (verbose) {
-                table.addRow(`${date} ${time}`, tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice,
-                    (receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
-            } else {
-                table.addRow(tx.from, tx.to, tx.value,
-                    (receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
-            }
-        }
+			if (verbose) {
+				table.addRow(`${date} ${time}`, tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice,
+					(receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
+			} else {
+				table.addRow(tx.from, tx.to, tx.value,
+					(receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
+			}
+		}
 
-        resolve(success(table));
-    });
+		resolve(success(table));
+	});
 };
 
 /**
@@ -101,18 +101,18 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
  */
 export default function commandTransactionsList(evmlc: Vorpal, session: Session) {
 
-    const description =
-        'Lists all submitted transactions with the status.';
+	const description =
+		'Lists all submitted transactions with the status.';
 
-    return evmlc.command('transactions list').alias('t l')
-        .description(description)
-        .option('-f, --formatted', 'format output')
-        .option('-v, --verbose', 'verbose output')
-        .option('-h, --host <ip>', 'override config parameter host')
-        .option('-p, --port <port>', 'override config parameter port')
-        .types({
-            string: ['h', 'host']
-        })
-        .action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
+	return evmlc.command('transactions list').alias('t l')
+		.description(description)
+		.option('-f, --formatted', 'format output')
+		.option('-v, --verbose', 'verbose output')
+		.option('-h, --host <ip>', 'override config parameter host')
+		.option('-p, --port <port>', 'override config parameter port')
+		.types({
+			string: ['h', 'host']
+		})
+		.action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
 
 };

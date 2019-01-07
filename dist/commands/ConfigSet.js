@@ -46,7 +46,7 @@ exports.stage = (args, session) => {
                             default: object[key],
                             message: `${key.charAt(0).toUpperCase() + key.slice(1)}: `,
                             name: key,
-                            type: 'input',
+                            type: 'input'
                         });
                     }
                 }
@@ -68,7 +68,7 @@ exports.stage = (args, session) => {
         const newConfig = {
             connection: {
                 host: args.options.host,
-                port: args.options.port,
+                port: args.options.port
             },
             defaults: {
                 from: args.options.from,

@@ -62,7 +62,7 @@ exports.stage = (args, session) => {
             const transaction = new evm_lite_lib_1.Transaction(null, session.connection.host, session.connection.port, false);
             const receipt = yield transaction.getReceipt(tx.txHash);
             const date = txDate.getFullYear() + '-' + (txDate.getMonth() + 1) + '-' + txDate.getDate();
-            const time = txDate.getHours() + ":" + txDate.getMinutes() + ":" + txDate.getSeconds();
+            const time = txDate.getHours() + ':' + txDate.getMinutes() + ':' + txDate.getSeconds();
             if (verbose) {
                 table.addRow(`${date} ${time}`, tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice, (receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
             }

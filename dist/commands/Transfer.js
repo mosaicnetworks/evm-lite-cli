@@ -47,39 +47,39 @@ exports.stage = (args, session) => {
                 choices: accounts.map((account) => account.address),
                 message: 'From: ',
                 name: 'from',
-                type: 'list',
+                type: 'list'
             }
         ];
         const passwordQ = [
             {
                 message: 'Enter password: ',
                 name: 'password',
-                type: 'password',
+                type: 'password'
             }
         ];
         const restOfQs = [
             {
                 message: 'To',
                 name: 'to',
-                type: 'input',
+                type: 'input'
             },
             {
                 default: '100',
                 message: 'Value: ',
                 name: 'value',
-                type: 'input',
+                type: 'input'
             },
             {
                 default: session.config.data.defaults.gas || 100000,
                 message: 'Gas: ',
                 name: 'gas',
-                type: 'input',
+                type: 'input'
             },
             {
                 default: session.config.data.defaults.gasPrice || 0,
                 message: 'Gas Price: ',
                 name: 'gasPrice',
-                type: 'input',
+                type: 'input'
             }
         ];
         const tx = {};
@@ -109,7 +109,7 @@ exports.stage = (args, session) => {
                 resolve(error(Staging_1.default.ERRORS.IS_DIRECTORY, 'Password file path provided is not a file.'));
                 return;
             }
-            args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8').trim();
+            args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8');
         }
         let decrypted = null;
         try {
@@ -191,7 +191,7 @@ function commandTransfer(evmlc, session) {
         .option('--pwd <password>', 'password file path')
         .option('-p, --port <port>', 'override config parameter port')
         .types({
-        string: ['t', 'to', 'f', 'from', 'h', 'host', 'pwd'],
+        string: ['t', 'to', 'f', 'from', 'h', 'host', 'pwd']
     })
         .action((args) => Staging_1.execute(exports.stage, args, session));
 }

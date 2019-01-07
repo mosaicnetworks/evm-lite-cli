@@ -1,45 +1,45 @@
 {
-  "name": "evml-cli",
-  "version": "0.1.2",
-  "description": "A CLI to interact with EVM-Lite node.",
-  "main": "./dist/index.js",
-  "scripts": {
-    "test": "mocha -r ts-node/register __test__/**/*.ts || true"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
-  "dependencies": {
-    "ascii-table": "0.0.9",
-    "chalk": "^2.4.1",
-    "evm-lite-lib": "^0.1.5",
-    "figlet": "^1.2.0",
-    "inquirer": "latest",
-    "install": "^0.12.2",
-    "json-bigint": "^0.3.0",
-    "mkdirp": "^0.5.1",
-    "npm": "^6.5.0",
-    "toml": "^2.3.3",
-    "tomlify-j0.4": "^3.0.0",
-    "vorpal": "^1.12.0"
-  },
-  "bin": {
-    "evmlc": "./dist/index.js"
-  },
-  "devDependencies": {
-    "@types/chai": "^4.1.6",
-    "@types/chalk": "^2.2.0",
-    "@types/inquirer": "0.0.43",
-    "@types/lowdb": "^1.0.6",
-    "@types/mocha": "^5.2.5",
-    "@types/node": "^10.11.0",
-    "@types/vorpal": "^1.11.0",
-    "chai": "^4.2.0",
-    "mocha": "^5.2.0",
-    "ts-node": "^7.0.1",
-    "tslint": "^5.11.0",
-    "tslint-config-prettier": "^1.15.0",
-    "typescript": "^3.1.6"
-  },
-  "typings": "./dist/index.d.ts"
+	"name": "evml-cli",
+	"version": "0.1.2",
+	"description": "A CLI to interact with EVM-Lite node.",
+	"main": "./dist/index.js",
+	"scripts": {
+		"test": "mocha -r ts-node/register __test__/**/*.ts || true"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "MIT",
+	"dependencies": {
+		"ascii-table": "0.0.9",
+		"chalk": "^2.4.1",
+		"evm-lite-lib": "^0.1.9",
+		"figlet": "^1.2.0",
+		"inquirer": "latest",
+		"install": "^0.12.2",
+		"json-bigint": "^0.3.0",
+		"mkdirp": "^0.5.1",
+		"npm": "^6.5.0",
+		"toml": "^2.3.3",
+		"tomlify-j0.4": "^3.0.0",
+		"vorpal": "^1.12.0"
+	},
+	"bin": {
+		"evmlc": "./dist/index.js"
+	},
+	"devDependencies": {
+		"@types/chai": "^4.1.6",
+		"@types/chalk": "^2.2.0",
+		"@types/inquirer": "0.0.43",
+		"@types/lowdb": "^1.0.6",
+		"@types/mocha": "^5.2.5",
+		"@types/node": "^10.11.0",
+		"@types/vorpal": "^1.11.0",
+		"chai": "^4.2.0",
+		"mocha": "^5.2.0",
+		"ts-node": "^7.0.1",
+		"tslint": "^5.11.0",
+		"tslint-config-prettier": "^1.15.0",
+		"typescript": "^3.1.6"
+	},
+	"typings": "./dist/index.d.ts"
 }

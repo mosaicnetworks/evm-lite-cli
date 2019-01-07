@@ -8,17 +8,17 @@
 
 import * as ASCIITable from 'ascii-table';
 import * as inquirer from 'inquirer';
-import * as Vorpal from "vorpal";
+import * as Vorpal from 'vorpal';
 
-import {Transaction, TXReceipt} from "evm-lite-lib";
+import { Transaction, TXReceipt } from 'evm-lite-lib';
 
-import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
+import Staging, { execute, Message, StagedOutput, StagingFunction } from '../classes/Staging';
 
-import Session from "../classes/Session";
+import Session from '../classes/Session';
 
 
 interface TransactionsGetPrompt {
-    hash: string;
+	hash: string;
 }
 
 /**
@@ -35,76 +35,76 @@ interface TransactionsGetPrompt {
  * @alpha
  */
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
-    return new Promise<StagedOutput<Message>>(async (resolve) => {
+	return new Promise<StagedOutput<Message>>(async (resolve) => {
 
-        const {error, success} = Staging.getStagingFunctions(args);
+		const { error, success } = Staging.getStagingFunctions(args);
 
-        const connection = await session.connect(args.options.host, args.options.port);
-        if (!connection) {
-            resolve(error(Staging.ERRORS.INVALID_CONNECTION,));
-            return;
-        }
+		const connection = await session.connect(args.options.host, args.options.port);
+		if (!connection) {
+			resolve(error(Staging.ERRORS.INVALID_CONNECTION));
+			return;
+		}
 
-        const table = new ASCIITable('Transaction Receipt').setHeading('Key', 'Value');
-        const interactive = args.options.interactive || session.interactive;
-        const formatted = args.options.formatted || false;
-        const questions = [
-            {
-                message: 'Transaction Hash: ',
-                name: 'hash',
-                required: true,
-                type: 'input',
-            }
-        ];
+		const table = new ASCIITable('Transaction Receipt').setHeading('Key', 'Value');
+		const interactive = args.options.interactive || session.interactive;
+		const formatted = args.options.formatted || false;
+		const questions = [
+			{
+				message: 'Transaction Hash: ',
+				name: 'hash',
+				required: true,
+				type: 'input'
+			}
+		];
 
-        if (interactive && !args.hash) {
-            const {hash} = await inquirer.prompt<TransactionsGetPrompt>(questions);
-            args.hash = hash;
-        }
+		if (interactive && !args.hash) {
+			const { hash } = await inquirer.prompt<TransactionsGetPrompt>(questions);
+			args.hash = hash;
+		}
 
-        if (!args.hash) {
-            resolve(error(Staging.ERRORS.BLANK_FIELD, 'Provide a transaction hash.'));
-            return;
-        }
+		if (!args.hash) {
+			resolve(error(Staging.ERRORS.BLANK_FIELD, 'Provide a transaction hash.'));
+			return;
+		}
 
-        const transaction = new Transaction(null, session.connection.host, session.connection.port, false);
-        const receipt: TXReceipt = await transaction.getReceipt(args.hash);
-        if (!receipt) {
-            resolve(error(Staging.ERRORS.FETCH_FAILED, 'Could not fetch receipt for hash: ' + args.hash));
-            return;
-        }
+		const transaction = new Transaction(null, session.connection.host, session.connection.port, false);
+		const receipt: TXReceipt = await transaction.getReceipt(args.hash);
+		if (!receipt) {
+			resolve(error(Staging.ERRORS.FETCH_FAILED, 'Could not fetch receipt for hash: ' + args.hash));
+			return;
+		}
 
-        delete receipt.logsBloom;
-        delete receipt.contractAddress;
+		delete receipt.logsBloom;
+		delete receipt.contractAddress;
 
-        if (!formatted) {
-            resolve(success(receipt));
-            return;
-        }
+		if (!formatted) {
+			resolve(success(receipt));
+			return;
+		}
 
-        for (const key in receipt) {
-            if (receipt.hasOwnProperty(key)) {
-                if (key !== 'status') {
-                    table.addRow(key, receipt[key]);
-                } else {
-                    table.addRow(key, (!receipt[key]) ? 'Successful' : 'Failed')
-                }
-            }
-        }
+		for (const key in receipt) {
+			if (receipt.hasOwnProperty(key)) {
+				if (key !== 'status') {
+					table.addRow(key, receipt[key]);
+				} else {
+					table.addRow(key, (!receipt[key]) ? 'Successful' : 'Failed');
+				}
+			}
+		}
 
-        const tx = await session.database.transactions.get(args.hash);
-        if (!tx) {
-            resolve(error(Staging.ERRORS.FETCH_FAILED, 'Could not find transaction in list.'));
-            return;
-        }
+		const tx = await session.database.transactions.get(args.hash);
+		if (!tx) {
+			resolve(error(Staging.ERRORS.FETCH_FAILED, 'Could not find transaction in list.'));
+			return;
+		}
 
-        table
-            .addRow('Value', tx.value)
-            .addRow('Gas', tx.gas)
-            .addRow('Gas Price', tx.gasPrice);
+		table
+			.addRow('Value', tx.value)
+			.addRow('Gas', tx.gas)
+			.addRow('Gas Price', tx.gasPrice);
 
-        resolve(success(table));
-    });
+		resolve(success(table));
+	});
 };
 
 /**
@@ -127,18 +127,18 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
  */
 export default function commandTransactionsGet(evmlc: Vorpal, session: Session) {
 
-    const description =
-        'Gets a transaction using its hash.';
+	const description =
+		'Gets a transaction using its hash.';
 
-    return evmlc.command('transactions get [hash]').alias('t g')
-        .description(description)
-        .option('-f, --formatted', 'format output')
-        .option('-i, --interactive', 'use interactive mode')
-        .option('-h, --host <ip>', 'override config parameter host')
-        .option('-p, --port <port>', 'override config parameter port')
-        .types({
-            string: ['_', 'h', 'host']
-        })
-        .action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
+	return evmlc.command('transactions get [hash]').alias('t g')
+		.description(description)
+		.option('-f, --formatted', 'format output')
+		.option('-i, --interactive', 'use interactive mode')
+		.option('-h, --host <ip>', 'override config parameter host')
+		.option('-p, --port <port>', 'override config parameter port')
+		.types({
+			string: ['_', 'h', 'host']
+		})
+		.action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
 
 };

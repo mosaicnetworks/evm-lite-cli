@@ -5,9 +5,9 @@
  * @author Mosaic Networks <https://github.com/mosaicnetworks>
  * @date 2018
  */
-import * as Vorpal from "vorpal";
-import { StagingFunction } from "../classes/Staging";
-import Session from "../classes/Session";
+import * as Vorpal from 'vorpal';
+import { StagingFunction } from '../classes/Staging';
+import Session from '../classes/Session';
 /**
  * Should return either a Staged error or success.
  *
@@ -42,4 +42,4 @@ export declare const stage: StagingFunction;
  *
  * @alpha
  */
-export default function commandAccountsList(evmlc: Vorpal, session: Session): Vorpal.Command;
+export default function commandAccountsList(evmlc: Vorpal, session: Session): any;

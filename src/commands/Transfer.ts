@@ -6,30 +6,30 @@
  * @date 2018
  */
 
-import * as fs from "fs";
+import * as fs from 'fs';
 import * as inquirer from 'inquirer';
-import * as Vorpal from "vorpal";
+import * as Vorpal from 'vorpal';
 
-import {Account, Static} from "evm-lite-lib"
+import { Account, Static } from 'evm-lite-lib';
 
-import Staging, {execute, Message, StagedOutput, StagingFunction} from "../classes/Staging";
+import Staging, { execute, Message, StagedOutput, StagingFunction } from '../classes/Staging';
 
-import Session from "../classes/Session";
+import Session from '../classes/Session';
 
 
 interface TransferFromAddressPrompt {
-    from: string;
+	from: string;
 }
 
 interface TransferDecryptPrompt {
-    password: string;
+	password: string;
 }
 
 interface TransferOtherQuestionsPrompt {
-    to: string;
-    value: string;
-    gas: string;
-    gasPrice: string;
+	to: string;
+	value: string;
+	gas: string;
+	gasPrice: string;
 }
 
 /**
@@ -46,139 +46,139 @@ interface TransferOtherQuestionsPrompt {
  * @alpha
  */
 export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
-    return new Promise<StagedOutput<Message>>(async (resolve) => {
+	return new Promise<StagedOutput<Message>>(async (resolve) => {
 
-        const {error, success} = Staging.getStagingFunctions(args);
+		const { error, success } = Staging.getStagingFunctions(args);
 
-        const connection = await session.connect(args.options.host, args.options.port);
-        if (!connection) {
-            resolve(error(Staging.ERRORS.INVALID_CONNECTION));
-            return;
-        }
+		const connection = await session.connect(args.options.host, args.options.port);
+		if (!connection) {
+			resolve(error(Staging.ERRORS.INVALID_CONNECTION));
+			return;
+		}
 
-        const interactive = args.options.interactive || session.interactive;
-        const accounts = await session.keystore.list();
-        const fromQ = [
-            {
-                choices: accounts.map((account) => account.address),
-                message: 'From: ',
-                name: 'from',
-                type: 'list',
-            }
-        ];
-        const passwordQ = [
-            {
-                message: 'Enter password: ',
-                name: 'password',
-                type: 'password',
-            }
-        ];
-        const restOfQs = [
-            {
-                message: 'To',
-                name: 'to',
-                type: 'input',
-            },
-            {
-                default: '100',
-                message: 'Value: ',
-                name: 'value',
-                type: 'input',
-            },
-            {
-                default: session.config.data.defaults.gas || 100000,
-                message: 'Gas: ',
-                name: 'gas',
-                type: 'input',
-            },
-            {
-                default: session.config.data.defaults.gasPrice || 0,
-                message: 'Gas Price: ',
-                name: 'gasPrice',
-                type: 'input',
-            }
-        ];
-        const tx: any = {};
+		const interactive = args.options.interactive || session.interactive;
+		const accounts = await session.keystore.list();
+		const fromQ = [
+			{
+				choices: accounts.map((account) => account.address),
+				message: 'From: ',
+				name: 'from',
+				type: 'list'
+			}
+		];
+		const passwordQ = [
+			{
+				message: 'Enter password: ',
+				name: 'password',
+				type: 'password'
+			}
+		];
+		const restOfQs = [
+			{
+				message: 'To',
+				name: 'to',
+				type: 'input'
+			},
+			{
+				default: '100',
+				message: 'Value: ',
+				name: 'value',
+				type: 'input'
+			},
+			{
+				default: session.config.data.defaults.gas || 100000,
+				message: 'Gas: ',
+				name: 'gas',
+				type: 'input'
+			},
+			{
+				default: session.config.data.defaults.gasPrice || 0,
+				message: 'Gas Price: ',
+				name: 'gasPrice',
+				type: 'input'
+			}
+		];
+		const tx: any = {};
 
-        if (interactive) {
-            const {from} = await inquirer.prompt<TransferFromAddressPrompt>(fromQ);
-            args.options.from = from;
-        }
+		if (interactive) {
+			const { from } = await inquirer.prompt<TransferFromAddressPrompt>(fromQ);
+			args.options.from = from;
+		}
 
-        if (!args.options.from) {
-            resolve(error(Staging.ERRORS.BLANK_FIELD, '`From` address cannot be blank.'));
-            return;
-        }
+		if (!args.options.from) {
+			resolve(error(Staging.ERRORS.BLANK_FIELD, '`From` address cannot be blank.'));
+			return;
+		}
 
-        const keystore = await session.keystore.get(args.options.from);
-        if (!keystore) {
-            resolve(error(Staging.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address: ${tx.from}.`));
-            return;
-        }
+		const keystore = await session.keystore.get(args.options.from);
+		if (!keystore) {
+			resolve(error(Staging.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address: ${tx.from}.`));
+			return;
+		}
 
-        if (!args.options.pwd) {
-            const {password} = await inquirer.prompt<TransferDecryptPrompt>(passwordQ);
-            args.options.pwd = password;
-        } else {
-            if (!Static.exists(args.options.pwd)) {
-                resolve(error(Staging.ERRORS.FILE_NOT_FOUND, 'Password file path provided does not exist.'));
-                return;
-            }
+		if (!args.options.pwd) {
+			const { password } = await inquirer.prompt<TransferDecryptPrompt>(passwordQ);
+			args.options.pwd = password;
+		} else {
+			if (!Static.exists(args.options.pwd)) {
+				resolve(error(Staging.ERRORS.FILE_NOT_FOUND, 'Password file path provided does not exist.'));
+				return;
+			}
 
-            if (Static.isDirectory(args.options.pwd)) {
-                resolve(error(Staging.ERRORS.IS_DIRECTORY, 'Password file path provided is not a file.'));
-                return;
-            }
+			if (Static.isDirectory(args.options.pwd)) {
+				resolve(error(Staging.ERRORS.IS_DIRECTORY, 'Password file path provided is not a file.'));
+				return;
+			}
 
-            args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8').trim();
-        }
+			args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8');
+		}
 
-        let decrypted: Account = null;
-        try {
-            decrypted = Account.decrypt(keystore, args.options.pwd);
-        } catch (err) {
-            resolve(error(Staging.ERRORS.DECRYPTION, 'Failed decryption of account.'));
-            return;
-        }
+		let decrypted: Account = null;
+		try {
+			decrypted = Account.decrypt(keystore, args.options.pwd);
+		} catch (err) {
+			resolve(error(Staging.ERRORS.DECRYPTION, 'Failed decryption of account.'));
+			return;
+		}
 
-        if (interactive) {
-            const answers = await inquirer.prompt<TransferOtherQuestionsPrompt>(restOfQs);
+		if (interactive) {
+			const answers = await inquirer.prompt<TransferOtherQuestionsPrompt>(restOfQs);
 
-            args.options.to = answers.to;
-            args.options.value = answers.value;
-            args.options.gas = answers.gas;
-            args.options.gasPrice = answers.gasPrice;
-        }
+			args.options.to = answers.to;
+			args.options.value = answers.value;
+			args.options.gas = answers.gas;
+			args.options.gasPrice = answers.gasPrice;
+		}
 
-        tx.from = args.options.from;
-        tx.to = args.options.to || undefined;
-        tx.value = parseInt(args.options.value, 10) || undefined;
-        tx.gas = parseInt(args.options.gas || session.config.data.defaults.gas || 100000, 10);
-        tx.gasPrice = parseInt(args.options.gasprice || session.config.data.defaults.gasPrice || 0, 10);
+		tx.from = args.options.from;
+		tx.to = args.options.to || undefined;
+		tx.value = parseInt(args.options.value, 10) || undefined;
+		tx.gas = parseInt(args.options.gas || session.config.data.defaults.gas || 100000, 10);
+		tx.gasPrice = parseInt(args.options.gasprice || session.config.data.defaults.gasPrice || 0, 10);
 
-        if ((!tx.to) || !tx.value) {
-            resolve(error(Staging.ERRORS.BLANK_FIELD, 'Provide an address to send to and a value.'));
-            return;
-        }
+		if ((!tx.to) || !tx.value) {
+			resolve(error(Staging.ERRORS.BLANK_FIELD, 'Provide an address to send to and a value.'));
+			return;
+		}
 
-        try {
-            const transaction = (await session.connection.prepareTransfer(tx.to, tx.value, tx.from))
-                .gas(tx.gas)
-                .gasPrice(tx.gasPrice);
-            const signedTransaction = await decrypted.signTransaction(transaction);
-            const response = await transaction.sendRaw(signedTransaction.rawTransaction);
+		try {
+			const transaction = (await session.connection.prepareTransfer(tx.to, tx.value, tx.from))
+				.gas(tx.gas)
+				.gasPrice(tx.gasPrice);
+			const signedTransaction = await decrypted.signTransaction(transaction);
+			const response = await transaction.sendRaw(signedTransaction.rawTransaction);
 
-            tx.txHash = response.txHash;
-            tx.date = new Date();
+			tx.txHash = response.txHash;
+			tx.date = new Date();
 
-            const txSchema = session.database.transactions.create(tx);
-            await session.database.transactions.insert(txSchema);
+			const txSchema = session.database.transactions.create(tx);
+			await session.database.transactions.insert(txSchema);
 
-            resolve(success(`Transaction submitted: ${response.txHash}`));
-        } catch (e) {
-            resolve(error(Staging.ERRORS.OTHER, (e.text) ? e.text : e.message));
-        }
-    });
+			resolve(success(`Transaction submitted: ${response.txHash}`));
+		} catch (e) {
+			resolve(error(Staging.ERRORS.OTHER, (e.text) ? e.text : e.message));
+		}
+	});
 };
 
 /**
@@ -207,24 +207,24 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
  */
 export default function commandTransfer(evmlc: Vorpal, session: Session) {
 
-    const description =
-        'Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the' +
-        ' configuration file.';
+	const description =
+		'Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the' +
+		' configuration file.';
 
-    return evmlc.command('transfer').alias('t')
-        .description(description)
-        .option('-i, --interactive', 'value to send')
-        .option('-v, --value <value>', 'value to send')
-        .option('-g, --gas <value>', 'gas to send at')
-        .option('-gp, --gasprice <value>', 'gas price to send at')
-        .option('-t, --to <address>', 'address to send to')
-        .option('-f, --from <address>', 'address to send from')
-        .option('-h, --host <ip>', 'override config parameter host')
-        .option('--pwd <password>', 'password file path')
-        .option('-p, --port <port>', 'override config parameter port')
-        .types({
-            string: ['t', 'to', 'f', 'from', 'h', 'host', 'pwd'],
-        })
-        .action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
+	return evmlc.command('transfer').alias('t')
+		.description(description)
+		.option('-i, --interactive', 'value to send')
+		.option('-v, --value <value>', 'value to send')
+		.option('-g, --gas <value>', 'gas to send at')
+		.option('-gp, --gasprice <value>', 'gas price to send at')
+		.option('-t, --to <address>', 'address to send to')
+		.option('-f, --from <address>', 'address to send from')
+		.option('-h, --host <ip>', 'override config parameter host')
+		.option('--pwd <password>', 'password file path')
+		.option('-p, --port <port>', 'override config parameter port')
+		.types({
+			string: ['t', 'to', 'f', 'from', 'h', 'host', 'pwd']
+		})
+		.action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
 
 };
