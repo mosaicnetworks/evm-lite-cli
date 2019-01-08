@@ -154,7 +154,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 		tx.to = args.options.to || undefined;
 		tx.value = parseInt(args.options.value, 10) || undefined;
 		tx.gas = parseInt(args.options.gas || session.config.data.defaults.gas || 100000, 10);
-		tx.gasPrice = parseInt(args.options.gasprice || session.config.data.defaults.gasPrice || 0, 10);
+		tx.gasPrice = parseInt(args.options.gasPrice || session.config.data.defaults.gasPrice || 0, 10);
 
 		if ((!tx.to) || !tx.value) {
 			resolve(error(Staging.ERRORS.BLANK_FIELD, 'Provide an address to send to and a value.'));
@@ -165,6 +165,8 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 			const transaction = (await session.connection.prepareTransfer(tx.to, tx.value, tx.from))
 				.gas(tx.gas)
 				.gasPrice(tx.gasPrice);
+
+			console.log(transaction.tx);
 			const signedTransaction = await decrypted.signTransaction(transaction);
 			const response = await transaction.sendRaw(signedTransaction.rawTransaction);
 

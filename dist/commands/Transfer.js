@@ -130,7 +130,7 @@ exports.stage = (args, session) => {
         tx.to = args.options.to || undefined;
         tx.value = parseInt(args.options.value, 10) || undefined;
         tx.gas = parseInt(args.options.gas || session.config.data.defaults.gas || 100000, 10);
-        tx.gasPrice = parseInt(args.options.gasprice || session.config.data.defaults.gasPrice || 0, 10);
+        tx.gasPrice = parseInt(args.options.gasPrice || session.config.data.defaults.gasPrice || 0, 10);
         if ((!tx.to) || !tx.value) {
             resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Provide an address to send to and a value.'));
             return;
@@ -139,6 +139,7 @@ exports.stage = (args, session) => {
             const transaction = (yield session.connection.prepareTransfer(tx.to, tx.value, tx.from))
                 .gas(tx.gas)
                 .gasPrice(tx.gasPrice);
+            console.log(transaction.tx);
             const signedTransaction = yield decrypted.signTransaction(transaction);
             const response = yield transaction.sendRaw(signedTransaction.rawTransaction);
             tx.txHash = response.txHash;
