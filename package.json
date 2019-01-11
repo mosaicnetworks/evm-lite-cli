@@ -12,7 +12,7 @@
 	"dependencies": {
 		"ascii-table": "0.0.9",
 		"chalk": "^2.4.1",
-		"evm-lite-lib": "^0.1.9",
+		"evm-lite-lib": "^0.1.13",
 		"figlet": "^1.2.0",
 		"inquirer": "latest",
 		"install": "^0.12.2",

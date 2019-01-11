@@ -49,10 +49,9 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 		}
 
 		if (!formatted) {
-			resolve(success(null));
+			resolve(success(JSON.stringify(transactions)));
 			return;
 		}
-
 
 		if (verbose) {
 			table.setHeading('Date Time', 'Hash', 'From', 'To', 'Value', 'Gas', 'Gas Price', 'Status');
@@ -61,9 +60,19 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 		}
 
 		for (const tx of transactions) {
+			let receipt: TXReceipt;
 			const txDate = new Date(tx.date);
-			const transaction = new Transaction(null, session.connection.host, session.connection.port, false);
-			const receipt: TXReceipt = await transaction.getReceipt(tx.txHash);
+			const transaction = new Transaction(
+				null,
+				session.connection.host,
+				session.connection.port,
+				false);
+
+			if (tx.txHash) {
+				transaction.hash = tx.txHash;
+
+				receipt = await transaction.receipt;
+			}
 
 			const date = txDate.getFullYear() + '-' + (txDate.getMonth() + 1) + '-' + txDate.getDate();
 			const time = txDate.getHours() + ':' + txDate.getMinutes() + ':' + txDate.getSeconds();

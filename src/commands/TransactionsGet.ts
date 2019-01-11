@@ -68,7 +68,10 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 		}
 
 		const transaction = new Transaction(null, session.connection.host, session.connection.port, false);
-		const receipt: TXReceipt = await transaction.getReceipt(args.hash);
+
+		transaction.hash = args.hash;
+		const receipt: TXReceipt = await transaction.receipt;
+
 		if (!receipt) {
 			resolve(error(Staging.ERRORS.FETCH_FAILED, 'Could not fetch receipt for hash: ' + args.hash));
 			return;

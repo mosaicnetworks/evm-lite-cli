@@ -48,7 +48,7 @@ exports.stage = (args, session) => {
             return;
         }
         if (!formatted) {
-            resolve(success(null));
+            resolve(success(JSON.stringify(transactions)));
             return;
         }
         if (verbose) {
@@ -58,9 +58,13 @@ exports.stage = (args, session) => {
             table.setHeading('From', 'To', 'Value', 'Status');
         }
         for (const tx of transactions) {
+            let receipt;
             const txDate = new Date(tx.date);
             const transaction = new evm_lite_lib_1.Transaction(null, session.connection.host, session.connection.port, false);
-            const receipt = yield transaction.getReceipt(tx.txHash);
+            if (tx.txHash) {
+                transaction.hash = tx.txHash;
+                receipt = yield transaction.receipt;
+            }
             const date = txDate.getFullYear() + '-' + (txDate.getMonth() + 1) + '-' + txDate.getDate();
             const time = txDate.getHours() + ':' + txDate.getMinutes() + ':' + txDate.getSeconds();
             if (verbose) {

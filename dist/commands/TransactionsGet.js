@@ -60,7 +60,8 @@ exports.stage = (args, session) => {
             return;
         }
         const transaction = new evm_lite_lib_1.Transaction(null, session.connection.host, session.connection.port, false);
-        const receipt = yield transaction.getReceipt(args.hash);
+        transaction.hash = args.hash;
+        const receipt = yield transaction.receipt;
         if (!receipt) {
             resolve(error(Staging_1.default.ERRORS.FETCH_FAILED, 'Could not fetch receipt for hash: ' + args.hash));
             return;

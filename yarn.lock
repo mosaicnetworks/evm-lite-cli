@@ -1321,10 +1321,10 @@ eventemitter3@1.1.1:
   resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-1.1.1.tgz#47786bdaa087caf7b1b75e73abc5c7d540158cd0"
   integrity sha1-R3hr2qCHyvext15zq8XH1UAVjNA=
 
-evm-lite-lib@^0.1.9:
-  version "0.1.9"
-  resolved "https://registry.yarnpkg.com/evm-lite-lib/-/evm-lite-lib-0.1.9.tgz#87b5a112c43722644ddcaf881329302732635822"
-  integrity sha512-W3JBkG5XRs0TRsrloR9wTOQe2vofNzAwL638FZvzuxQ2Jb11q+ZOmWDRWWSPq+2LK6cW/seD06XamrvjglJuBg==
+evm-lite-lib@^0.1.13:
+  version "0.1.14"
+  resolved "https://registry.yarnpkg.com/evm-lite-lib/-/evm-lite-lib-0.1.14.tgz#12532ec85a950e6e1dad237c3269f7b7b9c96b58"
+  integrity sha512-c0KD9tSbOcZ0/IfL3ida/AyIDSiHIpVAMEJvWhQZXtmkiXfcktsGG/C3eFiiKtrgyn3g74plmHIKvCId5t/NbQ==
   dependencies:
     chalk latest
     js-scrypt "^0.2.0"

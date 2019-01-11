@@ -162,21 +162,20 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 		}
 
 		try {
-			const transaction = (await session.connection.prepareTransfer(tx.to, tx.value, tx.from))
-				.gas(tx.gas)
-				.gasPrice(tx.gasPrice);
+			const transaction =
+				(await session.connection.prepareTransfer(tx.to, tx.value, tx.from))
+					.gas(tx.gas)
+					.gasPrice(tx.gasPrice);
 
-			console.log(transaction.tx);
-			const signedTransaction = await decrypted.signTransaction(transaction);
-			const response = await transaction.sendRaw(signedTransaction.rawTransaction);
+			await transaction.sign(decrypted);
+			await transaction.submit();
 
-			tx.txHash = response.txHash;
+			tx.txHash = transaction.hash;
 			tx.date = new Date();
 
-			const txSchema = session.database.transactions.create(tx);
-			await session.database.transactions.insert(txSchema);
+			await session.database.transactions.insert(session.database.transactions.create(tx));
 
-			resolve(success(`Transaction submitted: ${response.txHash}`));
+			resolve(success(`Transaction submitted: ${transaction.hash}`));
 		} catch (e) {
 			resolve(error(Staging.ERRORS.OTHER, (e.text) ? e.text : e.message));
 		}

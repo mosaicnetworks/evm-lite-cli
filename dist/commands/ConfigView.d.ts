@@ -38,4 +38,4 @@ export declare const stage: StagingFunction;
  *
  * @alpha
  */
-export default function commandConfigUser(evmlc: Vorpal, session: Session): Vorpal.Command;
+export default function commandConfigUser(evmlc: Vorpal, session: Session): any;

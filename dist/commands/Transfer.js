@@ -139,14 +139,12 @@ exports.stage = (args, session) => {
             const transaction = (yield session.connection.prepareTransfer(tx.to, tx.value, tx.from))
                 .gas(tx.gas)
                 .gasPrice(tx.gasPrice);
-            console.log(transaction.tx);
-            const signedTransaction = yield decrypted.signTransaction(transaction);
-            const response = yield transaction.sendRaw(signedTransaction.rawTransaction);
-            tx.txHash = response.txHash;
+            yield transaction.sign(decrypted);
+            yield transaction.submit();
+            tx.txHash = transaction.hash;
             tx.date = new Date();
-            const txSchema = session.database.transactions.create(tx);
-            yield session.database.transactions.insert(txSchema);
-            resolve(success(`Transaction submitted: ${response.txHash}`));
+            yield session.database.transactions.insert(session.database.transactions.create(tx));
+            resolve(success(`Transaction submitted: ${transaction.hash}`));
         }
         catch (e) {
             resolve(error(Staging_1.default.ERRORS.OTHER, (e.text) ? e.text : e.message));
