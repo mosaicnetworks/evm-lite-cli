@@ -10,12 +10,16 @@ import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import { Account, Static } from 'evm-lite-lib';
+import { Account, Static, Wallet } from 'evm-lite-lib';
 
-import Staging, { execute, Message, StagedOutput, StagingFunction } from '../classes/Staging';
+import Staging, {
+	execute,
+	Message,
+	StagedOutput,
+	StagingFunction
+} from '../classes/Staging';
 
 import Session from '../classes/Session';
-
 
 interface AccountsUpdateAddressPrompt {
 	address: string;
@@ -43,15 +47,18 @@ interface AccountsUpdateNewPasswordPrompt {
  *
  * @alpha
  */
-export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
-	return new Promise<StagedOutput<Message>>(async (resolve) => {
+export const stage: StagingFunction = (
+	args: Vorpal.Args,
+	session: Session
+): Promise<StagedOutput<Message>> => {
+	return new Promise<StagedOutput<Message>>(async resolve => {
 		const { error, success } = Staging.getStagingFunctions(args);
 
 		const interactive = args.options.interactive || session.interactive;
 		const accounts = await session.keystore.list();
 		const addressQ = [
 			{
-				choices: accounts.map((account) => account.address),
+				choices: accounts.map(account => account.address),
 				message: 'Address: ',
 				name: 'address',
 				type: 'list'
@@ -78,32 +85,56 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 		];
 
 		if (interactive && !args.address) {
-			const { address } = await inquirer.prompt<AccountsUpdateAddressPrompt>(addressQ);
+			const { address } = await inquirer.prompt<
+				AccountsUpdateAddressPrompt
+			>(addressQ);
 			args.address = address;
 		}
 
 		if (!args.address) {
-			resolve(error(Staging.ERRORS.BLANK_FIELD, 'Provide a non-empty address.'));
+			resolve(
+				error(
+					Staging.ERRORS.BLANK_FIELD,
+					'Provide a non-empty address.'
+				)
+			);
 			return;
 		}
 
-		const keystore = session.keystore.get(args.address);
+		const keystore = await session.keystore.get(args.address);
 		if (!keystore) {
-			resolve(error(Staging.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address.`));
+			resolve(
+				error(
+					Staging.ERRORS.FILE_NOT_FOUND,
+					`Cannot find keystore file of address.`
+				)
+			);
 			return;
 		}
 
 		if (!args.options.old) {
-			const { password } = await inquirer.prompt<AccountsUpdateDecrytPrompt>(passwordQ);
+			const { password } = await inquirer.prompt<
+				AccountsUpdateDecrytPrompt
+			>(passwordQ);
 			args.options.old = password.trim();
 		} else {
 			if (!Static.exists(args.options.old)) {
-				resolve(error(Staging.ERRORS.FILE_NOT_FOUND, 'Old password file path provided does not exist.'));
+				resolve(
+					error(
+						Staging.ERRORS.FILE_NOT_FOUND,
+						'Old password file path provided does not exist.'
+					)
+				);
 				return;
 			}
 
 			if (Static.isDirectory(args.options.old)) {
-				resolve(error(Staging.ERRORS.IS_DIRECTORY, 'Old password file path provided is not a file.'));
+				resolve(
+					error(
+						Staging.ERRORS.IS_DIRECTORY,
+						'Old password file path provided is not a file.'
+					)
+				);
 				return;
 			}
 
@@ -111,30 +142,49 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 		}
 
 		try {
-			Account.decrypt(keystore, args.options.old);
+			Wallet.decrypt(keystore, args.options.old);
 		} catch (err) {
-			resolve(error(
-				Staging.ERRORS.DECRYPTION,
-				'Failed decryption of account with the password provided.'
-			));
+			resolve(
+				error(
+					Staging.ERRORS.DECRYPTION,
+					'Failed decryption of account with the password provided.'
+				)
+			);
 			return;
 		}
 
 		if (!args.options.new) {
-			const { password, verifyPassword } = await inquirer.prompt<AccountsUpdateNewPasswordPrompt>(newPasswordQ);
-			if (!(password && verifyPassword && (password === verifyPassword))) {
-				resolve(error(Staging.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
+			const { password, verifyPassword } = await inquirer.prompt<
+				AccountsUpdateNewPasswordPrompt
+			>(newPasswordQ);
+			if (!(password && verifyPassword && password === verifyPassword)) {
+				resolve(
+					error(
+						Staging.ERRORS.BLANK_FIELD,
+						'Passwords either blank or do not match.'
+					)
+				);
 				return;
 			}
 			args.options.new = password.trim();
 		} else {
 			if (!Static.exists(args.options.new)) {
-				resolve(error(Staging.ERRORS.FILE_NOT_FOUND, 'New password file path provided does not exist.'));
+				resolve(
+					error(
+						Staging.ERRORS.FILE_NOT_FOUND,
+						'New password file path provided does not exist.'
+					)
+				);
 				return;
 			}
 
 			if (Static.isDirectory(args.options.new)) {
-				resolve(error(Staging.ERRORS.IS_DIRECTORY, 'New password file path provided is not a file.'));
+				resolve(
+					error(
+						Staging.ERRORS.IS_DIRECTORY,
+						'New password file path provided is not a file.'
+					)
+				);
 				return;
 			}
 
@@ -142,11 +192,17 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 		}
 
 		if (args.options.old === args.options.new) {
-			resolve(error(Staging.ERRORS.OTHER, 'New password is the same as old.'));
+			resolve(
+				error(Staging.ERRORS.OTHER, 'New password is the same as old.')
+			);
 			return;
 		}
 
-		const response = await session.keystore.update(args.address, args.options.old, args.options.new);
+		const response = await session.keystore.update(
+			args.address,
+			args.options.old,
+			args.options.new
+		);
 		resolve(success(response));
 	});
 };
@@ -170,11 +226,12 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
  * @alpha
  */
 export default function commandAccountsUpdate(evmlc: Vorpal, session: Session) {
-
 	const description =
 		'Update the password for a local account. Previous password must be known.';
 
-	return evmlc.command('accounts update [address]').alias('a u')
+	return evmlc
+		.command('accounts update [address]')
+		.alias('a u')
 		.description(description)
 		.option('-i, --interactive', 'use interactive mode')
 		.option('-o, --old <path>', 'old password file path')
@@ -182,6 +239,7 @@ export default function commandAccountsUpdate(evmlc: Vorpal, session: Session) {
 		.types({
 			string: ['_', 'old', 'o', 'n', 'new']
 		})
-		.action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
-
-};
+		.action(
+			(args: Vorpal.Args): Promise<void> => execute(stage, args, session)
+		);
+}

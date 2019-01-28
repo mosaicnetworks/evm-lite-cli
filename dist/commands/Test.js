@@ -9,7 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 function commandTest(evmlc, session) {
-    return evmlc.command('test').alias('test')
+    return evmlc
+        .command('test')
+        .alias('test')
         .hidden()
         .action((args) => {
         return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
@@ -19,4 +21,3 @@ function commandTest(evmlc, session) {
         .description('Testing purposes.');
 }
 exports.default = commandTest;
-;

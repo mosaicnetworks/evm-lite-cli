@@ -3,12 +3,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const Globals_1 = require("../classes/Globals");
 function commandLogsShow(evmlc, session) {
-    return evmlc.command('logs view').alias('l v')
+    return evmlc
+        .command('logs view')
+        .alias('l v')
         .description('Prints log information to screen in plain text.')
         .option('-s, --session', 'output session logs')
         .hidden()
         .action((args) => {
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
             const interactive = session.interactive || false;
             const current = args.options.session || false;
             if (current) {
@@ -29,4 +31,3 @@ function commandLogsShow(evmlc, session) {
     });
 }
 exports.default = commandLogsShow;
-;

@@ -66,7 +66,7 @@ exports.stage = (args, session) => {
         if (formatted) {
             table.addRow(account.address, account.balance, account.nonce);
         }
-        resolve(success((formatted) ? table : account));
+        resolve(success(formatted ? table : account));
     }));
 };
 /**
@@ -88,7 +88,9 @@ exports.stage = (args, session) => {
  */
 function commandAccountsGet(evmlc, session) {
     const description = 'Gets account balance and nonce from a node with a valid connection.';
-    return evmlc.command('accounts get [address]').alias('a g')
+    return evmlc
+        .command('accounts get [address]')
+        .alias('a g')
         .description(description)
         .option('-f, --formatted', 'format output')
         .option('-i, --interactive', 'use interactive mode')
@@ -100,4 +102,3 @@ function commandAccountsGet(evmlc, session) {
         .action((args) => Staging_1.execute(exports.stage, args, session));
 }
 exports.default = commandAccountsGet;
-;

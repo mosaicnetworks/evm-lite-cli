@@ -12,10 +12,14 @@ import * as Vorpal from 'vorpal';
 
 import { Transaction, TXReceipt } from 'evm-lite-lib';
 
-import Staging, { execute, Message, StagedOutput, StagingFunction } from '../classes/Staging';
+import Staging, {
+	execute,
+	Message,
+	StagedOutput,
+	StagingFunction
+} from '../classes/Staging';
 
 import Session from '../classes/Session';
-
 
 interface TransactionsGetPrompt {
 	hash: string;
@@ -34,18 +38,26 @@ interface TransactionsGetPrompt {
  *
  * @alpha
  */
-export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
-	return new Promise<StagedOutput<Message>>(async (resolve) => {
-
+export const stage: StagingFunction = (
+	args: Vorpal.Args,
+	session: Session
+): Promise<StagedOutput<Message>> => {
+	return new Promise<StagedOutput<Message>>(async resolve => {
 		const { error, success } = Staging.getStagingFunctions(args);
 
-		const connection = await session.connect(args.options.host, args.options.port);
+		const connection = await session.connect(
+			args.options.host,
+			args.options.port
+		);
 		if (!connection) {
 			resolve(error(Staging.ERRORS.INVALID_CONNECTION));
 			return;
 		}
 
-		const table = new ASCIITable('Transaction Receipt').setHeading('Key', 'Value');
+		const table = new ASCIITable('Transaction Receipt').setHeading(
+			'Key',
+			'Value'
+		);
 		const interactive = args.options.interactive || session.interactive;
 		const formatted = args.options.formatted || false;
 		const questions = [
@@ -58,22 +70,36 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 		];
 
 		if (interactive && !args.hash) {
-			const { hash } = await inquirer.prompt<TransactionsGetPrompt>(questions);
+			const { hash } = await inquirer.prompt<TransactionsGetPrompt>(
+				questions
+			);
 			args.hash = hash;
 		}
 
 		if (!args.hash) {
-			resolve(error(Staging.ERRORS.BLANK_FIELD, 'Provide a transaction hash.'));
+			resolve(
+				error(Staging.ERRORS.BLANK_FIELD, 'Provide a transaction hash.')
+			);
 			return;
 		}
 
-		const transaction = new Transaction(null, session.connection.host, session.connection.port, false);
+		const transaction = new Transaction(
+			null,
+			session.connection.host,
+			session.connection.port,
+			false
+		);
 
 		transaction.hash = args.hash;
 		const receipt: TXReceipt = await transaction.receipt;
 
 		if (!receipt) {
-			resolve(error(Staging.ERRORS.FETCH_FAILED, 'Could not fetch receipt for hash: ' + args.hash));
+			resolve(
+				error(
+					Staging.ERRORS.FETCH_FAILED,
+					'Could not fetch receipt for hash: ' + args.hash
+				)
+			);
 			return;
 		}
 
@@ -90,14 +116,19 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 				if (key !== 'status') {
 					table.addRow(key, receipt[key]);
 				} else {
-					table.addRow(key, (!receipt[key]) ? 'Successful' : 'Failed');
+					table.addRow(key, !receipt[key] ? 'Successful' : 'Failed');
 				}
 			}
 		}
 
 		const tx = await session.database.transactions.get(args.hash);
 		if (!tx) {
-			resolve(error(Staging.ERRORS.FETCH_FAILED, 'Could not find transaction in list.'));
+			resolve(
+				error(
+					Staging.ERRORS.FETCH_FAILED,
+					'Could not find transaction in list.'
+				)
+			);
 			return;
 		}
 
@@ -128,12 +159,15 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
  *
  * @alpha
  */
-export default function commandTransactionsGet(evmlc: Vorpal, session: Session) {
+export default function commandTransactionsGet(
+	evmlc: Vorpal,
+	session: Session
+) {
+	const description = 'Gets a transaction using its hash.';
 
-	const description =
-		'Gets a transaction using its hash.';
-
-	return evmlc.command('transactions get [hash]').alias('t g')
+	return evmlc
+		.command('transactions get [hash]')
+		.alias('t g')
 		.description(description)
 		.option('-f, --formatted', 'format output')
 		.option('-i, --interactive', 'use interactive mode')
@@ -142,6 +176,7 @@ export default function commandTransactionsGet(evmlc: Vorpal, session: Session) 
 		.types({
 			string: ['_', 'h', 'host']
 		})
-		.action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
-
-};
+		.action(
+			(args: Vorpal.Args): Promise<void> => execute(stage, args, session)
+		);
+}

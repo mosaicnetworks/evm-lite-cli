@@ -28,10 +28,13 @@ class Session {
             gas: data.defaults.gas,
             gasPrice: data.defaults.gasPrice
         });
-        return node.testConnection()
+        return node
+            .testConnection()
             .then((success) => {
             if (success) {
-                if (this.connection && this.connection.host === host && this.connection.port === port) {
+                if (this.connection &&
+                    this.connection.host === host &&
+                    this.connection.port === port) {
                     return this.connection;
                 }
                 if (!forcedHost && !forcedPort) {
@@ -48,6 +51,5 @@ class Session {
             return null;
         });
     }
-    ;
 }
 exports.default = Session;

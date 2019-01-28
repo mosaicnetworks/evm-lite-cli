@@ -78,7 +78,7 @@ exports.stage = (args, session) => {
                     table.addRow(key, receipt[key]);
                 }
                 else {
-                    table.addRow(key, (!receipt[key]) ? 'Successful' : 'Failed');
+                    table.addRow(key, !receipt[key] ? 'Successful' : 'Failed');
                 }
             }
         }
@@ -114,7 +114,9 @@ exports.stage = (args, session) => {
  */
 function commandTransactionsGet(evmlc, session) {
     const description = 'Gets a transaction using its hash.';
-    return evmlc.command('transactions get [hash]').alias('t g')
+    return evmlc
+        .command('transactions get [hash]')
+        .alias('t g')
         .description(description)
         .option('-f, --formatted', 'format output')
         .option('-i, --interactive', 'use interactive mode')
@@ -126,4 +128,3 @@ function commandTransactionsGet(evmlc, session) {
         .action((args) => Staging_1.execute(exports.stage, args, session));
 }
 exports.default = commandTransactionsGet;
-;

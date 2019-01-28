@@ -49,10 +49,11 @@ const init = () => {
 init()
     .then(() => {
     let dataDirPath = Globals_1.default.evmlcDir;
-    if ((process.argv[2] === '--datadir' || process.argv[2] === '-d')) {
+    if (process.argv[2] === '--datadir' || process.argv[2] === '-d') {
         dataDirPath = process.argv[3];
         if (!evm_lite_lib_1.Static.exists(process.argv[3])) {
-            Globals_1.default.warning('Data directory file path provided does not exist and hence will created...');
+            Globals_1.default.warning('Data directory file path provided does' +
+                'not exist and hence will created...');
         }
         process.argv.splice(2, 2);
     }

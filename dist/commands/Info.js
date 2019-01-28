@@ -74,7 +74,8 @@ exports.stage = (args, session) => {
  * @alpha
  */
 function commandInfo(evmlc, session) {
-    return evmlc.command('info')
+    return evmlc
+        .command('info')
         .description('Prints information about node as JSON or --formatted.')
         .option('-f, --formatted', 'format output')
         .option('-h, --host <ip>', 'override config parameter host')
@@ -85,4 +86,3 @@ function commandInfo(evmlc, session) {
         .action((args) => Staging_1.execute(exports.stage, args, session));
 }
 exports.default = commandInfo;
-;

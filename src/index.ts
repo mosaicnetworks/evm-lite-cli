@@ -44,7 +44,6 @@ const init = (): Promise<void> => {
 	});
 };
 
-
 /**
  * EVM-Lite Command Line Interface
  *
@@ -56,11 +55,14 @@ init()
 	.then(() => {
 		let dataDirPath: string = Globals.evmlcDir;
 
-		if ((process.argv[2] === '--datadir' || process.argv[2] === '-d')) {
+		if (process.argv[2] === '--datadir' || process.argv[2] === '-d') {
 			dataDirPath = process.argv[3];
 
 			if (!Static.exists(process.argv[3])) {
-				Globals.warning('Data directory file path provided does not exist and hence will created...');
+				Globals.warning(
+					'Data directory file path provided does' +
+						'not exist and hence will created...'
+				);
 			}
 
 			process.argv.splice(2, 2);
@@ -69,8 +71,12 @@ init()
 		const session = new Session(dataDirPath);
 
 		if (!process.argv[2]) {
-			console.log('\n  A Command Line Interface to interact with EVM-Lite.');
-			console.log(`\n  Current Data Directory: ` + session.directory.path);
+			console.log(
+				'\n  A Command Line Interface to interact with EVM-Lite.'
+			);
+			console.log(
+				`\n  Current Data Directory: ` + session.directory.path
+			);
 
 			process.argv[2] = 'help';
 		}
@@ -105,7 +111,7 @@ init()
 			session
 		};
 	})
-	.then(async (cli: { instance: Vorpal, session: Session }) => {
+	.then(async (cli: { instance: Vorpal; session: Session }) => {
 		if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
 			console.log(figlet.textSync('EVM-Lite CLI', {}));
 			Globals.warning(` Mode:        Interactive`);

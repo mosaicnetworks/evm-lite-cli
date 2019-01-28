@@ -3,15 +3,12 @@ import * as path from 'path';
 import { DataDirectory, EVMLC } from 'evm-lite-lib';
 import Globals from './Globals';
 
-
 export default class Session {
-
 	public interactive: boolean;
 	public logpath: string;
 
 	public directory: DataDirectory;
 	public connection: EVMLC;
-
 
 	constructor(dataDirPath: string) {
 		this.interactive = false;
@@ -20,8 +17,6 @@ export default class Session {
 		this.logpath = path.join(dataDirPath, 'logs');
 
 		this.directory = new DataDirectory(dataDirPath);
-
-
 	}
 
 	get database() {
@@ -47,10 +42,15 @@ export default class Session {
 			gasPrice: data.defaults.gasPrice
 		});
 
-		return node.testConnection()
+		return node
+			.testConnection()
 			.then((success: boolean) => {
 				if (success) {
-					if (this.connection && this.connection.host === host && this.connection.port === port) {
+					if (
+						this.connection &&
+						this.connection.host === host &&
+						this.connection.port === port
+					) {
 						return this.connection;
 					}
 
@@ -66,6 +66,5 @@ export default class Session {
 				Globals.error('Could not connect to node.');
 				return null;
 			});
-	};
-
+	}
 }

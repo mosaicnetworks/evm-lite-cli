@@ -11,7 +11,12 @@ import * as Vorpal from 'vorpal';
 
 import { Transaction, TXReceipt } from 'evm-lite-lib';
 
-import Staging, { execute, Message, StagedOutput, StagingFunction } from '../classes/Staging';
+import Staging, {
+	execute,
+	Message,
+	StagedOutput,
+	StagingFunction
+} from '../classes/Staging';
 
 import Session from '../classes/Session';
 
@@ -28,11 +33,17 @@ import Session from '../classes/Session';
  *
  * @alpha
  */
-export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
-	return new Promise<StagedOutput<Message>>(async (resolve) => {
+export const stage: StagingFunction = (
+	args: Vorpal.Args,
+	session: Session
+): Promise<StagedOutput<Message>> => {
+	return new Promise<StagedOutput<Message>>(async resolve => {
 		const { error, success } = Staging.getStagingFunctions(args);
 
-		const connection = await session.connect(args.options.host, args.options.port);
+		const connection = await session.connect(
+			args.options.host,
+			args.options.port
+		);
 		if (!connection) {
 			resolve(error(Staging.ERRORS.INVALID_CONNECTION));
 			return;
@@ -54,7 +65,16 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 		}
 
 		if (verbose) {
-			table.setHeading('Date Time', 'Hash', 'From', 'To', 'Value', 'Gas', 'Gas Price', 'Status');
+			table.setHeading(
+				'Date Time',
+				'Hash',
+				'From',
+				'To',
+				'Value',
+				'Gas',
+				'Gas Price',
+				'Status'
+			);
 		} else {
 			table.setHeading('From', 'To', 'Value', 'Status');
 		}
@@ -66,7 +86,8 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 				null,
 				session.connection.host,
 				session.connection.port,
-				false);
+				false
+			);
 
 			if (tx.txHash) {
 				transaction.hash = tx.txHash;
@@ -74,15 +95,45 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 				receipt = await transaction.receipt;
 			}
 
-			const date = txDate.getFullYear() + '-' + (txDate.getMonth() + 1) + '-' + txDate.getDate();
-			const time = txDate.getHours() + ':' + txDate.getMinutes() + ':' + txDate.getSeconds();
+			const date =
+				txDate.getFullYear() +
+				'-' +
+				(txDate.getMonth() + 1) +
+				'-' +
+				txDate.getDate();
+			const time =
+				txDate.getHours() +
+				':' +
+				txDate.getMinutes() +
+				':' +
+				txDate.getSeconds();
 
 			if (verbose) {
-				table.addRow(`${date} ${time}`, tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice,
-					(receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
+				table.addRow(
+					`${date} ${time}`,
+					tx.txHash,
+					tx.from,
+					tx.to,
+					tx.value,
+					tx.gas,
+					tx.gasPrice,
+					receipt
+						? !receipt.status
+							? 'Success'
+							: 'Failed'
+						: 'Failed'
+				);
 			} else {
-				table.addRow(tx.from, tx.to, tx.value,
-					(receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
+				table.addRow(
+					tx.from,
+					tx.to,
+					tx.value,
+					receipt
+						? !receipt.status
+							? 'Success'
+							: 'Failed'
+						: 'Failed'
+				);
 			}
 		}
 
@@ -108,12 +159,15 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
  *
  * @alpha
  */
-export default function commandTransactionsList(evmlc: Vorpal, session: Session) {
+export default function commandTransactionsList(
+	evmlc: Vorpal,
+	session: Session
+) {
+	const description = 'Lists all submitted transactions with the status.';
 
-	const description =
-		'Lists all submitted transactions with the status.';
-
-	return evmlc.command('transactions list').alias('t l')
+	return evmlc
+		.command('transactions list')
+		.alias('t l')
 		.description(description)
 		.option('-f, --formatted', 'format output')
 		.option('-v, --verbose', 'verbose output')
@@ -122,6 +176,7 @@ export default function commandTransactionsList(evmlc: Vorpal, session: Session)
 		.types({
 			string: ['h', 'host']
 		})
-		.action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
-
-};
+		.action(
+			(args: Vorpal.Args): Promise<void> => execute(stage, args, session)
+		);
+}

@@ -45,9 +45,9 @@ exports.stage = (args, session) => {
                 return;
             }
         }
-        const accounts = remote ?
-            yield connection.getAccounts() :
-            yield session.keystore.list(verbose, connection);
+        const accounts = remote
+            ? yield connection.getAccounts()
+            : yield session.keystore.list(verbose, connection);
         if (!accounts || !accounts.length) {
             resolve(success([]));
             return;
@@ -56,9 +56,13 @@ exports.stage = (args, session) => {
             resolve(success(accounts));
             return;
         }
-        (verbose) ? table.setHeading('Address', 'Balance', 'Nonce') : table.setHeading('Address');
+        verbose
+            ? table.setHeading('Address', 'Balance', 'Nonce')
+            : table.setHeading('Address');
         for (const account of accounts) {
-            (verbose) ? table.addRow(account.address, account.balance, account.nonce) : table.addRow(account.address);
+            verbose
+                ? table.addRow(account.address, account.balance, account.nonce)
+                : table.addRow(account.address);
         }
         resolve(success(table));
     }));
@@ -86,7 +90,9 @@ exports.stage = (args, session) => {
 function commandAccountsList(evmlc, session) {
     const description = 'List all accounts in the local keystore directory provided by the configuration file. This command will ' +
         'also get a balance and nonce for all the accounts from the node if a valid connection is established.';
-    return evmlc.command('accounts list').alias('a l')
+    return evmlc
+        .command('accounts list')
+        .alias('a l')
         .description(description)
         .option('-f, --formatted', 'format output')
         .option('-v, --verbose', 'verbose output (fetches balance & nonce from node)')
@@ -99,4 +105,3 @@ function commandAccountsList(evmlc, session) {
         .action((args) => Staging_1.execute(exports.stage, args, session));
 }
 exports.default = commandAccountsList;
-;

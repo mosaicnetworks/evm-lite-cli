@@ -11,7 +11,12 @@ import * as Vorpal from 'vorpal';
 
 import { EVMLC } from 'evm-lite-lib';
 
-import Staging, { execute, Message, StagedOutput, StagingFunction } from '../classes/Staging';
+import Staging, {
+	execute,
+	Message,
+	StagedOutput,
+	StagingFunction
+} from '../classes/Staging';
 
 import Session from '../classes/Session';
 
@@ -28,9 +33,11 @@ import Session from '../classes/Session';
  *
  * @alpha
  */
-export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
-	return new Promise<StagedOutput<Message>>(async (resolve) => {
-
+export const stage: StagingFunction = (
+	args: Vorpal.Args,
+	session: Session
+): Promise<StagedOutput<Message>> => {
+	return new Promise<StagedOutput<Message>>(async resolve => {
 		const { error, success } = Staging.getStagingFunctions(args);
 
 		const remote = args.options.remote || false;
@@ -40,16 +47,19 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
 		let connection: EVMLC = null;
 		if (verbose || remote) {
-			connection = await session.connect(args.options.host, args.options.port);
+			connection = await session.connect(
+				args.options.host,
+				args.options.port
+			);
 			if (!connection) {
 				resolve(error(Staging.ERRORS.INVALID_CONNECTION));
 				return;
 			}
 		}
 
-		const accounts = remote ?
-			await connection.getAccounts() :
-			await session.keystore.list(verbose, connection);
+		const accounts = remote
+			? await connection.getAccounts()
+			: await session.keystore.list(verbose, connection);
 
 		if (!accounts || !accounts.length) {
 			resolve(success([]));
@@ -61,9 +71,13 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 			return;
 		}
 
-		(verbose) ? table.setHeading('Address', 'Balance', 'Nonce') : table.setHeading('Address');
+		verbose
+			? table.setHeading('Address', 'Balance', 'Nonce')
+			: table.setHeading('Address');
 		for (const account of accounts) {
-			(verbose) ? table.addRow(account.address, account.balance, account.nonce) : table.addRow(account.address);
+			verbose
+				? table.addRow(account.address, account.balance, account.nonce)
+				: table.addRow(account.address);
 		}
 
 		resolve(success(table));
@@ -91,21 +105,26 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
  * @alpha
  */
 export default function commandAccountsList(evmlc: Vorpal, session: Session) {
-
 	const description =
 		'List all accounts in the local keystore directory provided by the configuration file. This command will ' +
 		'also get a balance and nonce for all the accounts from the node if a valid connection is established.';
 
-	return evmlc.command('accounts list').alias('a l')
+	return evmlc
+		.command('accounts list')
+		.alias('a l')
 		.description(description)
 		.option('-f, --formatted', 'format output')
-		.option('-v, --verbose', 'verbose output (fetches balance & nonce from node)')
+		.option(
+			'-v, --verbose',
+			'verbose output (fetches balance & nonce from node)'
+		)
 		.option('-r, --remote', 'list remote accounts')
 		.option('-h, --host <ip>', 'override config parameter host')
 		.option('-p, --port <port>', 'override config parameter port')
 		.types({
 			string: ['h', 'host']
 		})
-		.action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
-
-};
+		.action(
+			(args: Vorpal.Args): Promise<void> => execute(stage, args, session)
+		);
+}

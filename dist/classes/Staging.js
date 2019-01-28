@@ -12,8 +12,6 @@ const ASCIITable = require("ascii-table");
 const JSONBig = require("json-bigint");
 const Globals_1 = require("./Globals");
 class Staging {
-    constructor() {
-    }
     static success(args, message) {
         return {
             args,
@@ -61,8 +59,10 @@ exports.execute = (fn, args, session) => {
                     message = output.message;
                     break;
                 case 'object':
-                    message = (output.message instanceof ASCIITable) ?
-                        output.message.toString() : JSONBig.stringify(output.message);
+                    message =
+                        output.message instanceof ASCIITable
+                            ? output.message.toString()
+                            : JSONBig.stringify(output.message);
                     break;
             }
         }

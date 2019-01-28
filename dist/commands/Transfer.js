@@ -44,7 +44,7 @@ exports.stage = (args, session) => {
         const accounts = yield session.keystore.list();
         const fromQ = [
             {
-                choices: accounts.map((account) => account.address),
+                choices: accounts.map(account => account.address),
                 message: 'From: ',
                 name: 'from',
                 type: 'list'
@@ -113,7 +113,7 @@ exports.stage = (args, session) => {
         }
         let decrypted = null;
         try {
-            decrypted = evm_lite_lib_1.Account.decrypt(keystore, args.options.pwd);
+            decrypted = evm_lite_lib_1.Wallet.decrypt(keystore, args.options.pwd);
         }
         catch (err) {
             resolve(error(Staging_1.default.ERRORS.DECRYPTION, 'Failed decryption of account.'));
@@ -131,7 +131,7 @@ exports.stage = (args, session) => {
         tx.value = parseInt(args.options.value, 10) || undefined;
         tx.gas = parseInt(args.options.gas || session.config.data.defaults.gas || 100000, 10);
         tx.gasPrice = parseInt(args.options.gasPrice || session.config.data.defaults.gasPrice || 0, 10);
-        if ((!tx.to) || !tx.value) {
+        if (!tx.to || !tx.value) {
             resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Provide an address to send to and a value.'));
             return;
         }
@@ -147,7 +147,7 @@ exports.stage = (args, session) => {
             resolve(success(`Transaction submitted: ${transaction.hash}`));
         }
         catch (e) {
-            resolve(error(Staging_1.default.ERRORS.OTHER, (e.text) ? e.text : e.message));
+            resolve(error(Staging_1.default.ERRORS.OTHER, e.text ? e.text : e.message));
         }
     }));
 };
@@ -178,7 +178,9 @@ exports.stage = (args, session) => {
 function commandTransfer(evmlc, session) {
     const description = 'Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the' +
         ' configuration file.';
-    return evmlc.command('transfer').alias('t')
+    return evmlc
+        .command('transfer')
+        .alias('t')
         .description(description)
         .option('-i, --interactive', 'value to send')
         .option('-v, --value <value>', 'value to send')
@@ -195,4 +197,3 @@ function commandTransfer(evmlc, session) {
         .action((args) => Staging_1.execute(exports.stage, args, session));
 }
 exports.default = commandTransfer;
-;

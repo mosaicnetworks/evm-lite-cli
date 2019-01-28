@@ -10,12 +10,16 @@ import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import { Account, Static } from 'evm-lite-lib';
+import { Account, Static, Wallet } from 'evm-lite-lib';
 
-import Staging, { execute, Message, StagedOutput, StagingFunction } from '../classes/Staging';
+import Staging, {
+	execute,
+	Message,
+	StagedOutput,
+	StagingFunction
+} from '../classes/Staging';
 
 import Session from '../classes/Session';
-
 
 interface TransferFromAddressPrompt {
 	from: string;
@@ -45,12 +49,17 @@ interface TransferOtherQuestionsPrompt {
  *
  * @alpha
  */
-export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
-	return new Promise<StagedOutput<Message>>(async (resolve) => {
-
+export const stage: StagingFunction = (
+	args: Vorpal.Args,
+	session: Session
+): Promise<StagedOutput<Message>> => {
+	return new Promise<StagedOutput<Message>>(async resolve => {
 		const { error, success } = Staging.getStagingFunctions(args);
 
-		const connection = await session.connect(args.options.host, args.options.port);
+		const connection = await session.connect(
+			args.options.host,
+			args.options.port
+		);
 		if (!connection) {
 			resolve(error(Staging.ERRORS.INVALID_CONNECTION));
 			return;
@@ -60,7 +69,7 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 		const accounts = await session.keystore.list();
 		const fromQ = [
 			{
-				choices: accounts.map((account) => account.address),
+				choices: accounts.map(account => account.address),
 				message: 'From: ',
 				name: 'from',
 				type: 'list'
@@ -101,32 +110,56 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 		const tx: any = {};
 
 		if (interactive) {
-			const { from } = await inquirer.prompt<TransferFromAddressPrompt>(fromQ);
+			const { from } = await inquirer.prompt<TransferFromAddressPrompt>(
+				fromQ
+			);
 			args.options.from = from;
 		}
 
 		if (!args.options.from) {
-			resolve(error(Staging.ERRORS.BLANK_FIELD, '`From` address cannot be blank.'));
+			resolve(
+				error(
+					Staging.ERRORS.BLANK_FIELD,
+					'`From` address cannot be blank.'
+				)
+			);
 			return;
 		}
 
 		const keystore = await session.keystore.get(args.options.from);
 		if (!keystore) {
-			resolve(error(Staging.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address: ${tx.from}.`));
+			resolve(
+				error(
+					Staging.ERRORS.FILE_NOT_FOUND,
+					`Cannot find keystore file of address: ${tx.from}.`
+				)
+			);
 			return;
 		}
 
 		if (!args.options.pwd) {
-			const { password } = await inquirer.prompt<TransferDecryptPrompt>(passwordQ);
+			const { password } = await inquirer.prompt<TransferDecryptPrompt>(
+				passwordQ
+			);
 			args.options.pwd = password;
 		} else {
 			if (!Static.exists(args.options.pwd)) {
-				resolve(error(Staging.ERRORS.FILE_NOT_FOUND, 'Password file path provided does not exist.'));
+				resolve(
+					error(
+						Staging.ERRORS.FILE_NOT_FOUND,
+						'Password file path provided does not exist.'
+					)
+				);
 				return;
 			}
 
 			if (Static.isDirectory(args.options.pwd)) {
-				resolve(error(Staging.ERRORS.IS_DIRECTORY, 'Password file path provided is not a file.'));
+				resolve(
+					error(
+						Staging.ERRORS.IS_DIRECTORY,
+						'Password file path provided is not a file.'
+					)
+				);
 				return;
 			}
 
@@ -135,14 +168,21 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 
 		let decrypted: Account = null;
 		try {
-			decrypted = Account.decrypt(keystore, args.options.pwd);
+			decrypted = Wallet.decrypt(keystore, args.options.pwd);
 		} catch (err) {
-			resolve(error(Staging.ERRORS.DECRYPTION, 'Failed decryption of account.'));
+			resolve(
+				error(
+					Staging.ERRORS.DECRYPTION,
+					'Failed decryption of account.'
+				)
+			);
 			return;
 		}
 
 		if (interactive) {
-			const answers = await inquirer.prompt<TransferOtherQuestionsPrompt>(restOfQs);
+			const answers = await inquirer.prompt<TransferOtherQuestionsPrompt>(
+				restOfQs
+			);
 
 			args.options.to = answers.to;
 			args.options.value = answers.value;
@@ -153,19 +193,33 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 		tx.from = args.options.from;
 		tx.to = args.options.to || undefined;
 		tx.value = parseInt(args.options.value, 10) || undefined;
-		tx.gas = parseInt(args.options.gas || session.config.data.defaults.gas || 100000, 10);
-		tx.gasPrice = parseInt(args.options.gasPrice || session.config.data.defaults.gasPrice || 0, 10);
+		tx.gas = parseInt(
+			args.options.gas || session.config.data.defaults.gas || 100000,
+			10
+		);
+		tx.gasPrice = parseInt(
+			args.options.gasPrice || session.config.data.defaults.gasPrice || 0,
+			10
+		);
 
-		if ((!tx.to) || !tx.value) {
-			resolve(error(Staging.ERRORS.BLANK_FIELD, 'Provide an address to send to and a value.'));
+		if (!tx.to || !tx.value) {
+			resolve(
+				error(
+					Staging.ERRORS.BLANK_FIELD,
+					'Provide an address to send to and a value.'
+				)
+			);
 			return;
 		}
 
 		try {
-			const transaction =
-				(await session.connection.prepareTransfer(tx.to, tx.value, tx.from))
-					.gas(tx.gas)
-					.gasPrice(tx.gasPrice);
+			const transaction = (await session.connection.prepareTransfer(
+				tx.to,
+				tx.value,
+				tx.from
+			))
+				.gas(tx.gas)
+				.gasPrice(tx.gasPrice);
 
 			await transaction.sign(decrypted);
 			await transaction.submit();
@@ -173,11 +227,13 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
 			tx.txHash = transaction.hash;
 			tx.date = new Date();
 
-			await session.database.transactions.insert(session.database.transactions.create(tx));
+			await session.database.transactions.insert(
+				session.database.transactions.create(tx)
+			);
 
 			resolve(success(`Transaction submitted: ${transaction.hash}`));
 		} catch (e) {
-			resolve(error(Staging.ERRORS.OTHER, (e.text) ? e.text : e.message));
+			resolve(error(Staging.ERRORS.OTHER, e.text ? e.text : e.message));
 		}
 	});
 };
@@ -207,12 +263,13 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
  * @alpha
  */
 export default function commandTransfer(evmlc: Vorpal, session: Session) {
-
 	const description =
 		'Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the' +
 		' configuration file.';
 
-	return evmlc.command('transfer').alias('t')
+	return evmlc
+		.command('transfer')
+		.alias('t')
 		.description(description)
 		.option('-i, --interactive', 'value to send')
 		.option('-v, --value <value>', 'value to send')
@@ -226,6 +283,7 @@ export default function commandTransfer(evmlc: Vorpal, session: Session) {
 		.types({
 			string: ['t', 'to', 'f', 'from', 'h', 'host', 'pwd']
 		})
-		.action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
-
-};
+		.action(
+			(args: Vorpal.Args): Promise<void> => execute(stage, args, session)
+		);
+}

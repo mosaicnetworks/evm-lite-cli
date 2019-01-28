@@ -24,8 +24,8 @@ const Staging_1 = require("../classes/Staging");
  * Should return either a Staged error or success.
  *
  * @remarks
- * This staging function will parse all the arguments of the `accounts create` command
- * and resolve a success or an error.
+ * This staging function will parse all the arguments of the `accounts create`
+ * command and resolve a success or an error.
  *
  * @param args - Arguments to the command.
  * @param session - Controls the session of the CLI instance.
@@ -58,7 +58,7 @@ exports.stage = (args, session) => {
         ];
         if (interactive) {
             const { output, password, verifyPassword } = yield inquirer.prompt(questions);
-            if (!(password && verifyPassword && (password === verifyPassword))) {
+            if (!(password && verifyPassword && password === verifyPassword)) {
                 resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
                 return;
             }
@@ -76,7 +76,8 @@ exports.stage = (args, session) => {
             }
             args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8').trim();
         }
-        args.options.output = args.options.output || session.config.data.storage.keystore;
+        args.options.output =
+            args.options.output || session.config.data.storage.keystore;
         if (!evm_lite_lib_1.Static.exists(args.options.output)) {
             resolve(error(Staging_1.default.ERRORS.DIRECTORY_NOT_EXIST, 'Output directory does not exist.'));
             return;
@@ -93,15 +94,17 @@ exports.stage = (args, session) => {
  * Should construct a Vorpal.Command instance for the command `accounts create`.
  *
  * @remarks
- * Allows you to create and encrypt accounts locally. Created accounts will either be placed
- * in the keystore folder provided by default config file (located at `~/.evmlc/config.toml`)
- * or the config file located in the `--datadir, -d` flag.
+ * Allows you to create and encrypt accounts locally. Created accounts will
+ * either be placed in the keystore folder provided by default config file
+ * (located at `~/.evmlc/config.toml`) or the config file located in the
+ * `--datadir, -d` flag.
  *
- * Usage: `accounts create --verbose --output ~/datadir/keystore --pwd ~/datadir/pwd.txt`
+ * Usage:
+ * `accounts create --verbose --output ~/datadir/keystore --pwd ~/datadir/pwd.txt`
  *
- * Here we have specified to create the account file in `~/datadir/keystore`, encrypt
- * with the `~/datadir/pwd.txt` and once that is done, provide the verbose output of
- * the created account.
+ * Here we have specified to create the account file in `~/datadir/keystore`,
+ * encrypt with the `~/datadir/pwd.txt` and once that is done, provide the
+ * verbose output of the created account.
  *
  * @param evmlc - The CLI instance.
  * @param session - Controls the session of the CLI instance.
@@ -110,10 +113,14 @@ exports.stage = (args, session) => {
  * @alpha
  */
 function commandAccountsCreate(evmlc, session) {
-    const description = 'Allows you to create and encrypt accounts locally. Created accounts will either be placed in the' +
-        ' keystore folder inside the data directory provided by the global --datadir, -d flag or if no flag is' +
+    const description = 'Allows you to create and encrypt accounts locally. Created accounts' +
+        ' will either be placed in the' +
+        ' keystore folder inside the data directory provided by the global' +
+        '--datadir, -d flag or if no flag is' +
         ' provided, in the keystore specified in the configuration file.';
-    return evmlc.command('accounts create').alias('a c')
+    return evmlc
+        .command('accounts create')
+        .alias('a c')
         .description(description)
         .option('-o, --output <path>', 'keystore file output path')
         .option('-v, --verbose', 'show verbose output')
@@ -124,4 +131,3 @@ function commandAccountsCreate(evmlc, session) {
         .action((args) => Staging_1.execute(exports.stage, args, session));
 }
 exports.default = commandAccountsCreate;
-;

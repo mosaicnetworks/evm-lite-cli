@@ -65,13 +65,29 @@ exports.stage = (args, session) => {
                 transaction.hash = tx.txHash;
                 receipt = yield transaction.receipt;
             }
-            const date = txDate.getFullYear() + '-' + (txDate.getMonth() + 1) + '-' + txDate.getDate();
-            const time = txDate.getHours() + ':' + txDate.getMinutes() + ':' + txDate.getSeconds();
+            const date = txDate.getFullYear() +
+                '-' +
+                (txDate.getMonth() + 1) +
+                '-' +
+                txDate.getDate();
+            const time = txDate.getHours() +
+                ':' +
+                txDate.getMinutes() +
+                ':' +
+                txDate.getSeconds();
             if (verbose) {
-                table.addRow(`${date} ${time}`, tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice, (receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
+                table.addRow(`${date} ${time}`, tx.txHash, tx.from, tx.to, tx.value, tx.gas, tx.gasPrice, receipt
+                    ? !receipt.status
+                        ? 'Success'
+                        : 'Failed'
+                    : 'Failed');
             }
             else {
-                table.addRow(tx.from, tx.to, tx.value, (receipt) ? ((!receipt.status) ? 'Success' : 'Failed') : 'Failed');
+                table.addRow(tx.from, tx.to, tx.value, receipt
+                    ? !receipt.status
+                        ? 'Success'
+                        : 'Failed'
+                    : 'Failed');
             }
         }
         resolve(success(table));
@@ -97,7 +113,9 @@ exports.stage = (args, session) => {
  */
 function commandTransactionsList(evmlc, session) {
     const description = 'Lists all submitted transactions with the status.';
-    return evmlc.command('transactions list').alias('t l')
+    return evmlc
+        .command('transactions list')
+        .alias('t l')
         .description(description)
         .option('-f, --formatted', 'format output')
         .option('-v, --verbose', 'verbose output')
@@ -109,4 +127,3 @@ function commandTransactionsList(evmlc, session) {
         .action((args) => Staging_1.execute(exports.stage, args, session));
 }
 exports.default = commandTransactionsList;
-;

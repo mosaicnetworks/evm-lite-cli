@@ -30,7 +30,6 @@ export default class Staging {
         OTHER: string;
         PATH_NOT_EXIST: string;
     };
-    constructor();
     static success(args: Args, message: Message): {
         args: Args;
         message: any;

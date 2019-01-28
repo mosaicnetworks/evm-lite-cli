@@ -22,9 +22,10 @@ const Staging_1 = require("../classes/Staging");
  * @alpha
  */
 exports.stage = (args, session) => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
         const { success } = Staging_1.default.getStagingFunctions(args);
-        const message = `Config file location: ${session.config.path} \n\n` + session.config.toTOML();
+        const message = `Config file location: ${session.config.path} \n\n` +
+            session.config.toTOML();
         resolve(success(message));
     });
 };
@@ -46,9 +47,10 @@ exports.stage = (args, session) => {
  */
 function commandConfigUser(evmlc, session) {
     const description = 'Output current configuration file as JSON.';
-    return evmlc.command('config view').alias('c v')
+    return evmlc
+        .command('config view')
+        .alias('c v')
         .description(description)
         .action((args) => Staging_1.execute(exports.stage, args, session));
 }
 exports.default = commandConfigUser;
-;

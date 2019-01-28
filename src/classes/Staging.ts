@@ -6,7 +6,6 @@ import { BaseAccount, SentTX, TXReceipt, V3JSONKeyStore } from 'evm-lite-lib';
 import Globals from './Globals';
 import Session from './Session';
 
-
 export interface Args {
 	options: {
 		[key: string]: any;
@@ -15,17 +14,26 @@ export interface Args {
 	[key: string]: any;
 }
 
-export type Message = SentTX[] | BaseAccount[] | TXReceipt | V3JSONKeyStore | ASCIITable | object | string;
+export type Message =
+	| SentTX[]
+	| BaseAccount[]
+	| TXReceipt
+	| V3JSONKeyStore
+	| ASCIITable
+	| object
+	| string;
 
 export interface StagedOutput<Message> {
 	type: string;
 	subtype?: string;
-	args: Args,
+	args: Args;
 	message?: Message;
 }
 
-
-export type StagingFunction = (args: Args, session: Session) => Promise<StagedOutput<Message>>;
+export type StagingFunction = (
+	args: Args,
+	session: Session
+) => Promise<StagedOutput<Message>>;
 
 export default class Staging {
 	public static ERROR = 'error';
@@ -42,9 +50,6 @@ export default class Staging {
 		OTHER: 'Something went wrong',
 		PATH_NOT_EXIST: 'Path(s) should exist'
 	};
-
-	constructor() {
-	}
 
 	public static success(args: Args, message: Message) {
 		return {
@@ -63,9 +68,11 @@ export default class Staging {
 		};
 	}
 
-	public static getStagingFunctions(args: Args): {
-		error: (subtype: string, message?: Message) => StagedOutput<Message>,
-		success: (message: Message) => StagedOutput<Message>
+	public static getStagingFunctions(
+		args: Args
+	): {
+		error: (subtype: string, message?: Message) => StagedOutput<Message>;
+		success: (message: Message) => StagedOutput<Message>;
 	} {
 		return {
 			error: Staging.error.bind(null, args),
@@ -74,8 +81,12 @@ export default class Staging {
 	}
 }
 
-export const execute = (fn: StagingFunction, args: Args, session: Session): Promise<void> => {
-	return new Promise<void>(async (resolve) => {
+export const execute = (
+	fn: StagingFunction,
+	args: Args,
+	session: Session
+): Promise<void> => {
+	return new Promise<void>(async resolve => {
 		const output: StagedOutput<Message> = await fn(args, session);
 		let message: string;
 
@@ -85,15 +96,19 @@ export const execute = (fn: StagingFunction, args: Args, session: Session): Prom
 					message = output.message;
 					break;
 				case 'object':
-					message = (output.message instanceof ASCIITable) ?
-						output.message.toString() : JSONBig.stringify(output.message);
+					message =
+						output.message instanceof ASCIITable
+							? output.message.toString()
+							: JSONBig.stringify(output.message);
 					break;
 			}
 		} else {
 			message = output.subtype + '.';
 		}
 
-		Globals[output.type](`${message.charAt(0).toUpperCase() + message.slice(1)}`);
+		Globals[output.type](
+			`${message.charAt(0).toUpperCase() + message.slice(1)}`
+		);
 		resolve();
 	});
 };

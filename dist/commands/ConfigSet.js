@@ -21,8 +21,8 @@ const Staging_1 = require("../classes/Staging");
  * Should return either a Staged error or success.
  *
  * @remarks
- * This staging function will parse all the arguments of the `config set` command
- * and resolve a success or an error.
+ * This staging function will parse all the arguments of the `config set`
+ * command and resolve a success or an error.
  *
  * @param args - Arguments to the command.
  * @param session - Controls the session of the CLI instance.
@@ -36,21 +36,42 @@ exports.stage = (args, session) => {
         const interactive = args.options.interactive || session.interactive;
         const questions = [];
         function populateQuestions(object) {
-            for (const key in object) {
-                if (object.hasOwnProperty(key)) {
-                    if (typeof object[key] === 'object') {
-                        populateQuestions(object[key]);
-                    }
-                    else {
-                        questions.push({
-                            default: object[key],
-                            message: `${key.charAt(0).toUpperCase() + key.slice(1)}: `,
-                            name: key,
-                            type: 'input'
-                        });
-                    }
-                }
-            }
+            questions.push({
+                default: object.connection.host,
+                message: 'Host',
+                name: 'host',
+                type: 'input'
+            });
+            questions.push({
+                default: object.connection.port,
+                message: 'Port',
+                name: 'port',
+                type: 'input'
+            });
+            questions.push({
+                default: object.defaults.from,
+                message: 'From',
+                name: 'from',
+                type: 'input'
+            });
+            questions.push({
+                default: object.defaults.gas,
+                message: 'Gas',
+                name: 'gas',
+                type: 'input'
+            });
+            questions.push({
+                default: object.defaults.gasPrice,
+                message: 'Gas Price',
+                name: 'gasPrice',
+                type: 'input'
+            });
+            questions.push({
+                default: object.storage.keystore,
+                message: 'Keystore',
+                name: 'keystore',
+                type: 'input'
+            });
         }
         populateQuestions(session.config.data);
         if (interactive) {
@@ -61,7 +82,7 @@ exports.stage = (args, session) => {
                 }
             }
         }
-        if (!Object.keys(args.options).length) {
+        if (!Object.keys(args.options).length && !interactive) {
             resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'No options provided.'));
             return;
         }
@@ -73,7 +94,7 @@ exports.stage = (args, session) => {
             defaults: {
                 from: args.options.from,
                 gas: parseInt(args.options.gas, 10),
-                gasPrice: parseInt(args.options.gasprice, 10)
+                gasPrice: parseInt(args.options.gasPrice, 10)
             },
             storage: {
                 keystore: args.options.keystore
@@ -87,12 +108,13 @@ exports.stage = (args, session) => {
  * Should construct a Vorpal.Command instance for the command `config set`.
  *
  * @remarks
- * Allows you to set EVM-Lite CLI configuration settings through the CLI. Can be done interactively.
+ * Allows you to set EVM-Lite CLI configuration settings through the CLI.
+ * Can be done interactively.
  *
  * Usage: `config set --host 5.5.5.1`
  *
- * Here we have executed a command to change the default host to connect to for any command
- * through the CLI to `5.5.5.1`.
+ * Here we have executed a command to change the default host to connect to
+ * for any command through the CLI to `5.5.5.1`.
  *
  * @param evmlc - The CLI instance.
  * @param session - Controls the session of the CLI instance.
@@ -102,7 +124,9 @@ exports.stage = (args, session) => {
  */
 function commandConfigSet(evmlc, session) {
     const description = 'Set values of the configuration inside the data directory.';
-    return evmlc.command('config set').alias('c s')
+    return evmlc
+        .command('config set')
+        .alias('c s')
         .description(description)
         .option('-i, --interactive', 'enter into interactive command')
         .option('-h, --host <host>', 'default host')
@@ -118,4 +142,3 @@ function commandConfigSet(evmlc, session) {
         .action((args) => Staging_1.execute(exports.stage, args, session));
 }
 exports.default = commandConfigSet;
-;

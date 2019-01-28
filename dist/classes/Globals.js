@@ -3,8 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Chalk = require("chalk");
 const path = require("path");
 class Globals {
-    constructor() {
-    }
     static success(message) {
         console.log(Chalk.default.green(message));
     }

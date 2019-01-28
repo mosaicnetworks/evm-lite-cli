@@ -39,7 +39,7 @@ exports.stage = (args, session) => {
         const accounts = yield session.keystore.list();
         const addressQ = [
             {
-                choices: accounts.map((account) => account.address),
+                choices: accounts.map(account => account.address),
                 message: 'Address: ',
                 name: 'address',
                 type: 'list'
@@ -72,7 +72,7 @@ exports.stage = (args, session) => {
             resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Provide a non-empty address.'));
             return;
         }
-        const keystore = session.keystore.get(args.address);
+        const keystore = yield session.keystore.get(args.address);
         if (!keystore) {
             resolve(error(Staging_1.default.ERRORS.FILE_NOT_FOUND, `Cannot find keystore file of address.`));
             return;
@@ -93,7 +93,7 @@ exports.stage = (args, session) => {
             args.options.old = fs.readFileSync(args.options.old, 'utf8').trim();
         }
         try {
-            evm_lite_lib_1.Account.decrypt(keystore, args.options.old);
+            evm_lite_lib_1.Wallet.decrypt(keystore, args.options.old);
         }
         catch (err) {
             resolve(error(Staging_1.default.ERRORS.DECRYPTION, 'Failed decryption of account with the password provided.'));
@@ -101,7 +101,7 @@ exports.stage = (args, session) => {
         }
         if (!args.options.new) {
             const { password, verifyPassword } = yield inquirer.prompt(newPasswordQ);
-            if (!(password && verifyPassword && (password === verifyPassword))) {
+            if (!(password && verifyPassword && password === verifyPassword)) {
                 resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Passwords either blank or do not match.'));
                 return;
             }
@@ -146,7 +146,9 @@ exports.stage = (args, session) => {
  */
 function commandAccountsUpdate(evmlc, session) {
     const description = 'Update the password for a local account. Previous password must be known.';
-    return evmlc.command('accounts update [address]').alias('a u')
+    return evmlc
+        .command('accounts update [address]')
+        .alias('a u')
         .description(description)
         .option('-i, --interactive', 'use interactive mode')
         .option('-o, --old <path>', 'old password file path')
@@ -157,4 +159,3 @@ function commandAccountsUpdate(evmlc, session) {
         .action((args) => Staging_1.execute(exports.stage, args, session));
 }
 exports.default = commandAccountsUpdate;
-;

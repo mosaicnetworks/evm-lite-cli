@@ -8,7 +8,12 @@
 
 import * as Vorpal from 'vorpal';
 
-import Staging, { execute, Message, StagedOutput, StagingFunction } from '../classes/Staging';
+import Staging, {
+	execute,
+	Message,
+	StagedOutput,
+	StagingFunction
+} from '../classes/Staging';
 
 import Session from '../classes/Session';
 
@@ -25,11 +30,16 @@ import Session from '../classes/Session';
  *
  * @alpha
  */
-export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Promise<StagedOutput<Message>> => {
-	return new Promise<StagedOutput<Message>>((resolve) => {
+export const stage: StagingFunction = (
+	args: Vorpal.Args,
+	session: Session
+): Promise<StagedOutput<Message>> => {
+	return new Promise<StagedOutput<Message>>(resolve => {
 		const { success } = Staging.getStagingFunctions(args);
 
-		const message: string = `Config file location: ${session.config.path} \n\n` + session.config.toTOML();
+		const message: string =
+			`Config file location: ${session.config.path} \n\n` +
+			session.config.toTOML();
 		resolve(success(message));
 	});
 };
@@ -51,12 +61,13 @@ export const stage: StagingFunction = (args: Vorpal.Args, session: Session): Pro
  * @alpha
  */
 export default function commandConfigUser(evmlc: Vorpal, session: Session) {
+	const description = 'Output current configuration file as JSON.';
 
-	const description =
-		'Output current configuration file as JSON.';
-
-	return evmlc.command('config view').alias('c v')
+	return evmlc
+		.command('config view')
+		.alias('c v')
 		.description(description)
-		.action((args: Vorpal.Args): Promise<void> => execute(stage, args, session));
-
-};
+		.action(
+			(args: Vorpal.Args): Promise<void> => execute(stage, args, session)
+		);
+}
