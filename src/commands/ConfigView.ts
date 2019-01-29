@@ -21,8 +21,8 @@ import Session from '../classes/Session';
  * Should return either a Staged error or success.
  *
  * @remarks
- * This staging function will parse all the arguments of the `config view` command
- * and resolve a success or an error.
+ * This staging function will parse all the arguments of the `config view`
+ * command and resolve a success or an error.
  *
  * @param args - Arguments to the command.
  * @param session - Controls the session of the CLI instance.

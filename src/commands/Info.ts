@@ -80,7 +80,8 @@ export const stage: StagingFunction = (
  *
  * Usage: `info --formatted`
  *
- * Here we have executed a command to view information about the node in an ASCII table.
+ * Here we have executed a command to view information about the node in an
+ * ASCII table.
  *
  * @param evmlc - The CLI instance.
  * @param session - Controls the session of the CLI instance.

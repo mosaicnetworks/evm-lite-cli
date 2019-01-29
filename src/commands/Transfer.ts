@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import { Account, Static, Wallet } from 'evm-lite-lib';
+import { Account, Static } from 'evm-lite-lib';
 
 import Staging, {
 	execute,
@@ -168,7 +168,7 @@ export const stage: StagingFunction = (
 
 		let decrypted: Account = null;
 		try {
-			decrypted = Wallet.decrypt(keystore, args.options.pwd);
+			decrypted = Account.decrypt(keystore, args.options.pwd);
 		} catch (err) {
 			resolve(
 				error(
@@ -252,8 +252,9 @@ export const stage: StagingFunction = (
  * --gas 1000000
  * --gasprice 0`
  *
- * Here we have requested the transfer of `200` tokens to the specified address from
- * `0x583560ee73713a6554c463bd02349841cd79f6e2`. The default `gas` and `gasprice` can be set in the configuration file
+ * Here we have requested the transfer of `200` tokens to the specified
+ * address from `0x583560ee73713a6554c463bd02349841cd79f6e2`.
+ * The default `gas` and `gasprice` can be set in the configuration file
  * to be used for all transfers.
  *
  * @param evmlc - The CLI instance.
@@ -264,7 +265,8 @@ export const stage: StagingFunction = (
  */
 export default function commandTransfer(evmlc: Vorpal, session: Session) {
 	const description =
-		'Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the' +
+		'Initiate a transfer of token(s) to an address. ' +
+		'Default values for gas and gas prices are set in the' +
 		' configuration file.';
 
 	return evmlc

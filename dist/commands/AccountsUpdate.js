@@ -23,8 +23,8 @@ const Staging_1 = require("../classes/Staging");
  * Should return either a Staged error or success.
  *
  * @remarks
- * This staging function will parse all the arguments of the `accounts update` command
- * and resolve a success or an error.
+ * This staging function will parse all the arguments of the `accounts update`
+ * command and resolve a success or an error.
  *
  * @param args - Arguments to the command.
  * @param session - Controls the session of the CLI instance.
@@ -93,7 +93,7 @@ exports.stage = (args, session) => {
             args.options.old = fs.readFileSync(args.options.old, 'utf8').trim();
         }
         try {
-            evm_lite_lib_1.Wallet.decrypt(keystore, args.options.old);
+            evm_lite_lib_1.Account.decrypt(keystore, args.options.old);
         }
         catch (err) {
             resolve(error(Staging_1.default.ERRORS.DECRYPTION, 'Failed decryption of account with the password provided.'));
@@ -130,13 +130,16 @@ exports.stage = (args, session) => {
  * Should construct a Vorpal.Command instance for the command `accounts update`.
  *
  * @remarks
- * Allows you to update the password of a `V3JSONKeystore` file if the the previous password
- * is known.
+ * Allows you to update the password of a `V3JSONKeystore` file if the the
+ * previous password is known.
  *
- * Usage: `accounts update 0x583560ee73713a6554c463bd02349841cd79f6e2 --old ~/oldpwd.txt --new ~/newpwd.txt`
+ * Usage:
+ * `accounts update 0x583560ee73713a6554c463bd02349841cd79f6e2
+ * --old ~/oldpwd.txt --new ~/newpwd.txt`
  *
- * Here we have written a command to change the password from the contents `oldpwd.txt` to the contents
- * of `newpwd.txt` for the account `0x583560ee73713a6554c463bd02349841cd79f6e2`.
+ * Here we have written a command to change the password from the contents
+ * `oldpwd.txt` to the contents of `newpwd.txt` for the account
+ * `0x583560ee73713a6554c463bd02349841cd79f6e2`.
  *
  * @param evmlc - The CLI instance.
  * @param session - Controls the session of the CLI instance.

@@ -24,8 +24,8 @@ import Session from '../classes/Session';
  * Should return either a Staged error or success.
  *
  * @remarks
- * This staging function will parse all the arguments of the `transactions get` command
- * and resolve a success or an error.
+ * This staging function will parse all the arguments of the `transactions get`
+ * command and resolve a success or an error.
  *
  * @param args - Arguments to the command.
  * @param session - Controls the session of the CLI instance.
@@ -142,16 +142,18 @@ export const stage: StagingFunction = (
 };
 
 /**
- * Should construct a Vorpal.Command instance for the command `transactions list`.
+ * Should construct a Vorpal.Command instance for the command
+ * `transactions list`.
  *
  * @remarks
- * Allows you list all the transactions sent using the CLI and each of its details..
+ * Allows you list all the transactions sent using the CLI and each of
+ * its details..
  *
  * Usage: `transactions list --formatted --verbose`
  *
- * Here we have executed a command to list all the transactions sent with the CLI and
- * asked for the `verbose` output of the data which then should be formatted into an
- * ASCII table specified by `formatted`.
+ * Here we have executed a command to list all the transactions sent with the
+ * CLI and asked for the `verbose` output of the data which then should be
+ * formatted into an ASCII table specified by `formatted`.
  *
  * @param evmlc - The CLI instance.
  * @param session - Controls the session of the CLI instance.

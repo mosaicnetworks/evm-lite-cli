@@ -36,8 +36,9 @@ export declare const stage: StagingFunction;
  * --gas 1000000
  * --gasprice 0`
  *
- * Here we have requested the transfer of `200` tokens to the specified address from
- * `0x583560ee73713a6554c463bd02349841cd79f6e2`. The default `gas` and `gasprice` can be set in the configuration file
+ * Here we have requested the transfer of `200` tokens to the specified
+ * address from `0x583560ee73713a6554c463bd02349841cd79f6e2`.
+ * The default `gas` and `gasprice` can be set in the configuration file
  * to be used for all transfers.
  *
  * @param evmlc - The CLI instance.

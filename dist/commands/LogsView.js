@@ -20,7 +20,8 @@ function commandLogsShow(evmlc, session) {
                     // }
                 }
                 else {
-                    Globals_1.default.warning('Cannot print session log when not in interactive mode.');
+                    Globals_1.default.warning('Cannot print session log  \
+								when not in interactive mode.');
                 }
             }
             else {

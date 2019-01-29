@@ -113,7 +113,7 @@ exports.stage = (args, session) => {
         }
         let decrypted = null;
         try {
-            decrypted = evm_lite_lib_1.Wallet.decrypt(keystore, args.options.pwd);
+            decrypted = evm_lite_lib_1.Account.decrypt(keystore, args.options.pwd);
         }
         catch (err) {
             resolve(error(Staging_1.default.ERRORS.DECRYPTION, 'Failed decryption of account.'));
@@ -165,8 +165,9 @@ exports.stage = (args, session) => {
  * --gas 1000000
  * --gasprice 0`
  *
- * Here we have requested the transfer of `200` tokens to the specified address from
- * `0x583560ee73713a6554c463bd02349841cd79f6e2`. The default `gas` and `gasprice` can be set in the configuration file
+ * Here we have requested the transfer of `200` tokens to the specified
+ * address from `0x583560ee73713a6554c463bd02349841cd79f6e2`.
+ * The default `gas` and `gasprice` can be set in the configuration file
  * to be used for all transfers.
  *
  * @param evmlc - The CLI instance.
@@ -176,7 +177,8 @@ exports.stage = (args, session) => {
  * @alpha
  */
 function commandTransfer(evmlc, session) {
-    const description = 'Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the' +
+    const description = 'Initiate a transfer of token(s) to an address. ' +
+        'Default values for gas and gas prices are set in the' +
         ' configuration file.';
     return evmlc
         .command('transfer')

@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import { Account, Static, Wallet } from 'evm-lite-lib';
+import { Account, Static } from 'evm-lite-lib';
 
 import Staging, {
 	execute,
@@ -38,8 +38,8 @@ interface AccountsUpdateNewPasswordPrompt {
  * Should return either a Staged error or success.
  *
  * @remarks
- * This staging function will parse all the arguments of the `accounts update` command
- * and resolve a success or an error.
+ * This staging function will parse all the arguments of the `accounts update`
+ * command and resolve a success or an error.
  *
  * @param args - Arguments to the command.
  * @param session - Controls the session of the CLI instance.
@@ -142,7 +142,7 @@ export const stage: StagingFunction = (
 		}
 
 		try {
-			Wallet.decrypt(keystore, args.options.old);
+			Account.decrypt(keystore, args.options.old);
 		} catch (err) {
 			resolve(
 				error(
@@ -211,13 +211,16 @@ export const stage: StagingFunction = (
  * Should construct a Vorpal.Command instance for the command `accounts update`.
  *
  * @remarks
- * Allows you to update the password of a `V3JSONKeystore` file if the the previous password
- * is known.
+ * Allows you to update the password of a `V3JSONKeystore` file if the the
+ * previous password is known.
  *
- * Usage: `accounts update 0x583560ee73713a6554c463bd02349841cd79f6e2 --old ~/oldpwd.txt --new ~/newpwd.txt`
+ * Usage:
+ * `accounts update 0x583560ee73713a6554c463bd02349841cd79f6e2
+ * --old ~/oldpwd.txt --new ~/newpwd.txt`
  *
- * Here we have written a command to change the password from the contents `oldpwd.txt` to the contents
- * of `newpwd.txt` for the account `0x583560ee73713a6554c463bd02349841cd79f6e2`.
+ * Here we have written a command to change the password from the contents
+ * `oldpwd.txt` to the contents of `newpwd.txt` for the account
+ * `0x583560ee73713a6554c463bd02349841cd79f6e2`.
  *
  * @param evmlc - The CLI instance.
  * @param session - Controls the session of the CLI instance.

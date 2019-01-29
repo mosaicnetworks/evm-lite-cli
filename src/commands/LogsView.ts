@@ -24,7 +24,8 @@ export default function commandLogsShow(evmlc: Vorpal, session: Session) {
 							// }
 						} else {
 							Globals.warning(
-								'Cannot print session log when not in interactive mode.'
+								'Cannot print session log  \
+								when not in interactive mode.'
 							);
 						}
 					} else {

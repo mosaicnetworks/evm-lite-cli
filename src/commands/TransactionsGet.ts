@@ -29,8 +29,8 @@ interface TransactionsGetPrompt {
  * Should return either a Staged error or success.
  *
  * @remarks
- * This staging function will parse all the arguments of the `transactions get` command
- * and resolve a success or an error.
+ * This staging function will parse all the arguments of the `transactions get`
+ * command and resolve a success or an error.
  *
  * @param args - Arguments to the command.
  * @param session - Controls the session of the CLI instance.
@@ -145,13 +145,14 @@ export const stage: StagingFunction = (
  * Should construct a Vorpal.Command instance for the command `transactions get`.
  *
  * @remarks
- * Allows you to get transaction details such as `gas`, `gasprice`, `status`, `to` etc. using a
- * transaction hash.
+ * Allows you to get transaction details such as `gas`, `gasprice`, `status`,
+ * `to` etc. using a transaction hash.
  *
- * Usage: `transactions get --formatted 0xf4d71b947c7d870332b849b489a8f4dcdca166f9c485963b473724eab9eaee62`
+ * Usage: `transactions get
+ * --formatted 0xf4d71b947c7d870332b849b489a8f4dcdca166f9c485963b473724eab9eaee62`
  *
- * Here we have requested the details of the transaction with hash the specified hash and asked that the
- * data is formatted into an ASCII table.
+ * Here we have requested the details of the transaction with hash the
+ * specified hash and asked that the data is formatted into an ASCII table.
  *
  * @param evmlc - The CLI instance.
  * @param session - Controls the session of the CLI instance.
