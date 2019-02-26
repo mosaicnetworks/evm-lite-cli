@@ -46,7 +46,7 @@ exports.stage = (args, session) => {
             }
         }
         const accounts = remote
-            ? yield connection.getAccounts()
+            ? yield connection.accounts.getAccounts()
             : yield session.keystore.list(verbose, connection);
         if (!accounts || !accounts.length) {
             resolve(success([]));

@@ -57,7 +57,7 @@ exports.stage = (args, session) => {
             resolve(error(Staging_1.default.ERRORS.BLANK_FIELD, 'Provide a non-empty address.'));
             return;
         }
-        const account = yield connection.getAccount(args.address);
+        const account = yield connection.accounts.getAccount(args.address);
         if (!account) {
             resolve(error(Staging_1.default.ERRORS.FETCH_FAILED, 'Could not fetch account: ' + args.address));
             return;

@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import { Account, Static } from 'evm-lite-lib';
+import { Account, Accounts, Static, AddressType } from 'evm-lite-lib';
 
 import Staging, {
 	execute,
@@ -142,7 +142,13 @@ export const stage: StagingFunction = (
 		}
 
 		try {
-			Account.decrypt(keystore, args.options.old);
+			new Accounts('127.0.0.1', 8080, {
+				from: new AddressType(
+					'0X0000000000000000000000000000000000000000'
+				),
+				gas: 0,
+				gasPrice: 0
+			}).decrypt(keystore, args.options.old);
 		} catch (err) {
 			resolve(
 				error(

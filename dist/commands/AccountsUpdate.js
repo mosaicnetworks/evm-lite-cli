@@ -93,7 +93,11 @@ exports.stage = (args, session) => {
             args.options.old = fs.readFileSync(args.options.old, 'utf8').trim();
         }
         try {
-            evm_lite_lib_1.Account.decrypt(keystore, args.options.old);
+            new evm_lite_lib_1.Accounts('127.0.0.1', 8080, {
+                from: new evm_lite_lib_1.AddressType('0X0000000000000000000000000000000000000000'),
+                gas: 0,
+                gasPrice: 0
+            }).decrypt(keystore, args.options.old);
         }
         catch (err) {
             resolve(error(Staging_1.default.ERRORS.DECRYPTION, 'Failed decryption of account with the password provided.'));

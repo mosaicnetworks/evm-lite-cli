@@ -168,7 +168,7 @@ export const stage: StagingFunction = (
 
 		let decrypted: Account = null;
 		try {
-			decrypted = Account.decrypt(keystore, args.options.pwd);
+			decrypted = connection.accounts.decrypt(keystore, args.options.pwd);
 		} catch (err) {
 			resolve(
 				error(
@@ -213,7 +213,7 @@ export const stage: StagingFunction = (
 		}
 
 		try {
-			const transaction = (await session.connection.prepareTransfer(
+			const transaction = (await session.connection.accounts.prepareTransfer(
 				tx.to,
 				tx.value,
 				tx.from

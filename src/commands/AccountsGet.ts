@@ -80,7 +80,7 @@ export const stage: StagingFunction = (
 			return;
 		}
 
-		const account = await connection.getAccount(args.address);
+		const account = await connection.accounts.getAccount(args.address);
 		if (!account) {
 			resolve(
 				error(

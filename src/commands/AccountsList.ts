@@ -58,7 +58,7 @@ export const stage: StagingFunction = (
 		}
 
 		const accounts = remote
-			? await connection.getAccounts()
+			? await connection.accounts.getAccounts()
 			: await session.keystore.list(verbose, connection);
 
 		if (!accounts || !accounts.length) {

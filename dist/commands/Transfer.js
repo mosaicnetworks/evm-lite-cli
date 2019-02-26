@@ -113,7 +113,7 @@ exports.stage = (args, session) => {
         }
         let decrypted = null;
         try {
-            decrypted = evm_lite_lib_1.Account.decrypt(keystore, args.options.pwd);
+            decrypted = connection.accounts.decrypt(keystore, args.options.pwd);
         }
         catch (err) {
             resolve(error(Staging_1.default.ERRORS.DECRYPTION, 'Failed decryption of account.'));
@@ -136,7 +136,7 @@ exports.stage = (args, session) => {
             return;
         }
         try {
-            const transaction = (yield session.connection.prepareTransfer(tx.to, tx.value, tx.from))
+            const transaction = (yield session.connection.accounts.prepareTransfer(tx.to, tx.value, tx.from))
                 .gas(tx.gas)
                 .gasPrice(tx.gasPrice);
             yield transaction.sign(decrypted);
