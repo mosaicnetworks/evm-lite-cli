@@ -130,6 +130,7 @@ export const stage: StagingFunction = (
 		const account = JSONBig.parse(
 			await session.keystore.create(args.options.pwd, args.options.output)
 		);
+
 		resolve(success(verbose ? account : `0x${account.address}`));
 	});
 };

@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 "use strict";
+/**
+ * @file AccountsCreate.ts
+ * @module evm-lite-cli
+ * @author Danu Kumanan <https://github.com/danu3006>
+ * @author Mosaic Networks <https://github.com/mosaicnetworks>
+ * @date 2018
+ */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }

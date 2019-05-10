@@ -94,7 +94,7 @@ exports.stage = (args, session) => {
         }
         try {
             new evm_lite_lib_1.Accounts('127.0.0.1', 8080, {
-                from: new evm_lite_lib_1.AddressType('0X0000000000000000000000000000000000000000'),
+                from: '0X0000000000000000000000000000000000000000',
                 gas: 0,
                 gasPrice: 0
             }).decrypt(keystore, args.options.old);

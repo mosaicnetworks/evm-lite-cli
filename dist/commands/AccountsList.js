@@ -37,7 +37,7 @@ exports.stage = (args, session) => {
         const verbose = args.options.verbose || false;
         const formatted = args.options.formatted || false;
         const table = new ASCIITable();
-        let connection = null;
+        let connection;
         if (verbose || remote) {
             connection = yield session.connect(args.options.host, args.options.port);
             if (!connection) {
@@ -47,7 +47,7 @@ exports.stage = (args, session) => {
         }
         const accounts = remote
             ? yield connection.accounts.getAccounts()
-            : yield session.keystore.list(verbose, connection);
+            : yield session.keystore.list(connection);
         if (!accounts || !accounts.length) {
             resolve(success([]));
             return;
