@@ -45,7 +45,8 @@ export const stage: StagingFunction = (
 		const formatted = args.options.formatted || false;
 		const table = new ASCIITable();
 
-		let connection: EVMLC = null;
+		let connection: EVMLC | undefined;
+
 		if (verbose || remote) {
 			connection = await session.connect(
 				args.options.host,
@@ -59,7 +60,7 @@ export const stage: StagingFunction = (
 
 		const accounts = remote
 			? await connection.accounts.getAccounts()
-			: await session.keystore.list(verbose, connection);
+			: await session.keystore.list(connection);
 
 		if (!accounts || !accounts.length) {
 			resolve(success([]));
