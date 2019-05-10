@@ -9,7 +9,7 @@
 import * as ASCIITable from 'ascii-table';
 import * as Vorpal from 'vorpal';
 
-import { Transaction, TXReceipt } from 'evm-lite-lib';
+import { Transaction, TXReceipt, TX } from 'evm-lite-lib';
 
 import Staging, {
 	execute,
@@ -80,10 +80,11 @@ export const stage: StagingFunction = (
 		}
 
 		for (const tx of transactions) {
+			console.log(tx);
 			let receipt: TXReceipt;
 			const txDate = new Date(tx.date);
 			const transaction = new Transaction(
-				null,
+				{} as TX,
 				session.connection.host,
 				session.connection.port,
 				false

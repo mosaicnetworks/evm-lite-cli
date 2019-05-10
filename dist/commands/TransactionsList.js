@@ -58,9 +58,10 @@ exports.stage = (args, session) => {
             table.setHeading('From', 'To', 'Value', 'Status');
         }
         for (const tx of transactions) {
+            console.log(tx);
             let receipt;
             const txDate = new Date(tx.date);
-            const transaction = new evm_lite_lib_1.Transaction(null, session.connection.host, session.connection.port, false);
+            const transaction = new evm_lite_lib_1.Transaction({}, session.connection.host, session.connection.port, false);
             if (tx.txHash) {
                 transaction.hash = tx.txHash;
                 receipt = yield transaction.receipt;
