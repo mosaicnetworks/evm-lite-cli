@@ -34,6 +34,9 @@ import TransactionsGet from './commands/TransactionsGet';
 import TransactionsList from './commands/TransactionsList';
 import Transfer from './commands/Transfer';
 
+// POA TEMP
+import POANominate from './commands/POA/Nominate';
+
 const __VERSION = '0.1.1';
 const init = (): Promise<void> => {
 	return new Promise<void>(resolve => {
@@ -99,6 +102,7 @@ init()
 			Test,
 			TransactionsList,
 			TransactionsGet,
+			POANominate,
 			// LogsView,
 			// LogsClear,
 			Clear
@@ -137,4 +141,4 @@ init()
 			cli.instance.parse(process.argv);
 		}
 	})
-	.catch(err => console.log(err));
+	.catch(console.log);

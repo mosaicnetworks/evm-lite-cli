@@ -31,7 +31,7 @@ export default class Session {
 		return this.directory.config;
 	}
 
-	public connect(forcedHost: string, forcedPort: number): Promise<EVMLC> {
+	public connect(forcedHost?: string, forcedPort?: number): Promise<EVMLC> {
 		const { data } = this.directory.config;
 
 		const host: string = forcedHost || data.connection.host || '127.0.0.1';
