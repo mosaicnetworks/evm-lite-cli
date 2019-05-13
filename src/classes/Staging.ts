@@ -109,6 +109,7 @@ export const execute = (
 		Globals[output.type](
 			`${message.charAt(0).toUpperCase() + message.slice(1)}`
 		);
+
 		resolve();
 	});
 };

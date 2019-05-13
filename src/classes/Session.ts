@@ -1,6 +1,7 @@
 import * as path from 'path';
 
 import { DataDirectory, EVMLC } from 'evm-lite-lib';
+
 import Globals from './Globals';
 
 export default class Session {
