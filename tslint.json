@@ -1,12 +1,7 @@
 {
-	"extends": [
-		"tslint:recommended",
-		"tslint-config-prettier"
-	],
+	"extends": ["tslint:recommended", "tslint-config-prettier"],
 	"linterOptions": {
-		"exclude": [
-			"node_modules/**/*.ts"
-		]
+		"exclude": ["node_modules/**/*.ts"]
 	},
 	"rules": {
 		"no-shadowed-variable": false,
@@ -15,6 +10,7 @@
 		"interface-name": false,
 		"prefer-for-of": false,
 		"max-classes-per-file": false,
-		"member-access": false
+		"member-access": false,
+		"no-namespace": false
 	}
 }

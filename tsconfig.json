@@ -5,7 +5,8 @@
 		"outDir": "./dist",
 		"declaration": true,
 		"skipLibCheck": true,
-		"skipDefaultLibCheck": true
+		"skipDefaultLibCheck": true,
+		"typeRoots": ["./node_modules/@types", "./types"]
 	},
 	"include": ["src/**/*.ts"],
 	"exclude": ["node_modules", "lib", "test"]
