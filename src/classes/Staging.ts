@@ -93,8 +93,11 @@ export const execute = <T1, T2>(
 		const output: StagedOutput<T1, T2> = await fn(args, session);
 		let message: string;
 
-		if (output.display) {
+		if (output.display !== undefined) {
 			switch (typeof output.display) {
+				case 'boolean':
+					message = output.display ? 'Yes' : 'No';
+					break;
 				case 'string':
 					message = output.display;
 					break;
@@ -112,7 +115,7 @@ export const execute = <T1, T2>(
 				'ERROR'}`;
 		}
 
-		Globals[output.display ? 'success' : 'error'](
+		Globals[output.display !== undefined ? 'success' : 'error'](
 			`${message.charAt(0).toUpperCase() + message.slice(1)}`
 		);
 

@@ -3,7 +3,7 @@
  * @module evm-lite-cli
  * @author Danu Kumanan <https://github.com/danu3006>
  * @author Mosaic Networks <https://github.com/mosaicnetworks>
- * @date 2018
+ * @date 2019
  */
 
 import * as ASCIITable from 'ascii-table';

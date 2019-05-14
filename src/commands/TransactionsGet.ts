@@ -3,14 +3,14 @@
  * @module evm-lite-cli
  * @author Danu Kumanan <https://github.com/danu3006>
  * @author Mosaic Networks <https://github.com/mosaicnetworks>
- * @date 2018
+ * @date 2019
  */
 
 import * as ASCIITable from 'ascii-table';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import { Transaction, TXReceipt, V3JSONKeyStore, TX } from 'evm-lite-lib';
+import { Transaction, TX, TXReceipt, V3JSONKeyStore } from 'evm-lite-lib';
 
 import Staging, { execute, StagingFunction } from '../classes/Staging';
 

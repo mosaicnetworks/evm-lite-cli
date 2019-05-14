@@ -58,6 +58,7 @@ export default class Session {
 					if (!forcedHost && !forcedPort) {
 						this.connection = node;
 					}
+
 					return node;
 				} else {
 					return null;
@@ -65,6 +66,7 @@ export default class Session {
 			})
 			.catch(() => {
 				Globals.error('Could not connect to node.');
+
 				return null;
 			});
 	}

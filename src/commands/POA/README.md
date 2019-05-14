@@ -1,0 +1,38 @@
+# Proof of Authority Commands
+
+## Setup
+
+To begin testing these commands you will need to set defaults.
+
+Run the following command and set each of the configuration attributes to the
+desired values.
+
+```bash
+evmlc config set -i
+
+? Host 127.0.0.1
+? Port 8080
+? From 0xA4a5F65Fb3752b2B6632F2729f17dd61B2aaD650
+? Gas 100000000
+? Gas Price 0
+? Keystore [home_dir]/.evmlc/keystore
+```
+
+The default `from` address will be the account used to sign transactions for any
+POA commands.
+
+## Nominate
+
+This command can be used to nominate an `address` to be put through elections.
+
+### Usage
+
+```bash
+evmlc poa nominate --pwd <password> --nominee <address> --moniker <moniker>
+```
+
+### Return
+
+```json
+{"root":"0x6b7ca84f9a4984ac2d47394b3112d1f248ca7d46d0caf8b6dd59d49b4df0133b","transactionHash":"0x29aa57271e747192b0dc5108495a4efa52d40b6d3dcba1cb31d6d90434693745","from":"0xa4a5f65fb3752b2b6632f2729f17dd61b2aad650","to":"0xf213fad3daab5b18c19c36117bf6174249f6c214","gasUsed":22104,"cumulativeGasUsed":22104,"contractAddress":"0x0000000000000000000000000000000000000000","logs":[],"logsBloom":"0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000","status":0}
+```

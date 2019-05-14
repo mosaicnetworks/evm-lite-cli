@@ -1,3 +1,5 @@
+// Needs finishing
+
 import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
@@ -11,29 +13,29 @@ import Staging, { execute, StagingFunction } from '../../classes/Staging';
 
 interface NominateAnswers {
 	nominee: string;
-	moniker: string;
+	verdict: boolean;
 	password: string;
 }
 
-export const stage: StagingFunction<TXReceipt, TXReceipt> = (
+export const stage: StagingFunction<any, any> = (
 	args: Vorpal.Args,
 	session: Session
 ) => {
 	return new Promise(async (resolve, reject) => {
-		const staging = new Staging<TXReceipt, TXReceipt>(args);
+		const staging = new Staging<any, any>(args);
 
 		const interactive = args.options.interactive || session.interactive;
 		const connection = await session.connect();
 		const questions = [
 			{
-				message: 'Enter address to nominate: ',
+				message: 'Address: ',
 				name: 'nominee',
 				type: 'input'
 			},
 			{
-				message: 'Enter a moniker: ',
-				name: 'nominee',
-				type: 'input'
+				message: 'Verdict: ',
+				name: 'verdict',
+				type: 'confirm'
 			},
 			{
 				message: 'Enter a password: ',
@@ -43,13 +45,23 @@ export const stage: StagingFunction<TXReceipt, TXReceipt> = (
 		];
 
 		if (interactive) {
-			const { nominee, password, moniker } = await inquirer.prompt<
+			const { nominee, verdict, password } = await inquirer.prompt<
 				NominateAnswers
 			>(questions);
 
+			args.options.address = nominee;
+			args.options.verdict = verdict;
 			args.options.pwd = password.trim();
-			args.options.nominee = nominee;
-			args.options.moniker = moniker;
+		}
+
+		if (!args.options.address) {
+			resolve(
+				staging.error(
+					Staging.ERRORS.BLANK_FIELD,
+					'No address provided.'
+				)
+			);
+			return;
 		}
 
 		if (!args.options.pwd) {
@@ -62,21 +74,11 @@ export const stage: StagingFunction<TXReceipt, TXReceipt> = (
 			return;
 		}
 
-		if (!args.options.nominee) {
+		if (args.options.verdict === undefined) {
 			resolve(
 				staging.error(
 					Staging.ERRORS.BLANK_FIELD,
-					'No nominee address provided.'
-				)
-			);
-			return;
-		}
-
-		if (!args.options.moniker) {
-			resolve(
-				staging.error(
-					Staging.ERRORS.BLANK_FIELD,
-					'No moniker provided.'
+					'No verdict provided.'
 				)
 			);
 			return;
@@ -96,14 +98,12 @@ export const stage: StagingFunction<TXReceipt, TXReceipt> = (
 			}
 		);
 
-		const transaction = contract.methods.submitNominee(
-			Static.cleanAddress(args.options.nominee),
-			'moniker'
+		const transaction = contract.methods.castNomineeVote(
+			Static.cleanAddress(args.options.address),
+			args.options.verdict
 		);
 
-		await transaction.submit(account, {
-			timeout: 3
-		});
+		await transaction.submit(account, { timeout: 3 });
 
 		resolve(staging.success(await transaction.receipt));
 	});
@@ -113,19 +113,18 @@ export default function command(
 	evmlc: Vorpal,
 	session: Session
 ): Vorpal.Command {
-	const description =
-		'Allows you to nominate an address to go through election';
+	const description = 'Allows you to vote for an address.';
 
 	return evmlc
-		.command('poa nominate')
-		.alias('p n')
+		.command('poa vote')
+		.alias('p v')
 		.description(description)
 		.option('-i, --interactive', 'interactive')
+		.option('--address <address>', 'address to vote for')
+		.option('--verdict <boolean>', 'verdict for given address')
 		.option('--pwd <password>', 'text password')
-		.option('--nominee <nominee>', 'nominee address')
-		.option('--moniker <moniker>', 'moniker for nominee')
 		.types({
-			string: ['pwd', 'nominee', 'moniker']
+			string: ['address']
 		})
 		.action(
 			(args: Vorpal.Args): Promise<void> => execute(stage, args, session)
