@@ -9,14 +9,9 @@
 import * as ASCIITable from 'ascii-table';
 import * as Vorpal from 'vorpal';
 
-import { EVMLC } from 'evm-lite-lib';
+import { BaseAccount, EVMLC } from 'evm-lite-lib';
 
-import Staging, {
-	execute,
-	Message,
-	StagedOutput,
-	StagingFunction
-} from '../classes/Staging';
+import Staging, { execute, StagingFunction } from '../classes/Staging';
 
 import Session from '../classes/Session';
 
@@ -33,12 +28,12 @@ import Session from '../classes/Session';
  *
  * @alpha
  */
-export const stage: StagingFunction = (
+export const stage: StagingFunction<ASCIITable, BaseAccount[]> = (
 	args: Vorpal.Args,
 	session: Session
-): Promise<StagedOutput<Message>> => {
-	return new Promise<StagedOutput<Message>>(async resolve => {
-		const { error, success } = Staging.getStagingFunctions(args);
+) => {
+	return new Promise(async resolve => {
+		const staging = new Staging<ASCIITable, BaseAccount[]>(args);
 
 		const remote = args.options.remote || false;
 		const verbose = args.options.verbose || false;
@@ -53,7 +48,7 @@ export const stage: StagingFunction = (
 				args.options.port
 			);
 			if (!connection) {
-				resolve(error(Staging.ERRORS.INVALID_CONNECTION));
+				resolve(staging.error(Staging.ERRORS.INVALID_CONNECTION));
 				return;
 			}
 		}
@@ -63,12 +58,12 @@ export const stage: StagingFunction = (
 			: await session.keystore.list(connection);
 
 		if (!accounts || !accounts.length) {
-			resolve(success([]));
+			resolve(staging.success([]));
 			return;
 		}
 
 		if (!formatted) {
-			resolve(success(accounts));
+			resolve(staging.success(accounts));
 			return;
 		}
 
@@ -81,7 +76,7 @@ export const stage: StagingFunction = (
 				: table.addRow(account.address);
 		}
 
-		resolve(success(table));
+		resolve(staging.success(table));
 	});
 };
 

@@ -8,12 +8,7 @@
 
 import * as Vorpal from 'vorpal';
 
-import Staging, {
-	execute,
-	Message,
-	StagedOutput,
-	StagingFunction
-} from '../classes/Staging';
+import Staging, { execute, StagingFunction } from '../classes/Staging';
 
 import Session from '../classes/Session';
 
@@ -30,17 +25,18 @@ import Session from '../classes/Session';
  *
  * @alpha
  */
-export const stage: StagingFunction = (
+export const stage: StagingFunction<string, string> = (
 	args: Vorpal.Args,
 	session: Session
-): Promise<StagedOutput<Message>> => {
-	return new Promise<StagedOutput<Message>>(resolve => {
-		const { success } = Staging.getStagingFunctions(args);
+) => {
+	return new Promise(resolve => {
+		const staging = new Staging<string, string>(args);
 
 		const message: string =
 			`Config file location: ${session.config.path} \n\n` +
 			session.config.toTOML();
-		resolve(success(message));
+
+		resolve(staging.success(message));
 	});
 };
 

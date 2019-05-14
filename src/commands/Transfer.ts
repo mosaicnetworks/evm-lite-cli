@@ -12,12 +12,7 @@ import * as Vorpal from 'vorpal';
 
 import { Account, Static } from 'evm-lite-lib';
 
-import Staging, {
-	execute,
-	Message,
-	StagedOutput,
-	StagingFunction
-} from '../classes/Staging';
+import Staging, { execute, StagingFunction } from '../classes/Staging';
 
 import Session from '../classes/Session';
 
@@ -49,19 +44,19 @@ interface TransferOtherQuestionsPrompt {
  *
  * @alpha
  */
-export const stage: StagingFunction = (
+export const stage: StagingFunction<string, string> = (
 	args: Vorpal.Args,
 	session: Session
-): Promise<StagedOutput<Message>> => {
-	return new Promise<StagedOutput<Message>>(async resolve => {
-		const { error, success } = Staging.getStagingFunctions(args);
+) => {
+	return new Promise(async resolve => {
+		const staging = new Staging<string, string>(args);
 
 		const connection = await session.connect(
 			args.options.host,
 			args.options.port
 		);
 		if (!connection) {
-			resolve(error(Staging.ERRORS.INVALID_CONNECTION));
+			resolve(staging.error(Staging.ERRORS.INVALID_CONNECTION));
 			return;
 		}
 
@@ -118,7 +113,7 @@ export const stage: StagingFunction = (
 
 		if (!args.options.from) {
 			resolve(
-				error(
+				staging.error(
 					Staging.ERRORS.BLANK_FIELD,
 					'`From` address cannot be blank.'
 				)
@@ -129,7 +124,7 @@ export const stage: StagingFunction = (
 		const keystore = await session.keystore.get(args.options.from);
 		if (!keystore) {
 			resolve(
-				error(
+				staging.error(
 					Staging.ERRORS.FILE_NOT_FOUND,
 					`Cannot find keystore file of address: ${tx.from}.`
 				)
@@ -145,7 +140,7 @@ export const stage: StagingFunction = (
 		} else {
 			if (!Static.exists(args.options.pwd)) {
 				resolve(
-					error(
+					staging.error(
 						Staging.ERRORS.FILE_NOT_FOUND,
 						'Password file path provided does not exist.'
 					)
@@ -155,7 +150,7 @@ export const stage: StagingFunction = (
 
 			if (Static.isDirectory(args.options.pwd)) {
 				resolve(
-					error(
+					staging.error(
 						Staging.ERRORS.IS_DIRECTORY,
 						'Password file path provided is not a file.'
 					)
@@ -171,8 +166,8 @@ export const stage: StagingFunction = (
 			decrypted = connection.accounts.decrypt(keystore, args.options.pwd);
 		} catch (err) {
 			resolve(
-				error(
-					Staging.ERRORS.DECRYPTION,
+				staging.error(
+					Staging.ERRORS.FAILED_DECRYPTION,
 					'Failed decryption of account.'
 				)
 			);
@@ -204,7 +199,7 @@ export const stage: StagingFunction = (
 
 		if (!tx.to || !tx.value) {
 			resolve(
-				error(
+				staging.error(
 					Staging.ERRORS.BLANK_FIELD,
 					'Provide an address to send to and a value.'
 				)
@@ -231,9 +226,13 @@ export const stage: StagingFunction = (
 				session.database.transactions.create(tx)
 			);
 
-			resolve(success(`Transaction submitted: ${transaction.hash}`));
+			resolve(
+				staging.success(`Transaction submitted: ${transaction.hash}`)
+			);
 		} catch (e) {
-			resolve(error(Staging.ERRORS.OTHER, e.text ? e.text : e.message));
+			resolve(
+				staging.error(Staging.ERRORS.OTHER, e.text ? e.text : e.message)
+			);
 		}
 	});
 };

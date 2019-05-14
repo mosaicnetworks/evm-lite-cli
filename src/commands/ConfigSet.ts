@@ -11,12 +11,7 @@ import * as Vorpal from 'vorpal';
 
 import { ConfigSchema } from 'evm-lite-lib';
 
-import Staging, {
-	execute,
-	Message,
-	StagedOutput,
-	StagingFunction
-} from '../classes/Staging';
+import Staging, { execute, StagingFunction } from '../classes/Staging';
 
 import Session from '../classes/Session';
 
@@ -33,12 +28,12 @@ import Session from '../classes/Session';
  *
  * @alpha
  */
-export const stage: StagingFunction = (
+export const stage: StagingFunction<string, string> = (
 	args: Vorpal.Args,
 	session: Session
-): Promise<StagedOutput<Message>> => {
-	return new Promise<StagedOutput<Message>>(async resolve => {
-		const { error, success } = Staging.getStagingFunctions(args);
+) => {
+	return new Promise(async resolve => {
+		const staging = new Staging<string, string>(args);
 
 		const interactive = args.options.interactive || session.interactive;
 		const questions = [];
@@ -94,7 +89,12 @@ export const stage: StagingFunction = (
 		}
 
 		if (!Object.keys(args.options).length && !interactive) {
-			resolve(error(Staging.ERRORS.BLANK_FIELD, 'No options provided.'));
+			resolve(
+				staging.error(
+					Staging.ERRORS.BLANK_FIELD,
+					'No options provided.'
+				)
+			);
 			return;
 		}
 
@@ -115,7 +115,7 @@ export const stage: StagingFunction = (
 
 		const saved = await session.config.save(newConfig);
 
-		resolve(success(saved));
+		resolve(staging.success(saved));
 	});
 };
 

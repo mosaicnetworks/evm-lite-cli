@@ -9,14 +9,9 @@
 import * as ASCIITable from 'ascii-table';
 import * as Vorpal from 'vorpal';
 
-import { Transaction, TXReceipt, TX } from 'evm-lite-lib';
+import { SentTX, Transaction, TX, TXReceipt } from 'evm-lite-lib';
 
-import Staging, {
-	execute,
-	Message,
-	StagedOutput,
-	StagingFunction
-} from '../classes/Staging';
+import Staging, { execute, StagingFunction } from '../classes/Staging';
 
 import Session from '../classes/Session';
 
@@ -33,19 +28,19 @@ import Session from '../classes/Session';
  *
  * @alpha
  */
-export const stage: StagingFunction = (
+export const stage: StagingFunction<ASCIITable, SentTX[]> = (
 	args: Vorpal.Args,
 	session: Session
-): Promise<StagedOutput<Message>> => {
-	return new Promise<StagedOutput<Message>>(async resolve => {
-		const { error, success } = Staging.getStagingFunctions(args);
+) => {
+	return new Promise(async resolve => {
+		const staging = new Staging<ASCIITable, SentTX[]>(args);
 
 		const connection = await session.connect(
 			args.options.host,
 			args.options.port
 		);
 		if (!connection) {
-			resolve(error(Staging.ERRORS.INVALID_CONNECTION));
+			resolve(staging.error(Staging.ERRORS.INVALID_CONNECTION));
 			return;
 		}
 
@@ -55,12 +50,12 @@ export const stage: StagingFunction = (
 
 		const transactions = await session.database.transactions.list();
 		if (!transactions.length) {
-			resolve(success([]));
+			resolve(staging.success([]));
 			return;
 		}
 
 		if (!formatted) {
-			resolve(success(JSON.stringify(transactions)));
+			resolve(staging.success(transactions));
 			return;
 		}
 
@@ -80,8 +75,8 @@ export const stage: StagingFunction = (
 		}
 
 		for (const tx of transactions) {
-			console.log(tx);
 			let receipt: TXReceipt;
+
 			const txDate = new Date(tx.date);
 			const transaction = new Transaction(
 				{} as TX,
@@ -138,7 +133,7 @@ export const stage: StagingFunction = (
 			}
 		}
 
-		resolve(success(table));
+		resolve(staging.success(table));
 	});
 };
 

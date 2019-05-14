@@ -6,15 +6,11 @@ import {
 	BaseContractSchema,
 	Keystore,
 	Static,
-	Transaction
+	Transaction,
+	TXReceipt
 } from 'evm-lite-lib';
 
-import Staging, {
-	execute,
-	Message,
-	StagedOutput,
-	StagingFunction
-} from '../../classes/Staging';
+import Staging, { execute, StagingFunction } from '../../classes/Staging';
 
 import Session from '../../classes/Session';
 
@@ -36,12 +32,12 @@ interface NominateAnswers {
 	password: string;
 }
 
-export const stage: StagingFunction = (
+export const stage: StagingFunction<TXReceipt, TXReceipt> = (
 	args: Vorpal.Args,
 	session: Session
-): Promise<StagedOutput<Message>> => {
-	return new Promise<StagedOutput<Message>>(async (resolve, reject) => {
-		const { error, success } = Staging.getStagingFunctions(args);
+) => {
+	return new Promise(async (resolve, reject) => {
+		const staging = new Staging<TXReceipt, TXReceipt>(args);
 
 		const interactive = args.options.interactive || session.interactive;
 		const connection = await session.connect();
@@ -69,14 +65,17 @@ export const stage: StagingFunction = (
 
 		if (!args.options.pwd) {
 			resolve(
-				error(Staging.ERRORS.BLANK_FIELD, 'No password provided using')
+				staging.error(
+					Staging.ERRORS.BLANK_FIELD,
+					'No password provided using'
+				)
 			);
 			return;
 		}
 
 		if (!args.options.nominee) {
 			resolve(
-				error(
+				staging.error(
 					Staging.ERRORS.BLANK_FIELD,
 					'No nominee address provided using'
 				)
@@ -107,7 +106,7 @@ export const stage: StagingFunction = (
 			timeout: 3
 		});
 
-		resolve(success(await transaction.receipt));
+		resolve(staging.success(await transaction.receipt));
 	});
 };
 

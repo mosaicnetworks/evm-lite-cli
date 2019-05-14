@@ -1,47 +1,56 @@
+// Goal
+// This framework needs to be used to return a intermidiary object or value
+// that can be parsed by an output engine. Needs to account for any errors that
+// might be thrown or sent from the `staging` command.
+
+// The errors that need to be accounted for:
+// - Any blank fields
+// - Account decryption fails
+// - Direcrtory or file does not exist
+// - Promise fails or an invalid connections
+// - Path does not exist.
+
+// Only three possible senarios occur with commands. A commnand can have both
+// formatted output or verbose output or both. A function with a format flag
+// will only have two output types `ASCIITable` or an `object`. Notice with
+// the verbose flag these types dont change. A function with a verbose flag
+// will only have `object` or a `string`.
+
+// Requires two different output types
+
 import * as ASCIITable from 'ascii-table';
 import * as JSONBig from 'json-bigint';
 
-import { BaseAccount, SentTX, TXReceipt, V3JSONKeyStore } from 'evm-lite-lib';
+import { Args as VorpalArgs } from 'vorpal';
 
 import Globals from './Globals';
 import Session from './Session';
 
-export interface Args {
-	options: {
-		[key: string]: any;
+// The output type of the staging command
+export interface StagedOutput<T1, T2> {
+	args: VorpalArgs;
+
+	// The generic output for all three types of commands
+	display?: T1 | T2;
+
+	// Errors returned from staging functions are always of type string
+	error?: {
+		type: string;
+		message: string;
 	};
-
-	[key: string]: any;
 }
 
-export type Message =
-	| SentTX[]
-	| BaseAccount[]
-	| TXReceipt
-	| V3JSONKeyStore
-	| ASCIITable
-	| object
-	| string;
-
-export interface StagedOutput<Message> {
-	type: string;
-	subtype?: string;
-	args: Args;
-	message?: Message;
-}
-
-export type StagingFunction = (
-	args: Args,
+// Staging function signature
+export type StagingFunction<T1, T2> = (
+	args: VorpalArgs,
 	session: Session
-) => Promise<StagedOutput<Message>>;
+) => Promise<StagedOutput<T1, T2>>;
 
-export default class Staging {
-	public static ERROR = 'error';
-	public static SUCCESS = 'success';
+export default class Staging<T1, T2> {
 	public static ERRORS = {
 		BLANK_FIELD: 'Field(s) should not be blank',
-		DECRYPTION: 'Failed decryption',
 		DIRECTORY_NOT_EXIST: 'Directory should exist',
+		FAILED_DECRYPTION: 'Failed decryption',
 		FETCH_FAILED: 'Could not fetch data',
 		FILE_NOT_FOUND: 'Cannot find file',
 		INVALID_CONNECTION: 'Invalid connection',
@@ -51,62 +60,59 @@ export default class Staging {
 		PATH_NOT_EXIST: 'Path(s) should exist'
 	};
 
-	public static success(args: Args, message: Message) {
+	constructor(public readonly args: VorpalArgs) {}
+
+	public success(message: T1 | T2): StagedOutput<T1, T2> {
 		return {
-			args,
-			message,
-			type: Staging.SUCCESS
+			args: this.args,
+			display: message
 		};
 	}
 
-	public static error(args: Args, subtype: string, message: Message = null) {
+	public error(
+		type: string,
+		message?: string
+	): StagedOutput<undefined, undefined> {
 		return {
-			args,
-			message,
-			subtype,
-			type: Staging.ERROR
-		};
-	}
-
-	public static getStagingFunctions(
-		args: Args
-	): {
-		error: (subtype: string, message?: Message) => StagedOutput<Message>;
-		success: (message: Message) => StagedOutput<Message>;
-	} {
-		return {
-			error: Staging.error.bind(null, args),
-			success: Staging.success.bind(null, args)
+			args: this.args,
+			error: {
+				message,
+				type
+			}
 		};
 	}
 }
 
-export const execute = (
-	fn: StagingFunction,
-	args: Args,
+// Output execution to display
+export const execute = <T1, T2>(
+	fn: StagingFunction<T1, T2>,
+	args: VorpalArgs,
 	session: Session
 ): Promise<void> => {
 	return new Promise<void>(async resolve => {
-		const output: StagedOutput<Message> = await fn(args, session);
+		const output: StagedOutput<T1, T2> = await fn(args, session);
 		let message: string;
 
-		if (output.message) {
-			switch (typeof output.message) {
+		if (output.display) {
+			switch (typeof output.display) {
 				case 'string':
-					message = output.message;
+					message = output.display;
 					break;
 				case 'object':
 					message =
-						output.message instanceof ASCIITable
-							? output.message.toString()
-							: JSONBig.stringify(output.message);
+						output.display instanceof ASCIITable
+							? output.display.toString()
+							: JSONBig.stringify(output.display);
 					break;
 			}
-		} else {
-			message = output.subtype + '.';
 		}
 
-		Globals[output.type](
+		if (output.error) {
+			message = `${output.error.type}: ${output.error.message ||
+				'ERROR'}`;
+		}
+
+		Globals[output.display ? 'success' : 'error'](
 			`${message.charAt(0).toUpperCase() + message.slice(1)}`
 		);
 

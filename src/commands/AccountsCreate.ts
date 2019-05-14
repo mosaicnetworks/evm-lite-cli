@@ -11,14 +11,9 @@ import * as inquirer from 'inquirer';
 import * as JSONBig from 'json-bigint';
 import * as Vorpal from 'vorpal';
 
-import { Static } from 'evm-lite-lib';
+import { Static, V3JSONKeyStore } from 'evm-lite-lib';
 
-import Staging, {
-	execute,
-	Message,
-	StagedOutput,
-	StagingFunction
-} from '../classes/Staging';
+import Staging, { execute, StagingFunction } from '../classes/Staging';
 
 import Session from '../classes/Session';
 
@@ -41,12 +36,12 @@ interface AccountsCreatePrompt {
  *
  * @alpha
  */
-export const stage: StagingFunction = (
+export const stage: StagingFunction<V3JSONKeyStore, string> = (
 	args: Vorpal.Args,
 	session: Session
-): Promise<StagedOutput<Message>> => {
-	return new Promise<StagedOutput<Message>>(async resolve => {
-		const { error, success } = Staging.getStagingFunctions(args);
+) => {
+	return new Promise(async resolve => {
+		const staging = new Staging<V3JSONKeyStore, string>(args);
 
 		const interactive = !args.options.pwd || session.interactive;
 		const verbose = args.options.verbose || false;
@@ -75,7 +70,7 @@ export const stage: StagingFunction = (
 			>(questions);
 			if (!(password && verifyPassword && password === verifyPassword)) {
 				resolve(
-					error(
+					staging.error(
 						Staging.ERRORS.BLANK_FIELD,
 						'Passwords either blank or do not match.'
 					)
@@ -88,7 +83,7 @@ export const stage: StagingFunction = (
 		} else {
 			if (!Static.exists(args.options.pwd)) {
 				resolve(
-					error(
+					staging.error(
 						Staging.ERRORS.PATH_NOT_EXIST,
 						'Password file provided does not exist.'
 					)
@@ -98,7 +93,7 @@ export const stage: StagingFunction = (
 
 			if (Static.isDirectory(args.options.pwd)) {
 				resolve(
-					error(
+					staging.error(
 						Staging.ERRORS.IS_DIRECTORY,
 						'Password file path provided is a directory.'
 					)
@@ -113,25 +108,29 @@ export const stage: StagingFunction = (
 			args.options.output || session.config.data.storage.keystore;
 		if (!Static.exists(args.options.output)) {
 			resolve(
-				error(
+				staging.error(
 					Staging.ERRORS.DIRECTORY_NOT_EXIST,
 					'Output directory does not exist.'
 				)
 			);
 			return;
 		}
+
 		if (!Static.isDirectory(args.options.output)) {
 			resolve(
-				error(Staging.ERRORS.IS_FILE, 'Output path is not a directory.')
+				staging.error(
+					Staging.ERRORS.IS_FILE,
+					'Output path is not a directory.'
+				)
 			);
 			return;
 		}
 
-		const account = JSONBig.parse(
+		const account: V3JSONKeyStore = JSONBig.parse(
 			await session.keystore.create(args.options.pwd, args.options.output)
 		);
 
-		resolve(success(verbose ? account : `0x${account.address}`));
+		resolve(staging.success(verbose ? account : `0x${account.address}`));
 	});
 };
 

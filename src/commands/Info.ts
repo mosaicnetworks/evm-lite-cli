@@ -9,12 +9,7 @@
 import * as ASCIITable from 'ascii-table';
 import * as Vorpal from 'vorpal';
 
-import Staging, {
-	execute,
-	Message,
-	StagedOutput,
-	StagingFunction
-} from '../classes/Staging';
+import Staging, { execute, StagingFunction } from '../classes/Staging';
 
 import Session from '../classes/Session';
 
@@ -31,33 +26,36 @@ import Session from '../classes/Session';
  *
  * @alpha
  */
-export const stage: StagingFunction = (
+export const stage: StagingFunction<ASCIITable, any> = (
 	args: Vorpal.Args,
 	session: Session
-): Promise<StagedOutput<Message>> => {
-	return new Promise<StagedOutput<Message>>(async resolve => {
-		const { error, success } = Staging.getStagingFunctions(args);
+) => {
+	return new Promise(async resolve => {
+		const staging = new Staging<ASCIITable, any>(args);
 
 		const connection = await session.connect(
 			args.options.host,
 			args.options.port
 		);
 		if (!connection) {
-			resolve(error(Staging.ERRORS.INVALID_CONNECTION));
+			resolve(staging.error(Staging.ERRORS.INVALID_CONNECTION));
 			return;
 		}
 
 		const information = await connection.getInfo();
 		if (!information) {
 			resolve(
-				error(Staging.ERRORS.FETCH_FAILED, 'Cannot fetch information.')
+				staging.error(
+					Staging.ERRORS.FETCH_FAILED,
+					'Cannot fetch information.'
+				)
 			);
 			return;
 		}
 
 		const formatted = args.options.formatted || false;
 		if (!formatted) {
-			resolve(success(information));
+			resolve(staging.success(information));
 			return;
 		}
 
@@ -68,7 +66,7 @@ export const stage: StagingFunction = (
 			}
 		}
 
-		resolve(success(table));
+		resolve(staging.success(table));
 	});
 };
 

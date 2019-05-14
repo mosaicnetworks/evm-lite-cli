@@ -12,12 +12,7 @@ import * as Vorpal from 'vorpal';
 
 import { Account, Accounts, Static } from 'evm-lite-lib';
 
-import Staging, {
-	execute,
-	Message,
-	StagedOutput,
-	StagingFunction
-} from '../classes/Staging';
+import Staging, { execute, StagingFunction } from '../classes/Staging';
 
 import Session from '../classes/Session';
 
@@ -47,12 +42,12 @@ interface AccountsUpdateNewPasswordPrompt {
  *
  * @alpha
  */
-export const stage: StagingFunction = (
+export const stage: StagingFunction<string, string> = (
 	args: Vorpal.Args,
 	session: Session
-): Promise<StagedOutput<Message>> => {
-	return new Promise<StagedOutput<Message>>(async resolve => {
-		const { error, success } = Staging.getStagingFunctions(args);
+) => {
+	return new Promise(async resolve => {
+		const staging = new Staging<string, string>(args);
 
 		const interactive = args.options.interactive || session.interactive;
 		const accounts = await session.keystore.list();
@@ -93,7 +88,7 @@ export const stage: StagingFunction = (
 
 		if (!args.address) {
 			resolve(
-				error(
+				staging.error(
 					Staging.ERRORS.BLANK_FIELD,
 					'Provide a non-empty address.'
 				)
@@ -104,7 +99,7 @@ export const stage: StagingFunction = (
 		const keystore = await session.keystore.get(args.address);
 		if (!keystore) {
 			resolve(
-				error(
+				staging.error(
 					Staging.ERRORS.FILE_NOT_FOUND,
 					`Cannot find keystore file of address.`
 				)
@@ -120,7 +115,7 @@ export const stage: StagingFunction = (
 		} else {
 			if (!Static.exists(args.options.old)) {
 				resolve(
-					error(
+					staging.error(
 						Staging.ERRORS.FILE_NOT_FOUND,
 						'Old password file path provided does not exist.'
 					)
@@ -130,7 +125,7 @@ export const stage: StagingFunction = (
 
 			if (Static.isDirectory(args.options.old)) {
 				resolve(
-					error(
+					staging.error(
 						Staging.ERRORS.IS_DIRECTORY,
 						'Old password file path provided is not a file.'
 					)
@@ -149,8 +144,8 @@ export const stage: StagingFunction = (
 			}).decrypt(keystore, args.options.old);
 		} catch (err) {
 			resolve(
-				error(
-					Staging.ERRORS.DECRYPTION,
+				staging.error(
+					Staging.ERRORS.FAILED_DECRYPTION,
 					'Failed decryption of account with the password provided.'
 				)
 			);
@@ -163,7 +158,7 @@ export const stage: StagingFunction = (
 			>(newPasswordQ);
 			if (!(password && verifyPassword && password === verifyPassword)) {
 				resolve(
-					error(
+					staging.error(
 						Staging.ERRORS.BLANK_FIELD,
 						'Passwords either blank or do not match.'
 					)
@@ -174,7 +169,7 @@ export const stage: StagingFunction = (
 		} else {
 			if (!Static.exists(args.options.new)) {
 				resolve(
-					error(
+					staging.error(
 						Staging.ERRORS.FILE_NOT_FOUND,
 						'New password file path provided does not exist.'
 					)
@@ -184,7 +179,7 @@ export const stage: StagingFunction = (
 
 			if (Static.isDirectory(args.options.new)) {
 				resolve(
-					error(
+					staging.error(
 						Staging.ERRORS.IS_DIRECTORY,
 						'New password file path provided is not a file.'
 					)
@@ -197,7 +192,10 @@ export const stage: StagingFunction = (
 
 		if (args.options.old === args.options.new) {
 			resolve(
-				error(Staging.ERRORS.OTHER, 'New password is the same as old.')
+				staging.error(
+					Staging.ERRORS.OTHER,
+					'New password is the same as old.'
+				)
 			);
 			return;
 		}
@@ -207,7 +205,7 @@ export const stage: StagingFunction = (
 			args.options.old,
 			args.options.new
 		);
-		resolve(success(response));
+		resolve(staging.success(response));
 	});
 };
 

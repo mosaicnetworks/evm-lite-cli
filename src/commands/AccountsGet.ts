@@ -10,12 +10,9 @@ import * as ASCIITable from 'ascii-table';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import Staging, {
-	execute,
-	Message,
-	StagedOutput,
-	StagingFunction
-} from '../classes/Staging';
+import { BaseAccount } from 'evm-lite-lib';
+
+import Staging, { execute, StagingFunction } from '../classes/Staging';
 
 import Session from '../classes/Session';
 
@@ -36,19 +33,19 @@ interface AccountsGetPrompt {
  *
  * @alpha
  */
-export const stage: StagingFunction = (
+export const stage: StagingFunction<ASCIITable, BaseAccount> = (
 	args: Vorpal.Args,
 	session: Session
-): Promise<StagedOutput<Message>> => {
-	return new Promise<StagedOutput<Message>>(async resolve => {
-		const { error, success } = Staging.getStagingFunctions(args);
+) => {
+	return new Promise(async resolve => {
+		const staging = new Staging<ASCIITable, BaseAccount>(args);
 
 		const connection = await session.connect(
 			args.options.host,
 			args.options.port
 		);
 		if (!connection) {
-			resolve(error(Staging.ERRORS.INVALID_CONNECTION));
+			resolve(staging.error(Staging.ERRORS.INVALID_CONNECTION));
 			return;
 		}
 
@@ -72,7 +69,7 @@ export const stage: StagingFunction = (
 
 		if (!args.address) {
 			resolve(
-				error(
+				staging.error(
 					Staging.ERRORS.BLANK_FIELD,
 					'Provide a non-empty address.'
 				)
@@ -83,7 +80,7 @@ export const stage: StagingFunction = (
 		const account = await connection.accounts.getAccount(args.address);
 		if (!account) {
 			resolve(
-				error(
+				staging.error(
 					Staging.ERRORS.FETCH_FAILED,
 					'Could not fetch account: ' + args.address
 				)
@@ -100,7 +97,7 @@ export const stage: StagingFunction = (
 			table.addRow(account.address, account.balance, account.nonce);
 		}
 
-		resolve(success(formatted ? table : account));
+		resolve(staging.success(formatted ? table : account));
 	});
 };
 

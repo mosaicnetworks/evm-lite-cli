@@ -10,14 +10,9 @@ import * as ASCIITable from 'ascii-table';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import { Transaction, TXReceipt } from 'evm-lite-lib';
+import { Transaction, TXReceipt, V3JSONKeyStore, TX } from 'evm-lite-lib';
 
-import Staging, {
-	execute,
-	Message,
-	StagedOutput,
-	StagingFunction
-} from '../classes/Staging';
+import Staging, { execute, StagingFunction } from '../classes/Staging';
 
 import Session from '../classes/Session';
 
@@ -38,19 +33,19 @@ interface TransactionsGetPrompt {
  *
  * @alpha
  */
-export const stage: StagingFunction = (
+export const stage: StagingFunction<ASCIITable, V3JSONKeyStore> = (
 	args: Vorpal.Args,
 	session: Session
-): Promise<StagedOutput<Message>> => {
-	return new Promise<StagedOutput<Message>>(async resolve => {
-		const { error, success } = Staging.getStagingFunctions(args);
+) => {
+	return new Promise(async resolve => {
+		const staging = new Staging(args);
 
 		const connection = await session.connect(
 			args.options.host,
 			args.options.port
 		);
 		if (!connection) {
-			resolve(error(Staging.ERRORS.INVALID_CONNECTION));
+			resolve(staging.error(Staging.ERRORS.INVALID_CONNECTION));
 			return;
 		}
 
@@ -78,24 +73,27 @@ export const stage: StagingFunction = (
 
 		if (!args.hash) {
 			resolve(
-				error(Staging.ERRORS.BLANK_FIELD, 'Provide a transaction hash.')
+				staging.error(
+					Staging.ERRORS.BLANK_FIELD,
+					'Provide a transaction hash.'
+				)
 			);
 			return;
 		}
 
 		const transaction = new Transaction(
-			null,
+			{} as TX,
 			session.connection.host,
 			session.connection.port,
 			false
 		);
 
 		transaction.hash = args.hash;
-		const receipt: TXReceipt = await transaction.receipt;
 
+		const receipt: TXReceipt = await transaction.receipt;
 		if (!receipt) {
 			resolve(
-				error(
+				staging.error(
 					Staging.ERRORS.FETCH_FAILED,
 					'Could not fetch receipt for hash: ' + args.hash
 				)
@@ -107,7 +105,7 @@ export const stage: StagingFunction = (
 		delete receipt.contractAddress;
 
 		if (!formatted) {
-			resolve(success(receipt));
+			resolve(staging.success(receipt));
 			return;
 		}
 
@@ -124,7 +122,7 @@ export const stage: StagingFunction = (
 		const tx = await session.database.transactions.get(args.hash);
 		if (!tx) {
 			resolve(
-				error(
+				staging.error(
 					Staging.ERRORS.FETCH_FAILED,
 					'Could not find transaction in list.'
 				)
@@ -137,7 +135,7 @@ export const stage: StagingFunction = (
 			.addRow('Gas', tx.gas)
 			.addRow('Gas Price', tx.gasPrice);
 
-		resolve(success(table));
+		resolve(staging.success(table));
 	});
 };
 
