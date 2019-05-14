@@ -122,7 +122,7 @@ export default function commandAccountsCreate(
 		.alias('p n')
 		.description(description)
 		.option('-i, --interactive', 'interactive')
-		.option('--pwd <password>', 'password')
+		.option('--pwd <password>', 'text password')
 		.option('--nominee <nominee>', 'nominee address')
 		.types({
 			string: ['pwd', 'nominee']

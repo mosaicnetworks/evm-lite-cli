@@ -83,7 +83,7 @@ export default class Staging<T1, T2> {
 	}
 }
 
-// Output execution to display
+// Parse output to display
 export const execute = <T1, T2>(
 	fn: StagingFunction<T1, T2>,
 	args: VorpalArgs,
