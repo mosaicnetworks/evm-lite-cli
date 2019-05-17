@@ -127,7 +127,7 @@ export const stage: StagingFunction<any, any> = (
 				Static.cleanAddress(args.options.nominee),
 				args.options.verdict
 			)
-			.from('args.options.from');
+			.from(args.options.from);
 
 		console.log(transaction.parse());
 
