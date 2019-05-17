@@ -12,4 +12,4 @@ export interface POASchema extends BaseContractSchema {
 	dev_getCurrentNomineeVotes(address: string);
 }
 
-export const POA_ADDRESS: string = '0x65ffdbb24f67cf6325c184283e8e8f58324f9859';
+export const POA_ADDRESS: string = '0xabbaabbaabbaabbaabbaabbaabbaabbaabbaabba';
