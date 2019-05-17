@@ -170,7 +170,7 @@ export default function command(
 	evmlc: Vorpal,
 	session: Session
 ): Vorpal.Command {
-	const description = 'Allows you to vote for an address.';
+	const description = 'Vote for an nominee currently in election.';
 
 	return evmlc
 		.command('poa vote')
