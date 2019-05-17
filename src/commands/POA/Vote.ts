@@ -127,10 +127,15 @@ export const stage: StagingFunction<any, any> = (
 			args.options.verdict
 		);
 
+		console.log(transaction.parse());
+
 		await transaction.submit(account, { timeout: 3 });
 
 		const receipt = await transaction.receipt;
 		const parsedLogs = contract.parseLogs(receipt.logs);
+
+		console.log(receipt);
+		console.log(parsedLogs);
 
 		if (parsedLogs.length) {
 			let nomineeDecisionEvent: any;

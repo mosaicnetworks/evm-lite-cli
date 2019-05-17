@@ -136,12 +136,17 @@ export const stage: StagingFunction<string, string> = (
 			args.options.moniker
 		);
 
+		console.log(transaction.parse());
+
 		await transaction.submit(account, {
 			timeout: 3
 		});
 
 		const receipt = await transaction.receipt;
 		const parsedLogs = contract.parseLogs(receipt.logs);
+
+		console.log(receipt);
+		console.log(parsedLogs);
 
 		if (parsedLogs.length > 0) {
 			const nomineeProposedEvent = parsedLogs[0];
@@ -169,8 +174,7 @@ export default function command(
 	evmlc: Vorpal,
 	session: Session
 ): Vorpal.Command {
-	const description =
-		'Nominate an address to go through election';
+	const description = 'Nominate an address to go through election';
 
 	return evmlc
 		.command('poa nominate')

@@ -64,6 +64,8 @@ export const stage: StagingFunction<any, any> = (
 			Static.cleanAddress(args.address)
 		);
 
+		console.log(transaction.parse());
+
 		const response = await transaction.submit();
 
 		resolve(staging.success(response));
