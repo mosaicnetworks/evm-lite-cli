@@ -2,6 +2,8 @@
 
 ## Setup
 
+### Defaults
+
 To begin testing these commands you will need to set defaults.
 
 Run the following command and set each of the configuration attributes to the
@@ -24,3 +26,6 @@ POA commands.
 The `keystore` directory must contrain the associated `keystore` for the
 defualt `from` address.
 
+### Contract Address
+
+The contract address can be set in `src/commands/POA/other/constants.ts`.

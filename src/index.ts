@@ -35,9 +35,11 @@ import TransactionsList from './commands/TransactionsList';
 import Transfer from './commands/Transfer';
 
 // POA TEMP
-import POACheck from './commands/POA/Vote';
-import POANominate from './commands/POA/Nominate';
 import POAVote from './commands/POA/Check';
+import POAIsNominee from './commands/POA/IsNominee';
+import POANominate from './commands/POA/Nominate';
+import POAShowVotes from './commands/POA/ShowVotes';
+import POACheck from './commands/POA/Vote';
 
 const __VERSION = '0.1.1';
 const init = (): Promise<void> => {
@@ -109,6 +111,8 @@ init()
 			POANominate,
 			POACheck,
 			POAVote,
+			POAIsNominee,
+			POAShowVotes,
 
 			// LogsView,
 			// LogsClear,

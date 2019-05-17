@@ -60,7 +60,7 @@ export const stage: StagingFunction<any, any> = (
 			}
 		);
 
-		const transaction = contract.methods.checkAuthorised(
+		const transaction = contract.methods.dev_getCurrentNomineeVotes(
 			Static.cleanAddress(args.address)
 		);
 
@@ -77,8 +77,8 @@ export default function command(
 	const description = 'Allows you to check whether a nominee was accepted';
 
 	return evmlc
-		.command('poa check [address]')
-		.alias('p c')
+		.command('poa show [address]')
+		.alias('p s')
 		.description(description)
 		.option('-i, --interactive', 'interactive')
 		.types({

@@ -6,7 +6,12 @@ import * as Vorpal from 'vorpal';
 
 import { Keystore, Static, TXReceipt } from 'evm-lite-lib';
 
-import { POA_ABI, POA_BYTECODE, POASchema } from './other/constants';
+import {
+	POA_ABI,
+	POA_ADDRESS,
+	POA_BYTECODE,
+	POASchema
+} from './other/constants';
 
 import Session from '../../classes/Session';
 import Staging, { execute, StagingFunction } from '../../classes/Staging';
@@ -14,6 +19,7 @@ import Staging, { execute, StagingFunction } from '../../classes/Staging';
 interface NominateAnswers {
 	nominee: string;
 	verdict: boolean;
+	from: string;
 	password: string;
 }
 
@@ -26,7 +32,19 @@ export const stage: StagingFunction<any, any> = (
 
 		const interactive = args.options.interactive || session.interactive;
 		const connection = await session.connect();
+		const accounts = await session.keystore.list();
 		const questions = [
+			{
+				choices: accounts.map(account => account.address),
+				message: 'From: ',
+				name: 'from',
+				type: 'list'
+			},
+			{
+				message: 'Enter a password: ',
+				name: 'password',
+				type: 'password'
+			},
 			{
 				message: 'Address: ',
 				name: 'nominee',
@@ -36,29 +54,35 @@ export const stage: StagingFunction<any, any> = (
 				message: 'Verdict: ',
 				name: 'verdict',
 				type: 'confirm'
-			},
-			{
-				message: 'Enter a password: ',
-				name: 'password',
-				type: 'password'
 			}
 		];
 
 		if (interactive) {
-			const { nominee, verdict, password } = await inquirer.prompt<
+			const { nominee, verdict, password, from } = await inquirer.prompt<
 				NominateAnswers
 			>(questions);
 
-			args.options.address = nominee;
+			args.options.from = from;
+			args.options.nominee = nominee;
 			args.options.verdict = verdict;
 			args.options.pwd = password.trim();
 		}
 
-		if (!args.options.address) {
+		if (!args.options.nominee) {
 			resolve(
 				staging.error(
 					Staging.ERRORS.BLANK_FIELD,
-					'No address provided.'
+					'No `nominee` address provided.'
+				)
+			);
+			return;
+		}
+
+		if (!args.options.from) {
+			resolve(
+				staging.error(
+					Staging.ERRORS.BLANK_FIELD,
+					'No `from` address provided.'
 				)
 			);
 			return;
@@ -68,7 +92,7 @@ export const stage: StagingFunction<any, any> = (
 			resolve(
 				staging.error(
 					Staging.ERRORS.BLANK_FIELD,
-					'No password provided.'
+					'No `password` provided.'
 				)
 			);
 			return;
@@ -78,7 +102,7 @@ export const stage: StagingFunction<any, any> = (
 			resolve(
 				staging.error(
 					Staging.ERRORS.BLANK_FIELD,
-					'No verdict provided.'
+					'No `verdict` provided.'
 				)
 			);
 			return;
@@ -86,7 +110,7 @@ export const stage: StagingFunction<any, any> = (
 
 		const keystore = new Keystore(session.config.data.storage.keystore);
 		const account = await keystore.decrypt(
-			session.config.data.defaults.from.toLowerCase(),
+			args.options.from,
 			args.options.pwd,
 			session.connection
 		);
@@ -94,18 +118,51 @@ export const stage: StagingFunction<any, any> = (
 		const contract = session.connection.contracts.load<POASchema>(
 			JSON.parse(POA_ABI),
 			{
-				contractAddress: '0xf213fad3daab5b18c19c36117bf6174249f6c214'
+				contractAddress: POA_ADDRESS
 			}
 		);
 
 		const transaction = contract.methods.castNomineeVote(
-			Static.cleanAddress(args.options.address),
+			Static.cleanAddress(args.options.nominee),
 			args.options.verdict
 		);
 
 		await transaction.submit(account, { timeout: 3 });
 
-		resolve(staging.success(await transaction.receipt));
+		const receipt = await transaction.receipt;
+		const parsedLogs = contract.parseLogs(receipt.logs);
+
+		if (parsedLogs.length) {
+			let nomineeDecisionEvent: any;
+
+			const nomineeVoteCastEvent = parsedLogs[0];
+
+			if (parsedLogs.length > 1) {
+				nomineeDecisionEvent = parsedLogs[1];
+			}
+			const vote = nomineeVoteCastEvent.args._accepted ? 'Yes' : 'No';
+			let message = `You (${
+				nomineeVoteCastEvent.args._voter
+			}) voted '${vote}' for '${nomineeVoteCastEvent.args._nominee}'. `;
+
+			if (nomineeDecisionEvent) {
+				const accepted = nomineeDecisionEvent.args._accepted
+					? 'Accepted'
+					: 'Rejected';
+
+				message += `Election completed with the nominee being '${accepted}'.`;
+			}
+
+			resolve(staging.success(message));
+		} else {
+			resolve(
+				staging.error(
+					Staging.ERRORS.OTHER,
+					'Looks like the nominee is no longer ' +
+						'pending or you do not have permission.'
+				)
+			);
+		}
 	});
 };
 
@@ -123,8 +180,9 @@ export default function command(
 		.option('--address <address>', 'address to vote for')
 		.option('--verdict <boolean>', 'verdict for given address')
 		.option('--pwd <password>', 'text password')
+		.option('--from <address>', 'from address')
 		.types({
-			string: ['address']
+			string: ['address', 'from']
 		})
 		.action(
 			(args: Vorpal.Args): Promise<void> => execute(stage, args, session)
