@@ -2,30 +2,16 @@
 
 ## Setup
 
-### Defaults
-
-To begin testing these commands you will need to set defaults.
-
-Run the following command and set each of the configuration attributes to the
-desired values.
-
-```bash
-evmlc config set -i
-
-? Host 127.0.0.1
-? Port 8080
-? From 0xA4a5F65Fb3752b2B6632F2729f17dd61B2aaD650
-? Gas 100000000
-? Gas Price 0
-? Keystore [home_dir]/.evmlc/keystore
-```
-
-The default `from` address will be the account used to sign transactions for any
-POA commands.
-
-The `keystore` directory must contrain the associated `keystore` for the
-defualt `from` address.
-
-### Contract Address
-
 The contract address can be set in `src/commands/POA/other/constants.ts`.
+
+```
+$ evmlc poa
+
+  Commands:
+
+    poa nominate [options]             Allows you to nominate an address to go through election
+    poa vote [options]                 Allows you to vote for an address.
+    poa check [options] [address]      Allows you to check whether a nominee was accepted
+    poa isnominee [options] [address]  Checks whether an address is a nominee
+    poa show [options] [address]       Shows the number of yes and no votes
+```

@@ -74,7 +74,7 @@ export default function command(
 	evmlc: Vorpal,
 	session: Session
 ): Vorpal.Command {
-	const description = 'Allows you to check whether a nominee was accepted';
+	const description = 'Shows the number of yes and no votes';
 
 	return evmlc
 		.command('poa show [address]')
