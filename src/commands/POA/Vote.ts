@@ -122,10 +122,12 @@ export const stage: StagingFunction<any, any> = (
 			}
 		);
 
-		const transaction = contract.methods.castNomineeVote(
-			Static.cleanAddress(args.options.nominee),
-			args.options.verdict
-		);
+		const transaction = contract.methods
+			.castNomineeVote(
+				Static.cleanAddress(args.options.nominee),
+				args.options.verdict
+			)
+			.from('args.options.from');
 
 		console.log(transaction.parse());
 

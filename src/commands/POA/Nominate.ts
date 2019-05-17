@@ -131,10 +131,12 @@ export const stage: StagingFunction<string, string> = (
 			}
 		);
 
-		const transaction = contract.methods.submitNominee(
-			Static.cleanAddress(args.options.nominee),
-			args.options.moniker
-		);
+		const transaction = contract.methods
+			.submitNominee(
+				Static.cleanAddress(args.options.nominee),
+				args.options.moniker
+			)
+			.from(args.options.from);
 
 		console.log(transaction.parse());
 
