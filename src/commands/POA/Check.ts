@@ -2,14 +2,9 @@ import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import { Keystore, Static, TXReceipt } from 'evm-lite-lib';
+import { Static } from 'evm-lite-lib';
 
-import {
-	POA_ABI,
-	POA_ADDRESS,
-	POA_BYTECODE,
-	POASchema
-} from './other/constants';
+import { POA_ABI, POA_ADDRESS, POASchema } from './other/constants';
 
 import Session from '../../classes/Session';
 import Staging, { execute, StagingFunction } from '../../classes/Staging';
@@ -26,7 +21,9 @@ export const stage: StagingFunction<any, any> = (
 		const staging = new Staging<any, any>(args);
 
 		const interactive = args.options.interactive || session.interactive;
-		const connection = await session.connect();
+
+		await session.connect();
+
 		const questions = [
 			{
 				message: 'Enter address: ',

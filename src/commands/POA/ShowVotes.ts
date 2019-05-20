@@ -77,7 +77,7 @@ export default function command(
 	const description = 'Shows the number of yes and no votes';
 
 	return evmlc
-		.command('poa show [address]')
+		.command('poa showvotes [address]')
 		.alias('p s')
 		.description(description)
 		.option('-i, --interactive', 'interactive')

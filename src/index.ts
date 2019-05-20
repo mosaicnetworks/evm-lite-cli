@@ -40,6 +40,8 @@ import POAIsNominee from './commands/POA/IsNominee';
 import POANominate from './commands/POA/Nominate';
 import POAShowVotes from './commands/POA/ShowVotes';
 import POACheck from './commands/POA/Vote';
+import POAWhiteList from './commands/POA/WhiteList';
+import POANomineeList from './commands/POA/NomineeList';
 
 const __VERSION = '0.1.1';
 const init = (): Promise<void> => {
@@ -113,6 +115,8 @@ init()
 			POAVote,
 			POAIsNominee,
 			POAShowVotes,
+			POAWhiteList,
+			POANomineeList,
 
 			// LogsView,
 			// LogsClear,
