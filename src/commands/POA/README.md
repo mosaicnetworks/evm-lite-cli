@@ -9,9 +9,11 @@ $ evmlc poa
 
   Commands:
 
-    poa nominate [options]             Allows you to nominate an address to go through election
-    poa vote [options]                 Allows you to vote for an address.
-    poa check [options] [address]      Allows you to check whether a nominee was accepted
+    poa nominate [options]             Nominate an address to go through election
+    poa vote [options]                 Vote for an nominee currently in election.
+    poa check [options] [address]      Check whether a nominee was accepted
     poa isnominee [options] [address]  Checks whether an address is a nominee
-    poa show [options] [address]       Shows the number of yes and no votes
+    poa showvotes [options] [address]  Shows the number of yes and no votes
+    poa whitelist [options]            Show the entire whitelist with monikers
+    poa nomineelist [options]          Show the entire nominee list with moniker
 ```

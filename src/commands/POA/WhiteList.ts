@@ -113,7 +113,7 @@ export default function command(
 	evmlc: Vorpal,
 	session: Session
 ): Vorpal.Command {
-	const description = 'Check whether a nominee was accepted';
+	const description = 'Show the entire whitelist with monikers';
 
 	return evmlc
 		.command('poa whitelist')

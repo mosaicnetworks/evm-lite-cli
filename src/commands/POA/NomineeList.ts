@@ -43,7 +43,7 @@ export const stage: StagingFunction<any, any> = (
 		];
 
 		const table = new ASCIITable();
-		table.setHeading('Moniker', 'Address');
+		table.setHeading('Moniker', 'Address', 'Proposer');
 
 		if (interactive) {
 			const { from } = await inquirer.prompt(questions);
@@ -113,7 +113,7 @@ export default function command(
 	evmlc: Vorpal,
 	session: Session
 ): Vorpal.Command {
-	const description = 'Check whether a nominee was accepted';
+	const description = 'Show the entire nominee list with moniker';
 
 	return evmlc
 		.command('poa nomineelist')
