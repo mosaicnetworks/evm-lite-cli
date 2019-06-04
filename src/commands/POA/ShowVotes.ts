@@ -65,6 +65,18 @@ export const stage: StagingFunction<any, any> = (
 				Static.cleanAddress(args.address)
 			);
 
+			const parsed = transaction.parse();
+
+			if (!parsed.from.startsWith('0x')) {
+				transaction.from(`0x${parsed.from}`);
+			}
+
+			if (!parsed.to.startsWith('0x')) {
+				transaction.to(`0x${parsed.from}`);
+			}
+
+			console.log(transaction.parse());
+
 			const response = await transaction.submit();
 
 			resolve(staging.success(response));
