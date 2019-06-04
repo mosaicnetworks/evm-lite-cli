@@ -31,7 +31,9 @@ export const stage: StagingFunction<any, any> = (
 		const staging = new Staging<any, any>(args);
 
 		const interactive = args.options.interactive || session.interactive;
-		const connection = await session.connect();
+
+		await session.connect();
+
 		const accounts = await session.keystore.list();
 		const questions = [
 			{
@@ -63,12 +65,12 @@ export const stage: StagingFunction<any, any> = (
 			>(questions);
 
 			args.options.from = from;
-			args.options.nominee = nominee;
+			args.options.address = nominee;
 			args.options.verdict = verdict;
 			args.options.pwd = password.trim();
 		}
 
-		if (!args.options.nominee) {
+		if (!args.options.address) {
 			resolve(
 				staging.error(
 					Staging.ERRORS.BLANK_FIELD,
@@ -124,7 +126,7 @@ export const stage: StagingFunction<any, any> = (
 
 		const transaction = contract.methods
 			.castNomineeVote(
-				Static.cleanAddress(args.options.nominee),
+				Static.cleanAddress(args.options.address),
 				args.options.verdict
 			)
 			.from(args.options.from);
