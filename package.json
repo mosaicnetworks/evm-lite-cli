@@ -5,7 +5,7 @@
 	"main": "./dist/index.js",
 	"scripts": {
 		"test": "mocha -r ts-node/register tests/**/*.ts || true",
-		"tsc": "tsc"
+		"build": "tsc -p tsconfig.json"
 	},
 	"keywords": [],
 	"author": "",
@@ -13,6 +13,7 @@
 	"dependencies": {
 		"ascii-table": "0.0.9",
 		"chalk": "^2.4.1",
+		"evm-lite-lib": "^0.2.18",
 		"figlet": "^1.2.0",
 		"inquirer": "^6.3.1",
 		"json-bigint": "^0.3.0",

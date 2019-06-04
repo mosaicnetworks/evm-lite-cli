@@ -60,13 +60,18 @@ export const stage: StagingFunction<any, any> = (
 			}
 		);
 
-		const transaction = contract.methods.dev_getCurrentNomineeVotes(
-			Static.cleanAddress(args.address)
-		);
+		try {
+			const transaction = contract.methods.dev_getCurrentNomineeVotes(
+				Static.cleanAddress(args.address)
+			);
 
-		const response = await transaction.submit();
+			const response = await transaction.submit();
 
-		resolve(staging.success(response));
+			resolve(staging.success(response));
+		} catch (e) {
+			console.log(e);
+			resolve(e.text);
+		}
 	});
 };
 

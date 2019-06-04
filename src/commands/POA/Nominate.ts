@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import { Keystore, Static, TXReceipt } from 'evm-lite-lib';
+import { Keystore, Static } from 'evm-lite-lib';
 
 import {
 	POA_ABI,

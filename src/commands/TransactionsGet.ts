@@ -105,6 +105,7 @@ export const stage: StagingFunction<ASCIITable, V3JSONKeyStore> = (
 		delete receipt.contractAddress;
 
 		if (!formatted) {
+			// @ts-ignore
 			resolve(staging.success(receipt));
 			return;
 		}
@@ -135,6 +136,7 @@ export const stage: StagingFunction<ASCIITable, V3JSONKeyStore> = (
 			.addRow('Gas', tx.gas)
 			.addRow('Gas Price', tx.gasPrice);
 
+		// @ts-ignore
 		resolve(staging.success(table));
 	});
 };

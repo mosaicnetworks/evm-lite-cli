@@ -80,7 +80,7 @@ export const stage: StagingFunction<string, string> = (
 		populateQuestions(session.config.data);
 
 		if (interactive) {
-			const answers = await inquirer.prompt(questions);
+			const answers: any = await inquirer.prompt(questions);
 			for (const key in answers) {
 				if (answers.hasOwnProperty(key)) {
 					args.options[key.toLowerCase()] = answers[key];
