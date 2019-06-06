@@ -2,14 +2,9 @@ import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import { Keystore, Static, TXReceipt } from 'evm-lite-lib';
+import { Contract, Utils } from 'evm-lite-core';
 
-import {
-	POA_ABI,
-	POA_ADDRESS,
-	POA_BYTECODE,
-	POASchema
-} from './other/constants';
+import { POA_ABI, POA_ADDRESS, POASchema } from './other/contract';
 
 import Session from '../../classes/Session';
 import Staging, { execute, StagingFunction } from '../../classes/Staging';
@@ -26,7 +21,7 @@ export const stage: StagingFunction<any, any> = (
 		const staging = new Staging<any, any>(args);
 
 		const interactive = args.options.interactive || session.interactive;
-		const connection = await session.connect();
+		await session.connect();
 		const questions = [
 			{
 				message: 'Enter address: ',
@@ -53,31 +48,24 @@ export const stage: StagingFunction<any, any> = (
 			return;
 		}
 
-		const contract = session.connection.contracts.load<POASchema>(
+		const contract = Contract.load<POASchema>(
 			JSON.parse(POA_ABI),
-			{
-				contractAddress: POA_ADDRESS
-			}
+			POA_ADDRESS
 		);
 
 		try {
 			const transaction = contract.methods.dev_getCurrentNomineeVotes(
-				Static.cleanAddress(args.address)
+				{
+					from: session.config.state.defaults.from,
+					gas: session.config.state.defaults.gas,
+					gasPrice: session.config.state.defaults.gasPrice
+				},
+				Utils.cleanAddress(args.address)
 			);
 
-			const parsed = transaction.parse();
+			console.log(transaction);
 
-			if (!parsed.from.startsWith('0x')) {
-				transaction.from(`0x${parsed.from}`);
-			}
-
-			if (!parsed.to.startsWith('0x')) {
-				transaction.to(`0x${parsed.from}`);
-			}
-
-			console.log(transaction.parse());
-
-			const response = await transaction.submit();
+			const response = session.node.callTransaction(transaction);
 
 			resolve(staging.success(response));
 		} catch (e) {

@@ -11,14 +11,12 @@ import * as inquirer from 'inquirer';
 import * as JSONBig from 'json-bigint';
 import * as Vorpal from 'vorpal';
 
-import { Static, V3JSONKeyStore } from 'evm-lite-lib';
-
-import Staging, { execute, StagingFunction } from '../classes/Staging';
+import { Utils, V3JSONKeyStore } from 'evm-lite-keystore';
 
 import Session from '../classes/Session';
+import Staging, { execute, StagingFunction } from '../classes/Staging';
 
 interface AccountsCreatePrompt {
-	output: string;
 	password: string;
 	verifyPassword: string;
 }
@@ -47,12 +45,6 @@ export const stage: StagingFunction<V3JSONKeyStore, string> = (
 		const verbose = args.options.verbose || false;
 		const questions = [
 			{
-				default: session.keystore.path,
-				message: 'Enter keystore output path: ',
-				name: 'output',
-				type: 'input'
-			},
-			{
 				message: 'Enter a password: ',
 				name: 'password',
 				type: 'password'
@@ -65,7 +57,7 @@ export const stage: StagingFunction<V3JSONKeyStore, string> = (
 		];
 
 		if (interactive) {
-			const { output, password, verifyPassword } = await inquirer.prompt<
+			const { password, verifyPassword } = await inquirer.prompt<
 				AccountsCreatePrompt
 			>(questions);
 			if (!(password && verifyPassword && password === verifyPassword)) {
@@ -79,9 +71,8 @@ export const stage: StagingFunction<V3JSONKeyStore, string> = (
 			}
 
 			args.options.pwd = password.trim();
-			args.options.output = output;
 		} else {
-			if (!Static.exists(args.options.pwd)) {
+			if (!Utils.exists(args.options.pwd)) {
 				resolve(
 					staging.error(
 						Staging.ERRORS.PATH_NOT_EXIST,
@@ -91,7 +82,7 @@ export const stage: StagingFunction<V3JSONKeyStore, string> = (
 				return;
 			}
 
-			if (Static.isDirectory(args.options.pwd)) {
+			if (Utils.isDirectory(args.options.pwd)) {
 				resolve(
 					staging.error(
 						Staging.ERRORS.IS_DIRECTORY,
@@ -104,30 +95,10 @@ export const stage: StagingFunction<V3JSONKeyStore, string> = (
 			args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8').trim();
 		}
 
-		args.options.output =
-			args.options.output || session.config.data.storage.keystore;
-		if (!Static.exists(args.options.output)) {
-			resolve(
-				staging.error(
-					Staging.ERRORS.DIRECTORY_NOT_EXIST,
-					'Output directory does not exist.'
-				)
-			);
-			return;
-		}
+		console.log(args);
 
-		if (!Static.isDirectory(args.options.output)) {
-			resolve(
-				staging.error(
-					Staging.ERRORS.IS_FILE,
-					'Output path is not a directory.'
-				)
-			);
-			return;
-		}
-
-		const account: V3JSONKeyStore = JSONBig.parse(
-			await session.keystore.create(args.options.pwd, args.options.output)
+		const account: V3JSONKeyStore = await session.keystore.create(
+			args.options.pwd
 		);
 
 		resolve(staging.success(verbose ? account : `0x${account.address}`));
@@ -144,7 +115,7 @@ export const stage: StagingFunction<V3JSONKeyStore, string> = (
  * `--datadir, -d` flag.
  *
  * Usage:
- * `accounts create --verbose --output ~/datadir/keystore --pwd ~/datadir/pwd.txt`
+ * `accounts create --verbose --pwd ~/datadir/pwd.txt`
  *
  * Here we have specified to create the account file in `~/datadir/keystore`,
  * encrypt with the `~/datadir/pwd.txt` and once that is done, provide the
@@ -171,11 +142,10 @@ export default function commandAccountsCreate(
 		.command('accounts create')
 		.alias('a c')
 		.description(description)
-		.option('-o, --output <path>', 'keystore file output path')
 		.option('-v, --verbose', 'show verbose output')
 		.option('--pwd <file_path>', 'password file path')
 		.types({
-			string: ['pwd', 'o', 'output']
+			string: ['pwd']
 		})
 		.action(
 			(args: Vorpal.Args): Promise<void> => execute(stage, args, session)

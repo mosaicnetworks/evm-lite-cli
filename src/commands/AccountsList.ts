@@ -9,7 +9,7 @@
 import * as ASCIITable from 'ascii-table';
 import * as Vorpal from 'vorpal';
 
-import { BaseAccount, EVMLC } from 'evm-lite-lib';
+import { BaseAccount, EVMLC } from 'evm-lite-core';
 
 import Staging, { execute, StagingFunction } from '../classes/Staging';
 
@@ -53,9 +53,11 @@ export const stage: StagingFunction<ASCIITable, BaseAccount[]> = (
 			}
 		}
 
-		const accounts = remote
-			? await connection.accounts.getAccounts()
-			: await session.keystore.list(connection);
+		const accounts = await Promise.all(
+			(await session.keystore.list()).map(async keystore => {
+				return await connection.getAccount(keystore.address);
+			})
+		);
 
 		if (!accounts || !accounts.length) {
 			resolve(staging.success([]));
@@ -72,7 +74,11 @@ export const stage: StagingFunction<ASCIITable, BaseAccount[]> = (
 			: table.setHeading('Address');
 		for (const account of accounts) {
 			verbose
-				? table.addRow(account.address, account.balance, account.nonce)
+				? table.addRow(
+						account.address,
+						account.balance.toString(10),
+						account.nonce
+				  )
 				: table.addRow(account.address);
 		}
 

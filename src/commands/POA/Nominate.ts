@@ -2,14 +2,10 @@ import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import { Keystore, Static } from 'evm-lite-lib';
+import { Contract, Utils } from 'evm-lite-core';
+import { Keystore } from 'evm-lite-keystore';
 
-import {
-	POA_ABI,
-	POA_ADDRESS,
-	POA_BYTECODE,
-	POASchema
-} from './other/constants';
+import { POA_ABI, POA_ADDRESS, POASchema } from './other/contract';
 
 import Session from '../../classes/Session';
 import Staging, { execute, StagingFunction } from '../../classes/Staging';
@@ -117,35 +113,32 @@ export const stage: StagingFunction<string, string> = (
 			return;
 		}
 
-		const keystore = new Keystore(session.config.data.storage.keystore);
-		const account = await keystore.decrypt(
-			args.options.from,
-			args.options.pwd,
-			session.connection
+		const account = await Keystore.decrypt(
+			await session.keystore.get(args.options.from),
+			args.options.pwd
 		);
 
-		const contract = session.connection.contracts.load<POASchema>(
+		const contract = Contract.load<POASchema>(
 			JSON.parse(POA_ABI),
-			{
-				contractAddress: POA_ADDRESS
-			}
+			POA_ADDRESS
 		);
 
-		const transaction = contract.methods
-			.submitNominee(
-				Static.cleanAddress(args.options.nominee),
-				args.options.moniker
-			)
-			.from(args.options.from);
+		const transaction = contract.methods.submitNominee(
+			{
+				from: args.options.from,
+				gas: session.config.state.defaults.gas,
+				gasPrice: session.config.state.defaults.gasPrice
+			},
+			Utils.cleanAddress(args.options.nominee),
+			args.options.moniker
+		);
 
-		console.log(transaction.parse());
+		console.log(transaction);
 
-		await transaction.submit(account, {
-			timeout: 3
-		});
+		await session.node.sendTransaction(transaction, account);
 
 		const receipt = await transaction.receipt;
-		const parsedLogs = contract.parseLogs(receipt.logs);
+		const parsedLogs = receipt.logs;
 
 		console.log(receipt);
 		console.log(parsedLogs);

@@ -2,14 +2,9 @@ import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import { Keystore, Static, TXReceipt } from 'evm-lite-lib';
+import { Contract, Utils } from 'evm-lite-core';
 
-import {
-	POA_ABI,
-	POA_ADDRESS,
-	POA_BYTECODE,
-	POASchema
-} from './other/constants';
+import { POA_ABI, POA_ADDRESS, POASchema } from './other/contract';
 
 import Session from '../../classes/Session';
 import Staging, { execute, StagingFunction } from '../../classes/Staging';
@@ -26,7 +21,9 @@ export const stage: StagingFunction<any, any> = (
 		const staging = new Staging<any, any>(args);
 
 		const interactive = args.options.interactive || session.interactive;
-		const connection = await session.connect();
+
+		await session.connect();
+
 		const questions = [
 			{
 				message: 'Enter address: ',
@@ -53,18 +50,21 @@ export const stage: StagingFunction<any, any> = (
 			return;
 		}
 
-		const contract = session.connection.contracts.load<POASchema>(
+		const contract = Contract.load<POASchema>(
 			JSON.parse(POA_ABI),
-			{
-				contractAddress: POA_ADDRESS
-			}
+			POA_ADDRESS
 		);
 
 		const transaction = contract.methods.isNominee(
-			Static.cleanAddress(args.address)
+			{
+				from: session.config.state.defaults.from,
+				gas: session.config.state.defaults.gas,
+				gasPrice: session.config.state.defaults.gasPrice
+			},
+			Utils.cleanAddress(args.address)
 		);
 
-		const response = await transaction.submit();
+		const response = await session.node.callTransaction(transaction);
 
 		resolve(staging.success(response));
 	});

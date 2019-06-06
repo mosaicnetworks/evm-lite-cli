@@ -10,7 +10,7 @@ import * as ASCIITable from 'ascii-table';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import { Transaction, TX, TXReceipt, V3JSONKeyStore } from 'evm-lite-lib';
+import { TransactionReceipt } from 'evm-lite-core';
 
 import Staging, { execute, StagingFunction } from '../classes/Staging';
 
@@ -33,7 +33,7 @@ interface TransactionsGetPrompt {
  *
  * @alpha
  */
-export const stage: StagingFunction<ASCIITable, V3JSONKeyStore> = (
+export const stage: StagingFunction<ASCIITable, any> = (
 	args: Vorpal.Args,
 	session: Session
 ) => {
@@ -81,16 +81,9 @@ export const stage: StagingFunction<ASCIITable, V3JSONKeyStore> = (
 			return;
 		}
 
-		const transaction = new Transaction(
-			{} as TX,
-			session.connection.host,
-			session.connection.port,
-			false
+		const receipt: TransactionReceipt = await session.node.getReceipt(
+			args.hash
 		);
-
-		transaction.hash = args.hash;
-
-		const receipt: TXReceipt = await transaction.receipt;
 		if (!receipt) {
 			resolve(
 				staging.error(
@@ -100,9 +93,6 @@ export const stage: StagingFunction<ASCIITable, V3JSONKeyStore> = (
 			);
 			return;
 		}
-
-		delete receipt.logsBloom;
-		delete receipt.contractAddress;
 
 		if (!formatted) {
 			// @ts-ignore
@@ -120,21 +110,21 @@ export const stage: StagingFunction<ASCIITable, V3JSONKeyStore> = (
 			}
 		}
 
-		const tx = await session.database.transactions.get(args.hash);
-		if (!tx) {
-			resolve(
-				staging.error(
-					Staging.ERRORS.FETCH_FAILED,
-					'Could not find transaction in list.'
-				)
-			);
-			return;
-		}
+		// const tx = await session.database.transactions.get(args.hash);
+		// if (!tx) {
+		// 	resolve(
+		// 		staging.error(
+		// 			Staging.ERRORS.FETCH_FAILED,
+		// 			'Could not find transaction in list.'
+		// 		)
+		// 	);
+		// 	return;
+		// }
 
-		table
-			.addRow('Value', tx.value)
-			.addRow('Gas', tx.gas)
-			.addRow('Gas Price', tx.gasPrice);
+		// table
+		// 	.addRow('Value', tx.value)
+		// 	.addRow('Gas', tx.gas)
+		// 	.addRow('Gas Price', tx.gasPrice);
 
 		// @ts-ignore
 		resolve(staging.success(table));

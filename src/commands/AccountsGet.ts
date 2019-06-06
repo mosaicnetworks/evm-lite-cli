@@ -10,7 +10,7 @@ import * as ASCIITable from 'ascii-table';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import { BaseAccount } from 'evm-lite-lib';
+import { BaseAccount } from 'evm-lite-core';
 
 import Staging, { execute, StagingFunction } from '../classes/Staging';
 
@@ -44,6 +44,7 @@ export const stage: StagingFunction<ASCIITable, BaseAccount> = (
 			args.options.host,
 			args.options.port
 		);
+
 		if (!connection) {
 			resolve(staging.error(Staging.ERRORS.INVALID_CONNECTION));
 			return;
@@ -77,7 +78,7 @@ export const stage: StagingFunction<ASCIITable, BaseAccount> = (
 			return;
 		}
 
-		const account = await connection.accounts.getAccount(args.address);
+		const account = await connection.getAccount(args.address);
 		if (!account) {
 			resolve(
 				staging.error(
@@ -91,10 +92,16 @@ export const stage: StagingFunction<ASCIITable, BaseAccount> = (
 		const table = new ASCIITable().setHeading(
 			'Address',
 			'Balance',
-			'Nonce'
+			'Nonce',
+			'Bytecode'
 		);
 		if (formatted) {
-			table.addRow(account.address, account.balance, account.nonce);
+			table.addRow(
+				account.address,
+				account.balance.toString(10),
+				account.nonce,
+				account.bytecode
+			);
 		}
 
 		resolve(staging.success(formatted ? table : account));

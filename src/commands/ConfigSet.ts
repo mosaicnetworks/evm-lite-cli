@@ -9,7 +9,7 @@
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import { ConfigSchema } from 'evm-lite-lib';
+import { ConfigurationSchema } from 'evm-lite-datadirectory';
 
 import Staging, { execute, StagingFunction } from '../classes/Staging';
 
@@ -38,7 +38,7 @@ export const stage: StagingFunction<string, string> = (
 		const interactive = args.options.interactive || session.interactive;
 		const questions = [];
 
-		function populateQuestions(object: ConfigSchema) {
+		function populateQuestions(object: ConfigurationSchema) {
 			questions.push({
 				default: object.connection.host,
 				message: 'Host',
@@ -69,15 +69,9 @@ export const stage: StagingFunction<string, string> = (
 				name: 'gasPrice',
 				type: 'input'
 			});
-			questions.push({
-				default: object.storage.keystore,
-				message: 'Keystore',
-				name: 'keystore',
-				type: 'input'
-			});
 		}
 
-		populateQuestions(session.config.data);
+		populateQuestions(session.config.state);
 
 		if (interactive) {
 			const answers: any = await inquirer.prompt(questions);
@@ -107,15 +101,12 @@ export const stage: StagingFunction<string, string> = (
 				from: args.options.from,
 				gas: parseInt(args.options.gas, 10),
 				gasPrice: parseInt(args.options.gasPrice, 10)
-			},
-			storage: {
-				keystore: args.options.keystore
 			}
 		};
 
-		const saved = await session.config.save(newConfig);
+		await session.config.save(newConfig);
 
-		resolve(staging.success(saved));
+		resolve(staging.success('Saved new configuration.'));
 	});
 };
 

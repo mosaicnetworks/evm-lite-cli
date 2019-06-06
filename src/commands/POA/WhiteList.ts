@@ -1,11 +1,10 @@
-import * as fs from 'fs';
+import * as ASCIITable from 'ascii-table';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
-import * as ASCIITable from 'ascii-table';
 
-import { Static } from 'evm-lite-lib';
+import { Contract, Utils } from 'evm-lite-core';
 
-import { POA_ABI, POA_ADDRESS, POASchema } from './other/constants';
+import { POA_ABI, POA_ADDRESS, POASchema } from './other/contract';
 
 import Session from '../../classes/Session';
 import Staging, { execute, StagingFunction } from '../../classes/Staging';
@@ -51,7 +50,7 @@ export const stage: StagingFunction<any, any> = (
 			args.options.from = from;
 		}
 
-		if (!args.options.from && !session.config.data.defaults.from) {
+		if (!args.options.from && !session.config.state.defaults.from) {
 			resolve(
 				staging.error(
 					Staging.ERRORS.BLANK_FIELD,
@@ -63,43 +62,51 @@ export const stage: StagingFunction<any, any> = (
 
 		await session.connect();
 
-		const contract = session.connection.contracts.load<POASchema>(
+		const contract = Contract.load<POASchema>(
 			JSON.parse(POA_ABI),
-			{
-				contractAddress: POA_ADDRESS
-			}
+			POA_ADDRESS
 		);
 
-		const transaction = contract.methods
-			.getWhiteListCount()
-			.from(
-				Static.cleanAddress(
-					args.options.from || session.config.data.defaults.from
-				)
-			);
+		const transaction = contract.methods.getWhiteListCount({
+			from: Utils.cleanAddress(
+				args.options.from || session.config.state.defaults.from
+			),
+			gas: session.config.state.defaults.gas,
+			gasPrice: session.config.state.defaults.gasPrice
+		});
 
-		const response: any = await transaction.submit();
+		const response: any = await session.node.callTransaction(transaction);
 		const whiteListCount = parseInt(response as string, 10);
 
 		for (const i of Array(whiteListCount).keys()) {
-			const _transaction = contract.methods
-				.getWhiteListAddressFromIdx(i)
-				.from(
-					Static.cleanAddress(
-						args.options.from || session.config.data.defaults.from
-					)
-				);
+			const _transaction = contract.methods.getWhiteListAddressFromIdx(
+				{
+					from: Utils.cleanAddress(
+						args.options.from || session.config.state.defaults.from
+					),
+					gas: session.config.state.defaults.gas,
+					gasPrice: session.config.state.defaults.gasPrice
+				},
+				i
+			);
 
-			const whiteListAddress: any = await _transaction.submit();
-			const __transaction = contract.methods
-				.getMoniker(whiteListAddress)
-				.from(
-					Static.cleanAddress(
-						args.options.from || session.config.data.defaults.from
-					)
-				);
+			const whiteListAddress: any = await session.node.callTransaction(
+				_transaction
+			);
+			const __transaction = contract.methods.getMoniker(
+				{
+					from: Utils.cleanAddress(
+						args.options.from || session.config.state.defaults.from
+					),
+					gas: session.config.state.defaults.gas,
+					gasPrice: session.config.state.defaults.gasPrice
+				},
+				whiteListAddress
+			);
 
-			const hexMoniker: any = await __transaction.submit();
+			const hexMoniker: any = await session.node.callTransaction(
+				__transaction
+			);
 			const moniker = hexToString(hexMoniker as string);
 
 			table.addRow(moniker, whiteListAddress);

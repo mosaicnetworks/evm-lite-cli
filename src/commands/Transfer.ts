@@ -10,7 +10,8 @@ import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import { Account, Static } from 'evm-lite-lib';
+import { Account } from 'evm-lite-core';
+import { Keystore, Utils } from 'evm-lite-keystore';
 
 import Staging, { execute, StagingFunction } from '../classes/Staging';
 
@@ -90,13 +91,13 @@ export const stage: StagingFunction<string, string> = (
 				type: 'input'
 			},
 			{
-				default: session.config.data.defaults.gas || 100000,
+				default: session.config.state.defaults.gas || 100000,
 				message: 'Gas: ',
 				name: 'gas',
 				type: 'input'
 			},
 			{
-				default: session.config.data.defaults.gasPrice || 0,
+				default: session.config.state.defaults.gasPrice || 0,
 				message: 'Gas Price: ',
 				name: 'gasPrice',
 				type: 'input'
@@ -138,7 +139,7 @@ export const stage: StagingFunction<string, string> = (
 			);
 			args.options.pwd = password;
 		} else {
-			if (!Static.exists(args.options.pwd)) {
+			if (!Utils.exists(args.options.pwd)) {
 				resolve(
 					staging.error(
 						Staging.ERRORS.FILE_NOT_FOUND,
@@ -148,7 +149,7 @@ export const stage: StagingFunction<string, string> = (
 				return;
 			}
 
-			if (Static.isDirectory(args.options.pwd)) {
+			if (Utils.isDirectory(args.options.pwd)) {
 				resolve(
 					staging.error(
 						Staging.ERRORS.IS_DIRECTORY,
@@ -163,7 +164,7 @@ export const stage: StagingFunction<string, string> = (
 
 		let decrypted: Account = null;
 		try {
-			decrypted = connection.accounts.decrypt(keystore, args.options.pwd);
+			decrypted = Keystore.decrypt(keystore, args.options.pwd);
 		} catch (err) {
 			resolve(
 				staging.error(
@@ -189,11 +190,13 @@ export const stage: StagingFunction<string, string> = (
 		tx.to = args.options.to || undefined;
 		tx.value = parseInt(args.options.value, 10) || undefined;
 		tx.gas = parseInt(
-			args.options.gas || session.config.data.defaults.gas || 100000,
+			args.options.gas || session.config.state.defaults.gas || 100000,
 			10
 		);
 		tx.gasPrice = parseInt(
-			args.options.gasPrice || session.config.data.defaults.gasPrice || 0,
+			args.options.gasPrice ||
+				session.config.state.defaults.gasPrice ||
+				0,
 			10
 		);
 
@@ -208,23 +211,22 @@ export const stage: StagingFunction<string, string> = (
 		}
 
 		try {
-			const transaction = (await session.connection.accounts.prepareTransfer(
+			const transaction = Account.prepareTransfer(
+				tx.from,
 				tx.to,
 				tx.value,
-				tx.from
-			))
-				.gas(tx.gas)
-				.gasPrice(tx.gasPrice);
-
-			await transaction.sign(decrypted);
-			await transaction.submit();
-
-			tx.txHash = transaction.hash;
-			tx.date = new Date();
-
-			await session.database.transactions.insert(
-				session.database.transactions.create(tx)
+				tx.gas,
+				tx.gasPrice
 			);
+
+			await connection.sendTransaction(transaction, decrypted);
+
+			// tx.txHash = transaction.hash;
+			// tx.date = new Date();
+
+			// await session.database.transactions.insert(
+			// 	session.database.transactions.create(tx)
+			// );
 
 			resolve(
 				staging.success(`Transaction submitted: ${transaction.hash}`)

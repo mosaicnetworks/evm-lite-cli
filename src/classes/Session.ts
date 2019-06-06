@@ -1,27 +1,20 @@
-import * as path from 'path';
+import * as nodepath from 'path';
 
-import { DataDirectory, EVMLC } from 'evm-lite-lib';
-
-import Globals from './Globals';
+import { EVMLC } from 'evm-lite-core';
+import { DataDirectory } from 'evm-lite-datadirectory';
+import { Keystore } from 'evm-lite-keystore';
 
 export default class Session {
-	public interactive: boolean;
-	public logpath: string;
+	public interactive: boolean = false;
 
-	public directory: DataDirectory;
-	public connection: EVMLC;
+	public directory: DataDirectory<Keystore>;
+	public node: EVMLC = null;
 
-	constructor(dataDirPath: string) {
-		this.interactive = false;
-		this.connection = null;
+	constructor(path: string) {
+		const keystore = new Keystore(nodepath.join(path, 'keystore'));
 
-		this.logpath = path.join(dataDirPath, 'logs');
-
-		this.directory = new DataDirectory(dataDirPath);
-	}
-
-	get database() {
-		return this.directory.database;
+		this.directory = new DataDirectory(path);
+		this.directory.setKeystore(keystore);
 	}
 
 	get keystore() {
@@ -32,42 +25,34 @@ export default class Session {
 		return this.directory.config;
 	}
 
-	public connect(forcedHost?: string, forcedPort?: number): Promise<EVMLC> {
-		const { data } = this.directory.config;
+	public async connect(
+		forcedHost?: string,
+		forcedPort?: number
+	): Promise<EVMLC> {
+		const { state } = this.directory.config;
 
-		const host: string = forcedHost || data.connection.host || '127.0.0.1';
-		const port: number = forcedPort || data.connection.port || 8080;
-		const node = new EVMLC(host, port, {
-			from: data.defaults.from,
-			gas: data.defaults.gas,
-			gasPrice: data.defaults.gasPrice
-		});
+		const host: string = forcedHost || state.connection.host || '127.0.0.1';
+		const port: number = forcedPort || state.connection.port || 8080;
+		const node = new EVMLC(host, port);
 
-		return node
-			.testConnection()
-			.then((success: boolean) => {
-				if (success) {
-					if (
-						this.connection &&
-						this.connection.host === host &&
-						this.connection.port === port
-					) {
-						return this.connection;
-					}
+		try {
+			await node.getInfo();
 
-					if (!forcedHost && !forcedPort) {
-						this.connection = node;
-					}
+			if (
+				this.node &&
+				this.node.host === host &&
+				this.node.port === port
+			) {
+				return this.node;
+			}
+			if (!forcedHost && !forcedPort) {
+				this.node = node;
+			}
 
-					return node;
-				} else {
-					return null;
-				}
-			})
-			.catch(() => {
-				Globals.error('Could not connect to node.');
-
-				return null;
-			});
+			return node;
+		} catch (e) {
+			Promise.reject(new Error('Could not connect to node.'));
+			return null;
+		}
 	}
 }

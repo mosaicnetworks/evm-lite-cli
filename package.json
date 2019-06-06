@@ -13,11 +13,12 @@
 	"dependencies": {
 		"ascii-table": "0.0.9",
 		"chalk": "^2.4.1",
-		"evm-lite-lib": "^0.2.18",
+		"fetch": "^1.1.0",
 		"figlet": "^1.2.0",
 		"inquirer": "^6.3.1",
 		"json-bigint": "^0.3.0",
 		"mkdirp": "^0.5.1",
+		"node": "^12.4.0",
 		"toml": "^2.3.3",
 		"tomlify-j0.4": "^3.0.0",
 		"vorpal": "^1.12.0"

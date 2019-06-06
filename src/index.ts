@@ -12,7 +12,7 @@ import * as figlet from 'figlet';
 import * as mkdir from 'mkdirp';
 import * as Vorpal from 'vorpal';
 
-import { Static } from 'evm-lite-lib';
+import { Utils } from 'evm-lite-keystore';
 
 import Globals, { CommandFunction } from './classes/Globals';
 
@@ -21,7 +21,7 @@ import Session from './classes/Session';
 import AccountsCreate from './commands/AccountsCreate';
 import AccountsGet from './commands/AccountsGet';
 import AccountsList from './commands/AccountsList';
-import AccountsUpdate from './commands/AccountsUpdate';
+// import AccountsUpdate from './commands/AccountsUpdate';
 import Clear from './commands/Clear';
 import ConfigSet from './commands/ConfigSet';
 import ConfigView from './commands/ConfigView';
@@ -29,24 +29,24 @@ import Info from './commands/Info';
 import Interactive from './commands/Interactive';
 // import LogsClear from "./commands/LogsClear";
 // import LogsView from "./commands/LogsView";
-import Test from './commands/Test';
+// import Test from './commands/Test';
 import TransactionsGet from './commands/TransactionsGet';
-import TransactionsList from './commands/TransactionsList';
+// import TransactionsList from './commands/TransactionsList';
 import Transfer from './commands/Transfer';
 
 // POA TEMP
 import POAVote from './commands/POA/Check';
 import POAIsNominee from './commands/POA/IsNominee';
 import POANominate from './commands/POA/Nominate';
+import POANomineeList from './commands/POA/NomineeList';
 import POAShowVotes from './commands/POA/ShowVotes';
 import POACheck from './commands/POA/Vote';
 import POAWhiteList from './commands/POA/WhiteList';
-import POANomineeList from './commands/POA/NomineeList';
 
 const __VERSION = '0.1.1';
 const init = (): Promise<void> => {
 	return new Promise<void>(resolve => {
-		if (!Static.exists(Globals.evmlcDir)) {
+		if (!Utils.exists(Globals.evmlcDir)) {
 			mkdir.mkdirp(Globals.evmlcDir);
 		}
 		resolve();
@@ -67,7 +67,7 @@ init()
 		if (process.argv[2] === '--datadir' || process.argv[2] === '-d') {
 			dataDirPath = process.argv[3];
 
-			if (!Static.exists(process.argv[3])) {
+			if (!Utils.exists(process.argv[3])) {
 				Globals.warning(
 					'Data directory file path provided does' +
 						'not exist and hence will created...'
@@ -96,7 +96,7 @@ init()
 		const evmlc = new Vorpal().version(__VERSION);
 
 		[
-			AccountsUpdate,
+			// AccountsUpdate,
 			ConfigView,
 			ConfigSet,
 			AccountsCreate,
@@ -105,8 +105,8 @@ init()
 			Interactive,
 			Transfer,
 			Info,
-			Test,
-			TransactionsList,
+			// Test,
+			// TransactionsList,
 			TransactionsGet,
 
 			// POA
@@ -136,7 +136,10 @@ init()
 			Globals.warning(` Mode:        Interactive`);
 			Globals.warning(` Data Dir:    ${cli.session.directory.path}`);
 			Globals.info(` Config File: ${cli.session.config.path}`);
-			Globals.info(` Keystore:    ${cli.session.keystore.path}`);
+
+			if (cli.session.keystore) {
+				Globals.info(` Keystore:    ${cli.session.keystore.path}`);
+			}
 
 			const cmdInteractive = cli.instance.find('interactive');
 			if (cmdInteractive) {
