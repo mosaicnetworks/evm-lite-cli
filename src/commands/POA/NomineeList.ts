@@ -4,7 +4,7 @@ import * as Vorpal from 'vorpal';
 
 import { Contract, Utils } from 'evm-lite-core';
 
-import { POA_ABI, POA_ADDRESS, POASchema } from './other/contract';
+import { POASchema } from './other/contract';
 
 import Session from '../../classes/Session';
 import Staging, { execute, StagingFunction } from '../../classes/Staging';
@@ -28,9 +28,10 @@ export const stage: StagingFunction<any, any> = (
 	session: Session
 ) => {
 	return new Promise(async (resolve, reject) => {
+		await session.connect();
 		const staging = new Staging<any, any>(args);
-
 		const interactive = args.options.interactive || session.interactive;
+		const poa = await session.node.getContract();
 		const accounts = await session.keystore.list();
 		const questions = [
 			{
@@ -62,11 +63,7 @@ export const stage: StagingFunction<any, any> = (
 
 		await session.connect();
 
-		const contract = Contract.load<POASchema>(
-			JSON.parse(POA_ABI),
-			POA_ADDRESS
-		);
-
+		const contract = Contract.load<POASchema>(poa.abi, poa.address);
 		const transaction = contract.methods.getNomineeCount({
 			from: Utils.cleanAddress(
 				args.options.from || session.config.state.defaults.from
@@ -79,7 +76,7 @@ export const stage: StagingFunction<any, any> = (
 		const whiteListCount = parseInt(response as string, 10);
 
 		for (const i of Array(whiteListCount).keys()) {
-			const _transaction = contract.methods.getNomineeAddressFromIdx(
+			const tx1 = contract.methods.getNomineeAddressFromIdx(
 				{
 					from: Utils.cleanAddress(
 						args.options.from || session.config.state.defaults.from
@@ -90,10 +87,8 @@ export const stage: StagingFunction<any, any> = (
 				i
 			);
 
-			const nomineeAddress: any = await session.node.callTransaction(
-				_transaction
-			);
-			const __transaction = contract.methods.getMoniker(
+			const nomineeAddress: any = await session.node.callTransaction(tx1);
+			const tx2 = contract.methods.getMoniker(
 				{
 					from: Utils.cleanAddress(
 						args.options.from || session.config.state.defaults.from
@@ -104,9 +99,7 @@ export const stage: StagingFunction<any, any> = (
 				nomineeAddress
 			);
 
-			const hexMoniker: any = await session.node.callTransaction(
-				__transaction
-			);
+			const hexMoniker: any = await session.node.callTransaction(tx2);
 			const moniker = hexToString(hexMoniker as string);
 
 			table.addRow(moniker, nomineeAddress);

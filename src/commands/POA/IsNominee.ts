@@ -4,7 +4,7 @@ import * as Vorpal from 'vorpal';
 
 import { Contract, Utils } from 'evm-lite-core';
 
-import { POA_ABI, POA_ADDRESS, POASchema } from './other/contract';
+import { POASchema } from './other/contract';
 
 import Session from '../../classes/Session';
 import Staging, { execute, StagingFunction } from '../../classes/Staging';
@@ -18,12 +18,11 @@ export const stage: StagingFunction<any, any> = (
 	session: Session
 ) => {
 	return new Promise(async (resolve, reject) => {
-		const staging = new Staging<any, any>(args);
-
-		const interactive = args.options.interactive || session.interactive;
-
 		await session.connect();
 
+		const staging = new Staging<any, any>(args);
+		const interactive = args.options.interactive || session.interactive;
+		const poa = await session.node.getContract();
 		const questions = [
 			{
 				message: 'Enter address: ',
@@ -50,11 +49,7 @@ export const stage: StagingFunction<any, any> = (
 			return;
 		}
 
-		const contract = Contract.load<POASchema>(
-			JSON.parse(POA_ABI),
-			POA_ADDRESS
-		);
-
+		const contract = Contract.load<POASchema>(poa.abi, poa.address);
 		const transaction = contract.methods.isNominee(
 			{
 				from: session.config.state.defaults.from,

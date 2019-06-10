@@ -4,7 +4,7 @@ import * as Vorpal from 'vorpal';
 
 import { Contract, Utils } from 'evm-lite-core';
 
-import { POA_ABI, POA_ADDRESS, POASchema } from './other/contract';
+import { POASchema } from './other/contract';
 
 import Session from '../../classes/Session';
 import Staging, { execute, StagingFunction } from '../../classes/Staging';
@@ -28,8 +28,10 @@ export const stage: StagingFunction<any, any> = (
 	session: Session
 ) => {
 	return new Promise(async (resolve, reject) => {
-		const staging = new Staging<any, any>(args);
+		await session.connect();
 
+		const staging = new Staging<any, any>(args);
+		const poa = await session.node.getContract();
 		const interactive = args.options.interactive || session.interactive;
 		const accounts = await session.keystore.list();
 		const questions = [
@@ -62,11 +64,7 @@ export const stage: StagingFunction<any, any> = (
 
 		await session.connect();
 
-		const contract = Contract.load<POASchema>(
-			JSON.parse(POA_ABI),
-			POA_ADDRESS
-		);
-
+		const contract = Contract.load<POASchema>(poa.abi, poa.address);
 		const transaction = contract.methods.getWhiteListCount({
 			from: Utils.cleanAddress(
 				args.options.from || session.config.state.defaults.from
@@ -79,7 +77,7 @@ export const stage: StagingFunction<any, any> = (
 		const whiteListCount = parseInt(response as string, 10);
 
 		for (const i of Array(whiteListCount).keys()) {
-			const _transaction = contract.methods.getWhiteListAddressFromIdx(
+			const tx1 = contract.methods.getWhiteListAddressFromIdx(
 				{
 					from: Utils.cleanAddress(
 						args.options.from || session.config.state.defaults.from
@@ -91,9 +89,9 @@ export const stage: StagingFunction<any, any> = (
 			);
 
 			const whiteListAddress: any = await session.node.callTransaction(
-				_transaction
+				tx1
 			);
-			const __transaction = contract.methods.getMoniker(
+			const tx2 = contract.methods.getMoniker(
 				{
 					from: Utils.cleanAddress(
 						args.options.from || session.config.state.defaults.from
@@ -104,9 +102,7 @@ export const stage: StagingFunction<any, any> = (
 				whiteListAddress
 			);
 
-			const hexMoniker: any = await session.node.callTransaction(
-				__transaction
-			);
+			const hexMoniker: any = await session.node.callTransaction(tx2);
 			const moniker = hexToString(hexMoniker as string);
 
 			table.addRow(moniker, whiteListAddress);

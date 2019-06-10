@@ -5,7 +5,7 @@ import * as Vorpal from 'vorpal';
 import { Contract, Utils } from 'evm-lite-core';
 import { Keystore } from 'evm-lite-keystore';
 
-import { POA_ABI, POA_ADDRESS, POASchema } from './other/contract';
+import { POASchema } from './other/contract';
 
 import Session from '../../classes/Session';
 import Staging, { execute, StagingFunction } from '../../classes/Staging';
@@ -32,12 +32,12 @@ export const stage: StagingFunction<string, string> = (
 	session: Session
 ) => {
 	return new Promise(async (resolve, reject) => {
-		const staging = new Staging<string, string>(args);
+		await session.connect();
 
+		const staging = new Staging<string, string>(args);
 		const interactive = args.options.interactive || session.interactive;
-		const connection = await session.connect();
+		const poa = await session.node.getContract();
 		const accounts = await session.keystore.list();
-		const fromQ = [];
 		const questions = [
 			{
 				choices: accounts.map(account => account.address),
@@ -118,11 +118,7 @@ export const stage: StagingFunction<string, string> = (
 			args.options.pwd
 		);
 
-		const contract = Contract.load<POASchema>(
-			JSON.parse(POA_ABI),
-			POA_ADDRESS
-		);
-
+		const contract = Contract.load<POASchema>(poa.abi, poa.address);
 		const transaction = contract.methods.submitNominee(
 			{
 				from: args.options.from,
