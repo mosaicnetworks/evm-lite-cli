@@ -4,8 +4,10 @@
 	"description": "A CLI to interact with EVM-Lite node.",
 	"main": "./dist/index.js",
 	"scripts": {
+		"dev": "sh scripts/install.sh",
 		"test": "mocha -r ts-node/register tests/**/*.ts || true",
-		"build": "tsc -p tsconfig.json"
+		"build": "tsc -p tsconfig.json",
+		"clean": "rm -rf node_modules/ && rm -rf dev/ && rm -rf dist/"
 	},
 	"keywords": [],
 	"author": "",

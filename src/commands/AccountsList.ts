@@ -55,7 +55,15 @@ export const stage: StagingFunction<ASCIITable, BaseAccount[]> = (
 
 		const accounts = await Promise.all(
 			(await session.keystore.list()).map(async keystore => {
-				return await connection.getAccount(keystore.address);
+				if (verbose || remote) {
+					return await connection.getAccount(keystore.address);
+				} else {
+					return Promise.resolve({
+						address: keystore.address,
+						balance: 0,
+						nonce: 0
+					});
+				}
 			})
 		);
 
