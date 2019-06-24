@@ -1,13 +1,5 @@
 import * as Chalk from 'chalk';
 import * as path from 'path';
-import * as Vorpal from 'vorpal';
-
-import Session from './Session';
-
-export type CommandFunction = (
-	evmlc: Vorpal,
-	session: Session
-) => Vorpal.Command;
 
 export default class Globals {
 	public static evmlcDir: string = path.join(

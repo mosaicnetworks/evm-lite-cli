@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "sh scripts/install.sh",
 		"test": "mocha -r ts-node/register tests/**/*.ts || true",
-		"build": "tsc -p tsconfig.json",
+		"compile": "tsc -p tsconfig.json",
 		"clean": "rm -rf node_modules/ && rm -rf dev/ && rm -rf dist/"
 	},
 	"keywords": [],
@@ -15,6 +15,9 @@
 	"dependencies": {
 		"ascii-table": "0.0.9",
 		"chalk": "^2.4.1",
+		"evm-lite-core": "^1.0.0-alpha.1",
+		"evm-lite-datadir": "^1.0.0-alpha.1",
+		"evm-lite-keystore": "^1.0.0-alpha.1",
 		"fetch": "^1.1.0",
 		"figlet": "^1.2.0",
 		"inquirer": "^6.3.1",

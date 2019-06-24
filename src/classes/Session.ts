@@ -1,14 +1,14 @@
 import * as nodepath from 'path';
 
 import { EVMLC } from 'evm-lite-core';
-import { DataDirectory } from 'evm-lite-datadirectory';
+import { DataDirectory } from 'evm-lite-datadir';
 import { Keystore } from 'evm-lite-keystore';
 
 export default class Session {
 	public interactive: boolean = false;
 
-	public directory: DataDirectory<Keystore>;
 	public node: EVMLC = null;
+	public directory: DataDirectory<Keystore>;
 
 	constructor(path: string) {
 		const keystore = new Keystore(nodepath.join(path, 'keystore'));
@@ -38,16 +38,7 @@ export default class Session {
 		try {
 			await node.getInfo();
 
-			if (
-				this.node &&
-				this.node.host === host &&
-				this.node.port === port
-			) {
-				return this.node;
-			}
-			if (!forcedHost && !forcedPort) {
-				this.node = node;
-			}
+			this.node = node;
 
 			return node;
 		} catch (e) {

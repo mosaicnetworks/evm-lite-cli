@@ -14,8 +14,7 @@ import * as Vorpal from 'vorpal';
 
 import { Utils } from 'evm-lite-keystore';
 
-import Globals, { CommandFunction } from './classes/Globals';
-
+import Globals from './classes/Globals';
 import Session from './classes/Session';
 
 import AccountsCreate from './commands/AccountsCreate';
@@ -42,6 +41,11 @@ import POANomineeList from './commands/POA/NomineeList';
 import POAShowVotes from './commands/POA/ShowVotes';
 import POACheck from './commands/POA/Vote';
 import POAWhiteList from './commands/POA/WhiteList';
+
+export type CommandFunction = (
+	evmlc: Vorpal,
+	session: Session
+) => Vorpal.Command;
 
 const __VERSION = '0.1.1';
 const init = (): Promise<void> => {

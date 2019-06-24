@@ -9,7 +9,7 @@
 import * as inquirer from 'inquirer';
 import * as Vorpal from 'vorpal';
 
-import { ConfigurationSchema } from 'evm-lite-datadirectory';
+import { ConfigurationSchema } from 'evm-lite-datadir';
 
 import Staging, { execute, StagingFunction } from '../classes/Staging';
 
