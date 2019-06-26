@@ -10,3 +10,4 @@ dist/
 TODO.md
 dev/
 yarn-error.log
+.DS_Store
