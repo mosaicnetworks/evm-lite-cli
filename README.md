@@ -5,12 +5,16 @@ EVM-Lite.
 
 ## Installation
 
+_Not availiable on NPM._
+
+This project is under heavy development and a stable version will be published to `NPM` as soon as it is available.
+
 To begin with, you will need to install Node and NPM, which are bundled together
 in the installation package from the [Node website](https://nodejs.org/en/).
 
-This project was built with Node version 10.10.0 and NPM version 6.1.0.
+This project was built with Node version 10.16.0 (LTS).
 
-### Makefile
+### Development
 
 To download Javascript dependencies and install `evmlc`, run:
 
