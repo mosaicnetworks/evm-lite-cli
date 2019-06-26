@@ -18,8 +18,7 @@
 
 // Requires two different output types
 
-import * as ASCIITable from 'ascii-table';
-import * as JSONBig from 'json-bigint';
+import ASCIITable from 'ascii-table';
 
 import { Args as VorpalArgs } from 'vorpal';
 
@@ -27,24 +26,24 @@ import Globals from './Globals';
 import Session from './Session';
 
 // The output type of the staging command
-export interface StagedOutput<T1, T2> {
+export interface StagedOutput<FormattedType, NormalType> {
 	args: VorpalArgs;
 
 	// The generic output for all three types of commands
-	display?: T1 | T2;
+	display?: FormattedType | NormalType;
 
 	// Errors returned from staging functions are always of type string
 	error?: {
 		type: string;
-		message: string;
+		message?: string;
 	};
 }
 
 // Staging function signature
-export type StagingFunction<T1, T2> = (
+export type StagingFunction<FormattedType, NormalType> = (
 	args: VorpalArgs,
 	session: Session
-) => Promise<StagedOutput<T1, T2>>;
+) => Promise<StagedOutput<FormattedType, NormalType>>;
 
 export default class Staging<T1, T2> {
 	public static ERRORS = {
@@ -69,10 +68,7 @@ export default class Staging<T1, T2> {
 		};
 	}
 
-	public error(
-		type: string,
-		message?: string
-	): StagedOutput<undefined, undefined> {
+	public error(type: string, message?: string): StagedOutput<T1, T2> {
 		return {
 			args: this.args,
 			error: {
@@ -91,7 +87,7 @@ export const execute = <T1, T2>(
 ): Promise<void> => {
 	return new Promise<void>(async resolve => {
 		const output: StagedOutput<T1, T2> = await fn(args, session);
-		let message: string;
+		let message: string = '';
 
 		if (output.display !== undefined) {
 			switch (typeof output.display) {
@@ -102,10 +98,12 @@ export const execute = <T1, T2>(
 					message = output.display;
 					break;
 				case 'object':
-					message =
-						output.display instanceof ASCIITable
-							? output.display.toString()
-							: JSONBig.stringify(output.display);
+					if (output.display instanceof ASCIITable) {
+						// @ts-ignore
+						message = output.display.toString();
+					} else {
+						message = JSON.stringify(output.display);
+					}
 					break;
 			}
 		}

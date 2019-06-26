@@ -1,6 +1,6 @@
-import * as ASCIITable from 'ascii-table';
-import * as inquirer from 'inquirer';
-import * as Vorpal from 'vorpal';
+import ASCIITable from 'ascii-table';
+import inquirer from 'inquirer';
+import Vorpal from 'vorpal';
 
 import { Contract, Utils } from 'evm-lite-core';
 
@@ -28,10 +28,18 @@ export const stage: StagingFunction<any, any> = (
 	session: Session
 ) => {
 	return new Promise(async (resolve, reject) => {
-		await session.connect();
 		const staging = new Staging<any, any>(args);
+
+		const status = await session.connect();
+		if (!status) {
+			staging.error(
+				Staging.ERRORS.INVALID_CONNECTION,
+				'Could not connect to node.'
+			);
+		}
+
 		const interactive = args.options.interactive || session.interactive;
-		const poa = await session.node.getContract();
+		const poa = await session.getPOAContract();
 		const accounts = await session.keystore.list();
 		const questions = [
 			{
@@ -43,7 +51,7 @@ export const stage: StagingFunction<any, any> = (
 		];
 
 		const table = new ASCIITable();
-		table.setHeading('Moniker', 'Address', 'Proposer');
+		table.setHeading('Address');
 
 		if (interactive) {
 			const { from } = await inquirer.prompt(questions);
@@ -75,7 +83,7 @@ export const stage: StagingFunction<any, any> = (
 		const response: any = await session.node.callTransaction(transaction);
 		const whiteListCount = parseInt(response as string, 10);
 
-		for (const i of Array(whiteListCount).keys()) {
+		for (const i of Array.from(Array(whiteListCount).keys())) {
 			const tx1 = contract.methods.getNomineeAddressFromIdx(
 				{
 					from: Utils.cleanAddress(
@@ -102,7 +110,7 @@ export const stage: StagingFunction<any, any> = (
 			const hexMoniker: any = await session.node.callTransaction(tx2);
 			const moniker = hexToString(hexMoniker as string);
 
-			table.addRow(moniker, nomineeAddress);
+			table.addRow(nomineeAddress);
 		}
 
 		resolve(staging.success(table));

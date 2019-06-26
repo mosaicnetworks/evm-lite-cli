@@ -10,7 +10,8 @@
 
 import * as figlet from 'figlet';
 import * as mkdir from 'mkdirp';
-import * as Vorpal from 'vorpal';
+
+import Vorpal from 'vorpal';
 
 import { Utils } from 'evm-lite-keystore';
 
@@ -29,17 +30,17 @@ import Interactive from './commands/Interactive';
 // import LogsClear from "./commands/LogsClear";
 // import LogsView from "./commands/LogsView";
 // import Test from './commands/Test';
-import TransactionsGet from './commands/TransactionsGet';
+// import TransactionsGet from './commands/TransactionsGet';
 // import TransactionsList from './commands/TransactionsList';
 import Transfer from './commands/Transfer';
 
 // POA TEMP
-import POAVote from './commands/POA/Check';
+import POAVote from './commands/POA/Vote';
 import POAIsNominee from './commands/POA/IsNominee';
 import POANominate from './commands/POA/Nominate';
 import POANomineeList from './commands/POA/NomineeList';
 import POAShowVotes from './commands/POA/ShowVotes';
-import POACheck from './commands/POA/Vote';
+import POACheck from './commands/POA/Check';
 import POAWhiteList from './commands/POA/WhiteList';
 
 export type CommandFunction = (
@@ -47,11 +48,10 @@ export type CommandFunction = (
 	session: Session
 ) => Vorpal.Command;
 
-const __VERSION = '0.1.1';
 const init = (): Promise<void> => {
 	return new Promise<void>(resolve => {
 		if (!Utils.exists(Globals.evmlcDir)) {
-			mkdir.mkdirp(Globals.evmlcDir);
+			mkdir.sync(Globals.evmlcDir);
 		}
 		resolve();
 	});
@@ -97,7 +97,7 @@ init()
 		return session;
 	})
 	.then((session: Session) => {
-		const evmlc = new Vorpal().version(__VERSION);
+		const evmlc = new Vorpal();
 
 		[
 			// AccountsUpdate,
@@ -111,7 +111,7 @@ init()
 			Info,
 			// Test,
 			// TransactionsList,
-			TransactionsGet,
+			// TransactionsGet,
 
 			// POA
 			POANominate,

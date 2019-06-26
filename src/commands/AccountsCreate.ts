@@ -1,15 +1,7 @@
-/**
- * @file AccountsCreate.ts
- * @module evm-lite-cli
- * @author Danu Kumanan <https://github.com/danu3006>
- * @author Mosaic Networks <https://github.com/mosaicnetworks>
- * @date 2019
- */
-
 import * as fs from 'fs';
 import * as inquirer from 'inquirer';
-import * as JSONBig from 'json-bigint';
-import * as Vorpal from 'vorpal';
+
+import Vorpal from 'vorpal';
 
 import { Utils, V3JSONKeyStore } from 'evm-lite-keystore';
 
@@ -21,19 +13,6 @@ interface AccountsCreatePrompt {
 	verifyPassword: string;
 }
 
-/**
- * Should return either a Staged error or success.
- *
- * @remarks
- * This staging function will parse all the arguments of the `accounts create`
- * command and resolve a success or an error.
- *
- * @param args - Arguments to the command.
- * @param session - Controls the session of the CLI instance.
- * @returns An object specifying a success or an error.
- *
- * @alpha
- */
 export const stage: StagingFunction<V3JSONKeyStore, string> = (
 	args: Vorpal.Args,
 	session: Session
@@ -95,8 +74,6 @@ export const stage: StagingFunction<V3JSONKeyStore, string> = (
 			args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8').trim();
 		}
 
-		console.log(args);
-
 		const account: V3JSONKeyStore = await session.keystore.create(
 			args.options.pwd
 		);
@@ -105,29 +82,7 @@ export const stage: StagingFunction<V3JSONKeyStore, string> = (
 	});
 };
 
-/**
- * Should construct a Vorpal.Command instance for the command `accounts create`.
- *
- * @remarks
- * Allows you to create and encrypt accounts locally. Created accounts will
- * either be placed in the keystore folder provided by default config file
- * (located at `~/.evmlc/config.toml`) or the config file located in the
- * `--datadir, -d` flag.
- *
- * Usage:
- * `accounts create --verbose --pwd ~/datadir/pwd.txt`
- *
- * Here we have specified to create the account file in `~/datadir/keystore`,
- * encrypt with the `~/datadir/pwd.txt` and once that is done, provide the
- * verbose output of the created account.
- *
- * @param evmlc - The CLI instance.
- * @param session - Controls the session of the CLI instance.
- * @returns The Vorpal.Command instance of `accounts create`.
- *
- * @alpha
- */
-export default function commandAccountsCreate(
+export default function command(
 	evmlc: Vorpal,
 	session: Session
 ): Vorpal.Command {
@@ -147,7 +102,5 @@ export default function commandAccountsCreate(
 		.types({
 			string: ['pwd']
 		})
-		.action(
-			(args: Vorpal.Args): Promise<void> => execute(stage, args, session)
-		);
+		.action((args: Vorpal.Args) => execute(stage, args, session));
 }

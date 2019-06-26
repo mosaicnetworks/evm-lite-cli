@@ -1,4 +1,4 @@
-import * as Vorpal from 'vorpal';
+import Vorpal from 'vorpal';
 
 import Session from '../classes/Session';
 

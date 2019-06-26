@@ -1,6 +1,8 @@
-import * as ASCIITable from 'ascii-table';
-import * as inquirer from 'inquirer';
-import * as Vorpal from 'vorpal';
+// TODO: moniker
+
+import ASCIITable from 'ascii-table';
+import inquirer from 'inquirer';
+import Vorpal from 'vorpal';
 
 import { Contract, Utils } from 'evm-lite-core';
 
@@ -28,10 +30,18 @@ export const stage: StagingFunction<any, any> = (
 	session: Session
 ) => {
 	return new Promise(async (resolve, reject) => {
-		await session.connect();
-
 		const staging = new Staging<any, any>(args);
-		const poa = await session.node.getContract();
+
+		const status = await session.connect();
+
+		if (!status) {
+			staging.error(
+				Staging.ERRORS.INVALID_CONNECTION,
+				'Could not connect to node.'
+			);
+		}
+
+		const poa = await session.getPOAContract();
 		const interactive = args.options.interactive || session.interactive;
 		const accounts = await session.keystore.list();
 		const questions = [
@@ -43,8 +53,7 @@ export const stage: StagingFunction<any, any> = (
 			}
 		];
 
-		const table = new ASCIITable();
-		table.setHeading('Moniker', 'Address');
+		const table = new ASCIITable().setHeading('Address (Moniker)');
 
 		if (interactive) {
 			const { from } = await inquirer.prompt(questions);
@@ -62,53 +71,64 @@ export const stage: StagingFunction<any, any> = (
 			return;
 		}
 
-		await session.connect();
-
 		const contract = Contract.load<POASchema>(poa.abi, poa.address);
-		const transaction = contract.methods.getWhiteListCount({
-			from: Utils.cleanAddress(
-				args.options.from || session.config.state.defaults.from
-			),
-			gas: session.config.state.defaults.gas,
-			gasPrice: session.config.state.defaults.gasPrice
-		});
 
-		const response: any = await session.node.callTransaction(transaction);
-		const whiteListCount = parseInt(response as string, 10);
+		try {
+			const transaction = contract.methods.getWhiteListCount({
+				from: Utils.cleanAddress(
+					args.options.from || session.config.state.defaults.from
+				),
+				gas: session.config.state.defaults.gas,
+				gasPrice: session.config.state.defaults.gasPrice
+			});
 
-		for (const i of Array(whiteListCount).keys()) {
-			const tx1 = contract.methods.getWhiteListAddressFromIdx(
-				{
-					from: Utils.cleanAddress(
-						args.options.from || session.config.state.defaults.from
-					),
-					gas: session.config.state.defaults.gas,
-					gasPrice: session.config.state.defaults.gasPrice
-				},
-				i
+			const response: any = await session.node.callTransaction(
+				transaction
 			);
+			const whiteListCount = parseInt(response as string, 10);
 
-			const whiteListAddress: any = await session.node.callTransaction(
-				tx1
-			);
-			const tx2 = contract.methods.getMoniker(
-				{
-					from: Utils.cleanAddress(
-						args.options.from || session.config.state.defaults.from
-					),
-					gas: session.config.state.defaults.gas,
-					gasPrice: session.config.state.defaults.gasPrice
-				},
-				whiteListAddress
-			);
+			for (const i of Array.from(Array(whiteListCount).keys())) {
+				const tx1 = contract.methods.getWhiteListAddressFromIdx(
+					{
+						from: Utils.cleanAddress(
+							args.options.from ||
+								session.config.state.defaults.from
+						),
+						gas: session.config.state.defaults.gas,
+						gasPrice: session.config.state.defaults.gasPrice
+					},
+					i
+				);
 
-			const hexMoniker: any = await session.node.callTransaction(tx2);
-			const moniker = hexToString(hexMoniker as string);
+				const whiteListAddress: any = await session.node.callTransaction(
+					tx1
+				);
+				const tx2 = contract.methods.getMoniker(
+					{
+						from: Utils.cleanAddress(
+							args.options.from ||
+								session.config.state.defaults.from
+						),
+						gas: session.config.state.defaults.gas,
+						gasPrice: session.config.state.defaults.gasPrice
+					},
+					whiteListAddress
+				);
 
-			table.addRow(moniker, whiteListAddress);
+				const hexMoniker: any = await session.node.callTransaction(tx2);
+				const moniker = hexToString(hexMoniker as string).trim();
+
+				table.addRow(`${whiteListAddress}`);
+			}
+
+			if (whiteListCount === 0) {
+				return resolve(staging.success('No whitelist entries found.'));
+			} else {
+				return resolve(staging.success(table));
+			}
+		} catch (e) {
+			return resolve(staging.error(Staging.ERRORS.OTHER, e.toString()));
 		}
-
-		resolve(staging.success(table));
 	});
 };
 

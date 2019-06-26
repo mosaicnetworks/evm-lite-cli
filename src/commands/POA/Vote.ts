@@ -1,8 +1,7 @@
 // Needs finishing
 
-import * as fs from 'fs';
-import * as inquirer from 'inquirer';
-import * as Vorpal from 'vorpal';
+import inquirer from 'inquirer';
+import Vorpal from 'vorpal';
 
 import { Contract, Utils } from 'evm-lite-core';
 import { Keystore } from 'evm-lite-keystore';
@@ -24,11 +23,18 @@ export const stage: StagingFunction<any, any> = (
 	session: Session
 ) => {
 	return new Promise(async (resolve, reject) => {
-		await session.connect();
-
 		const staging = new Staging<any, any>(args);
+		const status = await session.connect();
+
+		if (!status) {
+			staging.error(
+				Staging.ERRORS.INVALID_CONNECTION,
+				'Could not connect to node.'
+			);
+		}
+
 		const interactive = args.options.interactive || session.interactive;
-		const poa = await session.node.getContract();
+		const poa = await session.getPOAContract();
 		const accounts = await session.keystore.list();
 		const questions = [
 			{
@@ -105,63 +111,71 @@ export const stage: StagingFunction<any, any> = (
 			return;
 		}
 
-		const account = await Keystore.decrypt(
-			await session.keystore.get(args.options.from),
-			args.options.pwd
-		);
-
-		const contract = Contract.load<POASchema>(poa.abi, poa.address);
-
-		const transaction = contract.methods.castNomineeVote(
-			{
-				from: args.options.from || session.config.state.defaults.from,
-				gas: session.config.state.defaults.gas,
-				gasPrice: session.config.state.defaults.gasPrice
-			},
-			Utils.cleanAddress(args.options.address),
-			args.options.verdict
-		);
-
-		console.log(transaction);
-
-		await session.node.sendTransaction(transaction, account);
-
-		const receipt = transaction.receipt;
-		const parsedLogs = receipt.logs;
-
-		console.log(receipt);
-		console.log(parsedLogs);
-
-		if (parsedLogs.length) {
-			let nomineeDecisionEvent: any;
-
-			const nomineeVoteCastEvent = parsedLogs[0];
-
-			if (parsedLogs.length > 1) {
-				nomineeDecisionEvent = parsedLogs[1];
-			}
-			const vote = nomineeVoteCastEvent.args._accepted ? 'Yes' : 'No';
-			let message = `You (${
-				nomineeVoteCastEvent.args._voter
-			}) voted '${vote}' for '${nomineeVoteCastEvent.args._nominee}'. `;
-
-			if (nomineeDecisionEvent) {
-				const accepted = nomineeDecisionEvent.args._accepted
-					? 'Accepted'
-					: 'Rejected';
-
-				message += `Election completed with the nominee being '${accepted}'.`;
-			}
-
-			resolve(staging.success(message));
-		} else {
-			resolve(
-				staging.error(
-					Staging.ERRORS.OTHER,
-					'Looks like the nominee is no longer ' +
-						'pending or you do not have permission.'
-				)
+		try {
+			const account = await Keystore.decrypt(
+				await session.keystore.get(args.options.from),
+				args.options.pwd
 			);
+
+			const contract = Contract.load<POASchema>(poa.abi, poa.address);
+
+			const transaction = contract.methods.castNomineeVote(
+				{
+					from:
+						args.options.from || session.config.state.defaults.from,
+					gas: session.config.state.defaults.gas,
+					gasPrice: session.config.state.defaults.gasPrice
+				},
+				Utils.cleanAddress(args.options.address),
+				args.options.verdict
+			);
+
+			console.log(transaction);
+
+			const receipt = await session.node.sendTransaction(
+				transaction,
+				account
+			);
+			const parsedLogs = receipt.logs;
+
+			console.log(receipt);
+			console.log(parsedLogs);
+
+			if (parsedLogs.length) {
+				let nomineeDecisionEvent: any;
+
+				const nomineeVoteCastEvent = parsedLogs[0];
+
+				if (parsedLogs.length > 1) {
+					nomineeDecisionEvent = parsedLogs[1];
+				}
+				const vote = nomineeVoteCastEvent.args._accepted ? 'Yes' : 'No';
+				let message = `You (${
+					nomineeVoteCastEvent.args._voter
+				}) voted '${vote}' for '${
+					nomineeVoteCastEvent.args._nominee
+				}'. `;
+
+				if (nomineeDecisionEvent) {
+					const accepted = nomineeDecisionEvent.args._accepted
+						? 'Accepted'
+						: 'Rejected';
+
+					message += `Election completed with the nominee being '${accepted}'.`;
+				}
+
+				resolve(staging.success(message));
+			} else {
+				resolve(
+					staging.error(
+						Staging.ERRORS.OTHER,
+						'Looks like the nominee is no longer ' +
+							'pending or you do not have permission.'
+					)
+				);
+			}
+		} catch (e) {
+			resolve(staging.error(Staging.ERRORS.OTHER, e.toString()));
 		}
 	});
 };

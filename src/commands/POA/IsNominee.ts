@@ -1,6 +1,5 @@
-import * as fs from 'fs';
-import * as inquirer from 'inquirer';
-import * as Vorpal from 'vorpal';
+import inquirer from 'inquirer';
+import Vorpal from 'vorpal';
 
 import { Contract, Utils } from 'evm-lite-core';
 
@@ -22,7 +21,7 @@ export const stage: StagingFunction<any, any> = (
 
 		const staging = new Staging<any, any>(args);
 		const interactive = args.options.interactive || session.interactive;
-		const poa = await session.node.getContract();
+		const poa = await session.getPOAContract();
 		const questions = [
 			{
 				message: 'Enter address: ',
@@ -59,9 +58,13 @@ export const stage: StagingFunction<any, any> = (
 			Utils.cleanAddress(args.address)
 		);
 
-		const response = await session.node.callTransaction(transaction);
+		try {
+			const response = await session.node.callTransaction(transaction);
 
-		resolve(staging.success(response));
+			resolve(staging.success(response));
+		} catch (e) {
+			resolve(staging.error(Staging.ERRORS.OTHER, e.toString()));
+		}
 	});
 };
 
@@ -73,7 +76,7 @@ export default function command(
 
 	return evmlc
 		.command('poa isnominee [address]')
-		.alias('p i')
+		.alias('p in')
 		.description(description)
 		.option('-i, --interactive', 'interactive')
 		.types({

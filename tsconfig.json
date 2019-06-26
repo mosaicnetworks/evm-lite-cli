@@ -4,10 +4,11 @@
 		"module": "commonjs",
 		"outDir": "./dist",
 		"declaration": true,
+		"declarationDir": "./dist/typings",
 		"skipLibCheck": true,
+		"esModuleInterop": true,
 		"skipDefaultLibCheck": true,
 		"typeRoots": ["./node_modules/@types", "./types"]
 	},
-	"include": ["src/**/*.ts"],
-	"exclude": ["node_modules", "lib", "test"]
+	"include": ["./src/**/*.ts"]
 }

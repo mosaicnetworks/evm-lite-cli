@@ -4,6 +4,7 @@ A Command Line Interface to interact with
 EVM-Lite.
 
 ## Installation
+
 To begin with, you will need to install Node and NPM, which are bundled together
 in the installation package from the [Node website](https://nodejs.org/en/).
 
@@ -14,7 +15,13 @@ This project was built with Node version 10.10.0 and NPM version 6.1.0.
 To download Javascript dependencies and install `evmlc`, run:
 
 ```
-$ make
+$ npm run dev
+```
+
+or with `yarn`
+
+```
+$ yarn run dev:yarn
 ```
 
 If the `make` was successful you should now be able to run `evmlc`:
@@ -48,12 +55,13 @@ special directory in a default location (`~/.evmlc` on Linux and Mac), where it
 stores any relevant information. In particular, this directory contains the
 following items:
 
- - **config.toml**: where global options are specified. These values may be
-                    overwritten by CLI flags.
- - **keystore**: where all encrypted account keys are stored.
+-   **config.toml**: where global options are specified. These values may be
+    overwritten by CLI flags.
+-   **keystore**: where all encrypted account keys are stored.
 
 Example config.toml:
- ```toml
+
+```toml
 [defaults]
 host = "127.0.0.1"
 port = "8080"
@@ -61,7 +69,7 @@ from = ""
 gas = 100000.0
 gasprice = 0.0
 keystore = "[...]/.evmlc/keystore"
- ```
+```
 
 The easiest way to manage configuration is through the `config` command in
 interactive mode.
@@ -81,6 +89,7 @@ $ evmlc i
 
 evmlc$
 ```
+
 To change default configuration values run `config set` or `c s`. You will be
 taken to an interactive prompt to change connection and default values.
 
@@ -96,6 +105,7 @@ evmlc$ config set
 ```
 
 ## Commands
+
 By default all commands will output raw JSON unless the `-f, --formatted` flag
 is provided. A connection to the node is not required unless stated in each
 command.
@@ -172,7 +182,7 @@ the same transactions in the same order, thereby arriving at the same State.
 
 Restricting EVM-Lite to externally owned accounts makes for an “altcoin” system
 that can only be used to transfer coins. The use of Contract accounts with the
-EVM make it possible to deploy and use *Smart Contracts* which we will explore
+EVM make it possible to deploy and use _Smart Contracts_ which we will explore
 in another document.
 
 #### What is an account file?
@@ -180,13 +190,13 @@ in another document.
 This is best explained in the
 [Ethereum Docs](http://ethdocs.org/en/latest/account-management.html):
 
->Every account is defined by a pair of keys, a private key and public key.
->Accounts are indexed by their address which is derived from the public key by
->taking the last 20 bytes. Every private key/address pair is encoded in a
->keyfile. Keyfiles are JSON text files which you can open and view in any text
->editor. The critical component of the keyfile, your account’s private key, is
->always encrypted, and it is encrypted with the password you enter when you
->create the account.
+> Every account is defined by a pair of keys, a private key and public key.
+> Accounts are indexed by their address which is derived from the public key by
+> taking the last 20 bytes. Every private key/address pair is encoded in a
+> keyfile. Keyfiles are JSON text files which you can open and view in any text
+> editor. The critical component of the keyfile, your account’s private key, is
+> always encrypted, and it is encrypted with the password you enter when you
+> create the account.
 
 ### 3) Start an `evm-lite` node and pre-allocate funds to our address
 
@@ -236,7 +246,6 @@ evmlc$ accounts list -f -v
 The command went through the accounts in the keystore, connected to the node to
 retrieve the corresponding balance, and displayed it nicely on the screen.
 
-
 ### 5) Create another account
 
 ```bash
@@ -284,16 +293,16 @@ It can contain instructions to move coins from one account to another, create a
 new Contract account, or call an existing Contract account. Transactions are
 encoded using the custom Ethereum scheme, RLP, and contain the following fields:
 
-- the recipient of the message,
-- a signature identifying the sender and proving their intention to send the
-transaction.
-- The number of coin to transfer from the sender to the recipient,
-- an optional data field, which can contain the message sent to a contract,
-- a STARTGAS value, representing the maximum number of computational steps the
-transaction execution is allowed to take,
-- a GASPRICE value, representing the fee the sender is willing to pay for gas.
-One unit of gas corresponds to the execution of one atomic instruction, i.e., a
-computational step.
+-   the recipient of the message,
+-   a signature identifying the sender and proving their intention to send the
+    transaction.
+-   The number of coin to transfer from the sender to the recipient,
+-   an optional data field, which can contain the message sent to a contract,
+-   a STARTGAS value, representing the maximum number of computational steps the
+    transaction execution is allowed to take,
+-   a GASPRICE value, representing the fee the sender is willing to pay for gas.
+    One unit of gas corresponds to the execution of one atomic instruction, i.e., a
+    computational step.
 
 ### 7) Check accounts again
 

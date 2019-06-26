@@ -4,10 +4,12 @@
 	"description": "A CLI to interact with EVM-Lite node.",
 	"main": "./dist/index.js",
 	"scripts": {
-		"dev": "sh scripts/install.sh",
-		"test": "mocha -r ts-node/register tests/**/*.ts || true",
-		"compile": "tsc -p tsconfig.json",
-		"clean": "rm -rf node_modules/ && rm -rf dev/ && rm -rf dist/"
+		"build": "tsc -p tsconfig.json",
+		"clean": "rm -rf node_modules/ && rm -rf dist/",
+		"clean:build": "rm -rf dist/",
+		"e": "ts-node src/index",
+		"dev": "npm install && npm run build && npm link",
+		"dev:yarn": "yarn install && yarn run build && yarn link"
 	},
 	"keywords": [],
 	"author": "",
@@ -15,9 +17,9 @@
 	"dependencies": {
 		"ascii-table": "0.0.9",
 		"chalk": "^2.4.1",
-		"evm-lite-core": "^1.0.0-alpha.1",
-		"evm-lite-datadir": "^1.0.0-alpha.1",
-		"evm-lite-keystore": "^1.0.0-alpha.1",
+		"evm-lite-core": "^1.0.0-alpha.3",
+		"evm-lite-datadir": "^1.0.0-alpha.3",
+		"evm-lite-keystore": "^1.0.0-alpha.3",
 		"fetch": "^1.1.0",
 		"figlet": "^1.2.0",
 		"inquirer": "^6.3.1",
@@ -40,8 +42,9 @@
 		"@types/node": "^10.11.0",
 		"chai": "^4.2.0",
 		"mocha": "^5.2.0",
-		"ts-node": "^7.0.1",
+		"ts-node": "^8.3.0",
 		"tslint": "^5.11.0",
+		"tslint-config-airbnb": "^5.11.1",
 		"tslint-config-prettier": "^1.15.0",
 		"typescript": "^3.1.6"
 	},

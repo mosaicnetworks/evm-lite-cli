@@ -1,14 +1,7 @@
-/**
- * @file Transfer.ts
- * @module evm-lite-cli
- * @author Danu Kumanan <https://github.com/danu3006>
- * @author Mosaic Networks <https://github.com/mosaicnetworks>
- * @date 2019
- */
-
 import * as fs from 'fs';
-import * as inquirer from 'inquirer';
-import * as Vorpal from 'vorpal';
+
+import inquirer from 'inquirer';
+import Vorpal from 'vorpal';
 
 import { Account } from 'evm-lite-core';
 import { Keystore, Utils } from 'evm-lite-keystore';
@@ -32,31 +25,18 @@ interface TransferOtherQuestionsPrompt {
 	gasPrice: string;
 }
 
-/**
- * Should return either a Staged error or success.
- *
- * @remarks
- * This staging function will parse all the arguments of the `transfer` command
- * and resolve a success or an error.
- *
- * @param args - Arguments to the command.
- * @param session - Controls the session of the CLI instance.
- * @returns An object specifying a success or an error.
- *
- * @alpha
- */
 export const stage: StagingFunction<string, string> = (
 	args: Vorpal.Args,
 	session: Session
 ) => {
 	return new Promise(async resolve => {
 		const staging = new Staging<string, string>(args);
-
-		const connection = await session.connect(
+		const status = await session.connect(
 			args.options.host,
 			args.options.port
 		);
-		if (!connection) {
+
+		if (!status) {
 			resolve(staging.error(Staging.ERRORS.INVALID_CONNECTION));
 			return;
 		}
@@ -162,7 +142,7 @@ export const stage: StagingFunction<string, string> = (
 			args.options.pwd = fs.readFileSync(args.options.pwd, 'utf8');
 		}
 
-		let decrypted: Account = null;
+		let decrypted: Account;
 		try {
 			decrypted = Keystore.decrypt(keystore, args.options.pwd);
 		} catch (err) {
@@ -219,7 +199,7 @@ export const stage: StagingFunction<string, string> = (
 				tx.gasPrice
 			);
 
-			await connection.sendTransaction(transaction, decrypted);
+			await session.node.sendTransaction(transaction, decrypted);
 
 			// tx.txHash = transaction.hash;
 			// tx.date = new Date();
@@ -239,31 +219,6 @@ export const stage: StagingFunction<string, string> = (
 	});
 };
 
-/**
- * Should construct a Vorpal.Command instance for the command `transfer`.
- *
- * @remarks
- * Allows you to transfer token(s) from one account to another.
- *
- * Usage: `transfer
- * --from 0x583560ee73713a6554c463bd02349841cd79f6e2
- * --to 0x546756ee73713a6554c463bd02349841cd79f6e2
- * --value 200
- * --pwd ~/pwd.txt
- * --gas 1000000
- * --gasprice 0`
- *
- * Here we have requested the transfer of `200` tokens to the specified
- * address from `0x583560ee73713a6554c463bd02349841cd79f6e2`.
- * The default `gas` and `gasprice` can be set in the configuration file
- * to be used for all transfers.
- *
- * @param evmlc - The CLI instance.
- * @param session - Controls the session of the CLI instance.
- * @returns The Vorpal.Command instance of `accounts create`.
- *
- * @alpha
- */
 export default function commandTransfer(evmlc: Vorpal, session: Session) {
 	const description =
 		'Initiate a transfer of token(s) to an address. ' +

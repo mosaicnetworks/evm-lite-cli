@@ -1,6 +1,5 @@
-import * as fs from 'fs';
-import * as inquirer from 'inquirer';
-import * as Vorpal from 'vorpal';
+import inquirer from 'inquirer';
+import Vorpal from 'vorpal';
 
 import { Contract, Utils } from 'evm-lite-core';
 
@@ -18,10 +17,17 @@ export const stage: StagingFunction<any, any> = (
 	session: Session
 ) => {
 	return new Promise(async (resolve, reject) => {
-		await session.connect();
-
 		const staging = new Staging<any, any>(args);
-		const poa = await session.node.getContract();
+		const status = await session.connect();
+
+		if (!status) {
+			staging.error(
+				Staging.ERRORS.INVALID_CONNECTION,
+				'Could not connect to node.'
+			);
+		}
+
+		const poa = await session.getPOAContract();
 		const interactive = args.options.interactive || session.interactive;
 		const questions = [
 			{
@@ -31,7 +37,7 @@ export const stage: StagingFunction<any, any> = (
 			}
 		];
 
-		if (interactive) {
+		if (interactive && !args.address) {
 			const { nominee } = await inquirer.prompt<NominateAnswers>(
 				questions
 			);
@@ -63,11 +69,9 @@ export const stage: StagingFunction<any, any> = (
 
 			console.log(transaction);
 
-			const response = session.node.callTransaction(transaction);
-
+			const response = await session.node.callTransaction(transaction);
 			resolve(staging.success(response));
 		} catch (e) {
-			console.log(e);
 			resolve(e.text);
 		}
 	});
@@ -81,7 +85,7 @@ export default function command(
 
 	return evmlc
 		.command('poa showvotes [address]')
-		.alias('p s')
+		.alias('p sv')
 		.description(description)
 		.option('-i, --interactive', 'interactive')
 		.types({

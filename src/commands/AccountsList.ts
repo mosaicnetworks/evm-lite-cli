@@ -1,33 +1,12 @@
-/**
- * @file AccountsList.ts
- * @module evm-lite-cli
- * @author Danu Kumanan <https://github.com/danu3006>
- * @author Mosaic Networks <https://github.com/mosaicnetworks>
- * @date 2019
- */
+import ASCIITable from 'ascii-table';
+import Vorpal from 'vorpal';
 
-import * as ASCIITable from 'ascii-table';
-import * as Vorpal from 'vorpal';
-
-import { BaseAccount, EVMLC } from 'evm-lite-core';
+import { BaseAccount } from 'evm-lite-core';
 
 import Staging, { execute, StagingFunction } from '../classes/Staging';
 
 import Session from '../classes/Session';
 
-/**
- * Should return either a Staged error or success.
- *
- * @remarks
- * This staging function will parse all the arguments of the `accounts list`
- * command and resolve a success or an error.
- *
- * @param args - Arguments to the command.
- * @param session - Controls the session of the CLI instance.
- * @returns An object specifying a success or an error.
- *
- * @alpha
- */
 export const stage: StagingFunction<ASCIITable, BaseAccount[]> = (
 	args: Vorpal.Args,
 	session: Session
@@ -40,14 +19,13 @@ export const stage: StagingFunction<ASCIITable, BaseAccount[]> = (
 		const formatted = args.options.formatted || false;
 		const table = new ASCIITable();
 
-		let connection: EVMLC | undefined;
-
 		if (verbose || remote) {
-			connection = await session.connect(
+			const status = await session.connect(
 				args.options.host,
 				args.options.port
 			);
-			if (!connection) {
+
+			if (!status) {
 				resolve(staging.error(Staging.ERRORS.INVALID_CONNECTION));
 				return;
 			}
@@ -56,12 +34,13 @@ export const stage: StagingFunction<ASCIITable, BaseAccount[]> = (
 		const accounts = await Promise.all(
 			(await session.keystore.list()).map(async keystore => {
 				if (verbose || remote) {
-					return await connection.getAccount(keystore.address);
+					return await session.node.getAccount(keystore.address);
 				} else {
 					return Promise.resolve({
 						address: keystore.address,
 						balance: 0,
-						nonce: 0
+						nonce: 0,
+						bytecode: ''
 					});
 				}
 			})
@@ -94,28 +73,7 @@ export const stage: StagingFunction<ASCIITable, BaseAccount[]> = (
 	});
 };
 
-/**
- * Should construct a Vorpal.Command instance for the command `accounts list`.
- *
- * @remarks
- * Allows you to list all the accounts either locally or remote. If account
- * details such as balance and nonce are required then the `--verbose, -v`
- * flag should be provided. Local accounts are read from the `keystore`
- * provided in the configuration file.
- *
- * Usage: `accounts list --verbose --formatted`
- *
- * Here we have asked to display the formatted version of all the accounts
- * along with their balance and nonce which is specified by the `verbose` flag.
- * All accounts are sourced from the local keystore.
- *
- * @param evmlc - The CLI instance.
- * @param session - Controls the session of the CLI instance.
- * @returns The Vorpal.Command instance of `accounts get`.
- *
- * @alpha
- */
-export default function commandAccountsList(evmlc: Vorpal, session: Session) {
+export default function command(evmlc: Vorpal, session: Session) {
 	const description =
 		'List all accounts in the local keystore directory provided by the ' +
 		'configuration file. This command will also get a balance and nonce ' +
