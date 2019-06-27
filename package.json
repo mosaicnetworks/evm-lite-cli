@@ -4,6 +4,7 @@
 	"description": "A CLI to interact with EVM-Lite node.",
 	"main": "./dist/index.js",
 	"scripts": {
+		"prepublish": "npm run build",
 		"build": "tsc -p tsconfig.json",
 		"clean": "rm -rf node_modules/ && rm -rf dist/",
 		"clean:build": "rm -rf dist/",
