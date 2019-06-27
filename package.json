@@ -17,6 +17,7 @@
 	"dependencies": {
 		"ascii-table": "0.0.9",
 		"chalk": "^2.4.1",
+		"evm-lite-core": "^1.0.0-alpha.3",
 		"evm-lite-datadir": "^1.0.0-alpha.3",
 		"evm-lite-keystore": "^1.0.0-alpha.3",
 		"fetch": "^1.1.0",
