@@ -5,7 +5,7 @@
  * @module evm-lite-cli
  * @author Danu Kumanan <https://github.com/danu3006>
  * @author Mosaic Networks <https://github.com/mosaicnetworks>
- * @date 2018
+ * @date 2019
  */
 
 require('dotenv').config();
@@ -20,23 +20,31 @@ import { Utils } from 'evm-lite-keystore';
 import Globals from './classes/Globals';
 import Session from './classes/Session';
 
+// Accounts
 import AccountsCreate from './commands/AccountsCreate';
 import AccountsGet from './commands/AccountsGet';
 import AccountsList from './commands/AccountsList';
 // import AccountsUpdate from './commands/AccountsUpdate';
-import Clear from './commands/Clear';
+
+// Config
 import ConfigSet from './commands/ConfigSet';
 import ConfigView from './commands/ConfigView';
+
+// Misc
+import Clear from './commands/Clear';
 import Info from './commands/Info';
 import Interactive from './commands/Interactive';
+
+// Transaction
+import Transfer from './commands/Transfer';
+// import TransactionsGet from './commands/TransactionsGet';
+// import TransactionsList from './commands/TransactionsList';
+
 // import LogsClear from "./commands/LogsClear";
 // import LogsView from "./commands/LogsView";
 // import Test from './commands/Test';
-// import TransactionsGet from './commands/TransactionsGet';
-// import TransactionsList from './commands/TransactionsList';
-import Transfer from './commands/Transfer';
 
-// POA TEMP
+// POA
 import POAVote from './commands/POA/Vote';
 import POAIsNominee from './commands/POA/IsNominee';
 import POANominate from './commands/POA/Nominate';
