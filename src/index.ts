@@ -8,6 +8,8 @@
  * @date 2018
  */
 
+require('dotenv').config();
+
 import * as figlet from 'figlet';
 import * as mkdir from 'mkdirp';
 
