@@ -113,7 +113,11 @@ export const stage: StagingFunction<any, any> = (
 			table.addRow(nomineeAddress);
 		}
 
-		resolve(staging.success(table));
+		if (whiteListCount === 0) {
+			resolve(staging.success('No nominees found.'));
+		} else {
+			resolve(staging.success(table));
+		}
 	});
 };
 
