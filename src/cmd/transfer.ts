@@ -1,47 +1,310 @@
-// import * as inquirer from 'inquirer';
+import * as fs from 'fs';
+import * as inquirer from 'inquirer';
 
-// import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Command, Args } from 'vorpal';
 
-// import Session from '../Session';
-// import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
+import {
+	V3JSONKeyStore,
+	Keystore,
+	Utils as KeystoreUtils
+} from 'evm-lite-keystore';
+import { Utils, Account } from 'evm-lite-core';
 
-// interface Options extends GenericOptions {}
+import Session from '../Session';
+import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
 
-// export interface Arguments extends Args<Options> {
-// 	options: Options;
-// }
+import {
+	InvalidConnection,
+	EmptyKeystoreDirectoryError,
+	InvalidArgumentError,
+	KeystoreNotFoundError,
+	PathNotFoundError,
+	InvalidPathError
+} from '../errors';
 
-// export default function command(evmlc: Vorpal, session: Session): Command {
-// 	const description =
-// 		'Initiate a transfer of token(s) to an address. ' +
-// 		'Default values for gas and gas prices are set in the' +
-// 		' configuration file.';
+interface Options extends GenericOptions {
+	interactive?: boolean;
+	host?: string;
+	port?: number;
+	pwd?: string;
 
-// 	return evmlc
-// 		.command('transfer')
-// 		.alias('t')
-// 		.description(description)
-// 		.option('-i, --interactive', 'enter interactive mode')
-// 		.option('-d, --debug', 'show debug output')
-// 		.option('-v, --value <value>', 'value to send')
-// 		.option('-g, --gas <value>', 'gas')
-// 		.option('-gp, --gasprice <value>', 'gas price')
-// 		.option('-t, --to <address>', 'send to address')
-// 		.option('-f, --from <address>', 'send from address')
-// 		.option('--pwd <password>', 'passphrase file path')
-// 		.option('-h, --host <ip>', 'override config host value')
-// 		.option('-p, --port <port>', 'override config port value')
-// 		.types({
-// 			string: ['t', 'to', 'f', 'from', 'h', 'host', 'pwd']
-// 		})
-// 		.action(
-// 			(args: Arguments): Promise<void> => execute(stage, args, session)
-// 		);
-// }
+	// tx
+	from?: string;
+	to?: string;
+	gas?: number;
+	gasPrice?: number;
+	value?: number;
+}
 
-// export const stage: StagingFunction<Arguments, string, string> = async (
-// 	args: Arguments,
-// 	session: Session
-// ) => {
-// 	// const staging = new Staging<Arguments, string, string>(args);
-// };
+export interface Arguments extends Args<Options> {
+	options: Options;
+}
+
+export default function command(evmlc: Vorpal, session: Session): Command {
+	const description =
+		'Initiate a transfer of token(s) to an address. ' +
+		'Default values for gas and gas prices are set in the' +
+		' configuration file.';
+
+	return evmlc
+		.command('transfer')
+		.alias('t')
+		.description(description)
+		.option('-i, --interactive', 'enter interactive mode')
+		.option('-d, --debug', 'show debug output')
+		.option('-v, --value <value>', 'value to send')
+		.option('-g, --gas <value>', 'gas')
+		.option('-gp, --gasprice <value>', 'gas price')
+		.option('-t, --to <address>', 'send to address')
+		.option('-f, --from <address>', 'send from address')
+		.option('--pwd <password>', 'passphrase file path')
+		.option('-h, --host <ip>', 'override config host value')
+		.option('-p, --port <port>', 'override config port value')
+		.types({
+			string: ['t', 'to', 'f', 'from', 'h', 'host', 'pwd']
+		})
+		.action(
+			(args: Arguments): Promise<void> => execute(stage, args, session)
+		);
+}
+
+interface FirstAnswers {
+	from: string;
+}
+
+interface SecondAnswers {
+	passphrase: string;
+}
+
+interface ThirdAnswers {
+	to: string;
+	value: number;
+	gas: number;
+	gasPrice: number;
+}
+
+interface FourthAnswers {
+	send: boolean;
+}
+
+export const stage: StagingFunction<Arguments, string, string> = async (
+	args: Arguments,
+	session: Session
+) => {
+	const staging = new Staging<Arguments, string, string>(args);
+
+	let passphrase: string = '';
+
+	const status = await session.connect(args.options.host, args.options.port);
+
+	const host = args.options.host || session.config.state.connection.host;
+	const port = args.options.port || session.config.state.connection.port;
+
+	if (!status) {
+		return Promise.reject(
+			new InvalidConnection(
+				`A connection could be establised to ${host}:${port}`
+			)
+		);
+	}
+
+	const interactive = args.options.interactive || session.interactive;
+
+	let keystores: V3JSONKeyStore[];
+
+	staging.debug(
+		`Attempting to read keystore directory at ${session.keystore.path}`
+	);
+
+	try {
+		keystores = await session.keystore.list();
+
+		staging.debug('Reading keystore successful.');
+	} catch (e) {
+		return Promise.reject(e);
+	}
+
+	staging.debug(`Keystores length ${keystores.length}`);
+
+	if (!keystores.length) {
+		return Promise.reject(
+			new EmptyKeystoreDirectoryError(
+				`No accounts found in keystore directory ${
+					session.keystore.path
+				}`
+			)
+		);
+	}
+
+	const first: inquirer.Questions<FirstAnswers> = [
+		{
+			choices: keystores.map(keystore => keystore.address),
+			message: 'From: ',
+			name: 'from',
+			type: 'list'
+		}
+	];
+
+	const second: inquirer.Questions<SecondAnswers> = [
+		{
+			message: 'Enter password: ',
+			name: 'passphrase',
+			type: 'password'
+		}
+	];
+
+	const third: inquirer.Questions<ThirdAnswers> = [
+		{
+			message: 'To',
+			name: 'to',
+			type: 'input'
+		},
+		{
+			default: 100,
+			message: 'Value: ',
+			name: 'value',
+			type: 'number'
+		},
+		{
+			default: session.config.state.defaults.gas || 100000,
+			message: 'Gas: ',
+			name: 'gas',
+			type: 'number'
+		},
+		{
+			default: session.config.state.defaults.gasPrice || 0,
+			message: 'Gas Price: ',
+			name: 'gasPrice',
+			type: 'number'
+		}
+	];
+
+	const fourth: inquirer.Questions<FourthAnswers> = [
+		{
+			message: 'Submit transaction',
+			name: 'send',
+			type: 'confirm'
+		}
+	];
+
+	const tx: any = {};
+
+	if (interactive) {
+		const { from } = await inquirer.prompt<FirstAnswers>(first);
+
+		args.options.from = Utils.cleanAddress(Utils.trimAddress(from));
+	}
+
+	if (!args.options.from) {
+		return Promise.reject(
+			new InvalidArgumentError('Argument `from` not provided.')
+		);
+	}
+
+	let keystore: V3JSONKeyStore;
+
+	try {
+		keystore = await session.keystore.get(args.options.from);
+	} catch (e) {
+		return Promise.reject(
+			new KeystoreNotFoundError(
+				`Could not locate keystore for address ${args.address} in ${
+					session.keystore.path
+				}`
+			)
+		);
+	}
+
+	if (interactive) {
+		const { passphrase: p } = await inquirer.prompt<SecondAnswers>(second);
+
+		passphrase = p.trim();
+	}
+
+	if (!passphrase) {
+		if (!args.options.pwd) {
+			return Promise.reject(
+				new InvalidArgumentError('Passphrase file path not provided.')
+			);
+		}
+
+		if (!KeystoreUtils.exists(args.options.pwd)) {
+			return Promise.reject(
+				new PathNotFoundError(
+					'Old passphrase file path provided does not exist.'
+				)
+			);
+		}
+
+		if (KeystoreUtils.isDirectory(args.options.pwd)) {
+			return Promise.reject(
+				new InvalidPathError(
+					'Old passphrase file path provided is a directory.'
+				)
+			);
+		}
+
+		passphrase = fs.readFileSync(args.options.pwd, 'utf8').trim();
+	}
+
+	let decrypted: Account;
+
+	try {
+		decrypted = Keystore.decrypt(keystore, passphrase);
+	} catch (err) {
+		return Promise.reject(
+			new InvalidArgumentError(
+				'Cannot decrypt account with passphrase provided.'
+			)
+		);
+	}
+
+	if (interactive) {
+		const answers = await inquirer.prompt<ThirdAnswers>(third);
+
+		args.options.to = answers.to;
+		args.options.value = answers.value;
+		args.options.gas = answers.gas;
+		args.options.gasPrice = answers.gasPrice;
+	}
+
+	args.options.gas = args.options.gas || session.config.state.defaults.gas;
+	args.options.gasPrice =
+		args.options.gasPrice || session.config.state.defaults.gasPrice;
+
+	if (!args.options.to || !args.options.value) {
+		return Promise.reject(
+			new InvalidArgumentError(
+				'Provide an address to send to and a value.'
+			)
+		);
+	}
+
+	let send: boolean = true;
+
+	const transaction = Account.prepareTransfer(
+		args.options.from,
+		args.options.to,
+		args.options.value,
+		args.options.gas,
+		args.options.gasPrice
+	);
+
+	console.log(transaction);
+
+	if (interactive) {
+		const { send: s } = await inquirer.prompt<FourthAnswers>(fourth);
+
+		send = s;
+	}
+
+	if (!send) {
+		return Promise.resolve(staging.success('Transaction aborted.'));
+	}
+
+	session.node.sendTransaction(transaction, decrypted);
+
+	return Promise.resolve(
+		staging.success('Transaction submitted successfully.')
+	);
+};

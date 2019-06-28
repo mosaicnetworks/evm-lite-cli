@@ -24,7 +24,9 @@ import configView from './cmd/config-view';
 // Misc
 import clear from './cmd/clear';
 import interactive from './cmd/interactive';
+import transfer from './cmd/transfer';
 import info from './cmd/info';
+import test from './cmd/test';
 
 export type CommandFunction = (evmlc: Vorpal, session: Session) => Command;
 
@@ -92,7 +94,9 @@ init()
 			// misc
 			clear,
 			interactive,
-			info
+			info,
+			test,
+			transfer
 		].forEach((command: CommandFunction) => {
 			command(evmlc, session);
 		});
