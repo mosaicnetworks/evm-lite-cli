@@ -26,6 +26,7 @@ import clear from './cmd/clear';
 import interactive from './cmd/interactive';
 import transfer from './cmd/transfer';
 import info from './cmd/info';
+import version from './cmd/version';
 import test from './cmd/test';
 
 export type CommandFunction = (evmlc: Vorpal, session: Session) => Command;
@@ -96,6 +97,7 @@ init()
 			interactive,
 			info,
 			test,
+			version,
 			transfer
 		].forEach((command: CommandFunction) => {
 			command(evmlc, session);
