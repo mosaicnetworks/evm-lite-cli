@@ -1,56 +1,38 @@
 {
 	"name": "evm-lite-cli",
-	"version": "0.1.1",
-	"description": "A CLI to interact with EVM-Lite node.",
-	"main": "./dist/index.js",
-	"scripts": {
-		"prepublish": "npm run build",
-		"build": "tsc -p tsconfig.json",
-		"clean": "rm -rf node_modules/ && rm -rf dist/",
-		"clean:build": "rm -rf dist/",
-		"e": "ts-node src/index",
-		"dev": "npm install && npm run build && npm link",
-		"dev:yarn": "yarn install && yarn run build && yarn link"
-	},
-	"keywords": [],
-	"author": "",
+	"version": "1.0.0",
+	"main": "index.js",
 	"license": "MIT",
+	"scripts": {
+		"test": "jest",
+		"build": "tsc -p tsconfig.json",
+		"clean": "rm -rf node_modules && rm -rf dist/",
+		"e": "ts-node src/index"
+	},
 	"dependencies": {
-		"ascii-table": "0.0.9",
-		"chalk": "^2.4.1",
-		"evm-lite-core": "^1.0.0-alpha.3",
-		"evm-lite-datadir": "^1.0.0-alpha.3",
-		"evm-lite-keystore": "^1.0.0-alpha.3",
-		"fetch": "^1.1.0",
-		"figlet": "^1.2.0",
-		"inquirer": "^6.3.1",
-		"json-bigint": "^0.3.0",
+		"ascii-table": "^0.0.9",
+		"chalk": "^2.4.2",
+		"dotenv": "^8.0.0",
+		"evm-lite-core": "../evm-lite-lib/packages/core",
+		"evm-lite-datadir": "../evm-lite-lib/packages/datadir",
+		"evm-lite-keystore": "../evm-lite-lib/packages/keystore",
+		"figlet": "^1.2.3",
+		"inquirer": "^6.4.1",
 		"mkdirp": "^0.5.1",
-		"node": "^12.4.0",
-		"toml": "^2.3.3",
-		"tomlify-j0.4": "^3.0.0",
 		"vorpal": "^1.12.0"
 	},
-	"bin": {
-		"evmlc": "./dist/index.js"
-	},
 	"devDependencies": {
-		"@types/chai": "^4.1.6",
-		"@types/chalk": "^2.2.0",
 		"@types/figlet": "^1.2.0",
-		"@types/inquirer": "0.0.43",
-		"@types/lowdb": "^1.0.6",
+		"@types/inquirer": "^6.0.3",
+		"@types/jest": "^24.0.15",
 		"@types/mkdirp": "^0.5.2",
-		"@types/mocha": "^5.2.5",
-		"@types/node": "^10.11.0",
-		"chai": "^4.2.0",
-		"dotenv": "^8.0.0",
-		"mocha": "^5.2.0",
+		"@types/node": "^12.0.10",
+		"jest": "^24.8.0",
+		"ts-jest": "^24.0.2",
 		"ts-node": "^8.3.0",
-		"tslint": "^5.11.0",
+		"tslint": "^5.18.0",
 		"tslint-config-airbnb": "^5.11.1",
-		"tslint-config-prettier": "^1.15.0",
-		"typescript": "^3.1.6"
-	},
-	"typings": "./dist/index.d.ts"
+		"tslint-config-prettier": "^1.18.0",
+		"typescript": "^3.5.2"
+	}
 }

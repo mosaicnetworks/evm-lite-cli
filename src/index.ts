@@ -1,62 +1,32 @@
 #!/usr/bin/env node
 
-/**
- * @file AccountsCreate.ts
- * @module evm-lite-cli
- * @author Danu Kumanan <https://github.com/danu3006>
- * @author Mosaic Networks <https://github.com/mosaicnetworks>
- * @date 2019
- */
-
 require('dotenv').config();
 
 import * as figlet from 'figlet';
 import * as mkdir from 'mkdirp';
 
-import Vorpal from 'vorpal';
+import Vorpal, { Command } from 'vorpal';
 
 import { Utils } from 'evm-lite-keystore';
 
-import Globals from './classes/Globals';
-import Session from './classes/Session';
+import Globals from './Globals';
+import Session from './Session';
 
 // Accounts
-import AccountsCreate from './commands/AccountsCreate';
-import AccountsGet from './commands/AccountsGet';
-import AccountsList from './commands/AccountsList';
-// import AccountsUpdate from './commands/AccountsUpdate';
+import accountsCreate from './cmd/accounts-create';
+import accountsGet from './cmd/accounts-get';
+import accountsList from './cmd/accounts-list';
+import accountsUpdate from './cmd/accounts-Update';
 
 // Config
-import ConfigSet from './commands/ConfigSet';
-import ConfigView from './commands/ConfigView';
+import configView from './cmd/config-view';
 
 // Misc
-import Clear from './commands/Clear';
-import Info from './commands/Info';
-import Interactive from './commands/Interactive';
+import clear from './cmd/clear';
+import interactive from './cmd/interactive';
+import info from './cmd/info';
 
-// Transaction
-import Transfer from './commands/Transfer';
-// import TransactionsGet from './commands/TransactionsGet';
-// import TransactionsList from './commands/TransactionsList';
-
-// import LogsClear from "./commands/LogsClear";
-// import LogsView from "./commands/LogsView";
-// import Test from './commands/Test';
-
-// POA
-import POAVote from './commands/POA/Vote';
-import POAIsNominee from './commands/POA/IsNominee';
-import POANominate from './commands/POA/Nominate';
-import POANomineeList from './commands/POA/NomineeList';
-import POAShowVotes from './commands/POA/ShowVotes';
-import POACheck from './commands/POA/Check';
-import POAWhiteList from './commands/POA/WhiteList';
-
-export type CommandFunction = (
-	evmlc: Vorpal,
-	session: Session
-) => Vorpal.Command;
+export type CommandFunction = (evmlc: Vorpal, session: Session) => Command;
 
 const init = (): Promise<void> => {
 	return new Promise<void>(resolve => {
@@ -110,31 +80,19 @@ init()
 		const evmlc = new Vorpal();
 
 		[
-			// AccountsUpdate,
-			ConfigView,
-			ConfigSet,
-			AccountsCreate,
-			AccountsList,
-			AccountsGet,
-			Interactive,
-			Transfer,
-			Info,
-			// Test,
-			// TransactionsList,
-			// TransactionsGet,
+			// accounts
+			accountsCreate,
+			accountsGet,
+			accountsList,
+			accountsUpdate,
 
-			// POA
-			POANominate,
-			POACheck,
-			POAVote,
-			POAIsNominee,
-			POAShowVotes,
-			POAWhiteList,
-			POANomineeList,
+			// config
+			configView,
 
-			// LogsView,
-			// LogsClear,
-			Clear
+			// misc
+			clear,
+			interactive,
+			info
 		].forEach((command: CommandFunction) => {
 			command(evmlc, session);
 		});

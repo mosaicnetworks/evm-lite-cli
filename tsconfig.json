@@ -5,6 +5,7 @@
 		"outDir": "./dist",
 		"declaration": true,
 		"declarationDir": "./dist/typings",
+		"strict": true,
 		"skipLibCheck": true,
 		"esModuleInterop": true,
 		"skipDefaultLibCheck": true,
