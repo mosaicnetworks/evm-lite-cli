@@ -32,7 +32,7 @@ interface Options extends GenericOptions {
 	from?: string;
 	to?: string;
 	gas?: number;
-	gasPrice?: number;
+	gasprice?: number;
 	value?: number;
 }
 
@@ -265,12 +265,12 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		args.options.to = answers.to;
 		args.options.value = answers.value;
 		args.options.gas = answers.gas;
-		args.options.gasPrice = answers.gasPrice;
+		args.options.gasprice = answers.gasPrice;
 	}
 
 	args.options.gas = args.options.gas || session.config.state.defaults.gas;
-	args.options.gasPrice =
-		args.options.gasPrice || session.config.state.defaults.gasPrice;
+	args.options.gasprice =
+		args.options.gasprice || session.config.state.defaults.gasPrice;
 
 	if (!args.options.to || !args.options.value) {
 		return Promise.reject(
@@ -287,7 +287,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		args.options.to,
 		args.options.value,
 		args.options.gas,
-		args.options.gasPrice
+		args.options.gasprice
 	);
 
 	console.log(transaction);

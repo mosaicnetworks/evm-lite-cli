@@ -20,6 +20,7 @@ import accountsUpdate from './cmd/accounts-Update';
 
 // Config
 import configView from './cmd/config-view';
+import configSet from './cmd/config-set';
 
 // Misc
 import clear from './cmd/clear';
@@ -91,6 +92,7 @@ init()
 
 			// config
 			configView,
+			configSet,
 
 			// misc
 			clear,
