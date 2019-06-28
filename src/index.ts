@@ -22,6 +22,9 @@ import accountsUpdate from './cmd/accounts-Update';
 import configView from './cmd/config-view';
 import configSet from './cmd/config-set';
 
+// poa
+import poaCheck from './cmd/poa-check';
+
 // Misc
 import clear from './cmd/clear';
 import interactive from './cmd/interactive';
@@ -93,6 +96,9 @@ init()
 			// config
 			configView,
 			configSet,
+
+			// poa
+			poaCheck,
 
 			// misc
 			clear,

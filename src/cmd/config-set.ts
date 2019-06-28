@@ -5,12 +5,12 @@ import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
 import inquirer = require('inquirer');
 
 interface Options extends GenericOptions {
-	interactive: boolean;
-	host: string;
-	port: number;
-	from: string;
-	gas: number;
-	gasprice: number;
+	interactive?: boolean;
+	host?: string;
+	port?: number;
+	from?: string;
+	gas?: number;
+	gasprice?: number;
 }
 
 export interface Arguments extends Args<Options> {
@@ -57,6 +57,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 	const staging = new Staging<Arguments, string, string>(args);
 
 	const config = session.config.state;
+
+	staging.debug(`Successfully read configuration at ${session.config.path}`);
 
 	const interactive = args.options.interactive || session.interactive;
 	const questions: inquirer.Questions<Answers> = [
@@ -114,7 +116,11 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		}
 	};
 
+	staging.debug(`Attempting to write new config to ${session.config.path}`);
+
 	await session.config.save(newConfig);
+
+	staging.debug(`Configuration wrriten successfully`);
 
 	console.log(session.config.toTOML());
 

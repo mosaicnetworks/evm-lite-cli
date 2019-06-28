@@ -108,6 +108,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		);
 	}
 
+	staging.debug(`Connected to node at ${host}:${port}`);
+
 	const interactive = args.options.interactive || session.interactive;
 
 	let keystores: V3JSONKeyStore[];
@@ -201,10 +203,14 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		);
 	}
 
+	staging.debug(`Fetching keystore for address ${args.options.from}`);
+
 	let keystore: V3JSONKeyStore;
 
 	try {
 		keystore = await session.keystore.get(args.options.from);
+
+		staging.debug(`Decrypted account ${args.options.from}`);
 	} catch (e) {
 		return Promise.reject(
 			new KeystoreNotFoundError(
@@ -228,6 +234,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 			);
 		}
 
+		staging.debug(`Passphrase path detected`);
+
 		if (!KeystoreUtils.exists(args.options.pwd)) {
 			return Promise.reject(
 				new PathNotFoundError(
@@ -235,6 +243,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 				)
 			);
 		}
+
+		staging.debug(`Passphrase path exists`);
 
 		if (KeystoreUtils.isDirectory(args.options.pwd)) {
 			return Promise.reject(
@@ -245,9 +255,13 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		}
 
 		passphrase = fs.readFileSync(args.options.pwd, 'utf8').trim();
+
+		staging.debug(`Successfully read passphrase from file`);
 	}
 
 	let decrypted: Account;
+
+	staging.debug(`Attempting to decrypt keystore with passphrase`);
 
 	try {
 		decrypted = Keystore.decrypt(keystore, passphrase);
@@ -258,6 +272,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 			)
 		);
 	}
+
+	staging.debug(`Successfully decrypted keystore`);
 
 	if (interactive) {
 		const answers = await inquirer.prompt<ThirdAnswers>(third);
@@ -290,6 +306,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		args.options.gasprice
 	);
 
+	staging.debug(`Generated transaction`);
+
 	console.log(transaction);
 
 	if (interactive) {
@@ -302,7 +320,15 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		return Promise.resolve(staging.success('Transaction aborted.'));
 	}
 
-	session.node.sendTransaction(transaction, decrypted);
+	staging.debug(`Attempting to send transaction`);
+
+	try {
+		await session.node.sendTransaction(transaction, decrypted);
+	} catch (e) {
+		return Promise.reject(e);
+	}
+
+	staging.debug(`Sucessfully submitted transaction to node`);
 
 	return Promise.resolve(
 		staging.success('Transaction submitted successfully.')

@@ -31,7 +31,7 @@ export default class Session {
 	}> {
 		if (process.env.DEBUG) {
 			return {
-				address: '0xabbaabbaabbaabbaabbaabbaabbaabbaabbaabba',
+				address: process.env.CONTRACT_ADDRESS!,
 				abi: JSON.parse(process.env.CONTRACT_ABI!)
 			};
 		}
