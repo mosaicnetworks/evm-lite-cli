@@ -5,6 +5,7 @@
 	"license": "MIT",
 	"scripts": {
 		"test": "jest",
+		"prepublish": "tsc",
 		"build": "tsc -p tsconfig.json",
 		"clean": "rm -rf node_modules && rm -rf dist/",
 		"e": "ts-node src/index"
@@ -34,5 +35,8 @@
 		"tslint-config-airbnb": "^5.11.1",
 		"tslint-config-prettier": "^1.18.0",
 		"typescript": "^3.5.2"
+	},
+	"bin": {
+		"evmlc": "./dist/index.js"
 	}
 }
