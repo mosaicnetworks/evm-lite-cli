@@ -70,6 +70,7 @@ export const stage: StagingFunction<
 	V3JSONKeyStore
 > = async (args: Arguments, session: Session) => {
 	const staging = new Staging<Arguments, V3JSONKeyStore, V3JSONKeyStore>(
+		session.debug,
 		args
 	);
 

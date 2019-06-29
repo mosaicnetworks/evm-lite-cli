@@ -36,7 +36,10 @@ export const stage: StagingFunction<Arguments, ASCIITable, any> = async (
 	args: Arguments,
 	session: Session
 ) => {
-	const staging = new Staging<Arguments, ASCIITable, any>(args);
+	const staging = new Staging<Arguments, ASCIITable, any>(
+		session.debug,
+		args
+	);
 
 	const status = await session.connect(args.options.host, args.options.port);
 

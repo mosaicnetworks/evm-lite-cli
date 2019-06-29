@@ -112,6 +112,12 @@ init()
 	.then(async (cli: { instance: Vorpal; session: Session }) => {
 		if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
 			console.log(figlet.textSync('EVM-Lite CLI', {}));
+
+			if (process.argv[3] === '-d' || process.argv[3] === '--debug') {
+				cli.session.debug = true;
+				Globals.warning(` Debug:        True`);
+			}
+
 			Globals.warning(` Mode:        Interactive`);
 			Globals.warning(` Data Dir:    ${cli.session.directory.path}`);
 			Globals.info(` Config File: ${cli.session.config.path}`);

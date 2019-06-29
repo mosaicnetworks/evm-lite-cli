@@ -56,7 +56,10 @@ export default class Staging<
 	T1,
 	T2
 > {
-	constructor(public readonly args: Arguments) {}
+	constructor(
+		public readonly debugMode: boolean,
+		public readonly args: Arguments
+	) {}
 
 	public success(message: T1 | T2): StagedOutput<Arguments, T1, T2> {
 		return {
@@ -66,7 +69,7 @@ export default class Staging<
 	}
 
 	public debug(message: string): void {
-		if (this.args.options.debug || false) {
+		if (this.args.options.debug || this.debugMode || false) {
 			Globals.warning(`[DEBUG] ${message}`);
 		}
 	}

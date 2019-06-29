@@ -54,7 +54,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
 ) => {
-	const staging = new Staging<Arguments, string, string>(args);
+	const staging = new Staging<Arguments, string, string>(session.debug, args);
 
 	const config = session.config.state;
 

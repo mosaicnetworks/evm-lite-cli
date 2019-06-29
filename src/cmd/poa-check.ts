@@ -55,7 +55,10 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 	args: Arguments,
 	session: Session
 ) => {
-	const staging = new Staging<Arguments, boolean, boolean>(args);
+	const staging = new Staging<Arguments, boolean, boolean>(
+		session.debug,
+		args
+	);
 	const status = await session.connect(args.options.host, args.options.port);
 
 	const host = args.options.host || session.config.state.connection.host;
