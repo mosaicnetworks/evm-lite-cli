@@ -34,6 +34,8 @@ export interface Arguments extends Args<Options> {
 interface NomineeEntry {
 	address: string;
 	moniker: string;
+	upVotes: number;
+	downVotes: number;
 }
 
 export default function command(evmlc: Vorpal, session: Session): Command {
@@ -171,7 +173,9 @@ export const stage: StagingFunction<
 	for (const i of Array.from(Array(nomineeCount).keys())) {
 		const nominee: NomineeEntry = {
 			address: '',
-			moniker: ''
+			moniker: '',
+			upVotes: 0,
+			downVotes: 0
 		};
 
 		const tx = contract.methods.getNomineeAddressFromIdx(
@@ -193,7 +197,11 @@ export const stage: StagingFunction<
 			return Promise.reject(e);
 		}
 
-		staging.debug(`Successfull fetching nominee address for entry ${i}`);
+		staging.debug(
+			`Successfull fetching nominee address for entry ${i} ${
+				nominee.address
+			}`
+		);
 
 		const monikerTx = contract.methods.getMoniker(
 			{
@@ -208,7 +216,9 @@ export const stage: StagingFunction<
 
 		let hex: string;
 
-		staging.debug(`Attempting to fetch nominee moniker for entry ${i}`);
+		staging.debug(
+			`Attempting to fetch moniker for nominee ${nominee.address}`
+		);
 
 		try {
 			hex = await session.node.callTransaction(monikerTx);
@@ -216,11 +226,42 @@ export const stage: StagingFunction<
 			return Promise.reject(e);
 		}
 
-		staging.debug(`Successfull fetching nominee moniker for entry ${i}`);
+		staging.debug(
+			`Successfull fetching moniker for nominee ${nominee.address}`
+		);
 
 		nominee.moniker = Globals.hexToString(hex)
 			.trim()
 			.replace(/\u0000/g, '');
+
+		const votesTransaction = contract.methods.dev_getCurrentNomineeVotes(
+			{
+				from: session.config.state.defaults.from,
+				gas: session.config.state.defaults.gas,
+				gasPrice: session.config.state.defaults.gasPrice
+			},
+			Utils.cleanAddress(nominee.address)
+		);
+
+		staging.debug(
+			`Attempting to fetch votes for nominee ${nominee.address}`
+		);
+
+		let votes: [string, string];
+
+		try {
+			votes = await session.node.callTransaction<[string, string]>(
+				votesTransaction
+			);
+		} catch (e) {
+			return Promise.reject(e);
+		}
+		staging.debug(
+			`Successfull fetching moniker for nominee ${nominee.address}`
+		);
+
+		nominee.upVotes = parseInt(votes[0], 10);
+		nominee.downVotes = parseInt(votes[1], 10);
 
 		nominees.push(nominee);
 	}
@@ -231,14 +272,21 @@ export const stage: StagingFunction<
 		return Promise.resolve(staging.success(nominees));
 	}
 
-	const table = new ASCIITable().setHeading('Moniker', 'Address');
+	const table = new ASCIITable().setHeading(
+		'Moniker',
+		'Address',
+		'Up Votes',
+		'Down Votes'
+	);
 
 	staging.debug(`Generating table for whitelist`);
 
 	for (const entry of nominees) {
 		table.addRow(
 			`${entry.moniker.charAt(0).toUpperCase() + entry.moniker.slice(1)}`,
-			entry.address
+			entry.address,
+			entry.upVotes,
+			entry.downVotes
 		);
 	}
 
