@@ -14,7 +14,7 @@ export interface Arguments extends Args<Options> {
 }
 
 export default function command(evmlc: Vorpal, session: Session): Command {
-	const description = 'Creates an encrypted keypair locally.';
+	const description = 'Displays current version of cli';
 
 	return evmlc
 		.command('version')

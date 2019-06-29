@@ -22,7 +22,7 @@ export default function commandConfigSet(
 	session: Session
 ): Command {
 	const description =
-		'Set values of the configuration inside the data directory.';
+		'Set values of the configuration inside the data directory';
 
 	return evmlc
 		.command('config set')

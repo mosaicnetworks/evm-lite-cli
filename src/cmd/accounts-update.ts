@@ -33,7 +33,7 @@ export interface Arguments extends Args<Options> {
 }
 
 export default function command(evmlc: Vorpal, session: Session): Command {
-	const description = 'Update passphrase for a local account.';
+	const description = 'Update passphrase for a local account';
 
 	return evmlc
 		.command('accounts update [address]')

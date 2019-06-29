@@ -40,7 +40,7 @@ export interface Arguments extends Args<Options> {
 }
 
 export default function command(evmlc: Vorpal, session: Session): Command {
-	const description = 'Vote for an nominee currently in election.';
+	const description = 'Vote for an nominee currently in election';
 
 	return evmlc
 		.command('poa vote [address]')

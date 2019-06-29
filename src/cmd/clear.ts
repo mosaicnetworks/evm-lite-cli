@@ -11,7 +11,7 @@ interface Arguments extends Args<Options> {
 export default function commandClear(evmlc: Vorpal, _: Session) {
 	return evmlc
 		.command('clear')
-		.description('Clears interactive mode console output.')
+		.description('Clears interactive mode console output')
 		.action(
 			(_: Arguments): Promise<void> => {
 				return new Promise<void>(resolve => {
