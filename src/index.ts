@@ -27,6 +27,7 @@ import poaCheck from './cmd/poa-check';
 import poaWhitelist from './cmd/poa-whitelist';
 import poaNomineelist from './cmd/poa-nomineelist';
 import poaNominate from './cmd/poa-nominate';
+import poaVote from './cmd/poa-vote';
 
 // Misc
 import clear from './cmd/clear';
@@ -98,6 +99,7 @@ init()
 			poaWhitelist,
 			poaNomineelist,
 			poaNominate,
+			poaVote,
 
 			// misc
 			clear,
