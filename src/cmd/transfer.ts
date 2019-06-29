@@ -41,10 +41,7 @@ export interface Arguments extends Args<Options> {
 }
 
 export default function command(evmlc: Vorpal, session: Session): Command {
-	const description =
-		'Initiate a transfer of token(s) to an address. ' +
-		'Default values for gas and gas prices are set in the' +
-		' configuration file.';
+	const description = 'Initiate a transfer of token(s) to an address. ';
 
 	return evmlc
 		.command('transfer')
