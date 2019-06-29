@@ -34,11 +34,12 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.alias('p c')
 		.description(description)
 		.option('-i, --interactive', 'enter interactive')
+		.option('-d, --debug', 'show debug output')
 		.option('--from <address>', 'from address')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.types({
-			string: ['_', 'from', 'h', 'host']
+			string: ['_', 'from', 'h', 'host', 'nominee']
 		})
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
@@ -105,7 +106,7 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 	const questions: inquirer.Questions<Answers> = [
 		{
 			choices: keystores.map(keystore => keystore.address),
-			default: Utils.trimAddress(session.config.state.defaults.from),
+			default: Utils.trimHex(session.config.state.defaults.from),
 			message: 'From: ',
 			name: 'from',
 			type: 'list'
@@ -128,7 +129,7 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 		return Promise.reject(new InvalidArgumentError('No address provided.'));
 	}
 
-	args.address = Utils.trimAddress(args.address);
+	args.address = Utils.trimHex(args.address);
 
 	staging.debug(`Address to nominate ${args.address}`);
 

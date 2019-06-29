@@ -189,12 +189,10 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		}
 	];
 
-	const tx: any = {};
-
 	if (interactive) {
 		const { from } = await inquirer.prompt<FirstAnswers>(first);
 
-		args.options.from = Utils.cleanAddress(Utils.trimAddress(from));
+		args.options.from = Utils.cleanAddress(Utils.trimHex(from));
 	}
 
 	if (!args.options.from) {

@@ -44,13 +44,6 @@ const init = (): Promise<void> => {
 	});
 };
 
-/**
- * EVM-Lite Command Line Interface
- *
- * You can enter interactive mode by using the command `interactive, i`.
- * Running any command will provide you with a step by step dialogue to executing
- * that command with the respective options.
- */
 init()
 	.then(() => {
 		let dataDirPath: string = Globals.evmlcDir;

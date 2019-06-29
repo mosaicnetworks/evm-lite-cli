@@ -89,7 +89,7 @@ export const stage: StagingFunction<
 		return Promise.reject(new InvalidArgumentError('No address provided.'));
 	}
 
-	args.address = Utils.trimAddress(args.address);
+	args.address = Utils.trimHex(args.address);
 
 	staging.debug(`Address to fetch ${args.address}`);
 

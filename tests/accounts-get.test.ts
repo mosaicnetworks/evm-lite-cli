@@ -133,10 +133,8 @@ describe('accounts-get.ts', () => {
 		const output = await stage(args, session);
 		const account = output.display as BaseAccount;
 
-		expect(Utils.trimAddress(account.address)).toBe(
-			Utils.trimAddress(address)
-		);
-
+		expect(args.address).toBe(address.slice(2));
+		expect(Utils.trimHex(account.address)).toBe(Utils.trimHex(address));
 		expect(account.balance).not.toBe(undefined);
 		expect(account.nonce).not.toBe(undefined);
 		expect(account.bytecode).not.toBe(undefined);

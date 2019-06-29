@@ -6,6 +6,7 @@ import { Keystore } from 'evm-lite-keystore';
 
 export default class Session {
 	public interactive: boolean = false;
+	public debug: boolean = false;
 
 	public node: EVMLC = new EVMLC('localhost', 8080);
 	public directory: DataDirectory<Keystore>;
