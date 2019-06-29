@@ -3,7 +3,7 @@ import ASCIITable from 'ascii-table';
 import { BaseAccount } from 'evm-lite-core';
 
 import { Arguments, stage } from '../src/cmd/accounts-list';
-import { InvalidConnection } from '../src/errors';
+import { InvalidConnectionError } from '../src/errors';
 
 import { session } from './stage';
 
@@ -20,7 +20,7 @@ describe('accounts-list.ts', () => {
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidConnection).toBe(true);
+			expect(e instanceof InvalidConnectionError).toBe(true);
 		}
 	});
 

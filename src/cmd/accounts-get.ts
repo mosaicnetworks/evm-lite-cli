@@ -8,7 +8,7 @@ import { BaseAccount, Utils } from 'evm-lite-core';
 import Session from '../Session';
 import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
 
-import { InvalidConnection, InvalidArgumentError } from '../errors';
+import { InvalidConnectionError, InvalidArgumentError } from '../errors';
 
 interface Options extends GenericOptions {
 	formatted?: boolean;
@@ -62,7 +62,7 @@ export const stage: StagingFunction<
 
 	if (!status) {
 		return Promise.reject(
-			new InvalidConnection(
+			new InvalidConnectionError(
 				`A connection could be establised to ${host}:${port}`
 			)
 		);

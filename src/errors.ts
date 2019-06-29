@@ -30,7 +30,7 @@ export class InvalidArgumentError extends Error {
 	}
 }
 
-export class InvalidConnection extends Error {
+export class InvalidConnectionError extends Error {
 	constructor(message: string) {
 		super(message);
 

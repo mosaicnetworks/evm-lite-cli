@@ -1,7 +1,7 @@
 import ASCIITable from 'ascii-table';
 
 import { Arguments, stage } from '../src/cmd/accounts-get';
-import { InvalidArgumentError, InvalidConnection } from '../src/errors';
+import { InvalidArgumentError, InvalidConnectionError } from '../src/errors';
 
 import { session } from './stage';
 import { BaseAccount, Utils } from 'evm-lite-core';
@@ -19,7 +19,7 @@ describe('accounts-get.ts', () => {
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidConnection).toBe(true);
+			expect(e instanceof InvalidConnectionError).toBe(true);
 		}
 	});
 

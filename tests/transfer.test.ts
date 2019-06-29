@@ -1,6 +1,6 @@
 import { stage, Arguments } from '../src/cmd/transfer';
 import {
-	InvalidConnection,
+	InvalidConnectionError,
 	EmptyKeystoreDirectoryError,
 	InvalidArgumentError,
 	KeystoreNotFoundError,
@@ -28,7 +28,7 @@ describe('transfer.ts', () => {
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidConnection).toBe(true);
+			expect(e instanceof InvalidConnectionError).toBe(true);
 		}
 	});
 

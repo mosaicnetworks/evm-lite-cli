@@ -11,7 +11,7 @@ import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
 import { Schema } from '../POA';
 
 import {
-	InvalidConnection,
+	InvalidConnectionError,
 	EmptyKeystoreDirectoryError,
 	InvalidArgumentError
 } from '../errors';
@@ -24,10 +24,12 @@ interface Options extends GenericOptions {
 }
 
 export interface Arguments extends Args<Options> {
+	address?: string;
 	options: Options;
 }
+
 export default function command(evmlc: Vorpal, session: Session): Command {
-	const description = 'Check whether a nominee was accepted';
+	const description = 'Check whether an address is on the whitelist';
 
 	return evmlc
 		.command('poa check [address]')
@@ -70,7 +72,7 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 
 	if (!status) {
 		return Promise.reject(
-			new InvalidConnection(
+			new InvalidConnectionError(
 				`A connection could be establised to ${host}:${port}`
 			)
 		);

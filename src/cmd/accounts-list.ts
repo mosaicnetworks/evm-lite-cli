@@ -7,7 +7,7 @@ import { V3JSONKeyStore } from 'evm-lite-keystore';
 import Session from '../Session';
 import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
 
-import { InvalidConnection } from '../errors';
+import { InvalidConnectionError } from '../errors';
 
 interface Options extends GenericOptions {
 	formatted?: boolean;
@@ -64,7 +64,7 @@ export const stage: StagingFunction<
 		);
 
 		return Promise.reject(
-			new InvalidConnection(
+			new InvalidConnectionError(
 				`A connection could be establised to ${host}:${port}.`
 			)
 		);

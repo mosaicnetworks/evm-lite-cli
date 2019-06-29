@@ -1,6 +1,3 @@
-import * as fs from 'fs';
-import * as path from 'path';
-
 import { Account } from 'evm-lite-core';
 
 import { Arguments, stage } from '../src/cmd/accounts-update';
