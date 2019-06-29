@@ -123,7 +123,7 @@ init()
 
 			if (process.argv[3] === '-d' || process.argv[3] === '--debug') {
 				cli.session.debug = true;
-				Globals.warning(` Debug:        True`);
+				Globals.warning(` Debug:       True`);
 			}
 
 			Globals.warning(` Mode:        Interactive`);
