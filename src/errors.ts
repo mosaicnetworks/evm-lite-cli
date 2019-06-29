@@ -54,3 +54,12 @@ export class KeystoreNotFoundError extends Error {
 		this.name = this.constructor.name;
 	}
 }
+
+// Receipt
+export class EmptyTransactionReceiptLogsError extends Error {
+	constructor(message: string) {
+		super(message);
+
+		this.name = this.constructor.name;
+	}
+}

@@ -136,7 +136,7 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 
 	args.address = Utils.trimHex(args.address);
 
-	staging.debug(`Address to nominate ${args.address}`);
+	staging.debug(`Address to check ${args.address}`);
 
 	if (args.address.length !== 40 && args.address.length !== 42) {
 		return Promise.reject(
@@ -144,15 +144,15 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 		);
 	}
 
-	if (!args.options.from && !session.config.state.defaults.from) {
+	const from = args.options.from || session.config.state.defaults.from;
+
+	if (!from) {
 		return Promise.reject(
 			new InvalidArgumentError(
 				'No from address provided or set in config.'
 			)
 		);
 	}
-
-	const from = args.options.from || session.config.state.defaults.from;
 
 	staging.debug(`From address ${from}`);
 

@@ -31,17 +31,17 @@ export interface Arguments extends Args<Options> {
 	options: Options;
 }
 
-interface WhitelistEntry {
+interface NomineeEntry {
 	address: string;
 	moniker: string;
 }
 
 export default function command(evmlc: Vorpal, session: Session): Command {
-	const description = 'List whitelist entries for a connected node';
+	const description = 'List nominees for the connected node';
 
 	return evmlc
-		.command('poa whitelist')
-		.alias('p wl')
+		.command('poa nomineelist')
+		.alias('p nl')
 		.description(description)
 		.option('-i, --interactive', 'interactive')
 		.option('-d, --debug', 'show debug output')
@@ -64,9 +64,9 @@ interface Answers {
 export const stage: StagingFunction<
 	Arguments,
 	ASCIITable,
-	WhitelistEntry[]
+	NomineeEntry[]
 > = async (args: Arguments, session: Session) => {
-	const staging = new Staging<Arguments, ASCIITable, WhitelistEntry[]>(
+	const staging = new Staging<Arguments, ASCIITable, NomineeEntry[]>(
 		session.debug,
 		args
 	);
@@ -133,7 +133,7 @@ export const stage: StagingFunction<
 
 	const from = args.options.from || session.config.state.defaults.from;
 
-	if (from) {
+	if (!from) {
 		return Promise.reject(
 			new InvalidArgumentError(
 				'No from address provided or set in config.'
@@ -145,7 +145,7 @@ export const stage: StagingFunction<
 	staging.debug(`Contract address ${poa.address}`);
 
 	const contract = Contract.load<Schema>(poa.abi, poa.address);
-	const transaction = contract.methods.getWhiteListCount({
+	const transaction = contract.methods.getNomineeCount({
 		from,
 		gas: session.config.state.defaults.gas,
 		gasPrice: session.config.state.defaults.gasPrice
@@ -153,7 +153,9 @@ export const stage: StagingFunction<
 
 	let response: any;
 
-	staging.debug(`Attempting to fetch whitelist count from ${host}:${port}`);
+	staging.debug(
+		`Attempting to fetch nominee list count from ${host}:${port}`
+	);
 
 	try {
 		response = await session.node.callTransaction(transaction);
@@ -161,18 +163,18 @@ export const stage: StagingFunction<
 		return Promise.reject(e);
 	}
 
-	const whitelistCount = response.toNumber();
-	const whitelist: WhitelistEntry[] = [];
+	const nomineeCount = response.toNumber();
+	const nominees: NomineeEntry[] = [];
 
-	staging.debug(`Received whitelist count of ${whitelistCount}`);
+	staging.debug(`Received nominee count of ${nomineeCount}`);
 
-	for (const i of Array.from(Array(whitelistCount).keys())) {
-		const whitelistEntry: WhitelistEntry = {
+	for (const i of Array.from(Array(nomineeCount).keys())) {
+		const nominee: NomineeEntry = {
 			address: '',
 			moniker: ''
 		};
 
-		const tx = contract.methods.getWhiteListAddressFromIdx(
+		const tx = contract.methods.getNomineeAddressFromIdx(
 			{
 				from: Utils.cleanAddress(
 					args.options.from || session.config.state.defaults.from
@@ -183,15 +185,15 @@ export const stage: StagingFunction<
 			i
 		);
 
-		staging.debug(`Attempting to fetch whitelist address for entry ${i}`);
+		staging.debug(`Attempting to fetch nominee address for entry ${i}`);
 
 		try {
-			whitelistEntry.address = await session.node.callTransaction(tx);
+			nominee.address = await session.node.callTransaction(tx);
 		} catch (e) {
 			return Promise.reject(e);
 		}
 
-		staging.debug(`Successfull fetching whitelist address for entry ${i}`);
+		staging.debug(`Successfull fetching nominee address for entry ${i}`);
 
 		const monikerTx = contract.methods.getMoniker(
 			{
@@ -201,12 +203,12 @@ export const stage: StagingFunction<
 				gas: session.config.state.defaults.gas,
 				gasPrice: session.config.state.defaults.gasPrice
 			},
-			whitelistEntry.address
+			nominee.address
 		);
 
 		let hex: string;
 
-		staging.debug(`Attempting to fetch whitelist moniker for entry ${i}`);
+		staging.debug(`Attempting to fetch nominee moniker for entry ${i}`);
 
 		try {
 			hex = await session.node.callTransaction(monikerTx);
@@ -214,26 +216,26 @@ export const stage: StagingFunction<
 			return Promise.reject(e);
 		}
 
-		staging.debug(`Successfull fetching whitelist moniker for entry ${i}`);
+		staging.debug(`Successfull fetching nominee moniker for entry ${i}`);
 
-		whitelistEntry.moniker = Globals.hexToString(hex)
+		nominee.moniker = Globals.hexToString(hex)
 			.trim()
 			.replace(/\u0000/g, '');
 
-		whitelist.push(whitelistEntry);
+		nominees.push(nominee);
 	}
 
-	staging.debug(`Whitelist array populated with length ${whitelist.length}`);
+	staging.debug(`Nominees array populated with length ${nominees.length}`);
 
 	if (!formatted) {
-		return Promise.resolve(staging.success(whitelist));
+		return Promise.resolve(staging.success(nominees));
 	}
 
 	const table = new ASCIITable().setHeading('Moniker', 'Address');
 
 	staging.debug(`Generating table for whitelist`);
 
-	for (const entry of whitelist) {
+	for (const entry of nominees) {
 		table.addRow(
 			`${entry.moniker.charAt(0).toUpperCase() + entry.moniker.slice(1)}`,
 			entry.address

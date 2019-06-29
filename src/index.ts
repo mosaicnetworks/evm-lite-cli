@@ -25,6 +25,8 @@ import configSet from './cmd/config-set';
 // poa
 import poaCheck from './cmd/poa-check';
 import poaWhitelist from './cmd/poa-whitelist';
+import poaNomineelist from './cmd/poa-nomineelist';
+import poaNominate from './cmd/poa-nominate';
 
 // Misc
 import clear from './cmd/clear';
@@ -94,6 +96,8 @@ init()
 			// poa
 			poaCheck,
 			poaWhitelist,
+			poaNomineelist,
+			poaNominate,
 
 			// misc
 			clear,
@@ -139,6 +143,7 @@ init()
 			cli.instance.delimiter('evmlc$').show();
 		} else {
 			const cmdClear = cli.instance.find('clear');
+
 			if (cmdClear) {
 				cmdClear.hidden();
 			}
