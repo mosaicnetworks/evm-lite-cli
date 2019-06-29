@@ -41,7 +41,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.types({
-			string: ['_', 'from', 'h', 'host', 'nominee']
+			string: ['_', 'from', 'h', 'host']
 		})
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
@@ -152,12 +152,14 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 		);
 	}
 
-	staging.debug(`From address ${args.options.from}`);
+	const from = args.options.from || session.config.state.defaults.from;
+
+	staging.debug(`From address ${from}`);
 
 	const contract = Contract.load<Schema>(poa.abi, poa.address);
 	const transaction = contract.methods.checkAuthorised(
 		{
-			from: args.options.from || session.config.state.defaults.from,
+			from,
 			gas: session.config.state.defaults.gas,
 			gasPrice: session.config.state.defaults.gasPrice
 		},

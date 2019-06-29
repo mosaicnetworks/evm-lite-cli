@@ -24,6 +24,7 @@ import configSet from './cmd/config-set';
 
 // poa
 import poaCheck from './cmd/poa-check';
+import poaWhitelist from './cmd/poa-whitelist';
 
 // Misc
 import clear from './cmd/clear';
@@ -92,6 +93,7 @@ init()
 
 			// poa
 			poaCheck,
+			poaWhitelist,
 
 			// misc
 			clear,

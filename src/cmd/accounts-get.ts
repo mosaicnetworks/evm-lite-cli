@@ -55,6 +55,7 @@ export const stage: StagingFunction<
 		session.debug,
 		args
 	);
+
 	const status = await session.connect(args.options.host, args.options.port);
 
 	const host = args.options.host || session.config.state.connection.host;

@@ -1,6 +1,6 @@
 import * as nodepath from 'path';
 
-import { EVMLC, ContractABI } from 'evm-lite-core';
+import { EVMLC, ContractABI, Utils } from 'evm-lite-core';
 import { DataDirectory } from 'evm-lite-datadir';
 import { Keystore } from 'evm-lite-keystore';
 
@@ -32,7 +32,7 @@ export default class Session {
 	}> {
 		if (process.env.DEBUG) {
 			return {
-				address: process.env.CONTRACT_ADDRESS!,
+				address: Utils.trimHex(process.env.CONTRACT_ADDRESS!),
 				abi: JSON.parse(process.env.CONTRACT_ABI!)
 			};
 		}
