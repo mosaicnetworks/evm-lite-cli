@@ -57,5 +57,5 @@ $ evmlc i --debug
     clear                                Clears interactive mode console output.
     info [options]                       Displays information about node
     version                              Creates an encrypted keypair locally.
-    transfer [options]                   Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the configuration file.
+    transfer [options]                   Initiate a transfer of token(s) to an address.
 ```
