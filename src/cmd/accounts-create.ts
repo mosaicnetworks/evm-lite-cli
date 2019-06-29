@@ -101,7 +101,7 @@ export const stage: StagingFunction<
 			);
 		}
 
-		staging.debug(`Passphrase file path detected: ${args.options.pwd}`);
+		staging.debug(`Passphrase file path detected ${args.options.pwd}`);
 
 		if (!Utils.exists(args.options.pwd)) {
 			return Promise.reject(
@@ -111,7 +111,7 @@ export const stage: StagingFunction<
 			);
 		}
 
-		staging.debug(`Passphrase file exists.`);
+		staging.debug(`Passphrase file exists`);
 
 		if (Utils.isDirectory(args.options.pwd)) {
 			return Promise.reject(
@@ -123,11 +123,11 @@ export const stage: StagingFunction<
 
 		passphrase = fs.readFileSync(args.options.pwd, 'utf8').trim();
 
-		staging.debug(`Passphrase read successfully.`);
+		staging.debug(`Passphrase read successfully`);
 	}
 
 	if (args.options.out) {
-		staging.debug(`Output path detected: ${args.options.out}`);
+		staging.debug(`Output path detected ${args.options.out}`);
 
 		if (!Utils.exists(args.options.out)) {
 			return Promise.reject(
@@ -135,7 +135,7 @@ export const stage: StagingFunction<
 			);
 		}
 
-		staging.debug(`Output path exists.`);
+		staging.debug(`Output path exists`);
 
 		if (!Utils.isDirectory(args.options.out)) {
 			return Promise.reject(
@@ -153,7 +153,7 @@ export const stage: StagingFunction<
 
 	staging.debug(
 		`Successfully written encrypted account to ${args.options.out ||
-			session.keystore.path}.`
+			session.keystore.path}`
 	);
 
 	return Promise.resolve(staging.success(account));

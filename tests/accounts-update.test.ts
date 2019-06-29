@@ -12,25 +12,19 @@ import {
 	InvalidPathError
 } from '../src/errors';
 
-import { session, datadir, pwdPath, password, otherPwdPath } from './stage';
+import {
+	session,
+	clearKeystore,
+	pwdPath,
+	password,
+	otherPwdPath
+} from './stage';
 import { V3JSONKeyStore } from 'evm-lite-keystore';
-
-const clearKeystore = () => {
-	const keystore = path.join(datadir, 'keystore');
-	const files = fs.readdirSync(keystore).filter(file => {
-		return !file.startsWith('.');
-	});
-
-	files.forEach(file => {
-		fs.unlinkSync(path.join(keystore, file));
-	});
-};
 
 let keystore: V3JSONKeyStore;
 
-describe('accounts-list.ts', () => {
+describe('accounts-update.ts', () => {
 	it('should throw EmptyKeystoreDirectoryError', async () => {
-		// clear keystore for testing
 		clearKeystore();
 
 		const args: Arguments = {
@@ -45,7 +39,6 @@ describe('accounts-list.ts', () => {
 	});
 
 	it('should throw InvalidArgumentError (empty address)', async () => {
-		// Create account
 		// So one account exists
 		const keystore = await session.keystore.create('danu');
 

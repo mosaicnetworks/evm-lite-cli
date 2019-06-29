@@ -1,8 +1,0 @@
-[connection]
-host = "127.0.0.1"
-port = 8080.0
-
-[defaults]
-from = ""
-gas = 100000.0
-gasPrice = 0.0

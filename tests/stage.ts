@@ -11,3 +11,14 @@ export const password = fs.readFileSync(pwdPath, 'utf8').trim();
 
 export const otherPwdPath = path.join(datadir, 'other_pwd.txt');
 export const otherPassword = fs.readFileSync(pwdPath, 'utf8').trim();
+
+export const clearKeystore = () => {
+	const keystore = path.join(datadir, 'keystore');
+	const files = fs.readdirSync(keystore).filter(file => {
+		return !file.startsWith('.');
+	});
+
+	files.forEach(file => {
+		fs.unlinkSync(path.join(keystore, file));
+	});
+};

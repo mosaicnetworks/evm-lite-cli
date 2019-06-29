@@ -210,7 +210,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 	try {
 		keystore = await session.keystore.get(args.options.from);
 
-		staging.debug(`Decrypted account ${args.options.from}`);
+		staging.debug(`Found keystore for account ${args.options.from}`);
 	} catch (e) {
 		return Promise.reject(
 			new KeystoreNotFoundError(

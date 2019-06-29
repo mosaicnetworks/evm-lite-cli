@@ -81,7 +81,7 @@ export const stage: StagingFunction<
 
 	try {
 		keystores = await session.keystore.list();
-		staging.debug('Reading keystore successful.');
+		staging.debug('Reading keystore successful');
 	} catch (e) {
 		return Promise.reject(e);
 	}

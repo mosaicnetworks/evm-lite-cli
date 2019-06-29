@@ -34,7 +34,7 @@ describe('accounts-create.ts', () => {
 		}
 	});
 
-	it('should throw InvalidPathError (invalid `pwd` path)', async () => {
+	it('should throw InvalidPathError (`pwd` path is directory)', async () => {
 		const args: Arguments = {
 			options: {
 				pwd: '/'
