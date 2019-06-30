@@ -181,13 +181,21 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		);
 	}
 
-	const from = args.options.from || session.config.state.defaults.from;
+	const from = Utils.trimHex(
+		args.options.from || session.config.state.defaults.from
+	);
 
 	if (!from) {
 		return Promise.reject(
 			new InvalidArgumentError(
 				'No from address provided or set in config.'
 			)
+		);
+	}
+
+	if (from.length !== 40) {
+		return Promise.reject(
+			new InvalidArgumentError('`from` address has an invalid length.')
 		);
 	}
 
@@ -205,7 +213,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		if (!KeystoreUtils.exists(args.options.pwd)) {
 			return Promise.reject(
 				new PathNotFoundError(
-					'Old passphrase file path provided does not exist.'
+					'Passphrase file path provided does not exist.'
 				)
 			);
 		}
@@ -215,7 +223,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		if (KeystoreUtils.isDirectory(args.options.pwd)) {
 			return Promise.reject(
 				new InvalidPathError(
-					'Old passphrase file path provided is a directory.'
+					'Passphrase file path provided is a directory.'
 				)
 			);
 		}

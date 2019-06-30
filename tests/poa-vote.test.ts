@@ -1,13 +1,18 @@
-import { stage, Arguments } from '../src/cmd/poa-nomineelist';
+import { Account } from 'evm-lite-core';
+
+import { stage, Arguments } from '../src/cmd/poa-vote';
 import {
 	InvalidConnectionError,
 	EmptyKeystoreDirectoryError,
-	InvalidArgumentError
+	InvalidArgumentError,
+	InvalidPathError,
+	PathNotFoundError,
+	KeystoreNotFoundError
 } from '../src/errors';
 
-import { session, clearKeystore } from './stage';
+import { session, clearKeystore, password, otherPwdPath } from './stage';
 
-describe('poa-nomineelist.ts', () => {
+describe('poa-vote.ts', () => {
 	it('should throw InvalidConnetionError', async () => {
 		const args: Arguments = {
 			options: {
@@ -34,6 +39,36 @@ describe('poa-nomineelist.ts', () => {
 			await stage(args, session);
 		} catch (e) {
 			expect(e instanceof EmptyKeystoreDirectoryError).toBe(true);
+		}
+	});
+
+	it('should throw InvalidArgumentError (no address set)', async () => {
+		const keystore = await session.keystore.create('danu');
+
+		const args: Arguments = {
+			address: '',
+			options: {}
+		};
+
+		try {
+			await stage(args, session);
+		} catch (e) {
+			expect(e instanceof InvalidArgumentError).toBe(true);
+		}
+	});
+
+	it('should throw InvalidArgumentError (no address set)', async () => {
+		const keystore = await session.keystore.create('danu');
+
+		const args: Arguments = {
+			address: '',
+			options: {}
+		};
+
+		try {
+			await stage(args, session);
+		} catch (e) {
+			expect(e instanceof InvalidArgumentError).toBe(true);
 		}
 	});
 
@@ -112,6 +147,42 @@ describe('poa-nomineelist.ts', () => {
 		const args: Arguments = {
 			options: {
 				from: `0x0x${keystore.address.slice(4)}` // 42
+			}
+		};
+
+		try {
+			await stage(args, session);
+		} catch (e) {
+			expect(e instanceof InvalidArgumentError).toBe(true);
+		}
+	});
+
+	it('should throw InvalidArgumentError (no from address)', async () => {
+		// Create account
+		const keystore = await session.keystore.create(password);
+
+		const args: Arguments = {
+			address: keystore.address, // 40
+			options: {
+				from: ''
+			}
+		};
+
+		try {
+			await stage(args, session);
+		} catch (e) {
+			expect(e instanceof InvalidArgumentError).toBe(true);
+		}
+	});
+
+	it('should throw InvalidArgumentError (wrong passphrase)', async () => {
+		// Create account
+		const keystore = await session.keystore.create(password);
+
+		const args: Arguments = {
+			address: keystore.address, // 40
+			options: {
+				pwd: otherPwdPath
 			}
 		};
 
