@@ -141,6 +141,12 @@ export const stage: StagingFunction<
 		);
 	}
 
+	if (from.length !== 40 && from.length !== 42) {
+		return Promise.reject(
+			new InvalidArgumentError('`from` address has an invalid length.')
+		);
+	}
+
 	staging.debug(`From address ${from}`);
 	staging.debug(`Contract address ${poa.address}`);
 

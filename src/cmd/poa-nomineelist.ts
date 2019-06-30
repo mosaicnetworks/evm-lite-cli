@@ -133,13 +133,21 @@ export const stage: StagingFunction<
 		args.options.from = from;
 	}
 
-	const from = args.options.from || session.config.state.defaults.from;
+	let from = Utils.trimHex(
+		args.options.from || session.config.state.defaults.from
+	);
 
 	if (!from) {
 		return Promise.reject(
 			new InvalidArgumentError(
 				'No from address provided or set in config.'
 			)
+		);
+	}
+
+	if (from.length !== 40 && from.length !== 42) {
+		return Promise.reject(
+			new InvalidArgumentError('`from` address has an invalid length.')
 		);
 	}
 
