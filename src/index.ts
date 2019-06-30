@@ -16,7 +16,7 @@ import Session from './Session';
 import accountsCreate from './cmd/accounts-create';
 import accountsGet from './cmd/accounts-get';
 import accountsList from './cmd/accounts-list';
-import accountsUpdate from './cmd/accounts-Update';
+import accountsUpdate from './cmd/accounts-update';
 
 // Config
 import configView from './cmd/config-view';
