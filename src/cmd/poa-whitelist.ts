@@ -133,7 +133,7 @@ export const stage: StagingFunction<
 
 	const from = args.options.from || session.config.state.defaults.from;
 
-	if (from) {
+	if (!from) {
 		return Promise.reject(
 			new InvalidArgumentError(
 				'No from address provided or set in config.'
