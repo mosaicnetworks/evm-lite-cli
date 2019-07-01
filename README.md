@@ -36,16 +36,17 @@ $ npm run i
     accounts create [options]            Creates an encrypted keypair locally
     accounts get [options] [address]     Fetches account details from a connected node
     accounts list [options]              List all accounts in the local keystore directory
-    accounts update [options] [address]  Update passphrase for a local account.
+    accounts update [options] [address]  Update passphrase for a local account
     config view [options]                Output current configuration file
-    config set [options]                 Set values of the configuration inside the data directory.
+    config set [options]                 Set values of the configuration inside the data directory
     poa check [options] [address]        Check whether an address is on the whitelist
     poa whitelist [options]              List whitelist entries for a connected node
     poa nomineelist [options]            List nominees for the connected node
     poa nominate [options] [address]     Nominate an address to proceed to election
-    poa vote [options] [address]         Vote for an nominee currently in election.
-    clear                                Clears interactive mode console output.
+    poa vote [options] [address]         Vote for an nominee currently in election
+    poa info [options]                   Display Proof of Authority information
+    clear                                Clears interactive mode console output
     info [options]                       Displays information about node
-    version                              Creates an encrypted keypair locally.
-    transfer [options]                   Initiate a transfer of token(s) to an address.
+    version                              Displays current version of cli
+    transfer [options]                   Initiate a transfer of token(s) to an address
 ```
