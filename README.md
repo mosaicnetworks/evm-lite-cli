@@ -14,18 +14,8 @@ npm install
 
 then
 
-```
-npm link
-```
-
-You should now be able to run
-
-Debug mode will display useful information for debugging.
-
-You can enter into interactive mode with `--debug` or `-d` for debugging information for all commands or use the flag `--debug` or `-d` with any command.
-
 ```console
-$ evmlc i --debug
+$ npm run i
 
   _______     ____  __       _     _ _          ____ _     ___
  | ____\ \   / /  \/  |     | |   (_) |_ ___   / ___| |   |_ _|
