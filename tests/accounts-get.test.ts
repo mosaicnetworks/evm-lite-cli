@@ -1,15 +1,19 @@
 import ASCIITable from 'ascii-table';
 
-import { Arguments, stage } from '../src/cmd/accounts-get';
-import { InvalidArgumentError, InvalidConnectionError } from '../src/errors';
+import { Account, Utils, BaseAccount } from 'evm-lite-core';
 
 import { session } from './stage';
-import { BaseAccount, Utils } from 'evm-lite-core';
+
+import { Arguments, stage, Output } from '../src/cmd/accounts-get';
+
+import { ACCOUNTS_GET } from '../src/errors/accounts';
+import { EVM_LITE_ERROR, INVALID_CONNECTION } from '../src/errors/generals';
 
 describe('accounts-get.ts', () => {
-	it('should throw InvalidConnetionError', async () => {
+	it('should error with as invalid node conn details', async () => {
+		expect.assertions(3);
+
 		const args: Arguments = {
-			address: '0x989beF689410f079D10b560C64c69aa5b557b105',
 			options: {
 				host: '127.0.0.1',
 				port: 3000
@@ -19,141 +23,158 @@ describe('accounts-get.ts', () => {
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidConnectionError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.host).toBe('127.0.0.1');
+			expect(output.args.options.port).toBe(3000);
+
+			if (output.error) {
+				expect(output.error.type).toBe(INVALID_CONNECTION);
+			}
 		}
 	});
 
-	it('should throw InvalidArgumentError (no arguments)', async () => {
+	it('should error with as [address] is empty', async () => {
+		expect.assertions(4);
+
 		const args: Arguments = {
-			address: '',
 			options: {
 				host: '127.0.0.1',
-				port: 8080
+				port: 8000
 			}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.host).toBe('127.0.0.1');
+			expect(output.args.options.port).toBe(8000);
+			expect(output.args.address).toBe(undefined);
+
+			if (output.error) {
+				expect(output.error.type).toBe(ACCOUNTS_GET.ADDRESS_EMPTY);
+			}
 		}
 	});
 
-	it('should throw InvalidArgumentError ((inc 0x) longer `address`)', async () => {
+	it('should error with as [address] is too short', async () => {
+		expect.assertions(4);
+
+		const account = Account.create();
+
 		const args: Arguments = {
-			address: '0x989beF689410f079D10b560C64c69aa5b557b1057',
+			address: account.address.slice(3),
 			options: {
 				host: '127.0.0.1',
-				port: 8080
+				port: 8000
 			}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.host).toBe('127.0.0.1');
+			expect(output.args.options.port).toBe(8000);
+			expect(output.args.address).toBe(
+				Utils.trimHex(account.address.slice(3))
+			);
+
+			if (output.error) {
+				expect(output.error.type).toBe(
+					ACCOUNTS_GET.ADDRESS_INVALID_LENGTH
+				);
+			}
 		}
 	});
 
-	it('should throw InvalidArgumentError ((inc 0x) shorter `address`)', async () => {
+	it('should error with as [address] is too long', async () => {
+		expect.assertions(4);
+
+		const account = Account.create();
+
 		const args: Arguments = {
-			address: '0x989beF689410f079D10b560C64c69aa5b557b10',
+			address: `${account.address}F`,
 			options: {
 				host: '127.0.0.1',
-				port: 8080
+				port: 8000
 			}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
-		}
-	});
+			const output = e as Output;
 
-	it('should throw InvalidArgumentError ((ex 0x) longer `address`)', async () => {
-		const args: Arguments = {
-			address: '989beF689410f079D10b560C64c69aa5b557b1059',
-			options: {
-				host: '127.0.0.1',
-				port: 8080
+			expect(output.args.options.host).toBe('127.0.0.1');
+			expect(output.args.options.port).toBe(8000);
+			expect(output.args.address).toBe(
+				Utils.trimHex(`${account.address}F`)
+			);
+
+			if (output.error) {
+				expect(output.error.type).toBe(
+					ACCOUNTS_GET.ADDRESS_INVALID_LENGTH
+				);
 			}
-		};
-
-		try {
-			await stage(args, session);
-		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
 		}
 	});
 
-	it('should throw InvalidArgumentError ((ex 0x) shorter `address`)', async () => {
-		const args: Arguments = {
-			address: '989beF689410f079D10b560C64c69aa5b557b10',
-			options: {
-				host: '127.0.0.1',
-				port: 8080
-			}
-		};
+	it('should get account and display in json format', async () => {
+		expect.assertions(8);
 
-		try {
-			await stage(args, session);
-		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
-		}
-	});
-
-	it('should throw InvalidArgumentError ((mul 0x) shorter `address`)', async () => {
-		const args: Arguments = {
-			address: '0x0x989beF689410f079D10b560C64c69aa5b557b1', // length 42
-			options: {
-				host: '127.0.0.1',
-				port: 8080
-			}
-		};
-
-		try {
-			await stage(args, session);
-		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
-		}
-	});
-
-	it('should fetch account with non-formatted output', async () => {
-		const address = '0x989beF689410f079D10b560C64c69aa5b557b105';
+		const account = Account.create();
 
 		const args: Arguments = {
-			address,
+			address: account.address,
 			options: {
 				host: '127.0.0.1',
-				port: 8080
+				port: 8000
 			}
 		};
 
 		const output = await stage(args, session);
-		const account = output.display as BaseAccount;
 
-		expect(args.address).toBe(address.slice(2).toLowerCase());
-		expect(Utils.trimHex(account.address)).toBe(Utils.trimHex(address));
-		expect(account.balance).not.toBe(undefined);
-		expect(account.nonce).not.toBe(undefined);
-		expect(account.bytecode).not.toBe(undefined);
+		expect(output.args.options.host).toBe('127.0.0.1');
+		expect(output.args.options.port).toBe(8000);
+		expect(output.args.address).toBe(Utils.trimHex(account.address));
+
+		let base = output.display! as BaseAccount;
+
+		expect(base).not.toBe(undefined);
+		expect(base.balance).not.toBe(undefined);
+		expect(base.nonce).not.toBe(undefined);
+		expect(base.bytecode).not.toBe(undefined);
+		expect(Utils.cleanAddress(base.address)).toBe(
+			Utils.cleanAddress(output.args.address!)
+		);
 	});
 
-	it('should fetch account with formatted output', async () => {
-		const address = '0x989beF689410f079D10b560C64c69aa5b557b105';
+	it('should get account and display in table format', async () => {
+		expect.assertions(4);
+
+		const account = Account.create();
 
 		const args: Arguments = {
-			address,
+			address: account.address,
 			options: {
 				formatted: true,
 				host: '127.0.0.1',
-				port: 8080
+				port: 8000
 			}
 		};
 
 		const output = await stage(args, session);
 
-		expect(output.display instanceof ASCIITable).toBe(true);
+		expect(output.args.options.host).toBe('127.0.0.1');
+		expect(output.args.options.port).toBe(8000);
+		expect(output.args.address).toBe(Utils.trimHex(account.address));
+
+		let base = output.display!;
+
+		expect(base instanceof ASCIITable).toBe(true);
 	});
 });

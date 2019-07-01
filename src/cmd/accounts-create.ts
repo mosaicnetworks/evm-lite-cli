@@ -6,13 +6,14 @@ import Vorpal, { Command, Args } from 'vorpal';
 import { Utils, V3JSONKeyStore } from 'evm-lite-keystore';
 
 import Session from '../Session';
-import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
+import Staging, {
+	execute,
+	StagingFunction,
+	GenericOptions,
+	StagedOutput
+} from '../Staging';
 
-import {
-	InvalidArgumentError,
-	PathNotFoundError,
-	InvalidPathError
-} from '../errors';
+import { ACCOUNTS_CREATE } from '../errors/accounts';
 
 interface Options extends GenericOptions {
 	interactive?: boolean;
@@ -47,6 +48,8 @@ interface Answers {
 	verifyPassphrase: string;
 }
 
+export type Output = StagedOutput<Arguments, V3JSONKeyStore, V3JSONKeyStore>;
+
 export const stage: StagingFunction<
 	Arguments,
 	V3JSONKeyStore,
@@ -78,7 +81,10 @@ export const stage: StagingFunction<
 
 		if (!(answers.passphrase && answers.verifyPassphrase)) {
 			return Promise.reject(
-				new InvalidArgumentError('Fields cannot be blank.')
+				staging.error(
+					ACCOUNTS_CREATE.PASS_FIELDS_BLANK,
+					'Fields cannot be blank'
+				)
 			);
 		}
 
@@ -86,7 +92,10 @@ export const stage: StagingFunction<
 
 		if (answers.passphrase !== answers.verifyPassphrase) {
 			return Promise.reject(
-				new InvalidArgumentError('Passphrases do not match.')
+				staging.error(
+					ACCOUNTS_CREATE.PASS_DO_NOT_MATCH,
+					'Passphrases do not match'
+				)
 			);
 		}
 
@@ -98,7 +107,10 @@ export const stage: StagingFunction<
 	if (!passphrase) {
 		if (!args.options.pwd) {
 			return Promise.reject(
-				new InvalidArgumentError('No passphrase file path provided.')
+				staging.error(
+					ACCOUNTS_CREATE.PWD_PATH_EMPTY,
+					'No passphrase file path provided'
+				)
 			);
 		}
 
@@ -106,7 +118,8 @@ export const stage: StagingFunction<
 
 		if (!Utils.exists(args.options.pwd)) {
 			return Promise.reject(
-				new PathNotFoundError(
+				staging.error(
+					ACCOUNTS_CREATE.PWD_PATH_NOT_FOUND,
 					'Passphrase file path provided does not exist.'
 				)
 			);
@@ -116,7 +129,8 @@ export const stage: StagingFunction<
 
 		if (Utils.isDirectory(args.options.pwd)) {
 			return Promise.reject(
-				new InvalidPathError(
+				staging.error(
+					ACCOUNTS_CREATE.PWD_IS_DIR,
 					'passphrase file path provided is a directory.'
 				)
 			);
@@ -132,7 +146,10 @@ export const stage: StagingFunction<
 
 		if (!Utils.exists(args.options.out)) {
 			return Promise.reject(
-				new PathNotFoundError('Output path provided does not exist.')
+				staging.error(
+					ACCOUNTS_CREATE.OUT_PATH_NOT_FOUND,
+					'Output path provided does not exist.'
+				)
 			);
 		}
 
@@ -140,7 +157,8 @@ export const stage: StagingFunction<
 
 		if (!Utils.isDirectory(args.options.out)) {
 			return Promise.reject(
-				new InvalidPathError(
+				staging.error(
+					ACCOUNTS_CREATE.OUT_PATH_IS_NOT_DIR,
 					'Output path provided is a not a directory.'
 				)
 			);

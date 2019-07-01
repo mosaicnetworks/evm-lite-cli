@@ -6,9 +6,15 @@ import Vorpal, { Command, Args } from 'vorpal';
 import { BaseAccount, Utils } from 'evm-lite-core';
 
 import Session from '../Session';
-import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
+import Staging, {
+	execute,
+	StagingFunction,
+	GenericOptions,
+	StagedOutput
+} from '../Staging';
 
-import { InvalidConnectionError, InvalidArgumentError } from '../errors';
+import { ACCOUNTS_GET } from '../errors/accounts';
+import { INVALID_CONNECTION, EVM_LITE_ERROR } from '../errors/generals';
 
 interface Options extends GenericOptions {
 	formatted?: boolean;
@@ -46,6 +52,8 @@ interface Answers {
 	address: string;
 }
 
+export type Output = StagedOutput<Arguments, ASCIITable, BaseAccount>;
+
 export const stage: StagingFunction<
 	Arguments,
 	ASCIITable,
@@ -63,7 +71,8 @@ export const stage: StagingFunction<
 
 	if (!status) {
 		return Promise.reject(
-			new InvalidConnectionError(
+			staging.error(
+				INVALID_CONNECTION,
 				`A connection could be establised to ${host}:${port}`
 			)
 		);
@@ -90,16 +99,21 @@ export const stage: StagingFunction<
 	}
 
 	if (!args.address) {
-		return Promise.reject(new InvalidArgumentError('No address provided.'));
+		return Promise.reject(
+			staging.error(ACCOUNTS_GET.ADDRESS_EMPTY, 'No address provided.')
+		);
 	}
 
 	args.address = Utils.trimHex(args.address);
 
 	staging.debug(`Address to fetch ${args.address}`);
 
-	if (args.address.length !== 40 && args.address.length !== 42) {
+	if (args.address.length !== 40) {
 		return Promise.reject(
-			new InvalidArgumentError('Address has an invalid length.')
+			staging.error(
+				ACCOUNTS_GET.ADDRESS_INVALID_LENGTH,
+				'Address has an invalid length.'
+			)
 		);
 	}
 
@@ -110,7 +124,7 @@ export const stage: StagingFunction<
 	try {
 		account = await session.node.getAccount(args.address);
 	} catch (e) {
-		return Promise.reject(e.text);
+		return Promise.reject(staging.error(EVM_LITE_ERROR, e.text));
 	}
 
 	staging.debug(`Successfully fetched account ${account.address}`);

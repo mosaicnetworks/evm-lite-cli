@@ -39,6 +39,12 @@ export interface StagedOutput<
 
 	// The generic output for all three types of commands
 	display?: FormattedType | NormalType;
+
+	// The generic error format
+	error?: {
+		type: string;
+		message: string;
+	};
 }
 
 // Staging function signature
@@ -60,6 +66,19 @@ export default class Staging<
 		public readonly debugMode: boolean,
 		public readonly args: Arguments
 	) {}
+
+	public error(
+		type: string,
+		message: string
+	): StagedOutput<Arguments, T1, T2> {
+		return {
+			args: this.args,
+			error: {
+				type,
+				message
+			}
+		};
+	}
 
 	public success(message: T1 | T2): StagedOutput<Arguments, T1, T2> {
 		return {
@@ -109,7 +128,17 @@ export const execute = <Arguments extends VorpalArgs<GenericOptions>, T1, T2>(
 				`${message.charAt(0).toUpperCase() + message.slice(1)}`
 			);
 		} catch (e) {
-			Globals.error(`${e.toString()}`);
+			// console.log(e);
+			if (e.error.type && e.error.message) {
+				// console.log(e.error);
+				const type = e.error.type as string;
+
+				if (type.startsWith('@evmlc')) {
+					Globals.error(`${e.error.message as string}`);
+				}
+			} else {
+				Globals.error(`${e.toString()}`);
+			}
 		}
 
 		resolve();
