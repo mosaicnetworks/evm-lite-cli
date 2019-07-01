@@ -81,8 +81,6 @@ export const stage: StagingFunction<
 	const formatted = args.options.formatted || false;
 	const interactive = args.options.interactive || session.interactive;
 
-	const poa = await session.getPOAContract();
-
 	if (!status) {
 		return Promise.reject(
 			new InvalidConnectionError(
@@ -90,6 +88,18 @@ export const stage: StagingFunction<
 			)
 		);
 	}
+
+	let poa: { address: string; abi: any[] };
+
+	try {
+		poa = await session.getPOAContract();
+	} catch (e) {
+		staging.debug('POA contract info fetch error');
+
+		return Promise.reject(e);
+	}
+
+	staging.debug('POA contract info fetch successful');
 
 	let keystores: V3JSONKeyStore[];
 
@@ -170,7 +180,7 @@ export const stage: StagingFunction<
 	try {
 		response = await session.node.callTransaction(transaction);
 	} catch (e) {
-		return Promise.reject(e);
+		return Promise.reject(e.text);
 	}
 
 	const nomineeCount = response.toNumber();
@@ -202,7 +212,7 @@ export const stage: StagingFunction<
 		try {
 			nominee.address = await session.node.callTransaction(tx);
 		} catch (e) {
-			return Promise.reject(e);
+			return Promise.reject(e.text);
 		}
 
 		staging.debug(
@@ -231,7 +241,7 @@ export const stage: StagingFunction<
 		try {
 			hex = await session.node.callTransaction(monikerTx);
 		} catch (e) {
-			return Promise.reject(e);
+			return Promise.reject(e.text);
 		}
 
 		staging.debug(
@@ -262,7 +272,7 @@ export const stage: StagingFunction<
 				votesTransaction
 			);
 		} catch (e) {
-			return Promise.reject(e);
+			return Promise.reject(e.text);
 		}
 		staging.debug(
 			`Successfull fetching moniker for nominee ${nominee.address}`

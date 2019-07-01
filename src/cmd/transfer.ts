@@ -320,7 +320,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 	try {
 		await session.node.sendTransaction(transaction, decrypted);
 	} catch (e) {
-		return Promise.reject(e);
+		return Promise.reject(e.text);
 	}
 
 	staging.debug(`Sucessfully submitted transaction to node`);

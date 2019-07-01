@@ -37,7 +37,12 @@ export default class Session {
 			};
 		}
 
-		return await this.node.getPOAContract();
+		const poa = await this.node.getPOAContract();
+		return {
+			...poa,
+			// @ts-ignore
+			abi: JSON.parse(poa.abi as string)
+		};
 	}
 
 	public async connect(

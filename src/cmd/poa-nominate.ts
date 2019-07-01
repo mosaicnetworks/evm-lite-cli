@@ -84,8 +84,6 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	const interactive = args.options.interactive || session.interactive;
 
-	const poa = await session.getPOAContract();
-
 	if (!status) {
 		return Promise.reject(
 			new InvalidConnectionError(
@@ -93,6 +91,18 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 			)
 		);
 	}
+
+	let poa: { address: string; abi: any[] };
+
+	try {
+		poa = await session.getPOAContract();
+	} catch (e) {
+		staging.debug('POA contract info fetch error');
+
+		return Promise.reject(e);
+	}
+
+	staging.debug('POA contract info fetch successful');
 
 	staging.debug(
 		`Successfully connected to ${session.node.host}:${session.node.port}`
@@ -288,7 +298,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 	try {
 		receipt = await session.node.sendTransaction(transaction, decrypted);
 	} catch (e) {
-		return Promise.reject(e);
+		return Promise.reject(e.text);
 	}
 
 	if (!receipt.logs.length) {

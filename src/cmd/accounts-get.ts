@@ -110,7 +110,7 @@ export const stage: StagingFunction<
 	try {
 		account = await session.node.getAccount(args.address);
 	} catch (e) {
-		return Promise.reject(e);
+		return Promise.reject(e.text);
 	}
 
 	staging.debug(`Successfully fetched account ${account.address}`);

@@ -109,7 +109,7 @@ export const execute = <Arguments extends VorpalArgs<GenericOptions>, T1, T2>(
 				`${message.charAt(0).toUpperCase() + message.slice(1)}`
 			);
 		} catch (e) {
-			Globals.error(`${e.toString() || 'ERROR_NOT_SPECIFIED'}`);
+			Globals.error(`${e.toString()}`);
 		}
 
 		resolve();

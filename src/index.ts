@@ -24,6 +24,7 @@ import configSet from './cmd/config-set';
 
 // poa
 import poaCheck from './cmd/poa-check';
+import poaInfo from './cmd/poa-info';
 import poaWhitelist from './cmd/poa-whitelist';
 import poaNomineelist from './cmd/poa-nomineelist';
 import poaNominate from './cmd/poa-nominate';
@@ -100,6 +101,7 @@ init()
 			poaNomineelist,
 			poaNominate,
 			poaVote,
+			poaInfo,
 
 			// misc
 			clear,

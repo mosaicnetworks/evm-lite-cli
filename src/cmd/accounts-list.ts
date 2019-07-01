@@ -109,7 +109,7 @@ export const stage: StagingFunction<
 
 			staging.debug(`Fetching account successful`);
 		} catch (e) {
-			return Promise.reject(e);
+			return Promise.reject(e.text);
 		}
 	} else {
 		staging.debug(`No valid connection detected`);
