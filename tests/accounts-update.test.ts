@@ -7,7 +7,7 @@ import { KEYSTORE } from '../src/errors/generals';
 import { ACCOUNT_UPDATE } from '../src/errors/accounts';
 import { V3JSONKeyStore } from 'evm-lite-keystore';
 
-describe('accounts-list.ts', () => {
+describe('accounts-update.ts', () => {
 	it('should error as empty keystore', async () => {
 		expect.assertions(1);
 

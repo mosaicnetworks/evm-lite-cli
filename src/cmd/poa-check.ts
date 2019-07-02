@@ -2,23 +2,27 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import { V3JSONKeyStore } from 'evm-lite-keystore';
-import { Utils, Contract } from 'evm-lite-core';
+import { Utils, Contract, Transaction } from 'evm-lite-core';
 
 import Session from '../Session';
-import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
+import Staging, {
+	execute,
+	StagingFunction,
+	GenericOptions,
+	StagedOutput
+} from '../Staging';
 
 import { Schema } from '../POA';
 
+import { POA_CHECK } from '../errors/poa';
 import {
-	InvalidConnectionError,
-	EmptyKeystoreDirectoryError,
-	InvalidArgumentError
-} from '../errors';
+	INVALID_CONNECTION,
+	EVM_LITE,
+	TRANSACTION_GENERATION
+} from '../errors/generals';
 
 interface Options extends GenericOptions {
 	interactive?: boolean;
-	from?: string;
 	host?: string;
 	port?: number;
 }
@@ -37,7 +41,6 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.description(description)
 		.option('-i, --interactive', 'enter interactive')
 		.option('-d, --debug', 'show debug output')
-		.option('--from <address>', 'from address')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.types({
@@ -49,9 +52,10 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 }
 
 interface Answers {
-	from: string;
 	nominee: string;
 }
+
+export type Output = StagedOutput<Arguments, boolean, boolean>;
 
 export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 	args: Arguments,
@@ -70,7 +74,8 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 
 	if (!status) {
 		return Promise.reject(
-			new InvalidConnectionError(
+			staging.error(
+				INVALID_CONNECTION,
 				`A connection could be establised to ${host}:${port}`
 			)
 		);
@@ -83,7 +88,7 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 	} catch (e) {
 		staging.debug('POA contract info fetch error');
 
-		return Promise.reject(e);
+		return Promise.reject(staging.error(EVM_LITE, e.toString()));
 	}
 
 	staging.debug('POA contract info fetch successful');
@@ -92,40 +97,7 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 		`Successfully connected to ${session.node.host}:${session.node.port}`
 	);
 
-	let keystores: V3JSONKeyStore[];
-
-	staging.debug(
-		`Attempting to read keystore directory at ${session.keystore.path}`
-	);
-
-	try {
-		keystores = await session.keystore.list();
-
-		staging.debug('Reading keystore successful.');
-	} catch (e) {
-		return Promise.reject(e);
-	}
-
-	staging.debug(`Keystores length ${keystores.length}`);
-
-	if (!keystores.length) {
-		return Promise.reject(
-			new EmptyKeystoreDirectoryError(
-				`No accounts found in keystore directory ${
-					session.keystore.path
-				}`
-			)
-		);
-	}
-
 	const questions: inquirer.Questions<Answers> = [
-		{
-			choices: keystores.map(keystore => keystore.address),
-			default: Utils.trimHex(session.config.state.defaults.from),
-			message: 'From: ',
-			name: 'from',
-			type: 'list'
-		},
 		{
 			message: 'Nominee address: ',
 			name: 'nominee',
@@ -134,54 +106,57 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 	];
 
 	if (interactive && !args.address) {
-		const { nominee, from } = await inquirer.prompt<Answers>(questions);
+		const { nominee } = await inquirer.prompt<Answers>(questions);
 
 		args.address = nominee;
-		args.options.from = from;
 	}
 
 	if (!args.address) {
-		return Promise.reject(new InvalidArgumentError('No address provided.'));
+		return Promise.reject(
+			staging.error(
+				POA_CHECK.ADDRESS_EMPTY,
+				'No nominee address provided.'
+			)
+		);
 	}
 
 	args.address = Utils.trimHex(args.address);
 
 	staging.debug(`Address to check ${args.address}`);
 
-	if (args.address.length !== 40 && args.address.length !== 42) {
+	if (args.address.length !== 40) {
 		return Promise.reject(
-			new InvalidArgumentError('Address has an invalid length.')
-		);
-	}
-
-	const from = args.options.from || session.config.state.defaults.from;
-
-	if (!from) {
-		return Promise.reject(
-			new InvalidArgumentError(
-				'No from address provided or set in config.'
+			staging.error(
+				POA_CHECK.ADDRESS_INVALID_LENGTH,
+				'Nominee address has an invalid length.'
 			)
 		);
 	}
 
-	staging.debug(`From address ${from}`);
-
 	const contract = Contract.load<Schema>(poa.abi, poa.address);
-	const transaction = contract.methods.checkAuthorised(
-		{
-			from,
-			gas: session.config.state.defaults.gas,
-			gasPrice: session.config.state.defaults.gasPrice
-		},
-		Utils.cleanAddress(args.address)
-	);
+
+	let transaction: Transaction;
+
+	try {
+		transaction = contract.methods.checkAuthorised(
+			{
+				gas: session.config.state.defaults.gas,
+				gasPrice: session.config.state.defaults.gasPrice
+			},
+			Utils.cleanAddress(args.address)
+		);
+	} catch (e) {
+		return Promise.reject(
+			staging.error(TRANSACTION_GENERATION, e.toString())
+		);
+	}
 
 	let response: boolean;
 
 	try {
 		response = await session.node.callTransaction<boolean>(transaction);
 	} catch (e) {
-		return Promise.reject(e.text);
+		return Promise.reject(staging.error(EVM_LITE, e.text));
 	}
 
 	return Promise.resolve(staging.success(response));

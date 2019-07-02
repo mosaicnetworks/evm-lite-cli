@@ -1,14 +1,14 @@
-import { stage, Arguments } from '../src/cmd/poa-check';
-import {
-	InvalidConnectionError,
-	EmptyKeystoreDirectoryError,
-	InvalidArgumentError
-} from '../src/errors';
+import { session } from './stage';
 
-import { session, clearKeystore } from './stage';
+import { stage, Arguments, Output } from '../src/cmd/poa-check';
+import { POA_CHECK } from '../src/errors/poa';
+import { INVALID_CONNECTION } from '../src/errors/generals';
+import { Account } from 'evm-lite-core';
 
 describe('poa-check.ts', () => {
-	it('should throw InvalidConnetionError', async () => {
+	it('should error as invalid node conn details', async () => {
+		expect.assertions(3);
+
 		const args: Arguments = {
 			options: {
 				host: '127.0.0.1',
@@ -19,117 +19,96 @@ describe('poa-check.ts', () => {
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidConnectionError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.host).toBe('127.0.0.1');
+			expect(output.args.options.port).toBe(3000);
+
+			if (output.error) {
+				expect(output.error.type).toBe(INVALID_CONNECTION);
+			}
 		}
 	});
 
-	it('should throw EmptyKeystoreDirectoryError', async () => {
-		clearKeystore();
+	it('should error as [address] is empty', async () => {
+		expect.assertions(3);
 
 		const args: Arguments = {
-			options: {}
+			options: {
+				host: '127.0.0.1',
+				port: 8000
+			}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof EmptyKeystoreDirectoryError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.host).toBe('127.0.0.1');
+			expect(output.args.options.port).toBe(8000);
+
+			if (output.error) {
+				expect(output.error.type).toBe(POA_CHECK.ADDRESS_EMPTY);
+			}
 		}
 	});
 
-	it('should throw InvalidArgumentError ((inc 0x) long address)', async () => {
-		// Create account
-		const keystore = await session.keystore.create('danu');
+	it('should error as [address] is too long', async () => {
+		expect.assertions(3);
+
+		const account = Account.create();
 
 		const args: Arguments = {
-			address: keystore.address + '0', // 43
-			options: {}
+			address: account.address + 'A',
+			options: {
+				host: '127.0.0.1',
+				port: 8000
+			}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.host).toBe('127.0.0.1');
+			expect(output.args.options.port).toBe(8000);
+
+			if (output.error) {
+				expect(output.error.type).toBe(
+					POA_CHECK.ADDRESS_INVALID_LENGTH
+				);
+			}
 		}
 	});
 
-	it('should throw InvalidArgumentError ((inc 0x) short address)', async () => {
-		// Create account
-		const keystore = await session.keystore.create('danu');
+	it('should error as [address] is too short', async () => {
+		expect.assertions(3);
+
+		const account = Account.create();
 
 		const args: Arguments = {
-			address: `0x${keystore.address.slice(3)}`, // 41
-			options: {}
+			address: account.address.slice(3),
+			options: {
+				host: '127.0.0.1',
+				port: 8000
+			}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
-		}
-	});
+			const output = e as Output;
 
-	it('should throw InvalidArgumentError ((ex 0x) long address)', async () => {
-		// Create account
-		const keystore = await session.keystore.create('danu');
+			expect(output.args.options.host).toBe('127.0.0.1');
+			expect(output.args.options.port).toBe(8000);
 
-		const args: Arguments = {
-			address: keystore.address.slice(2) + '0', // 41
-			options: {}
-		};
-
-		try {
-			await stage(args, session);
-		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
-		}
-	});
-
-	it('should throw InvalidArgumentError ((inc 0x) short address)', async () => {
-		// Create account
-		const keystore = await session.keystore.create('danu');
-
-		const args: Arguments = {
-			address: `${keystore.address.slice(3)}`, // 39
-			options: {}
-		};
-
-		try {
-			await stage(args, session);
-		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
-		}
-	});
-
-	it('should throw InvalidArgumentError ((mul 0x) address)', async () => {
-		// Create account
-		const keystore = await session.keystore.create('danu');
-
-		const args: Arguments = {
-			address: `0x0x${keystore.address.slice(4)}`, // 42
-			options: {}
-		};
-
-		try {
-			await stage(args, session);
-		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
-		}
-	});
-
-	it('should throw InvalidArgumentError (no `from` address)', async () => {
-		// Create account
-		const keystore = await session.keystore.create('danu');
-
-		const args: Arguments = {
-			address: keystore.address, // 42
-			options: {}
-		};
-
-		try {
-			await stage(args, session);
-		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
+			if (output.error) {
+				expect(output.error.type).toBe(
+					POA_CHECK.ADDRESS_INVALID_LENGTH
+				);
+			}
 		}
 	});
 });

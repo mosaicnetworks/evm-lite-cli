@@ -1,0 +1,4 @@
+export const POA_CHECK = {
+	ADDRESS_EMPTY: '@evmlc/POA/check/ADDRESS_EMPTY',
+	ADDRESS_INVALID_LENGTH: '@evmlc/POA/check/ADDRESS_INVALID_LENGTH'
+};
