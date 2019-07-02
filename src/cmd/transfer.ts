@@ -11,16 +11,15 @@ import {
 import { Utils, Account } from 'evm-lite-core';
 
 import Session from '../Session';
-import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
+import Staging, {
+	execute,
+	StagingFunction,
+	GenericOptions,
+	StagedOutput
+} from '../Staging';
 
-import {
-	InvalidConnectionError,
-	EmptyKeystoreDirectoryError,
-	InvalidArgumentError,
-	KeystoreNotFoundError,
-	PathNotFoundError,
-	InvalidPathError
-} from '../errors';
+import { TRANSFER } from '../errors/accounts';
+import { INVALID_CONNECTION, KEYSTORE } from '../errors/generals';
 
 interface Options extends GenericOptions {
 	interactive?: boolean;
@@ -84,6 +83,8 @@ interface FourthAnswers {
 	send: boolean;
 }
 
+export type Output = StagedOutput<Arguments, string, string>;
+
 export const stage: StagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
@@ -99,7 +100,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	if (!status) {
 		return Promise.reject(
-			new InvalidConnectionError(
+			staging.error(
+				INVALID_CONNECTION,
 				`A connection could be establised to ${host}:${port}`
 			)
 		);
@@ -120,14 +122,15 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 		staging.debug('Reading keystore successful.');
 	} catch (e) {
-		return Promise.reject(e);
+		return Promise.reject(staging.error(KEYSTORE.LIST, e.toString()));
 	}
 
 	staging.debug(`Keystores length ${keystores.length}`);
 
 	if (!keystores.length) {
 		return Promise.reject(
-			new EmptyKeystoreDirectoryError(
+			staging.error(
+				KEYSTORE.EMPTY,
 				`No accounts found in keystore directory ${
 					session.keystore.path
 				}`
@@ -189,12 +192,12 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 	if (interactive) {
 		const { from } = await inquirer.prompt<FirstAnswers>(first);
 
-		args.options.from = Utils.cleanAddress(Utils.trimHex(from));
+		args.options.from = Utils.trimHex(from);
 	}
 
 	if (!args.options.from) {
 		return Promise.reject(
-			new InvalidArgumentError('Argument `from` not provided.')
+			staging.error(TRANSFER.FROM_EMPTY, 'Argument `from` not provided.')
 		);
 	}
 
@@ -208,7 +211,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		staging.debug(`Found keystore for account ${args.options.from}`);
 	} catch (e) {
 		return Promise.reject(
-			new KeystoreNotFoundError(
+			staging.error(
+				KEYSTORE.FETCH,
 				`Could not locate keystore for address ${args.address} in ${
 					session.keystore.path
 				}`
@@ -225,7 +229,10 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 	if (!passphrase) {
 		if (!args.options.pwd) {
 			return Promise.reject(
-				new InvalidArgumentError('Passphrase file path not provided.')
+				staging.error(
+					TRANSFER.PWD_PATH_EMPTY,
+					'--pwd file path not provided.'
+				)
 			);
 		}
 
@@ -233,8 +240,9 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 		if (!KeystoreUtils.exists(args.options.pwd)) {
 			return Promise.reject(
-				new PathNotFoundError(
-					'Old passphrase file path provided does not exist.'
+				staging.error(
+					TRANSFER.PWD_PATH_NOT_FOUND,
+					'--pwd file path provided does not exist.'
 				)
 			);
 		}
@@ -243,8 +251,9 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 		if (KeystoreUtils.isDirectory(args.options.pwd)) {
 			return Promise.reject(
-				new InvalidPathError(
-					'Old passphrase file path provided is a directory.'
+				staging.error(
+					TRANSFER.PWD_IS_DIR,
+					'--pwd file path provided is a directory.'
 				)
 			);
 		}
@@ -262,7 +271,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		decrypted = Keystore.decrypt(keystore, passphrase);
 	} catch (err) {
 		return Promise.reject(
-			new InvalidArgumentError(
+			staging.error(
+				KEYSTORE.DECRYPTION,
 				'Cannot decrypt account with passphrase provided.'
 			)
 		);
@@ -285,8 +295,9 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	if (!args.options.to || !args.options.value) {
 		return Promise.reject(
-			new InvalidArgumentError(
-				'Provide an address to send to and a value.'
+			staging.error(
+				TRANSFER.TO_VALUE_EMPTY,
+				'Provide `to` address and `value` to send'
 			)
 		);
 	}

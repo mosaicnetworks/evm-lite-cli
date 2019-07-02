@@ -38,3 +38,12 @@ export const ACCOUNT_UPDATE = {
 	PASS_FIELDS_BLANK: '@evmlc/accounts/create/PASS_FIELDS_BLANK',
 	PASS_DO_NOT_MATCH: '@evmlc/accounts/create/PASS_DO_NOT_MATCH'
 };
+
+export const TRANSFER = {
+	FROM_EMPTY: '@evmlc/accounts/create/PASS_FIELDS_BLANK',
+	TO_VALUE_EMPTY: '@evmlc/accounts/create/PASS_FIELDS_BLANK',
+
+	PWD_PATH_EMPTY: '@evmlc/accounts/create/PWD_PATH_EMPTY',
+	PWD_IS_DIR: '@evmlc/accounts/create/PWD_IS_DIR',
+	PWD_PATH_NOT_FOUND: '@evmlc/accounts/create/PWD_PATH_NOT_FOUND'
+};

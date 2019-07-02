@@ -8,7 +8,7 @@ import { Arguments, stage, Output } from '../src/cmd/accounts-list';
 import { INVALID_CONNECTION } from '../src/errors/generals';
 
 describe('accounts-list.ts', () => {
-	it('should error with as invalid node conn details (remote)', async () => {
+	it('should error as invalid node conn details (remote)', async () => {
 		expect.assertions(3);
 
 		const args: Arguments = {
