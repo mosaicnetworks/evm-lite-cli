@@ -4,7 +4,7 @@ import { session, password, pwdPath, otherPwdPath } from './stage';
 
 import { Arguments, stage, Output } from '../src/cmd/accounts-update';
 import { KEYSTORE } from '../src/errors/generals';
-import { ACCOUNT_UPDATE } from '../src/errors/accounts';
+import { ACCOUNTS_UPDATE } from '../src/errors/accounts';
 import { V3JSONKeyStore } from 'evm-lite-keystore';
 
 describe('accounts-update.ts', () => {
@@ -44,7 +44,7 @@ describe('accounts-update.ts', () => {
 			expect(output.args.address).toBe(undefined);
 
 			if (output.error) {
-				expect(output.error.type).toBe(ACCOUNT_UPDATE.ADDRESS_EMPTY);
+				expect(output.error.type).toBe(ACCOUNTS_UPDATE.ADDRESS_EMPTY);
 			}
 		}
 	});
@@ -71,7 +71,7 @@ describe('accounts-update.ts', () => {
 
 			if (output.error) {
 				expect(output.error.type).toBe(
-					ACCOUNT_UPDATE.ADDRESS_INVALID_LENGTH
+					ACCOUNTS_UPDATE.ADDRESS_INVALID_LENGTH
 				);
 			}
 		}
@@ -99,7 +99,7 @@ describe('accounts-update.ts', () => {
 
 			if (output.error) {
 				expect(output.error.type).toBe(
-					ACCOUNT_UPDATE.ADDRESS_INVALID_LENGTH
+					ACCOUNTS_UPDATE.ADDRESS_INVALID_LENGTH
 				);
 			}
 		}
@@ -151,7 +151,7 @@ describe('accounts-update.ts', () => {
 			expect(output.args.address).toBe(Utils.trimHex(keystore.address));
 
 			if (output.error) {
-				expect(output.error.type).toBe(ACCOUNT_UPDATE.OLD_PWD_EMPTY);
+				expect(output.error.type).toBe(ACCOUNTS_UPDATE.OLD_PWD_EMPTY);
 			}
 		}
 	});
@@ -179,7 +179,7 @@ describe('accounts-update.ts', () => {
 
 			if (output.error) {
 				expect(output.error.type).toBe(
-					ACCOUNT_UPDATE.OLD_PWD_NOT_FOUND
+					ACCOUNTS_UPDATE.OLD_PWD_NOT_FOUND
 				);
 			}
 		}
@@ -207,7 +207,7 @@ describe('accounts-update.ts', () => {
 			expect(output.args.address).toBe(Utils.trimHex(keystore.address));
 
 			if (output.error) {
-				expect(output.error.type).toBe(ACCOUNT_UPDATE.OLD_PWD_IS_DIR);
+				expect(output.error.type).toBe(ACCOUNTS_UPDATE.OLD_PWD_IS_DIR);
 			}
 		}
 	});
@@ -262,7 +262,7 @@ describe('accounts-update.ts', () => {
 			expect(output.args.address).toBe(Utils.trimHex(keystore.address));
 
 			if (output.error) {
-				expect(output.error.type).toBe(ACCOUNT_UPDATE.NEW_PWD_EMPTY);
+				expect(output.error.type).toBe(ACCOUNTS_UPDATE.NEW_PWD_EMPTY);
 			}
 		}
 	});
@@ -292,7 +292,7 @@ describe('accounts-update.ts', () => {
 
 			if (output.error) {
 				expect(output.error.type).toBe(
-					ACCOUNT_UPDATE.NEW_PWD_NOT_FOUND
+					ACCOUNTS_UPDATE.NEW_PWD_NOT_FOUND
 				);
 			}
 		}
@@ -322,7 +322,7 @@ describe('accounts-update.ts', () => {
 			expect(output.args.address).toBe(Utils.trimHex(keystore.address));
 
 			if (output.error) {
-				expect(output.error.type).toBe(ACCOUNT_UPDATE.NEW_PWD_IS_DIR);
+				expect(output.error.type).toBe(ACCOUNTS_UPDATE.NEW_PWD_IS_DIR);
 			}
 		}
 	});
@@ -353,7 +353,9 @@ describe('accounts-update.ts', () => {
 			expect(output.args.address).toBe(Utils.trimHex(keystore.address));
 
 			if (output.error) {
-				expect(output.error.type).toBe(ACCOUNT_UPDATE.SAME_OLD_NEW_PWD);
+				expect(output.error.type).toBe(
+					ACCOUNTS_UPDATE.SAME_OLD_NEW_PWD
+				);
 			}
 		}
 	});

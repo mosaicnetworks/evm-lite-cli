@@ -18,7 +18,7 @@ import Staging, {
 	StagedOutput
 } from '../Staging';
 
-import { ACCOUNT_UPDATE } from '../errors/accounts';
+import { ACCOUNTS_UPDATE } from '../errors/accounts';
 import { KEYSTORE } from '../errors/generals';
 
 interface Options extends GenericOptions {
@@ -143,7 +143,7 @@ export const stage: StagingFunction<
 
 	if (!args.address) {
 		return Promise.reject(
-			staging.error(ACCOUNT_UPDATE.ADDRESS_EMPTY, 'No address provided.')
+			staging.error(ACCOUNTS_UPDATE.ADDRESS_EMPTY, 'No address provided.')
 		);
 	}
 
@@ -154,7 +154,7 @@ export const stage: StagingFunction<
 	if (args.address.length !== 40) {
 		return Promise.reject(
 			staging.error(
-				ACCOUNT_UPDATE.ADDRESS_INVALID_LENGTH,
+				ACCOUNTS_UPDATE.ADDRESS_INVALID_LENGTH,
 				'Address provided has an invalid length.'
 			)
 		);
@@ -190,7 +190,7 @@ export const stage: StagingFunction<
 		if (!args.options.old) {
 			return Promise.reject(
 				staging.error(
-					ACCOUNT_UPDATE.OLD_PWD_EMPTY,
+					ACCOUNTS_UPDATE.OLD_PWD_EMPTY,
 					'Old passphrase file path not provided.'
 				)
 			);
@@ -201,7 +201,7 @@ export const stage: StagingFunction<
 		if (!KeystoreUtils.exists(args.options.old)) {
 			return Promise.reject(
 				staging.error(
-					ACCOUNT_UPDATE.OLD_PWD_NOT_FOUND,
+					ACCOUNTS_UPDATE.OLD_PWD_NOT_FOUND,
 					'Old passphrase file path provided does not exist.'
 				)
 			);
@@ -210,7 +210,7 @@ export const stage: StagingFunction<
 		if (KeystoreUtils.isDirectory(args.options.old)) {
 			return Promise.reject(
 				staging.error(
-					ACCOUNT_UPDATE.OLD_PWD_IS_DIR,
+					ACCOUNTS_UPDATE.OLD_PWD_IS_DIR,
 					'Old passphrase file path provided is a directory.'
 				)
 			);
@@ -242,7 +242,7 @@ export const stage: StagingFunction<
 		if (!(passphrase && verifyPassphrase)) {
 			return Promise.reject(
 				staging.error(
-					ACCOUNT_UPDATE.PASS_FIELDS_BLANK,
+					ACCOUNTS_UPDATE.PASS_FIELDS_BLANK,
 					'Fields cannot be blank.'
 				)
 			);
@@ -253,7 +253,7 @@ export const stage: StagingFunction<
 		if (passphrase !== verifyPassphrase) {
 			return Promise.reject(
 				staging.error(
-					ACCOUNT_UPDATE.PASS_FIELDS_BLANK,
+					ACCOUNTS_UPDATE.PASS_FIELDS_BLANK,
 					'Passphrases do not match.'
 				)
 			);
@@ -268,7 +268,7 @@ export const stage: StagingFunction<
 		if (!args.options.new) {
 			return Promise.reject(
 				staging.error(
-					ACCOUNT_UPDATE.NEW_PWD_EMPTY,
+					ACCOUNTS_UPDATE.NEW_PWD_EMPTY,
 					'New passphrase file path not provided.'
 				)
 			);
@@ -279,7 +279,7 @@ export const stage: StagingFunction<
 		if (!KeystoreUtils.exists(args.options.new)) {
 			return Promise.reject(
 				staging.error(
-					ACCOUNT_UPDATE.NEW_PWD_NOT_FOUND,
+					ACCOUNTS_UPDATE.NEW_PWD_NOT_FOUND,
 					'New passphrase file path provided does not exist.'
 				)
 			);
@@ -288,7 +288,7 @@ export const stage: StagingFunction<
 		if (KeystoreUtils.isDirectory(args.options.new)) {
 			return Promise.reject(
 				staging.error(
-					ACCOUNT_UPDATE.NEW_PWD_IS_DIR,
+					ACCOUNTS_UPDATE.NEW_PWD_IS_DIR,
 					'Old passphrase file path provided is a directory.'
 				)
 			);
@@ -302,7 +302,7 @@ export const stage: StagingFunction<
 	if (oldPassphrase === newPassphrase) {
 		return Promise.reject(
 			staging.error(
-				ACCOUNT_UPDATE.SAME_OLD_NEW_PWD,
+				ACCOUNTS_UPDATE.SAME_OLD_NEW_PWD,
 				'New passphrase cannot be the same as old.'
 			)
 		);

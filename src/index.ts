@@ -17,6 +17,7 @@ import accountsCreate from './cmd/accounts-create';
 import accountsGet from './cmd/accounts-get';
 import accountsList from './cmd/accounts-list';
 import accountsUpdate from './cmd/accounts-update';
+import accountsImport from './cmd/accounts-import';
 
 // Config
 import configView from './cmd/config-view';
@@ -58,8 +59,8 @@ init()
 
 			if (!Utils.exists(process.argv[3])) {
 				Globals.warning(
-					'Data directory file path provided does' +
-						'not exist and hence will created...'
+					'Data directory path provided does ' +
+						'not exist and will created.'
 				);
 			}
 
@@ -90,6 +91,7 @@ init()
 			accountsGet,
 			accountsList,
 			accountsUpdate,
+			accountsImport,
 
 			// config
 			configView,

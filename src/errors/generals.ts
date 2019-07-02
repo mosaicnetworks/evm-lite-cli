@@ -10,5 +10,6 @@ export const KEYSTORE = {
 	LIST: '@evmlc/generals/keystore/KEYSTORE_LIST',
 	EMPTY: '@evmlc/generals/keystore/KEYSTORE_EMPTY',
 	FETCH: '@evmlc/generals/keystore/KEYSTORE_FETCH',
-	DECRYPTION: '@evmlc/generals/keystore/DECRYPTION'
+	DECRYPTION: '@evmlc/generals/keystore/DECRYPTION',
+	IMPORT: '@evmlc/generals/keystore/IMPORT'
 };

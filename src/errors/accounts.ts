@@ -19,7 +19,7 @@ export const ACCOUNTS_GET = {
 	ADDRESS_INVALID_LENGTH: '@evmlc/accounts/get/ADDRESS_INVALID_LENGTH'
 };
 
-export const ACCOUNT_UPDATE = {
+export const ACCOUNTS_UPDATE = {
 	// Non-interactive
 	ADDRESS_EMPTY: '@evmlc/accounts/update/ADDRESS_EMPTY',
 	ADDRESS_INVALID_LENGTH: '@evmlc/accounts/update/ADDRESS_INVALID_LENGTH',
@@ -46,4 +46,15 @@ export const TRANSFER = {
 	PWD_PATH_EMPTY: '@evmlc/accounts/transfer/PWD_PATH_EMPTY',
 	PWD_IS_DIR: '@evmlc/accounts/transfer/PWD_IS_DIR',
 	PWD_PATH_NOT_FOUND: '@evmlc/accounts/transfer/PWD_PATH_NOT_FOUND'
+};
+
+export const ACCOUNTS_IMPORT = {
+	PRIV_KEY_EMPTY: '@evmlc/accounts/import/PRIV_KEY_EMPTY',
+
+	PWD_PATH_EMPTY: '@evmlc/accounts/import/PWD_PATH_EMPTY',
+	PWD_IS_DIR: '@evmlc/accounts/import/PWD_IS_DIR',
+	PWD_PATH_NOT_FOUND: '@evmlc/accounts/import/PWD_PATH_NOT_FOUND',
+
+	PASS_FIELDS_BLANK: '@evmlc/accounts/import/PASS_FIELDS_BLANK',
+	PASS_DO_NOT_MATCH: '@evmlc/accounts/import/PASS_DO_NOT_MATCH'
 };
