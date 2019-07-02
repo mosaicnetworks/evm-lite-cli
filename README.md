@@ -13,6 +13,7 @@ npm install
 ```
 
 then
+(_This command is to make sure that an existing `evmlc` build is not ovewritten while testing this branch._)
 
 ```console
 $ npm run i
