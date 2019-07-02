@@ -144,7 +144,7 @@ While still in interactive mode, type the command `accounts create -v` (`-v` spe
 the default option for keystore and then type in a password to encrypt the account:
 
 ```bash
-evmlc$ accounts create -v
+evmlc$ accounts create
 
 ? Enter keystore output path:  [...]/.evmlc/keystore
 ? Enter a password:  [hidden]
@@ -236,7 +236,7 @@ How many coins where assigned to the account? let's check!
 Back in the interactive `evmlc` session, type `accounts list -f -v` (formatted, verbose output)
 
 ```bash
-evmlc$ accounts list -f -v
+evmlc$ accounts list -f
 
 .----------------------------------------------------------------------------------------.
 | # |                  Address                   |            Balance            | Nonce |
@@ -251,7 +251,7 @@ retrieve the corresponding balance, and displayed it nicely on the screen.
 ### 5) Create another account
 
 ```bash
-evmlc$ accounts create -v
+evmlc$ accounts create
 
 ? Enter keystore output path:  [...]/.evmlc/keystore
 ? Enter a password:  [hidden]
@@ -309,7 +309,7 @@ encoded using the custom Ethereum scheme, RLP, and contain the following fields:
 ### 7) Check accounts again
 
 ```bash
-evmlc$ accounts list -f -v
+evmlc$ accounts list -f
 
 .----------------------------------------------------------------------------------------.
 | # |                  Address                   |            Balance            | Nonce |
