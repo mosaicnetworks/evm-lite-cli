@@ -22,3 +22,5 @@ export const clearKeystore = () => {
 		fs.unlinkSync(path.join(keystore, file));
 	});
 };
+
+beforeEach((): void => clearKeystore());

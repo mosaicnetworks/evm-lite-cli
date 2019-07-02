@@ -1,28 +1,15 @@
-import { Account } from 'evm-lite-core';
+import { Utils } from 'evm-lite-core';
 
-import { Arguments, stage } from '../src/cmd/accounts-update';
-import {
-	EmptyKeystoreDirectoryError,
-	InvalidArgumentError,
-	KeystoreNotFoundError,
-	PathNotFoundError,
-	InvalidPathError
-} from '../src/errors';
+import { session, password, pwdPath, otherPwdPath } from './stage';
 
-import {
-	session,
-	clearKeystore,
-	pwdPath,
-	password,
-	otherPwdPath
-} from './stage';
+import { Arguments, stage, Output } from '../src/cmd/accounts-update';
+import { KEYSTORE } from '../src/errors/generals';
+import { ACCOUNT_UPDATE } from '../src/errors/accounts';
 import { V3JSONKeyStore } from 'evm-lite-keystore';
 
-let keystore: V3JSONKeyStore;
-
-describe('accounts-update.ts', () => {
-	it('should throw EmptyKeystoreDirectoryError', async () => {
-		clearKeystore();
+describe('accounts-list.ts', () => {
+	it('should error as empty keystore', async () => {
+		expect.assertions(1);
 
 		const args: Arguments = {
 			options: {}
@@ -31,146 +18,181 @@ describe('accounts-update.ts', () => {
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof EmptyKeystoreDirectoryError).toBe(true);
+			const output = e as Output;
+
+			if (output.error) {
+				expect(output.error.type).toBe(KEYSTORE.EMPTY);
+			}
 		}
 	});
 
-	it('should throw InvalidArgumentError (empty address)', async () => {
-		// So one account exists
-		const keystore = await session.keystore.create('danu');
+	it('should error as no [address] was provided', async () => {
+		expect.assertions(2);
+
+		// create keystore
+		await session.keystore.create(pwdPath);
 
 		const args: Arguments = {
-			address: '',
 			options: {}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.address).toBe(undefined);
+
+			if (output.error) {
+				expect(output.error.type).toBe(ACCOUNT_UPDATE.ADDRESS_EMPTY);
+			}
 		}
 	});
 
-	it('should throw InvalidArgumentError ((inc 0x) long address)', async () => {
-		// Create account
-		const keystore = await session.keystore.create('danu');
+	it('should error as shorter [address] was provided', async () => {
+		expect.assertions(2);
+
+		// create keystore
+		const keystore = await session.keystore.create(pwdPath);
 
 		const args: Arguments = {
-			address: keystore.address + '0', // 43
+			address: keystore.address.slice(3),
 			options: {}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.address).toBe(
+				Utils.trimHex(keystore.address.slice(3))
+			);
+
+			if (output.error) {
+				expect(output.error.type).toBe(
+					ACCOUNT_UPDATE.ADDRESS_INVALID_LENGTH
+				);
+			}
 		}
 	});
 
-	it('should throw InvalidArgumentError ((inc 0x) short address)', async () => {
-		// Create account
-		const keystore = await session.keystore.create('danu');
+	it('should error as longer [address] was provided', async () => {
+		expect.assertions(2);
+
+		// create keystore
+		const keystore = await session.keystore.create(pwdPath);
 
 		const args: Arguments = {
-			address: `0x${keystore.address.slice(3)}`, // 41
+			address: `${keystore.address}FA`,
 			options: {}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.address).toBe(
+				Utils.trimHex(`${keystore.address}FA`)
+			);
+
+			if (output.error) {
+				expect(output.error.type).toBe(
+					ACCOUNT_UPDATE.ADDRESS_INVALID_LENGTH
+				);
+			}
 		}
 	});
 
-	it('should throw InvalidArgumentError ((ex 0x) long address)', async () => {
-		// Create account
-		const keystore = await session.keystore.create('danu');
+	it('should error as [address] provided does not exist', async () => {
+		expect.assertions(2);
+
+		// create keystore
+		const keystore = await session.keystore.create(pwdPath);
 
 		const args: Arguments = {
-			address: keystore.address.slice(2) + '0', // 41
+			address: `${keystore.address.slice(1)}F`,
 			options: {}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.address).toBe(
+				Utils.trimHex(`${keystore.address.slice(1)}F`)
+			);
+
+			if (output.error) {
+				expect(output.error.type).toBe(KEYSTORE.FETCH);
+			}
 		}
 	});
 
-	it('should throw InvalidArgumentError ((inc 0x) short address)', async () => {
-		// Create account
-		const keystore = await session.keystore.create('danu');
+	it('should error as --old passphrase path empty', async () => {
+		expect.assertions(3);
+
+		// create keystore
+		const keystore = await session.keystore.create(pwdPath);
 
 		const args: Arguments = {
-			address: `${keystore.address.slice(3)}`, // 39
+			address: keystore.address,
 			options: {}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.old).toBe(undefined);
+			expect(output.args.address).toBe(Utils.trimHex(keystore.address));
+
+			if (output.error) {
+				expect(output.error.type).toBe(ACCOUNT_UPDATE.OLD_PWD_EMPTY);
+			}
 		}
 	});
 
-	it('should throw InvalidArgumentError ((mul 0x) address)', async () => {
-		// Create account
-		const keystore = await session.keystore.create('danu');
+	it('should error as --old passphrase path cannot be found', async () => {
+		expect.assertions(3);
+
+		// create keystore
+		const keystore = await session.keystore.create(pwdPath);
 
 		const args: Arguments = {
-			address: `0x0x${keystore.address.slice(4)}`, // 42
-			options: {}
-		};
-
-		try {
-			await stage(args, session);
-		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
-		}
-	});
-
-	it('should throw KeystoreNotFoundError (wrong address)', async () => {
-		// Create account
-		const account = Account.create();
-
-		const args: Arguments = {
-			address: account.address.slice(3) + '3', // 40
-			options: {}
-		};
-
-		try {
-			await stage(args, session);
-		} catch (e) {
-			expect(e instanceof KeystoreNotFoundError).toBe(true);
-		}
-	});
-
-	it('should throw PathNotFoundError (wrong old pwd path)', async () => {
-		// Create account
-		const keystore = await session.keystore.create(password);
-
-		const args: Arguments = {
-			address: keystore.address, // 40
+			address: keystore.address,
 			options: {
-				old: '/does_not_exists'
+				old: '/does_not_exists/pwd.txt'
 			}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof PathNotFoundError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.old).toBe('/does_not_exists/pwd.txt');
+			expect(output.args.address).toBe(Utils.trimHex(keystore.address));
+
+			if (output.error) {
+				expect(output.error.type).toBe(
+					ACCOUNT_UPDATE.OLD_PWD_NOT_FOUND
+				);
+			}
 		}
 	});
 
-	it('should throw InvalidPathError (old pwd path is directory)', async () => {
-		// Create account
-		const keystore = await session.keystore.create(password);
+	it('should error as --old passphrase path is dir', async () => {
+		expect.assertions(3);
+
+		// create keystore
+		const keystore = await session.keystore.create(pwdPath);
 
 		const args: Arguments = {
-			address: keystore.address, // 40
+			address: keystore.address,
 			options: {
 				old: '/'
 			}
@@ -179,35 +201,111 @@ describe('accounts-update.ts', () => {
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidPathError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.old).toBe('/');
+			expect(output.args.address).toBe(Utils.trimHex(keystore.address));
+
+			if (output.error) {
+				expect(output.error.type).toBe(ACCOUNT_UPDATE.OLD_PWD_IS_DIR);
+			}
 		}
 	});
 
-	it('should throw PathNotFoundError (wrong new pwd path)', async () => {
-		// Create account
-		const keystore = await session.keystore.create(password);
+	it('should error as --old passphrase is incorrect to decrypt', async () => {
+		expect.assertions(3);
+
+		// create keystore
+		const keystore = await session.keystore.create(pwdPath);
 
 		const args: Arguments = {
-			address: keystore.address, // 40
+			address: keystore.address,
 			options: {
-				old: pwdPath,
-				new: '/does_not_exist'
+				old: otherPwdPath
 			}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof PathNotFoundError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.old).toBe(otherPwdPath);
+			expect(output.args.address).toBe(Utils.trimHex(keystore.address));
+
+			if (output.error) {
+				expect(output.error.type).toBe(KEYSTORE.DECRYPTION);
+			}
 		}
 	});
 
-	it('should throw InvalidPathError (old pwd path is directory)', async () => {
-		// Create account
+	it('should error as --new passphrase path empty', async () => {
+		expect.assertions(4);
+
+		// create keystore
 		const keystore = await session.keystore.create(password);
 
 		const args: Arguments = {
-			address: keystore.address, // 40
+			address: keystore.address,
+			options: {
+				old: pwdPath
+			}
+		};
+
+		try {
+			await stage(args, session);
+		} catch (e) {
+			const output = e as Output;
+
+			expect(output.args.options.old).toBe(pwdPath);
+			expect(output.args.options.new).toBe(undefined);
+			expect(output.args.address).toBe(Utils.trimHex(keystore.address));
+
+			if (output.error) {
+				expect(output.error.type).toBe(ACCOUNT_UPDATE.NEW_PWD_EMPTY);
+			}
+		}
+	});
+
+	it('should error as --new passphrase path cannot be found', async () => {
+		expect.assertions(4);
+
+		// create keystore
+		const keystore = await session.keystore.create(password);
+
+		const args: Arguments = {
+			address: keystore.address,
+			options: {
+				old: pwdPath,
+				new: '/does_not_exist/pwd.txt'
+			}
+		};
+
+		try {
+			await stage(args, session);
+		} catch (e) {
+			const output = e as Output;
+
+			expect(output.args.options.old).toBe(pwdPath);
+			expect(output.args.options.new).toBe('/does_not_exist/pwd.txt');
+			expect(output.args.address).toBe(Utils.trimHex(keystore.address));
+
+			if (output.error) {
+				expect(output.error.type).toBe(
+					ACCOUNT_UPDATE.NEW_PWD_NOT_FOUND
+				);
+			}
+		}
+	});
+
+	it('should error as --new passphrase path is dir', async () => {
+		expect.assertions(4);
+
+		// create keystore
+		const keystore = await session.keystore.create(password);
+
+		const args: Arguments = {
+			address: keystore.address,
 			options: {
 				old: pwdPath,
 				new: '/'
@@ -217,16 +315,26 @@ describe('accounts-update.ts', () => {
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidPathError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.old).toBe(pwdPath);
+			expect(output.args.options.new).toBe('/');
+			expect(output.args.address).toBe(Utils.trimHex(keystore.address));
+
+			if (output.error) {
+				expect(output.error.type).toBe(ACCOUNT_UPDATE.NEW_PWD_IS_DIR);
+			}
 		}
 	});
 
-	it('should throw InvalidArgumentError (old = new)', async () => {
-		// Create account
+	it('should error as --new and --old passphrases are the same', async () => {
+		expect.assertions(4);
+
+		// create keystore
 		const keystore = await session.keystore.create(password);
 
 		const args: Arguments = {
-			address: keystore.address, // 40
+			address: keystore.address,
 			options: {
 				old: pwdPath,
 				new: pwdPath
@@ -236,47 +344,44 @@ describe('accounts-update.ts', () => {
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
+			const output = e as Output;
+
+			// implicit check that they are the same
+			expect(output.args.options.old).toBe(pwdPath);
+			expect(output.args.options.new).toBe(pwdPath);
+
+			expect(output.args.address).toBe(Utils.trimHex(keystore.address));
+
+			if (output.error) {
+				expect(output.error.type).toBe(ACCOUNT_UPDATE.SAME_OLD_NEW_PWD);
+			}
 		}
 	});
 
-	it('should update passsword for keystore to new pass)', async () => {
-		keystore = await session.keystore.create(password);
+	it('should change password to --new passphrase', async () => {
+		expect.assertions(4);
+
+		// create keystore
+		const keystore = await session.keystore.create(password);
 
 		const args: Arguments = {
-			address: keystore.address, // 40
+			address: keystore.address,
 			options: {
 				old: pwdPath,
 				new: otherPwdPath
 			}
 		};
 
-		const { display } = await stage(args, session);
+		const output = await stage(args, session);
+		const success = output.display! as V3JSONKeyStore;
 
-		expect(display).not.toBe(undefined);
+		// implicit check that they are the same
+		expect(output.args.options.old).toBe(pwdPath);
+		expect(output.args.options.new).toBe(otherPwdPath);
 
-		expect(typeof display!).toBe('object');
-		expect(display!.address.length).toBe(40);
-		expect(display!.address).toBe(keystore.address);
-		expect(display!.version).toBe(3);
-	});
-
-	it('should update passsword for keystore back to old pass)', async () => {
-		const args: Arguments = {
-			address: keystore.address,
-			options: {
-				old: otherPwdPath,
-				new: pwdPath
-			}
-		};
-
-		const { display } = await stage(args, session);
-
-		expect(display).not.toBe(undefined);
-
-		expect(typeof display!).toBe('object');
-		expect(display!.address.length).toBe(40);
-		expect(display!.address).toBe(keystore.address);
-		expect(display!.version).toBe(3);
+		expect(output.args.address).toBe(Utils.trimHex(keystore.address));
+		expect(Utils.trimHex(success.address)).toBe(
+			Utils.trimHex(keystore.address)
+		);
 	});
 });

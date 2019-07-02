@@ -14,7 +14,7 @@ import Staging, {
 } from '../Staging';
 
 import { ACCOUNTS_GET } from '../errors/accounts';
-import { INVALID_CONNECTION, EVM_LITE_ERROR } from '../errors/generals';
+import { INVALID_CONNECTION, EVM_LITE } from '../errors/generals';
 
 interface Options extends GenericOptions {
 	formatted?: boolean;
@@ -124,7 +124,7 @@ export const stage: StagingFunction<
 	try {
 		account = await session.node.getAccount(args.address);
 	} catch (e) {
-		return Promise.reject(staging.error(EVM_LITE_ERROR, e.text));
+		return Promise.reject(staging.error(EVM_LITE, e.text));
 	}
 
 	staging.debug(`Successfully fetched account ${account.address}`);

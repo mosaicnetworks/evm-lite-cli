@@ -5,9 +5,14 @@ import { BaseAccount } from 'evm-lite-core';
 import { V3JSONKeyStore } from 'evm-lite-keystore';
 
 import Session from '../Session';
-import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
+import Staging, {
+	execute,
+	StagingFunction,
+	GenericOptions,
+	StagedOutput
+} from '../Staging';
 
-import { InvalidConnectionError } from '../errors';
+import { EVM_LITE, INVALID_CONNECTION, KEYSTORE } from '../errors/generals';
 
 interface Options extends GenericOptions {
 	formatted?: boolean;
@@ -40,6 +45,8 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		);
 }
 
+export type Output = StagedOutput<Arguments, ASCIITable, BaseAccount[]>;
+
 export const stage: StagingFunction<
 	Arguments,
 	ASCIITable,
@@ -64,7 +71,8 @@ export const stage: StagingFunction<
 		);
 
 		return Promise.reject(
-			new InvalidConnectionError(
+			staging.error(
+				INVALID_CONNECTION,
 				`A connection could be establised to ${host}:${port}.`
 			)
 		);
@@ -73,9 +81,15 @@ export const stage: StagingFunction<
 	if (remote && status) {
 		staging.debug('Fetching remote accounts');
 
-		return Promise.resolve(
-			staging.success(await session.node.getAccounts())
-		);
+		let accounts: BaseAccount[];
+
+		try {
+			accounts = await session.node.getAccounts();
+		} catch (e) {
+			return Promise.reject(staging.error(EVM_LITE, e.text));
+		}
+
+		return Promise.resolve(staging.success(accounts));
 	}
 
 	let keystores: V3JSONKeyStore[];
@@ -86,7 +100,7 @@ export const stage: StagingFunction<
 		keystores = await session.keystore.list();
 		staging.debug('Reading keystore successful');
 	} catch (e) {
-		return Promise.reject(e);
+		return Promise.reject(staging.error(KEYSTORE.LIST, e.toString()));
 	}
 
 	let accounts: BaseAccount[] = keystores.map(keystore => ({
@@ -109,7 +123,7 @@ export const stage: StagingFunction<
 
 			staging.debug(`Fetching account successful`);
 		} catch (e) {
-			return Promise.reject(e.text);
+			return Promise.reject(staging.error(EVM_LITE, e.text));
 		}
 	} else {
 		staging.debug(`No valid connection detected`);

@@ -7,7 +7,7 @@ import { session } from './stage';
 import { Arguments, stage, Output } from '../src/cmd/accounts-get';
 
 import { ACCOUNTS_GET } from '../src/errors/accounts';
-import { EVM_LITE_ERROR, INVALID_CONNECTION } from '../src/errors/generals';
+import { INVALID_CONNECTION } from '../src/errors/generals';
 
 describe('accounts-get.ts', () => {
 	it('should error with as invalid node conn details', async () => {
@@ -40,7 +40,7 @@ describe('accounts-get.ts', () => {
 		const args: Arguments = {
 			options: {
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -50,7 +50,7 @@ describe('accounts-get.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 			expect(output.args.address).toBe(undefined);
 
 			if (output.error) {
@@ -68,7 +68,7 @@ describe('accounts-get.ts', () => {
 			address: account.address.slice(3),
 			options: {
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -78,7 +78,7 @@ describe('accounts-get.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 			expect(output.args.address).toBe(
 				Utils.trimHex(account.address.slice(3))
 			);

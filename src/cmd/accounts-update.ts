@@ -11,15 +11,15 @@ import {
 import { Utils } from 'evm-lite-core';
 
 import Session from '../Session';
-import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
+import Staging, {
+	execute,
+	StagingFunction,
+	GenericOptions,
+	StagedOutput
+} from '../Staging';
 
-import {
-	EmptyKeystoreDirectoryError,
-	InvalidArgumentError,
-	KeystoreNotFoundError,
-	PathNotFoundError,
-	InvalidPathError
-} from '../errors';
+import { ACCOUNT_UPDATE } from '../errors/accounts';
+import { KEYSTORE } from '../errors/generals';
 
 interface Options extends GenericOptions {
 	interactive?: boolean;
@@ -64,6 +64,8 @@ interface ThirdAnswers {
 	verifyPassphrase: string;
 }
 
+export type Output = StagedOutput<Arguments, V3JSONKeyStore, V3JSONKeyStore>;
+
 export const stage: StagingFunction<
 	Arguments,
 	V3JSONKeyStore,
@@ -87,14 +89,15 @@ export const stage: StagingFunction<
 
 		staging.debug('Reading keystore successful.');
 	} catch (e) {
-		return Promise.reject(e);
+		return Promise.reject(staging.error(KEYSTORE.LIST, e.toString()));
 	}
 
 	staging.debug(`Keystores length ${keystores.length}`);
 
 	if (!keystores.length) {
 		return Promise.reject(
-			new EmptyKeystoreDirectoryError(
+			staging.error(
+				KEYSTORE.EMPTY,
 				`No accounts found in keystore directory ${
 					session.keystore.path
 				}`
@@ -139,16 +142,21 @@ export const stage: StagingFunction<
 	}
 
 	if (!args.address) {
-		return Promise.reject(new InvalidArgumentError('No address provided.'));
+		return Promise.reject(
+			staging.error(ACCOUNT_UPDATE.ADDRESS_EMPTY, 'No address provided.')
+		);
 	}
 
 	args.address = Utils.trimHex(args.address);
 
 	staging.debug(`Address to update ${args.address}`);
 
-	if (args.address.length !== 40 && args.address.length !== 42) {
+	if (args.address.length !== 40) {
 		return Promise.reject(
-			new InvalidArgumentError('Address has an invalid length.')
+			staging.error(
+				ACCOUNT_UPDATE.ADDRESS_INVALID_LENGTH,
+				'Address provided has an invalid length.'
+			)
 		);
 	}
 
@@ -158,7 +166,8 @@ export const stage: StagingFunction<
 		await session.keystore.get(args.address);
 	} catch (e) {
 		return Promise.reject(
-			new KeystoreNotFoundError(
+			staging.error(
+				KEYSTORE.FETCH,
 				`Could not locate keystore for address ${args.address} in ${
 					session.keystore.path
 				}`
@@ -180,7 +189,8 @@ export const stage: StagingFunction<
 	if (!oldPassphrase) {
 		if (!args.options.old) {
 			return Promise.reject(
-				new InvalidArgumentError(
+				staging.error(
+					ACCOUNT_UPDATE.OLD_PWD_EMPTY,
 					'Old passphrase file path not provided.'
 				)
 			);
@@ -190,7 +200,8 @@ export const stage: StagingFunction<
 
 		if (!KeystoreUtils.exists(args.options.old)) {
 			return Promise.reject(
-				new PathNotFoundError(
+				staging.error(
+					ACCOUNT_UPDATE.OLD_PWD_NOT_FOUND,
 					'Old passphrase file path provided does not exist.'
 				)
 			);
@@ -198,7 +209,8 @@ export const stage: StagingFunction<
 
 		if (KeystoreUtils.isDirectory(args.options.old)) {
 			return Promise.reject(
-				new InvalidPathError(
+				staging.error(
+					ACCOUNT_UPDATE.OLD_PWD_IS_DIR,
 					'Old passphrase file path provided is a directory.'
 				)
 			);
@@ -219,7 +231,7 @@ export const stage: StagingFunction<
 	} catch (e) {
 		staging.debug(`Decrypt failed for ${args.address}`);
 
-		return Promise.reject(e);
+		return Promise.reject(staging.error(KEYSTORE.DECRYPTION, e.toString()));
 	}
 
 	if (!args.options.new && interactive) {
@@ -229,7 +241,10 @@ export const stage: StagingFunction<
 
 		if (!(passphrase && verifyPassphrase)) {
 			return Promise.reject(
-				new InvalidArgumentError('Fields cannot be blank.')
+				staging.error(
+					ACCOUNT_UPDATE.PASS_FIELDS_BLANK,
+					'Fields cannot be blank.'
+				)
 			);
 		}
 
@@ -237,7 +252,10 @@ export const stage: StagingFunction<
 
 		if (passphrase !== verifyPassphrase) {
 			return Promise.reject(
-				new InvalidArgumentError('Passphrases do not match.')
+				staging.error(
+					ACCOUNT_UPDATE.PASS_FIELDS_BLANK,
+					'Passphrases do not match.'
+				)
 			);
 		}
 
@@ -249,7 +267,8 @@ export const stage: StagingFunction<
 	if (!newPassphrase) {
 		if (!args.options.new) {
 			return Promise.reject(
-				new InvalidArgumentError(
+				staging.error(
+					ACCOUNT_UPDATE.NEW_PWD_EMPTY,
 					'New passphrase file path not provided.'
 				)
 			);
@@ -259,7 +278,8 @@ export const stage: StagingFunction<
 
 		if (!KeystoreUtils.exists(args.options.new)) {
 			return Promise.reject(
-				new PathNotFoundError(
+				staging.error(
+					ACCOUNT_UPDATE.NEW_PWD_NOT_FOUND,
 					'New passphrase file path provided does not exist.'
 				)
 			);
@@ -267,8 +287,9 @@ export const stage: StagingFunction<
 
 		if (KeystoreUtils.isDirectory(args.options.new)) {
 			return Promise.reject(
-				new InvalidPathError(
-					'New passphrase file path provided is a directory.'
+				staging.error(
+					ACCOUNT_UPDATE.NEW_PWD_IS_DIR,
+					'Old passphrase file path provided is a directory.'
 				)
 			);
 		}
@@ -280,8 +301,9 @@ export const stage: StagingFunction<
 
 	if (oldPassphrase === newPassphrase) {
 		return Promise.reject(
-			new InvalidArgumentError(
-				'New passphrase cannot be the same as new.'
+			staging.error(
+				ACCOUNT_UPDATE.SAME_OLD_NEW_PWD,
+				'New passphrase cannot be the same as old.'
 			)
 		);
 	}
