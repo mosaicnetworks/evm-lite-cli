@@ -125,7 +125,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 		staging.debug('Reading keystore successful.');
 	} catch (e) {
-		return Promise.reject(staging.error(EVM_LITE, e.toString()));
+		return Promise.reject(staging.error(KEYSTORE.LIST, e.toString()));
 	}
 
 	staging.debug(`Keystores length ${keystores.length}`);
@@ -333,7 +333,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 			staging.error(
 				TRANSACTION.EMPTY_LOGS,
 				'No logs were returned. ' +
-					'Possible due to lack of `gas` or you are not whitelisted.'
+					'Possibly due to lack of `gas` or you might not be whitelisted.'
 			)
 		);
 	}
