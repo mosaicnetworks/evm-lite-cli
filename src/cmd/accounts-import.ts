@@ -3,12 +3,8 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import { Utils, Account } from 'evm-lite-core';
-import {
-	Utils as KeystoreUtils,
-	V3JSONKeyStore,
-	Keystore
-} from 'evm-lite-keystore';
+import { Utils } from 'evm-lite-core';
+import { Utils as KeystoreUtils, V3JSONKeyStore } from 'evm-lite-keystore';
 
 import Session from '../Session';
 import Staging, {
