@@ -4,7 +4,7 @@ import { Arguments, stage, Output } from '../src/cmd/accounts-create';
 import { ACCOUNTS_CREATE } from '../src/errors/accounts';
 
 describe('accounts-create.ts', () => {
-	it('should error with as --pwd path empty', async () => {
+	it('should error as --pwd path empty', async () => {
 		expect.assertions(2);
 
 		const args: Arguments = {
@@ -24,7 +24,7 @@ describe('accounts-create.ts', () => {
 		}
 	});
 
-	it('should error with as --pwd path not found', async () => {
+	it('should error as --pwd path not found', async () => {
 		expect.assertions(2);
 
 		const path = '/path_does_not_exist/pwd.txt';
@@ -50,7 +50,7 @@ describe('accounts-create.ts', () => {
 		}
 	});
 
-	it('should error with as --pwd path is a directory', async () => {
+	it('should error as --pwd path is a directory', async () => {
 		expect.assertions(2);
 
 		const path = '/';
@@ -74,7 +74,7 @@ describe('accounts-create.ts', () => {
 		}
 	});
 
-	it('should error with as --out path not found', async () => {
+	it('should error as --out path not found', async () => {
 		expect.assertions(2);
 
 		const path = '/does_not_exist/';
@@ -101,7 +101,7 @@ describe('accounts-create.ts', () => {
 		}
 	});
 
-	it('should error with as --out path is not a directory', async () => {
+	it('should error as --out path is not a directory', async () => {
 		expect.assertions(2);
 
 		const args: Arguments = {

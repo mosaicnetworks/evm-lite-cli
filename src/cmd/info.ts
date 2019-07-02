@@ -4,7 +4,7 @@ import Vorpal, { Command, Args } from 'vorpal';
 import Session from '../Session';
 import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
 
-import { InvalidConnectionError } from '../errors';
+import { INVALID_CONNECTION, EVM_LITE } from '../errors/generals';
 
 interface Options extends GenericOptions {
 	formatted?: boolean;
@@ -50,7 +50,8 @@ export const stage: StagingFunction<Arguments, ASCIITable, any> = async (
 
 	if (!status) {
 		return Promise.reject(
-			new InvalidConnectionError(
+			staging.error(
+				INVALID_CONNECTION,
 				`A connection could be establised to ${host}:${port}`
 			)
 		);
@@ -63,7 +64,7 @@ export const stage: StagingFunction<Arguments, ASCIITable, any> = async (
 	try {
 		information = await session.node.getInfo();
 	} catch (e) {
-		return Promise.reject(e);
+		return Promise.reject(staging.error(EVM_LITE, e.toString()));
 	}
 
 	staging.debug(`Fetching information successful`);

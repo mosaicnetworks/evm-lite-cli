@@ -10,7 +10,7 @@ import { ACCOUNTS_GET } from '../src/errors/accounts';
 import { INVALID_CONNECTION } from '../src/errors/generals';
 
 describe('accounts-get.ts', () => {
-	it('should error with as invalid node conn details', async () => {
+	it('should error as invalid node conn details', async () => {
 		expect.assertions(3);
 
 		const args: Arguments = {
@@ -34,7 +34,7 @@ describe('accounts-get.ts', () => {
 		}
 	});
 
-	it('should error with as [address] is empty', async () => {
+	it('should error as [address] is empty', async () => {
 		expect.assertions(4);
 
 		const args: Arguments = {
@@ -59,7 +59,7 @@ describe('accounts-get.ts', () => {
 		}
 	});
 
-	it('should error with as [address] is too short', async () => {
+	it('should error as [address] is too short', async () => {
 		expect.assertions(4);
 
 		const account = Account.create();
@@ -91,7 +91,7 @@ describe('accounts-get.ts', () => {
 		}
 	});
 
-	it('should error with as [address] is too long', async () => {
+	it('should error as [address] is too long', async () => {
 		expect.assertions(4);
 
 		const account = Account.create();

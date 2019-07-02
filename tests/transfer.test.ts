@@ -1,23 +1,14 @@
-import { stage, Arguments } from '../src/cmd/transfer';
-import {
-	InvalidConnectionError,
-	EmptyKeystoreDirectoryError,
-	InvalidArgumentError,
-	KeystoreNotFoundError,
-	PathNotFoundError,
-	InvalidPathError
-} from '../src/errors';
+import { session, pwdPath, otherPwdPath, password } from './stage';
 
-import {
-	session,
-	clearKeystore,
-	pwdPath,
-	password,
-	otherPwdPath
-} from './stage';
+import { stage, Arguments, Output } from '../src/cmd/transfer';
+import { TRANSFER } from '../src/errors/accounts';
+import { KEYSTORE, EVM_LITE, INVALID_CONNECTION } from '../src/errors/generals';
+import { Utils } from 'evm-lite-core';
 
 describe('transfer.ts', () => {
-	it('should throw InvalidConnetionError', async () => {
+	it('should error as invalid node conn details', async () => {
+		expect.assertions(3);
+
 		const args: Arguments = {
 			options: {
 				host: '127.0.0.1',
@@ -28,139 +19,240 @@ describe('transfer.ts', () => {
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidConnectionError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.host).toBe('127.0.0.1');
+			expect(output.args.options.port).toBe(3000);
+
+			if (output.error) {
+				expect(output.error.type).toBe(INVALID_CONNECTION);
+			}
 		}
 	});
 
-	it('should throw EmptyKeystoreDirectoryError', async () => {
-		clearKeystore();
-
-		const args: Arguments = {
-			options: {}
-		};
-
-		try {
-			await stage(args, session);
-		} catch (e) {
-			expect(e instanceof EmptyKeystoreDirectoryError).toBe(true);
-		}
-	});
-
-	it('should throw InvalidArgumentError (no `from` address)', async () => {
-		const _ = await session.keystore.create('password');
+	it('should error as keystore is empty', async () => {
+		expect.assertions(3);
 
 		const args: Arguments = {
 			options: {
-				from: ''
+				host: '127.0.0.1',
+				port: 8000
 			}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.host).toBe('127.0.0.1');
+			expect(output.args.options.port).toBe(8000);
+
+			if (output.error) {
+				expect(output.error.type).toBe(KEYSTORE.EMPTY);
+			}
 		}
 	});
 
-	it('should throw InvalidArgumentError (incorrect `from` address)', async () => {
-		const keystore = await session.keystore.create('password');
+	it('should error as `from` address not provided', async () => {
+		expect.assertions(3);
+
+		// create keystore
+		await session.keystore.create(password);
 
 		const args: Arguments = {
 			options: {
-				from: keystore.address.slice(1) + '0'
+				host: '127.0.0.1',
+				port: 8000
 			}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof KeystoreNotFoundError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.host).toBe('127.0.0.1');
+			expect(output.args.options.port).toBe(8000);
+
+			if (output.error) {
+				expect(output.error.type).toBe(TRANSFER.FROM_EMPTY);
+			}
 		}
 	});
 
-	it('should throw InvalidArgumentError (no `pwd` path)', async () => {
-		const keystore = await session.keystore.create('password');
+	it('should error as `from` address keystore cannot be located', async () => {
+		expect.assertions(4);
+
+		// create keystore
+		const from = await session.keystore.create(password);
 
 		const args: Arguments = {
 			options: {
-				from: keystore.address
+				from: `${from.address.slice(1)}F`,
+				host: '127.0.0.1',
+				port: 8000
 			}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.host).toBe('127.0.0.1');
+			expect(output.args.options.port).toBe(8000);
+			expect(Utils.trimHex(output.args.options.from!)).toBe(
+				Utils.trimHex(`${from.address.slice(1)}F`)
+			);
+
+			if (output.error) {
+				expect(output.error.type).toBe(KEYSTORE.FETCH);
+			}
 		}
 	});
 
-	it('should throw PathNotFoundError (invalid `pwd` path)', async () => {
-		const keystore = await session.keystore.create('password');
+	it('should error as --pwd passphrase path empty', async () => {
+		expect.assertions(3);
+
+		// create keystore
+		const from = await session.keystore.create(password);
 
 		const args: Arguments = {
 			options: {
-				from: keystore.address,
-				pwd: '/does_not_exists/pwd.txt'
+				from: from.address,
+				host: '127.0.0.1',
+				port: 8000
 			}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof PathNotFoundError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.host).toBe('127.0.0.1');
+			expect(output.args.options.port).toBe(8000);
+
+			if (output.error) {
+				expect(output.error.type).toBe(TRANSFER.PWD_PATH_EMPTY);
+			}
 		}
 	});
 
-	it('should throw InvalidPathError (`pwd` path is directory)', async () => {
-		const keystore = await session.keystore.create('password');
+	it('should error as --pwd passphrase path does not exist', async () => {
+		expect.assertions(3);
+
+		// create keystore
+		const from = await session.keystore.create(password);
 
 		const args: Arguments = {
 			options: {
-				from: keystore.address,
-				pwd: '/'
+				pwd: '/does_not_exist/pwd.txt',
+				from: from.address,
+				host: '127.0.0.1',
+				port: 8000
 			}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidPathError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.host).toBe('127.0.0.1');
+			expect(output.args.options.port).toBe(8000);
+
+			if (output.error) {
+				expect(output.error.type).toBe(TRANSFER.PWD_PATH_NOT_FOUND);
+			}
 		}
 	});
 
-	it('should throw InvalidArgumentError (decryption fails)', async () => {
-		const keystore = await session.keystore.create(password);
+	it('should error as --pwd passphrase path is dir', async () => {
+		expect.assertions(3);
+
+		// create keystore
+		const from = await session.keystore.create(password);
 
 		const args: Arguments = {
 			options: {
-				from: keystore.address,
-				pwd: otherPwdPath
+				pwd: '/',
+				from: from.address,
+				host: '127.0.0.1',
+				port: 8000
 			}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.host).toBe('127.0.0.1');
+			expect(output.args.options.port).toBe(8000);
+
+			if (output.error) {
+				expect(output.error.type).toBe(TRANSFER.PWD_IS_DIR);
+			}
 		}
 	});
 
-	it('should throw InvalidArgumentError (no `to`, `value` set)', async () => {
-		const keystore = await session.keystore.create(password);
+	it('should error as --pwd passphrase cannot decrypt keystore', async () => {
+		expect.assertions(3);
+
+		// create keystore
+		const from = await session.keystore.create(password);
 
 		const args: Arguments = {
 			options: {
-				from: keystore.address,
+				pwd: otherPwdPath,
+				from: from.address,
+				host: '127.0.0.1',
+				port: 8000
+			}
+		};
+
+		try {
+			await stage(args, session);
+		} catch (e) {
+			const output = e as Output;
+
+			expect(output.args.options.host).toBe('127.0.0.1');
+			expect(output.args.options.port).toBe(8000);
+
+			if (output.error) {
+				expect(output.error.type).toBe(KEYSTORE.DECRYPTION);
+			}
+		}
+	});
+
+	it('should error as --to, --value are empty', async () => {
+		expect.assertions(3);
+
+		// create keystore
+		const from = await session.keystore.create(password);
+
+		const args: Arguments = {
+			options: {
 				pwd: pwdPath,
-				to: '',
-				value: 0
+				from: from.address,
+				host: '127.0.0.1',
+				port: 8000
 			}
 		};
 
 		try {
 			await stage(args, session);
 		} catch (e) {
-			expect(e instanceof InvalidArgumentError).toBe(true);
+			const output = e as Output;
+
+			expect(output.args.options.host).toBe('127.0.0.1');
+			expect(output.args.options.port).toBe(8000);
+
+			if (output.error) {
+				expect(output.error.type).toBe(TRANSFER.TO_VALUE_EMPTY);
+			}
 		}
 	});
 });
