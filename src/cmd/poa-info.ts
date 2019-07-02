@@ -3,7 +3,7 @@ import Vorpal, { Command, Args } from 'vorpal';
 import Session from '../Session';
 import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
 
-import { InvalidConnectionError } from '../errors';
+import { EVM_LITE, INVALID_CONNECTION } from '../errors/generals';
 
 interface Options extends GenericOptions {
 	host?: string;
@@ -42,7 +42,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	if (!status) {
 		return Promise.reject(
-			new InvalidConnectionError(
+			staging.error(
+				INVALID_CONNECTION,
 				`A connection could be establised to ${host}:${port}`
 			)
 		);
@@ -55,7 +56,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 	} catch (e) {
 		staging.debug('POA contract info fetch error');
 
-		return Promise.reject(e);
+		return Promise.reject(staging.error(EVM_LITE, e.toString()));
 	}
 
 	staging.debug('POA contract info fetch successful');
