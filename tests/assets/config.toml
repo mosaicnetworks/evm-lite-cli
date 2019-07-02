@@ -1,7 +1,0 @@
-[defaults]
-from = ""
-gas = 100000.0
-gasprice = 0.0
-host = "127.0.0.1"
-keystore = "/Users/danu/code/src/github.com/mosaicnetworks/evml-client/cli/test/assets/keystore"
-port = "8080"

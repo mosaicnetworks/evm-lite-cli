@@ -4,42 +4,51 @@ A Command Line Interface to interact with
 EVM-Lite.
 
 ## Installation
+
+<!-- ### NPM
+
+You can easily install `evmlc` with NPM
+
+```bash
+npm install -g evm-lite-cli
+```
+
+or with `yarn`
+
+```bash
+yarn global add evm-lite-cli
+``` -->
+
+## Development
+
 To begin with, you will need to install Node and NPM, which are bundled together
 in the installation package from the [Node website](https://nodejs.org/en/).
 
-This project was built with Node version 10.10.0 and NPM version 6.1.0.
+This project was built with Node version `10.16.0`.
 
-### Makefile
-
-To download Javascript dependencies and install `evmlc`, run:
-
-```
-$ make
-```
-
-If the `make` was successful you should now be able to run `evmlc`:
+Firstly we will need to install all dependencies
 
 ```bash
-$ evmlc
-
-  A Command Line Interface to interact with EVM-Lite.
-
-  Current Data Directory: [...]/.evmlc
-
-  Commands:
-
-    help [command...]                 Provides help for a given command.
-    exit                              Exits application.
-    config view                       Output current configuration file as JSON.
-    config set [options]              Set values of the configuration inside the data directory.
-    accounts create [options]         Allows you to create and encrypt accounts locally. Created accounts will either be placed in the keystore folder inside the data directory provided by the global --datadir, -d flag or if no flag is provided, in the keystore
-                                      specified in the configuration file.
-    accounts list [options]           List all accounts in the local keystore directory provided by the configuration file. This command will also get a balance and nonce for all the accounts from the node if a valid connection is established.
-    accounts get [options] [address]  Gets account balance and nonce from a node with a valid connection.
-    interactive                       Enter into interactive mode with data directory provided by --datadir, -d or default.
-    transfer [options]                Initiate a transfer of token(s) to an address. Default values for gas and gas prices are set in the configuration file.
-    info [options]                    Testing purposes.
+npm install
 ```
+
+or with `yarn
+
+```bash
+yarn install
+```
+
+This should also transpile all typescript files into `dist/`.
+
+For development, it is advised to use
+
+```bash
+npm run i
+```
+
+to test the CLI.
+
+Alternatively you can run `npm link` and access the CLI through `evmlc` however any changes made to the typescript files needs to be transpiled before changes are seen.
 
 ## Configuration
 
@@ -48,20 +57,22 @@ special directory in a default location (`~/.evmlc` on Linux and Mac), where it
 stores any relevant information. In particular, this directory contains the
 following items:
 
- - **config.toml**: where global options are specified. These values may be
-                    overwritten by CLI flags.
- - **keystore**: where all encrypted account keys are stored.
+-   **config.toml**: where global options are specified. These values may be
+    overwritten by CLI flags.
+-   **keystore**: where all encrypted account keys are stored.
 
 Example config.toml:
- ```toml
-[defaults]
+
+```toml
+[connection]
 host = "127.0.0.1"
-port = "8080"
-from = ""
-gas = 100000.0
-gasprice = 0.0
-keystore = "[...]/.evmlc/keystore"
- ```
+port = 8000
+
+[defaults]
+from = "0x702B0ad02a7a6056EB16A697A96d849c228F5fB4"
+gas = 1000000000000
+gasPrice = 0
+```
 
 The easiest way to manage configuration is through the `config` command in
 interactive mode.
@@ -81,22 +92,23 @@ $ evmlc i
 
 evmlc$
 ```
+
 To change default configuration values run `config set` or `c s`. You will be
 taken to an interactive prompt to change connection and default values.
 
 ```bash
 evmlc$ config set
 
-? Host:  127.0.0.1
-? Port:  8080
-? From:  none
-? Gas:  100000
-? Gasprice:  0
-? Keystore:  [...]/.evmlc/keystore
+? Host: 127.0.0.1
+? Port: 8000
+? From: 0x702B0ad02a7a6056EB16A697A96d849c228F5fB4
+? Gas: 1000000000000
+? Gas Price: 0
 ```
 
 ## Commands
-By default all commands will output raw JSON unless the `-f, --formatted` flag
+
+By default, all commands will output raw JSON unless the `-f, --formatted` flag
 is provided. A connection to the node is not required unless stated in each
 command.
 
@@ -132,7 +144,7 @@ While still in interactive mode, type the command `accounts create -v` (`-v` spe
 the default option for keystore and then type in a password to encrypt the account:
 
 ```bash
-evmlc$ accounts create -v
+evmlc$ accounts create
 
 ? Enter keystore output path:  [...]/.evmlc/keystore
 ? Enter a password:  [hidden]
@@ -150,7 +162,7 @@ in the keystore directory
 #### What is an account?
 
 EVM-Lite uses the same account model as Ethereum. Accounts represent identities
-of external agents, and are associated with a balance (and storage for Contract
+of external agents and are associated with a balance (and storage for Contract
 accounts). They rely on public key cryptography to sign transactions so that the
 EVM can securely validate the identity of a transaction sender.
 
@@ -158,7 +170,7 @@ Using the same account model as Ethereum doesn't mean that existing Ethereum
 accounts automatically have the same balance in EVM-Lite (or vice versa). In
 Ethereum, balances are denoted in Ether, the cryptocurrency maintained by the
 public Ethereum network. On the other hand, every EVM-Lite network (even a
-single node network) maintains a completely separate ledger, and may use any
+single node network) maintains a completely separate ledger and may use any
 name for the corresponding coin.
 
 What follows is mostly taken from the [Ethereum Docs](http://ethdocs.org/en/latest/account-management.html):
@@ -172,7 +184,7 @@ the same transactions in the same order, thereby arriving at the same State.
 
 Restricting EVM-Lite to externally owned accounts makes for an “altcoin” system
 that can only be used to transfer coins. The use of Contract accounts with the
-EVM make it possible to deploy and use *Smart Contracts* which we will explore
+EVM makes it possible to deploy and use _Smart Contracts_ which we will explore
 in another document.
 
 #### What is an account file?
@@ -180,13 +192,13 @@ in another document.
 This is best explained in the
 [Ethereum Docs](http://ethdocs.org/en/latest/account-management.html):
 
->Every account is defined by a pair of keys, a private key and public key.
->Accounts are indexed by their address which is derived from the public key by
->taking the last 20 bytes. Every private key/address pair is encoded in a
->keyfile. Keyfiles are JSON text files which you can open and view in any text
->editor. The critical component of the keyfile, your account’s private key, is
->always encrypted, and it is encrypted with the password you enter when you
->create the account.
+> Every account is defined by a pair of keys, a private key and public key.
+> Accounts are indexed by their address which is derived from the public key by
+> taking the last 20 bytes. Every private key/address pair is encoded in a
+> keyfile. Keyfiles are JSON text files which you can open and view in any text
+> editor. The critical component of the keyfile, your account’s private key, is
+> always encrypted, and it is encrypted with the password you enter when you
+> create the account.
 
 ### 3) Start an `evm-lite` node and pre-allocate funds to our address
 
@@ -224,7 +236,7 @@ How many coins where assigned to the account? let's check!
 Back in the interactive `evmlc` session, type `accounts list -f -v` (formatted, verbose output)
 
 ```bash
-evmlc$ accounts list -f -v
+evmlc$ accounts list -f
 
 .----------------------------------------------------------------------------------------.
 | # |                  Address                   |            Balance            | Nonce |
@@ -236,11 +248,10 @@ evmlc$ accounts list -f -v
 The command went through the accounts in the keystore, connected to the node to
 retrieve the corresponding balance, and displayed it nicely on the screen.
 
-
 ### 5) Create another account
 
 ```bash
-evmlc$ accounts create -v
+evmlc$ accounts create
 
 ? Enter keystore output path:  [...]/.evmlc/keystore
 ? Enter a password:  [hidden]
@@ -284,21 +295,21 @@ It can contain instructions to move coins from one account to another, create a
 new Contract account, or call an existing Contract account. Transactions are
 encoded using the custom Ethereum scheme, RLP, and contain the following fields:
 
-- the recipient of the message,
-- a signature identifying the sender and proving their intention to send the
-transaction.
-- The number of coin to transfer from the sender to the recipient,
-- an optional data field, which can contain the message sent to a contract,
-- a STARTGAS value, representing the maximum number of computational steps the
-transaction execution is allowed to take,
-- a GASPRICE value, representing the fee the sender is willing to pay for gas.
-One unit of gas corresponds to the execution of one atomic instruction, i.e., a
-computational step.
+-   the recipient of the message,
+-   a signature identifying the sender and proving their intention to send the
+    transaction.
+-   The number of coins to transfer from the sender to the recipient,
+-   an optional data field, which can contain the message sent to a contract,
+-   a STARTGAS value, representing the maximum number of computational steps the
+    transaction execution is allowed to take,
+-   a GASPRICE value, representing the fee the sender is willing to pay for gas.
+    One unit of gas corresponds to the execution of one atomic instruction, i.e., a
+    computational step.
 
 ### 7) Check accounts again
 
 ```bash
-evmlc$ accounts list -f -v
+evmlc$ accounts list -f
 
 .----------------------------------------------------------------------------------------.
 | # |                  Address                   |            Balance            | Nonce |
@@ -315,6 +326,6 @@ from one account to another. We used a single EVM-Lite node, running in Solo
 mode, for the purpose of demonstration, but the same concepts apply with
 networks consisting of multiple nodes, powered by other consensus algorithms
 (like Babble or Raft). In another document, we will describe how to create,
-publish, and interact with SmartContracts.
+publish, and interact with smart contracts.
 
 Many more features to come...

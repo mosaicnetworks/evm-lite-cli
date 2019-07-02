@@ -1,56 +1,55 @@
 #!/usr/bin/env node
 
-/**
- * @file AccountsCreate.ts
- * @module evm-lite-cli
- * @author Danu Kumanan <https://github.com/danu3006>
- * @author Mosaic Networks <https://github.com/mosaicnetworks>
- * @date 2018
- */
+require('dotenv').config();
 
 import * as figlet from 'figlet';
 import * as mkdir from 'mkdirp';
-import * as Vorpal from 'vorpal';
 
-import { Static } from 'evm-lite-lib';
+import Vorpal, { Command } from 'vorpal';
 
-import Globals, { CommandFunction } from './classes/Globals';
+import { Utils } from 'evm-lite-keystore';
 
-import Session from './classes/Session';
+import Globals from './Globals';
+import Session from './Session';
 
-import AccountsCreate from './commands/AccountsCreate';
-import AccountsGet from './commands/AccountsGet';
-import AccountsList from './commands/AccountsList';
-import AccountsUpdate from './commands/AccountsUpdate';
-import Clear from './commands/Clear';
-import ConfigSet from './commands/ConfigSet';
-import ConfigView from './commands/ConfigView';
-import Info from './commands/Info';
-import Interactive from './commands/Interactive';
-// import LogsClear from "./commands/LogsClear";
-// import LogsView from "./commands/LogsView";
-import Test from './commands/Test';
-import TransactionsGet from './commands/TransactionsGet';
-import TransactionsList from './commands/TransactionsList';
-import Transfer from './commands/Transfer';
+// Accounts
+import accountsCreate from './cmd/accounts-create';
+import accountsGet from './cmd/accounts-get';
+import accountsList from './cmd/accounts-list';
+import accountsUpdate from './cmd/accounts-update';
+import accountsImport from './cmd/accounts-import';
 
-const __VERSION = '0.1.1';
+// Config
+import configView from './cmd/config-view';
+import configSet from './cmd/config-set';
+
+// poa
+import poaCheck from './cmd/poa-check';
+import poaInfo from './cmd/poa-info';
+import poaWhitelist from './cmd/poa-whitelist';
+import poaNomineelist from './cmd/poa-nomineelist';
+import poaNominate from './cmd/poa-nominate';
+import poaVote from './cmd/poa-vote';
+
+// Misc
+import clear from './cmd/clear';
+import interactive from './cmd/interactive';
+import transfer from './cmd/transfer';
+import info from './cmd/info';
+import version from './cmd/version';
+import test from './cmd/test';
+
+export type CommandFunction = (evmlc: Vorpal, session: Session) => Command;
+
 const init = (): Promise<void> => {
 	return new Promise<void>(resolve => {
-		if (!Static.exists(Globals.evmlcDir)) {
-			mkdir.mkdirp(Globals.evmlcDir);
+		if (!Utils.exists(Globals.evmlcDir)) {
+			mkdir.sync(Globals.evmlcDir);
 		}
 		resolve();
 	});
 };
 
-/**
- * EVM-Lite Command Line Interface
- *
- * You can enter interactive mode by using the command `interactive, i`.
- * Running any command will provide you with a step by step dialogue to executing
- * that command with the respective options.
- */
 init()
 	.then(() => {
 		let dataDirPath: string = Globals.evmlcDir;
@@ -58,10 +57,10 @@ init()
 		if (process.argv[2] === '--datadir' || process.argv[2] === '-d') {
 			dataDirPath = process.argv[3];
 
-			if (!Static.exists(process.argv[3])) {
+			if (!Utils.exists(process.argv[3])) {
 				Globals.warning(
-					'Data directory file path provided does' +
-						'not exist and hence will created...'
+					'Data directory path provided does ' +
+						'not exist and will created.'
 				);
 			}
 
@@ -84,24 +83,35 @@ init()
 		return session;
 	})
 	.then((session: Session) => {
-		const evmlc = new Vorpal().version(__VERSION);
+		const evmlc = new Vorpal();
 
 		[
-			AccountsUpdate,
-			ConfigView,
-			ConfigSet,
-			AccountsCreate,
-			AccountsList,
-			AccountsGet,
-			Interactive,
-			Transfer,
-			Info,
-			Test,
-			TransactionsList,
-			TransactionsGet,
-			// LogsView,
-			// LogsClear,
-			Clear
+			// accounts
+			accountsCreate,
+			accountsGet,
+			accountsList,
+			accountsUpdate,
+			accountsImport,
+
+			// config
+			configView,
+			configSet,
+
+			// poa
+			poaCheck,
+			poaWhitelist,
+			poaNomineelist,
+			poaNominate,
+			poaVote,
+			poaInfo,
+
+			// misc
+			clear,
+			interactive,
+			info,
+			test,
+			version,
+			transfer
 		].forEach((command: CommandFunction) => {
 			command(evmlc, session);
 		});
@@ -114,10 +124,19 @@ init()
 	.then(async (cli: { instance: Vorpal; session: Session }) => {
 		if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
 			console.log(figlet.textSync('EVM-Lite CLI', {}));
+
+			if (process.argv[3] === '-d' || process.argv[3] === '--debug') {
+				cli.session.debug = true;
+				Globals.warning(` Debug:       True`);
+			}
+
 			Globals.warning(` Mode:        Interactive`);
 			Globals.warning(` Data Dir:    ${cli.session.directory.path}`);
 			Globals.info(` Config File: ${cli.session.config.path}`);
-			Globals.info(` Keystore:    ${cli.session.keystore.path}`);
+
+			if (cli.session.keystore) {
+				Globals.info(` Keystore:    ${cli.session.keystore.path}`);
+			}
 
 			const cmdInteractive = cli.instance.find('interactive');
 			if (cmdInteractive) {
@@ -130,6 +149,7 @@ init()
 			cli.instance.delimiter('evmlc$').show();
 		} else {
 			const cmdClear = cli.instance.find('clear');
+
 			if (cmdClear) {
 				cmdClear.hidden();
 			}
@@ -137,4 +157,4 @@ init()
 			cli.instance.parse(process.argv);
 		}
 	})
-	.catch(err => console.log(err));
+	.catch(console.log);

@@ -1,46 +1,43 @@
 {
 	"name": "evm-lite-cli",
-	"version": "0.1.1",
-	"description": "A CLI to interact with EVM-Lite node.",
-	"main": "./dist/index.js",
-	"scripts": {
-		"test": "mocha -r ts-node/register tests/**/*.ts || true",
-		"tsc": "tsc"
-	},
-	"keywords": [],
-	"author": "",
+	"version": "1.0.0-alpha.7",
+	"main": "index.js",
 	"license": "MIT",
+	"scripts": {
+		"postinstall": "tsc",
+		"prepublish": "tsc",
+		"clean": "rm -rf node_modules && rm -rf dist/",
+		"build": "tsc -p tsconfig.json",
+		"test": "jest",
+		"i": "ts-node src/index --datadir /Users/danu/Desktop/evmlc i --debug"
+	},
 	"dependencies": {
-		"@types/vorpal": "^1.11.0",
-		"ascii-table": "0.0.9",
-		"chalk": "^2.4.1",
-		"evm-lite-lib": "^0.2.18",
-		"figlet": "^1.2.0",
-		"inquirer": "^6.3.1",
-		"install": "^0.12.2",
-		"json-bigint": "^0.3.0",
+		"ascii-table": "^0.0.9",
+		"chalk": "^2.4.2",
+		"dotenv": "^8.0.0",
+		"evm-lite-core": "1.0.0-alpha.6",
+		"evm-lite-datadir": "1.0.0-alpha.7",
+		"evm-lite-keystore": "1.0.0-alpha.7",
+		"figlet": "^1.2.3",
+		"inquirer": "^6.4.1",
 		"mkdirp": "^0.5.1",
-		"npm": "^6.5.0",
-		"toml": "^2.3.3",
-		"tomlify-j0.4": "^3.0.0",
 		"vorpal": "^1.12.0"
+	},
+	"devDependencies": {
+		"@types/figlet": "^1.2.0",
+		"@types/inquirer": "^6.0.3",
+		"@types/jest": "^24.0.15",
+		"@types/mkdirp": "^0.5.2",
+		"@types/node": "^12.0.10",
+		"jest": "^24.8.0",
+		"ts-jest": "^24.0.2",
+		"ts-node": "^8.3.0",
+		"tslint": "^5.18.0",
+		"tslint-config-airbnb": "^5.11.1",
+		"tslint-config-prettier": "^1.18.0",
+		"typescript": "^3.5.2"
 	},
 	"bin": {
 		"evmlc": "./dist/index.js"
-	},
-	"devDependencies": {
-		"@types/chai": "^4.1.6",
-		"@types/chalk": "^2.2.0",
-		"@types/inquirer": "0.0.43",
-		"@types/lowdb": "^1.0.6",
-		"@types/mocha": "^5.2.5",
-		"@types/node": "^10.11.0",
-		"chai": "^4.2.0",
-		"mocha": "^5.2.0",
-		"ts-node": "^7.0.1",
-		"tslint": "^5.11.0",
-		"tslint-config-prettier": "^1.15.0",
-		"typescript": "^3.1.6"
-	},
-	"typings": "./dist/index.d.ts"
+	}
 }
