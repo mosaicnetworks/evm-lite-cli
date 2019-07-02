@@ -11,20 +11,23 @@ import {
 import { Utils, Contract, Account, TransactionReceipt } from 'evm-lite-core';
 
 import Session from '../Session';
-import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
+import Globals from '../Globals';
+import Staging, {
+	execute,
+	StagingFunction,
+	GenericOptions,
+	StagedOutput
+} from '../Staging';
 
 import { Schema } from '../POA';
 
+import { POA_NOMINATE } from '../errors/poa';
 import {
-	InvalidConnectionError,
-	EmptyKeystoreDirectoryError,
-	InvalidArgumentError,
-	InvalidPathError,
-	PathNotFoundError,
-	KeystoreNotFoundError,
-	EmptyTransactionReceiptLogsError
-} from '../errors';
-import Globals from '../Globals';
+	EVM_LITE,
+	TRANSACTION,
+	INVALID_CONNECTION,
+	KEYSTORE
+} from '../errors/generals';
 
 interface Options extends GenericOptions {
 	interactive?: boolean;
@@ -69,6 +72,8 @@ interface Answers {
 	moniker: string;
 }
 
+export type Output = StagedOutput<Arguments, string, string>;
+
 export const stage: StagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
@@ -86,7 +91,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	if (!status) {
 		return Promise.reject(
-			new InvalidConnectionError(
+			staging.error(
+				INVALID_CONNECTION,
 				`A connection could be establised to ${host}:${port}`
 			)
 		);
@@ -99,7 +105,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 	} catch (e) {
 		staging.debug('POA contract info fetch error');
 
-		return Promise.reject(e);
+		return Promise.reject(staging.error(EVM_LITE, e.toString()));
 	}
 
 	staging.debug('POA contract info fetch successful');
@@ -119,14 +125,15 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 		staging.debug('Reading keystore successful.');
 	} catch (e) {
-		return Promise.reject(e);
+		return Promise.reject(staging.error(EVM_LITE, e.toString()));
 	}
 
 	staging.debug(`Keystores length ${keystores.length}`);
 
 	if (!keystores.length) {
 		return Promise.reject(
-			new EmptyKeystoreDirectoryError(
+			staging.error(
+				KEYSTORE.EMPTY,
 				`No accounts found in keystore directory ${
 					session.keystore.path
 				}`
@@ -163,7 +170,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 			Answers
 		>(questions);
 
-		args.address = address;
+		args.address = Utils.trimHex(address);
 		args.options.from = from;
 		args.options.moniker = moniker;
 		passphrase = p;
@@ -171,13 +178,19 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	if (!args.address) {
 		return Promise.reject(
-			new InvalidArgumentError('No address provided to nominate.')
+			staging.error(
+				POA_NOMINATE.ADDRESS_EMPTY,
+				'No address provided to nominate.'
+			)
 		);
 	}
 
 	if (!args.options.moniker) {
 		return Promise.reject(
-			new InvalidArgumentError('No moniker provided for nominee.')
+			staging.error(
+				POA_NOMINATE.MONIKER_EMPTY,
+				'No moniker provided for nominee.'
+			)
 		);
 	}
 
@@ -185,9 +198,12 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	staging.debug(`Address to nominate ${args.address}`);
 
-	if (args.address.length !== 40 && args.address.length !== 42) {
+	if (args.address.length !== 40) {
 		return Promise.reject(
-			new InvalidArgumentError('Address has an invalid length.')
+			staging.error(
+				POA_NOMINATE.ADDRESS_INVALID_LENGTH,
+				'Address has an invalid length.'
+			)
 		);
 	}
 
@@ -197,7 +213,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	if (!from) {
 		return Promise.reject(
-			new InvalidArgumentError(
+			staging.error(
+				POA_NOMINATE.FROM_EMPTY,
 				'No from address provided or set in config.'
 			)
 		);
@@ -205,7 +222,10 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	if (from.length !== 40) {
 		return Promise.reject(
-			new InvalidArgumentError('`from` address has an invalid length.')
+			staging.error(
+				POA_NOMINATE.FROM_INVALID_LENGTH,
+				'`from` address has an invalid length.'
+			)
 		);
 	}
 
@@ -214,7 +234,10 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 	if (!passphrase) {
 		if (!args.options.pwd) {
 			return Promise.reject(
-				new InvalidArgumentError('Passphrase file path not provided.')
+				staging.error(
+					POA_NOMINATE.PWD_PATH_EMPTY,
+					'Passphrase file path not provided.'
+				)
 			);
 		}
 
@@ -222,7 +245,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 		if (!KeystoreUtils.exists(args.options.pwd)) {
 			return Promise.reject(
-				new PathNotFoundError(
+				staging.error(
+					POA_NOMINATE.PWD_PATH_NOT_FOUND,
 					'Passphrase file path provided does not exist.'
 				)
 			);
@@ -232,7 +256,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 		if (KeystoreUtils.isDirectory(args.options.pwd)) {
 			return Promise.reject(
-				new InvalidPathError(
+				staging.error(
+					POA_NOMINATE.PWD_IS_DIR,
 					'Passphrase file path provided is a directory.'
 				)
 			);
@@ -253,7 +278,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		staging.debug(`Found keystore for account ${args.options.from}`);
 	} catch (e) {
 		return Promise.reject(
-			new KeystoreNotFoundError(
+			staging.error(
+				KEYSTORE.FETCH,
 				`Could not locate keystore for address ${args.address} in ${
 					session.keystore.path
 				}`
@@ -269,7 +295,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		decrypted = Keystore.decrypt(keystore, passphrase);
 	} catch (err) {
 		return Promise.reject(
-			new InvalidArgumentError(
+			staging.error(
+				KEYSTORE.DECRYPTION,
 				'Cannot decrypt account with passphrase provided.'
 			)
 		);
@@ -303,16 +330,22 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	if (!receipt.logs.length) {
 		return Promise.reject(
-			new EmptyTransactionReceiptLogsError(
-				'No logs were returned. Possible due to lack of `gas` or you are not whitelisted.'
+			staging.error(
+				TRANSACTION.EMPTY_LOGS,
+				'No logs were returned. ' +
+					'Possible due to lack of `gas` or you are not whitelisted.'
 			)
 		);
 	}
 
 	staging.debug(`Logs received from transaction. Parsing...`);
 
-	const nomineeProposedEvent = receipt.logs[0];
-	const monikerAnnouceEvent = receipt.logs[1];
+	const nomineeProposedEvent = receipt.logs.filter(
+		log => log.event === 'NomineeProposed'
+	)[0];
+	const monikerAnnouceEvent = receipt.logs.filter(
+		log => log.event === 'MonikerAnnounce'
+	)[0];
 
 	const returnData = `You (${
 		nomineeProposedEvent.args._proposer

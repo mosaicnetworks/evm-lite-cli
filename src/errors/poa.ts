@@ -2,3 +2,16 @@ export const POA_CHECK = {
 	ADDRESS_EMPTY: '@evmlc/POA/check/ADDRESS_EMPTY',
 	ADDRESS_INVALID_LENGTH: '@evmlc/POA/check/ADDRESS_INVALID_LENGTH'
 };
+
+export const POA_NOMINATE = {
+	ADDRESS_EMPTY: '@evmlc/POA/nominate/ADDRESS_EMPTY',
+	ADDRESS_INVALID_LENGTH: '@evmlc/POA/nominate/ADDRESS_INVALID_LENGTH',
+	MONIKER_EMPTY: '@evmlc/POA/nominate/MONIKER_EMPTY',
+
+	FROM_EMPTY: '@evmlc/POA/nominate/FROM_EMPTY',
+	FROM_INVALID_LENGTH: '@evmlc/POA/nominate/FROM_INVALID_LENGTH',
+
+	PWD_PATH_EMPTY: '@evmlc/POA/nominate/PWD_PATH_EMPTY',
+	PWD_IS_DIR: '@evmlc/POA/nominate/PWD_IS_DIR',
+	PWD_PATH_NOT_FOUND: '@evmlc/POA/nominate/PWD_PATH_NOT_FOUND'
+};

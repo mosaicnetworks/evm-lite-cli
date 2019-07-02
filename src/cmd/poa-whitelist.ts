@@ -1,28 +1,18 @@
-import * as inquirer from 'inquirer';
-
 import ASCIITable from 'ascii-table';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import { V3JSONKeyStore } from 'evm-lite-keystore';
-import { Utils, Contract } from 'evm-lite-core';
+import { Contract } from 'evm-lite-core';
 
 import Session from '../Session';
+import Globals from '../Globals';
 import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
 
 import { Schema } from '../POA';
-
-import {
-	InvalidConnectionError,
-	EmptyKeystoreDirectoryError,
-	InvalidArgumentError
-} from '../errors';
-import Globals from '../Globals';
+import { EVM_LITE, INVALID_CONNECTION } from '../errors/generals';
 
 interface Options extends GenericOptions {
-	interactive?: boolean;
 	formatted?: boolean;
-	from?: string;
 	host?: string;
 	port?: number;
 }
@@ -43,7 +33,6 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.command('poa whitelist')
 		.alias('p wl')
 		.description(description)
-		.option('-i, --interactive', 'interactive')
 		.option('-d, --debug', 'show debug output')
 		.option('-f, --formatted', 'format output')
 		.option('--from <address>', 'from address')
@@ -77,11 +66,11 @@ export const stage: StagingFunction<
 	const port = args.options.port || session.config.state.connection.port;
 
 	const formatted = args.options.formatted || false;
-	const interactive = args.options.interactive || session.interactive;
 
 	if (!status) {
 		return Promise.reject(
-			new InvalidConnectionError(
+			staging.error(
+				INVALID_CONNECTION,
 				`A connection could be establised to ${host}:${port}`
 			)
 		);
@@ -94,75 +83,14 @@ export const stage: StagingFunction<
 	} catch (e) {
 		staging.debug('POA contract info fetch error');
 
-		return Promise.reject(e);
+		return Promise.reject(staging.error(EVM_LITE, e.toString()));
 	}
 
 	staging.debug('POA contract info fetch successful');
-
-	let keystores: V3JSONKeyStore[];
-
-	staging.debug(
-		`Attempting to read keystore directory at ${session.keystore.path}`
-	);
-
-	try {
-		keystores = await session.keystore.list();
-
-		staging.debug('Reading keystore successful.');
-	} catch (e) {
-		return Promise.reject(e);
-	}
-
-	staging.debug(`Keystores length ${keystores.length}`);
-
-	if (!keystores.length) {
-		return Promise.reject(
-			new EmptyKeystoreDirectoryError(
-				`No accounts found in keystore directory ${
-					session.keystore.path
-				}`
-			)
-		);
-	}
-
-	const questions: inquirer.Questions<Answers> = [
-		{
-			choices: keystores.map(keystore => keystore.address),
-			default: Utils.trimHex(session.config.state.defaults.from),
-			message: 'From: ',
-			name: 'from',
-			type: 'list'
-		}
-	];
-
-	if (interactive) {
-		const { from } = await inquirer.prompt(questions);
-
-		args.options.from = from;
-	}
-
-	const from = args.options.from || session.config.state.defaults.from;
-
-	if (!from) {
-		return Promise.reject(
-			new InvalidArgumentError(
-				'No from address provided or set in config.'
-			)
-		);
-	}
-
-	if (from.length !== 40 && from.length !== 42) {
-		return Promise.reject(
-			new InvalidArgumentError('`from` address has an invalid length.')
-		);
-	}
-
-	staging.debug(`From address ${from}`);
 	staging.debug(`Contract address ${poa.address}`);
 
 	const contract = Contract.load<Schema>(poa.abi, poa.address);
 	const transaction = contract.methods.getWhiteListCount({
-		from,
 		gas: session.config.state.defaults.gas,
 		gasPrice: session.config.state.defaults.gasPrice
 	});
@@ -174,7 +102,7 @@ export const stage: StagingFunction<
 	try {
 		response = await session.node.callTransaction(transaction);
 	} catch (e) {
-		return Promise.reject(e.text);
+		return Promise.reject(staging.error(EVM_LITE, e.text));
 	}
 
 	const whitelistCount = response.toNumber();
@@ -190,9 +118,6 @@ export const stage: StagingFunction<
 
 		const tx = contract.methods.getWhiteListAddressFromIdx(
 			{
-				from: Utils.cleanAddress(
-					args.options.from || session.config.state.defaults.from
-				),
 				gas: session.config.state.defaults.gas,
 				gasPrice: session.config.state.defaults.gasPrice
 			},
@@ -204,16 +129,13 @@ export const stage: StagingFunction<
 		try {
 			whitelistEntry.address = await session.node.callTransaction(tx);
 		} catch (e) {
-			return Promise.reject(e.text);
+			return Promise.reject(staging.error(EVM_LITE, e.text));
 		}
 
 		staging.debug(`Successfull fetching whitelist address for entry ${i}`);
 
 		const monikerTx = contract.methods.getMoniker(
 			{
-				from: Utils.cleanAddress(
-					args.options.from || session.config.state.defaults.from
-				),
 				gas: session.config.state.defaults.gas,
 				gasPrice: session.config.state.defaults.gasPrice
 			},
@@ -227,7 +149,7 @@ export const stage: StagingFunction<
 		try {
 			hex = await session.node.callTransaction(monikerTx);
 		} catch (e) {
-			return Promise.reject(e.text);
+			return Promise.reject(staging.error(EVM_LITE, e.text));
 		}
 
 		staging.debug(`Successfull fetching whitelist moniker for entry ${i}`);

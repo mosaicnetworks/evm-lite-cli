@@ -15,11 +15,7 @@ import Staging, {
 import { Schema } from '../POA';
 
 import { POA_CHECK } from '../errors/poa';
-import {
-	INVALID_CONNECTION,
-	EVM_LITE,
-	TRANSACTION_GENERATION
-} from '../errors/generals';
+import { INVALID_CONNECTION, EVM_LITE, TRANSACTION } from '../errors/generals';
 
 interface Options extends GenericOptions {
 	interactive?: boolean;
@@ -147,7 +143,7 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 		);
 	} catch (e) {
 		return Promise.reject(
-			staging.error(TRANSACTION_GENERATION, e.toString())
+			staging.error(TRANSACTION.GENERATION, e.toString())
 		);
 	}
 
