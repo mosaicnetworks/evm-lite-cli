@@ -36,7 +36,7 @@ evmlc$ accounts list -f
 '-----------------------------------------------------------------------------'
 ```
 
-Now we will need to create an account. We can do this by running `accounts create` and following the prompts on screen.
+Now we will need to create an account. We can do this by running `accounts create` and following the prompts on the screen.
 
 ```console
 evmlc$ accounts create
@@ -51,7 +51,7 @@ f0933af1d1a4316d1339cd042f489f63ed5218589f0b4963618","n":8192,"r":8,"p":1},"mac"
 
 ## 3) List whitelist
 
-As a sanity check we will need to see the entrie whitelist. We can do this by running `poa whitelist -f`.
+As a sanity check, we will need to see the entire whitelist. We can do this by running `poa whitelist -f`.
 
 ```console
 evmlc$ poa whitelist -f
@@ -80,10 +80,10 @@ You (0x702b0ad02a7a6056eb16a697a96d849c228f5fb4) nominated 'node1' (0x221eff07bd
 
 ## 5) List nominees
 
-Now that we have nomianted an address we can view the nomineelist by running `poa nomineelist -f`
+Now that we have nominated an address we can view the nominee list by running `poa nominee list -f`
 
 ```console
-evmlc$ poa nomineelist -f
+evmlc$ poa nominee list -f
 
 .------------------------------------------------------------------------------.
 | Moniker |                  Address                   | Up Votes | Down Votes |
@@ -92,9 +92,9 @@ evmlc$ poa nomineelist -f
 '------------------------------------------------------------------------------'
 ```
 
-## 6) Vote for nomineee
+## 6) Vote for the nominee
 
-We can now vote for the nominee by running `poa vote` and following the on screen prompts.
+We can now vote for the nominee by running `poa vote` and following the on-screen prompts.
 
 ```console
 evmlc$ poa vote
