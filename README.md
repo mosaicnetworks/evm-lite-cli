@@ -5,9 +5,9 @@
 A Command Line Interface to interact with
 EVM-Lite.
 
-<!-- ## Installation -->
+## Installation
 
-<!-- ### NPM
+### NPM
 
 You can easily install `evmlc` with NPM
 
@@ -19,7 +19,7 @@ or with `yarn`
 
 ```bash
 yarn global add evm-lite-cli
-``` -->
+```
 
 ## Development
 
