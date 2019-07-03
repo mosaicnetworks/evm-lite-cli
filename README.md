@@ -115,6 +115,10 @@ command.
 The global flag `-d, --datadir` specifies the directory where `keystore` and `config.toml` are stored unless overwritten by specific flags.
 Note that if this flag is not provided, it will default to `~/.evmlc`.
 
+```bash
+evmlc --datadir [path] interactive
+```
+
 ## Getting Started
 
 We explain how to use `evmlc` against a single `evm-lite` node. We will walk
@@ -233,7 +237,7 @@ How many coins where assigned to the account? let's check!
 
 ### 4) List accounts
 
-Back in the interactive `evmlc` session, type `accounts list -f -v` (formatted, verbose output)
+Back in the interactive `evmlc` session, type `accounts list -f`
 
 ```bash
 evmlc$ accounts list -f
