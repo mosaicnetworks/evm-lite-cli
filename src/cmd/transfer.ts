@@ -98,6 +98,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 	const host = args.options.host || session.config.state.connection.host;
 	const port = args.options.port || session.config.state.connection.port;
 
+	staging.debug(`Attempting to connect: ${host}:${port}`);
+
 	if (!status) {
 		return Promise.reject(
 			staging.error(
@@ -107,25 +109,18 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		);
 	}
 
-	staging.debug(`Connected to node at ${host}:${port}`);
-
 	const interactive = args.options.interactive || session.interactive;
 
 	let keystores: V3JSONKeyStore[];
 
-	staging.debug(
-		`Attempting to read keystore directory at ${session.keystore.path}`
-	);
+	staging.debug(`Keystore path: ${session.keystore.path}`);
+	staging.debug(`Attempting to fetch accounts from keystore...`);
 
 	try {
 		keystores = await session.keystore.list();
-
-		staging.debug('Reading keystore successful.');
 	} catch (e) {
 		return Promise.reject(staging.error(KEYSTORE.LIST, e.toString()));
 	}
-
-	staging.debug(`Keystores length ${keystores.length}`);
 
 	if (!keystores.length) {
 		return Promise.reject(
@@ -193,6 +188,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		const { from } = await inquirer.prompt<FirstAnswers>(first);
 
 		args.options.from = Utils.trimHex(from);
+
+		staging.debug(`From address received: ${from}`);
 	}
 
 	if (!args.options.from) {
@@ -201,14 +198,13 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		);
 	}
 
-	staging.debug(`Fetching keystore for address ${args.options.from}`);
+	staging.debug(`From address validated: ${args.options.from}`);
+	staging.debug(`Attempting to fetch keystore for address...`);
 
 	let keystore: V3JSONKeyStore;
 
 	try {
 		keystore = await session.keystore.get(args.options.from);
-
-		staging.debug(`Found keystore for account ${args.options.from}`);
 	} catch (e) {
 		return Promise.reject(
 			staging.error(
@@ -224,9 +220,13 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		const { passphrase: p } = await inquirer.prompt<SecondAnswers>(second);
 
 		passphrase = p.trim();
+
+		staging.debug(`Passphrase received: ${p}`);
 	}
 
 	if (!passphrase) {
+		staging.debug(`Passphrase path: ${args.options.pwd || 'null'}`);
+
 		if (!args.options.pwd) {
 			return Promise.reject(
 				staging.error(
@@ -236,8 +236,6 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		staging.debug(`Passphrase path detected`);
-
 		if (!KeystoreUtils.exists(args.options.pwd)) {
 			return Promise.reject(
 				staging.error(
@@ -246,8 +244,6 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 				)
 			);
 		}
-
-		staging.debug(`Passphrase path exists`);
 
 		if (KeystoreUtils.isDirectory(args.options.pwd)) {
 			return Promise.reject(
@@ -260,12 +256,12 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 		passphrase = fs.readFileSync(args.options.pwd, 'utf8').trim();
 
-		staging.debug(`Successfully read passphrase from file`);
+		staging.debug(`Passphrase read successfully: ${passphrase}`);
 	}
 
 	let decrypted: Account;
 
-	staging.debug(`Attempting to decrypt keystore with passphrase`);
+	staging.debug(`Attempting to decrypt keyfile with passphrase...`);
 
 	try {
 		decrypted = Keystore.decrypt(keystore, passphrase);
@@ -278,8 +274,6 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		);
 	}
 
-	staging.debug(`Successfully decrypted keystore`);
-
 	if (interactive) {
 		const answers = await inquirer.prompt<ThirdAnswers>(third);
 
@@ -287,6 +281,11 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		args.options.value = answers.value;
 		args.options.gas = answers.gas;
 		args.options.gasprice = answers.gasPrice;
+
+		staging.debug(`To received: ${answers.to || 'null'}`);
+		staging.debug(`Value received: ${answers.value || 'null'}`);
+		staging.debug(`Gas received: ${answers.gas || 'null'}`);
+		staging.debug(`Gas Price received: ${answers.gasPrice || 'null'}`);
 	}
 
 	args.options.gas = args.options.gas || session.config.state.defaults.gas;
@@ -304,6 +303,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	let send: boolean = true;
 
+	staging.debug(`Attempting to generate transaction...`);
+
 	const transaction = Account.prepareTransfer(
 		args.options.from,
 		args.options.to,
@@ -311,8 +312,6 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		args.options.gas,
 		args.options.gasprice
 	);
-
-	staging.debug(`Generated transaction`);
 
 	console.log(transaction);
 
@@ -326,15 +325,13 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		return Promise.resolve(staging.success('Transaction aborted.'));
 	}
 
-	staging.debug(`Attempting to send transaction`);
+	staging.debug(`Attempting to send transaction...`);
 
 	try {
 		await session.node.sendTransaction(transaction, decrypted);
 	} catch (e) {
 		return Promise.reject(e.text);
 	}
-
-	staging.debug(`Sucessfully submitted transaction to node`);
 
 	return Promise.resolve(
 		staging.success('Transaction submitted successfully.')

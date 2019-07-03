@@ -27,10 +27,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 	session: Session
 ) => {
 	const staging = new Staging<Arguments, string, string>(session.debug, args);
+	staging.debug(`Reading config file: ${session.config.path}`);
 
-	staging.debug(`Reading from config file at ${session.config.path}.`);
-
-	const message: string = session.config.toTOML();
-
-	return Promise.resolve(staging.success(message));
+	return Promise.resolve(staging.success(session.config.toTOML()));
 };

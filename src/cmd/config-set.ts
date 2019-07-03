@@ -3,6 +3,7 @@ import Vorpal, { Command, Args } from 'vorpal';
 import Session from '../Session';
 import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
 import inquirer = require('inquirer');
+import Globals from '../Globals';
 
 interface Options extends GenericOptions {
 	interactive?: boolean;
@@ -58,7 +59,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	const config = session.config.state;
 
-	staging.debug(`Successfully read configuration at ${session.config.path}`);
+	staging.debug(`Successfully read configuration: ${session.config.path}`);
 
 	const interactive = args.options.interactive || session.interactive;
 	const questions: inquirer.Questions<Answers> = [
@@ -116,13 +117,11 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		}
 	};
 
-	staging.debug(`Attempting to write new config to ${session.config.path}`);
+	staging.debug(`Attempting to write modified configuration...`);
 
 	await session.config.save(newConfig);
 
-	staging.debug(`Configuration wrriten successfully`);
-
-	console.log(session.config.toTOML());
+	Globals.info(session.config.toTOML());
 
 	return Promise.resolve(staging.success('Configuration saved'));
 };

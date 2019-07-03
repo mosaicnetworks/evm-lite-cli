@@ -129,8 +129,6 @@ export const stage: StagingFunction<
 		return Promise.reject(staging.error(EVM_LITE, e.text));
 	}
 
-	staging.debug(`Account fetch successful: ${account.address}`);
-
 	if (!formatted) {
 		return Promise.resolve(staging.success(account));
 	}
