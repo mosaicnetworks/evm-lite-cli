@@ -4,7 +4,7 @@ We explain how to use `evmlc`. We will walk through nominating a new `address`, 
 
 ## 1) Run `evmlc` in interactive mode
 
-```console
+```bash
 $ evmlc i
 
   _____  __     __  __  __           _       _   _               ____   _       ___
@@ -26,7 +26,7 @@ evmlc$
 
 We will need to create an account to nominate as a validator for the network. Firstly we can view our accounts by running `accounts list -f` (`-f` specified formatted output).
 
-```console
+```bash
 evmlc$ accounts list -f
 
 .-----------------------------------------------------------------------------.
@@ -38,7 +38,7 @@ evmlc$ accounts list -f
 
 Now we will need to create an account. We can do this by running `accounts create` and following the prompts on the screen.
 
-```console
+```bash
 evmlc$ accounts create
 
 ? Passphrase:  [hidden]
@@ -53,7 +53,7 @@ f0933af1d1a4316d1339cd042f489f63ed5218589f0b4963618","n":8192,"r":8,"p":1},"mac"
 
 As a sanity check, we will need to see the entire whitelist. We can do this by running `poa whitelist -f`.
 
-```console
+```bash
 evmlc$ poa whitelist -f
 
 .----------------------------------------------------------------------.
@@ -67,7 +67,7 @@ evmlc$ poa whitelist -f
 
 We will nominate the created account `221eff07bd1bf1e1fe21a069523413218c32be42` to go through election using the command `poa nominate`.
 
-```console
+```bash
 evmlc$ poa nominate
 
 ? From:  702b0ad02a7a6056eb16a697a96d849c228f5fb4
@@ -82,7 +82,7 @@ You (0x702b0ad02a7a6056eb16a697a96d849c228f5fb4) nominated 'node1' (0x221eff07bd
 
 Now that we have nominated an address we can view the nominee list by running `poa nominee list -f`
 
-```console
+```bash
 evmlc$ poa nominee list -f
 
 .------------------------------------------------------------------------------.
@@ -96,7 +96,7 @@ evmlc$ poa nominee list -f
 
 We can now vote for the nominee by running `poa vote` and following the on-screen prompts.
 
-```console
+```bash
 evmlc$ poa vote
 
 ? From:  702b0ad02a7a6056eb16a697a96d849c228f5fb4
@@ -114,7 +114,7 @@ Since we were the only whitelisted address, the only vote a nominee needs to get
 
 We now check the updated whitelist to see if the nominee was officially accepted.
 
-```console
+```bash
 evmlc$ poa whitelist -f
 .----------------------------------------------------------------------.
 |         Moniker         |                  Address                   |
