@@ -1,6 +1,6 @@
 {
 	"name": "evm-lite-cli",
-	"version": "1.0.0-alpha.7",
+	"version": "1.0.0-alpha.8",
 	"main": "index.js",
 	"license": "MIT",
 	"scripts": {
