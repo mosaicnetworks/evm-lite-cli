@@ -123,7 +123,11 @@ init()
 	})
 	.then(async (cli: { instance: Vorpal; session: Session }) => {
 		if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
-			console.log(figlet.textSync('EVM-Lite CLI', {}));
+			console.log(
+				figlet.textSync('EVM-Lite CLI', {
+					horizontalLayout: 'full'
+				})
+			);
 
 			if (process.argv[3] === '-d' || process.argv[3] === '--debug') {
 				cli.session.debug = true;

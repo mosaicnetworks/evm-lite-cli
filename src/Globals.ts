@@ -7,6 +7,10 @@ export default class Globals {
 		'.evmlc'
 	);
 
+	public static purple(message: string): void {
+		console.log(Chalk.default.bgMagenta(message));
+	}
+
 	public static success(message: any): void {
 		console.log(Chalk.default.green(message));
 	}

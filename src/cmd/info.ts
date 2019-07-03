@@ -19,7 +19,7 @@ export interface Arguments extends Args<Options> {
 export default function command(evmlc: Vorpal, session: Session): Command {
 	return evmlc
 		.command('info')
-		.description('Displays information about node')
+		.description('Display information about node')
 		.option('-f, --formatted', 'format output')
 		.option('-d, --debug', 'show debug output')
 		.option('-h, --host <ip>', 'override config parameter host')

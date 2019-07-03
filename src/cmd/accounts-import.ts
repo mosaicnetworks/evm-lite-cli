@@ -29,7 +29,7 @@ export interface Arguments extends Args<Options> {
 }
 
 export default function command(evmlc: Vorpal, session: Session): Command {
-	const description = 'Imports an encrypted keyfile to the keystore';
+	const description = 'Import an encrypted keyfile to the keystore';
 
 	return evmlc
 		.command('accounts import')

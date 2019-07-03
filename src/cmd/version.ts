@@ -14,11 +14,12 @@ export interface Arguments extends Args<Options> {
 }
 
 export default function command(evmlc: Vorpal, session: Session): Command {
-	const description = 'Displays current version of cli';
+	const description = 'Display current version of cli';
 
 	return evmlc
 		.command('version')
 		.alias('v')
+		.option('-d, --debug', 'show debug output')
 		.description(description)
 		.types({
 			string: []

@@ -30,7 +30,7 @@ interface NomineeEntry {
 }
 
 export default function command(evmlc: Vorpal, session: Session): Command {
-	const description = 'List nominees for the connected node';
+	const description = 'List nominees for a connected node';
 
 	return evmlc
 		.command('poa nomineelist')
