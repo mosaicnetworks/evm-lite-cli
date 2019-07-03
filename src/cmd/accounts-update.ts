@@ -80,19 +80,14 @@ export const stage: StagingFunction<
 
 	let keystores: V3JSONKeyStore[];
 
-	staging.debug(
-		`Attempting to read keystore directory at ${session.keystore.path}`
-	);
+	staging.debug(`Keystore path: ${session.keystore.path}`);
+	staging.debug(`Attempting to fetch accounts from keystore...`);
 
 	try {
 		keystores = await session.keystore.list();
-
-		staging.debug('Reading keystore successful.');
 	} catch (e) {
 		return Promise.reject(staging.error(KEYSTORE.LIST, e.toString()));
 	}
-
-	staging.debug(`Keystores length ${keystores.length}`);
 
 	if (!keystores.length) {
 		return Promise.reject(
@@ -139,6 +134,8 @@ export const stage: StagingFunction<
 		const { address } = await inquirer.prompt<FirstAnswers>(first);
 
 		args.address = address;
+
+		staging.debug(`Address received: ${address}`);
 	}
 
 	if (!args.address) {
@@ -149,8 +146,6 @@ export const stage: StagingFunction<
 
 	args.address = Utils.trimHex(args.address);
 
-	staging.debug(`Address to update ${args.address}`);
-
 	if (args.address.length !== 40) {
 		return Promise.reject(
 			staging.error(
@@ -160,10 +155,13 @@ export const stage: StagingFunction<
 		);
 	}
 
-	staging.debug(`Attempting to locate address ${args.address}`);
+	staging.debug(`Address validated: ${args.address}`);
+	staging.debug(`Attempting to fetch keystore for address...`);
+
+	let keystore: V3JSONKeyStore;
 
 	try {
-		await session.keystore.get(args.address);
+		keystore = await session.keystore.get(args.address);
 	} catch (e) {
 		return Promise.reject(
 			staging.error(
@@ -175,8 +173,6 @@ export const stage: StagingFunction<
 		);
 	}
 
-	staging.debug(`Successfully located address ${args.address}`);
-
 	let oldPassphrase: string = '';
 	let newPassphrase: string = '';
 
@@ -184,9 +180,13 @@ export const stage: StagingFunction<
 		const { passphrase } = await inquirer.prompt<SecondAnswers>(second);
 
 		oldPassphrase = passphrase.trim();
+
+		staging.debug(`Old passphrase received: ${oldPassphrase}`);
 	}
 
 	if (!oldPassphrase) {
+		staging.debug(`Old passphrase path: ${args.options.old || 'null'}`);
+
 		if (!args.options.old) {
 			return Promise.reject(
 				staging.error(
@@ -195,8 +195,6 @@ export const stage: StagingFunction<
 				)
 			);
 		}
-
-		staging.debug(`Old passphase path ${args.options.old}`);
 
 		if (!KeystoreUtils.exists(args.options.old)) {
 			return Promise.reject(
@@ -217,20 +215,15 @@ export const stage: StagingFunction<
 		}
 
 		oldPassphrase = fs.readFileSync(args.options.old, 'utf8').trim();
+
+		staging.debug(`Old passphrase read successfully: ${oldPassphrase}`);
 	}
 
-	staging.debug(`Received old passphrase`);
-	staging.debug(`Attempting to decrypt ${args.address}`);
+	staging.debug(`Attempting to decrypt keyfile with passphrase...`);
 
 	try {
-		const keystore = await session.keystore.get(args.address);
-
 		Keystore.decrypt(keystore, oldPassphrase);
-
-		staging.debug(`Decrypt was successful for ${args.address}`);
 	} catch (e) {
-		staging.debug(`Decrypt failed for ${args.address}`);
-
 		return Promise.reject(staging.error(KEYSTORE.DECRYPTION, e.toString()));
 	}
 
@@ -238,6 +231,11 @@ export const stage: StagingFunction<
 		const { passphrase, verifyPassphrase } = await inquirer.prompt<
 			ThirdAnswers
 		>(third);
+
+		staging.debug(`Passphrase received: ${passphrase || 'null'}`);
+		staging.debug(
+			`Verify passphrase received: ${verifyPassphrase || 'null'}`
+		);
 
 		if (!(passphrase && verifyPassphrase)) {
 			return Promise.reject(
@@ -248,8 +246,6 @@ export const stage: StagingFunction<
 			);
 		}
 
-		staging.debug('Both new passphrase fields present');
-
 		if (passphrase !== verifyPassphrase) {
 			return Promise.reject(
 				staging.error(
@@ -259,12 +255,16 @@ export const stage: StagingFunction<
 			);
 		}
 
-		staging.debug('New passphrases match');
-
 		newPassphrase = passphrase.trim();
+
+		staging.debug(`New passphrase set: ${newPassphrase}`);
 	}
 
 	if (!newPassphrase) {
+		staging.debug(
+			`New passphrase file path: ${args.options.new || 'null'}`
+		);
+
 		if (!args.options.new) {
 			return Promise.reject(
 				staging.error(
@@ -273,8 +273,6 @@ export const stage: StagingFunction<
 				)
 			);
 		}
-
-		staging.debug(`New passphase path ${args.options.new}`);
 
 		if (!KeystoreUtils.exists(args.options.new)) {
 			return Promise.reject(
@@ -295,9 +293,9 @@ export const stage: StagingFunction<
 		}
 
 		newPassphrase = fs.readFileSync(args.options.new, 'utf8').trim();
-	}
 
-	staging.debug(`Received new passphrase`);
+		staging.debug(`New passphrase read successfully: ${newPassphrase}`);
+	}
 
 	if (oldPassphrase === newPassphrase) {
 		return Promise.reject(
@@ -308,16 +306,13 @@ export const stage: StagingFunction<
 		);
 	}
 
-	staging.debug(`New passphrase validated`);
-	staging.debug(`Attempting to update passphrase for ${args.address}`);
+	staging.debug(`Attempting to update passphrase for address...`);
 
 	const newKeystore = await session.keystore.update(
 		args.address,
 		oldPassphrase,
 		newPassphrase
 	);
-
-	staging.debug(`Successfully updated passphrase for ${args.address}`);
 
 	return Promise.resolve(staging.success(newKeystore));
 };

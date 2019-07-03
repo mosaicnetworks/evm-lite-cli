@@ -9,7 +9,7 @@
 		"clean": "rm -rf node_modules && rm -rf dist/",
 		"build": "tsc -p tsconfig.json",
 		"test": "jest",
-		"i": "ts-node src/index --datadir /Users/danu/Desktop/evmlc i --debug"
+		"i": "ts-node src/index i --debug"
 	},
 	"dependencies": {
 		"ascii-table": "^0.0.9",

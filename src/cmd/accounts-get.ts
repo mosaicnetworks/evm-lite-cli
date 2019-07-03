@@ -69,6 +69,8 @@ export const stage: StagingFunction<
 	const host = args.options.host || session.config.state.connection.host;
 	const port = args.options.port || session.config.state.connection.port;
 
+	staging.debug(`Attempting to connect: ${host}:${port}`);
+
 	if (!status) {
 		return Promise.reject(
 			staging.error(
@@ -78,9 +80,7 @@ export const stage: StagingFunction<
 		);
 	}
 
-	staging.debug(
-		`Successfully connected to ${session.node.host}:${session.node.port}`
-	);
+	staging.debug(`Successfully connected: ${host}:${port}`);
 
 	const formatted = args.options.formatted || false;
 	const interactive = args.options.interactive || session.interactive;
@@ -96,6 +96,8 @@ export const stage: StagingFunction<
 		const { address } = await inquirer.prompt<Answers>(questions);
 
 		args.address = address;
+
+		staging.debug(`Address received: ${address}`);
 	}
 
 	if (!args.address) {
@@ -106,8 +108,6 @@ export const stage: StagingFunction<
 
 	args.address = Utils.trimHex(args.address);
 
-	staging.debug(`Address to fetch ${args.address}`);
-
 	if (args.address.length !== 40) {
 		return Promise.reject(
 			staging.error(
@@ -117,9 +117,11 @@ export const stage: StagingFunction<
 		);
 	}
 
+	staging.debug(`Address validated: ${args.address}`);
+
 	let account: BaseAccount;
 
-	staging.debug(`Attempting to fetch account from ${host}:${port}`);
+	staging.debug(`Attempting to fetch account details...`);
 
 	try {
 		account = await session.node.getAccount(args.address);
@@ -127,11 +129,13 @@ export const stage: StagingFunction<
 		return Promise.reject(staging.error(EVM_LITE, e.text));
 	}
 
-	staging.debug(`Successfully fetched account ${account.address}`);
+	staging.debug(`Account fetch successful: ${account.address}`);
 
 	if (!formatted) {
 		return Promise.resolve(staging.success(account));
 	}
+
+	staging.debug(`Preparing formatted output...`);
 
 	const table: ASCIITable = new ASCIITable().setHeading(
 		'Address',
@@ -146,8 +150,6 @@ export const stage: StagingFunction<
 		account.nonce,
 		account.bytecode
 	);
-
-	staging.debug(`Created table for account`);
 
 	return Promise.resolve(staging.success(table));
 };

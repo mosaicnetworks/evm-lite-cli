@@ -15,7 +15,7 @@ import Staging, {
 } from '../Staging';
 
 import { ACCOUNTS_IMPORT } from '../errors/accounts';
-import { EVM_LITE, KEYSTORE } from '../errors/generals';
+import { KEYSTORE } from '../errors/generals';
 
 interface Options extends GenericOptions {
 	interactive?: boolean;
@@ -92,6 +92,12 @@ export const stage: StagingFunction<
 			verifyPassphrase
 		} = await inquirer.prompt<Answers>(questions);
 
+		staging.debug(`Private key received: ${priv_key || 'null'}`);
+		staging.debug(`Passphrase received: ${p || 'null'}`);
+		staging.debug(
+			`Verify passphrase received: ${verifyPassphrase || 'null'}`
+		);
+
 		if (!(p && verifyPassphrase)) {
 			return Promise.reject(
 				staging.error(
@@ -100,8 +106,6 @@ export const stage: StagingFunction<
 				)
 			);
 		}
-
-		staging.debug('Both passphrase fields present');
 
 		if (p !== verifyPassphrase) {
 			return Promise.reject(
@@ -112,10 +116,10 @@ export const stage: StagingFunction<
 			);
 		}
 
-		staging.debug('Passphrases match');
-
 		args.priv_key = priv_key;
 		passphrase = p.trim();
+
+		staging.debug(`Passphrase set: ${passphrase}`);
 	}
 
 	if (!args.priv_key) {
@@ -129,9 +133,11 @@ export const stage: StagingFunction<
 
 	args.priv_key = Utils.cleanAddress(args.priv_key);
 
-	staging.debug(`Private key to import ${args.priv_key}`);
+	staging.debug(`Private key validated: ${args.priv_key}`);
 
 	if (!passphrase) {
+		staging.debug(`Passphrase file path: ${args.options.pwd || 'null'}`);
+
 		if (!args.options.pwd) {
 			return Promise.reject(
 				staging.error(
@@ -141,8 +147,6 @@ export const stage: StagingFunction<
 			);
 		}
 
-		staging.debug(`Passphrase path detected`);
-
 		if (!KeystoreUtils.exists(args.options.pwd)) {
 			return Promise.reject(
 				staging.error(
@@ -151,8 +155,6 @@ export const stage: StagingFunction<
 				)
 			);
 		}
-
-		staging.debug(`Passphrase path exists`);
 
 		if (KeystoreUtils.isDirectory(args.options.pwd)) {
 			return Promise.reject(
@@ -165,18 +167,19 @@ export const stage: StagingFunction<
 
 		passphrase = fs.readFileSync(args.options.pwd, 'utf8').trim();
 
-		staging.debug(`Successfully read passphrase from file`);
+		staging.debug(`Passphrase read successfully: ${passphrase}`);
 	}
 
 	let keystore: V3JSONKeyStore;
+
+	staging.debug(`Import directory: ${session.keystore.path}`);
+	staging.debug(`Attempting to import private key...`);
 
 	try {
 		keystore = await session.keystore.import(args.priv_key, passphrase);
 	} catch (e) {
 		return Promise.reject(staging.error(KEYSTORE.IMPORT, e.toString()));
 	}
-
-	staging.debug(`Encrypted account with passphrase`);
 
 	return Promise.resolve(staging.success(keystore));
 };
