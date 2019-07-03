@@ -68,6 +68,8 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 
 	const interactive = args.options.interactive || session.interactive;
 
+	staging.debug(`Attempting to connect: ${host}:${port}`);
+
 	if (!status) {
 		return Promise.reject(
 			staging.error(
@@ -79,6 +81,8 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 
 	let poa: { address: string; abi: any[] };
 
+	staging.debug(`Attempting to fetch PoA data...`);
+
 	try {
 		poa = await session.getPOAContract();
 	} catch (e) {
@@ -86,12 +90,6 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 
 		return Promise.reject(staging.error(EVM_LITE, e.toString()));
 	}
-
-	staging.debug('POA contract info fetch successful');
-
-	staging.debug(
-		`Successfully connected to ${session.node.host}:${session.node.port}`
-	);
 
 	const questions: inquirer.Questions<Answers> = [
 		{
@@ -105,6 +103,8 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 		const { nominee } = await inquirer.prompt<Answers>(questions);
 
 		args.address = nominee;
+
+		staging.debug(`Nominee received: ${nominee}`);
 	}
 
 	if (!args.address) {
@@ -118,8 +118,6 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 
 	args.address = Utils.trimHex(args.address);
 
-	staging.debug(`Address to check ${args.address}`);
-
 	if (args.address.length !== 40) {
 		return Promise.reject(
 			staging.error(
@@ -129,9 +127,13 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 		);
 	}
 
+	staging.debug(`Nominee address validated: ${args.address}`);
+
 	const contract = Contract.load<Schema>(poa.abi, poa.address);
 
 	let transaction: Transaction;
+
+	staging.debug(`Attempting to generate transaction...`);
 
 	try {
 		transaction = contract.methods.checkAuthorised(
@@ -148,6 +150,8 @@ export const stage: StagingFunction<Arguments, boolean, boolean> = async (
 	}
 
 	let response: boolean;
+
+	staging.debug(`Attempting to call transaction...`);
 
 	try {
 		response = await session.node.callTransaction<boolean>(transaction);

@@ -40,6 +40,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 	const host = args.options.host || session.config.state.connection.host;
 	const port = args.options.port || session.config.state.connection.port;
 
+	staging.debug(`Attempting to connect: ${host}:${port}`);
+
 	if (!status) {
 		return Promise.reject(
 			staging.error(
@@ -51,19 +53,13 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	let poa: { address: string; abi: any[] };
 
+	staging.debug(`Attempting to fetch PoA data...`);
+
 	try {
 		poa = await session.getPOAContract();
 	} catch (e) {
-		staging.debug('POA contract info fetch error');
-
 		return Promise.reject(staging.error(EVM_LITE, e.toString()));
 	}
 
-	staging.debug('POA contract info fetch successful');
-
-	staging.debug(
-		`Successfully connected to ${session.node.host}:${session.node.port}`
-	);
-
-	return Promise.resolve(staging.success(`Contract Address: ${poa.address}`));
+	return Promise.resolve(staging.success(`POA Address: ${poa.address}`));
 };

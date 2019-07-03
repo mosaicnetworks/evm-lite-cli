@@ -3,7 +3,7 @@
 A Command Line Interface to interact with
 EVM-Lite.
 
-## Installation
+<!-- ## Installation -->
 
 <!-- ### NPM
 

@@ -48,10 +48,6 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		);
 }
 
-interface Answers {
-	from: string;
-}
-
 export const stage: StagingFunction<
 	Arguments,
 	ASCIITable,
@@ -69,6 +65,8 @@ export const stage: StagingFunction<
 
 	const formatted = args.options.formatted || false;
 
+	staging.debug(`Attempting to connect: ${host}:${port}`);
+
 	if (!status) {
 		return Promise.reject(
 			staging.error(
@@ -80,19 +78,18 @@ export const stage: StagingFunction<
 
 	let poa: { address: string; abi: any[] };
 
+	staging.debug(`Attempting to fetch PoA data...`);
+
 	try {
 		poa = await session.getPOAContract();
 	} catch (e) {
-		staging.debug('POA contract info fetch error');
-
 		return Promise.reject(staging.error(EVM_LITE, e.toString()));
 	}
 
-	staging.debug('POA contract info fetch successful');
-
-	staging.debug(`Contract address ${poa.address}`);
-
 	const contract = Contract.load<Schema>(poa.abi, poa.address);
+
+	staging.debug(`Attempting to generate nominee count transaction...`);
+
 	const transaction = contract.methods.getNomineeCount({
 		gas: session.config.state.defaults.gas,
 		gasPrice: session.config.state.defaults.gasPrice
@@ -100,9 +97,7 @@ export const stage: StagingFunction<
 
 	let response: any;
 
-	staging.debug(
-		`Attempting to fetch nominee list count from ${host}:${port}`
-	);
+	staging.debug(`Attempting to call nominee count transaction...`);
 
 	try {
 		response = await session.node.callTransaction(transaction);
@@ -113,7 +108,7 @@ export const stage: StagingFunction<
 	const nomineeCount = response.toNumber();
 	const nominees: NomineeEntry[] = [];
 
-	staging.debug(`Received nominee count of ${nomineeCount}`);
+	staging.debug(`Attempting to fetch nominee details...`);
 
 	for (const i of Array.from(Array(nomineeCount).keys())) {
 		const nominee: NomineeEntry = {
@@ -131,19 +126,13 @@ export const stage: StagingFunction<
 			i
 		);
 
-		staging.debug(`Attempting to fetch nominee address for entry ${i}`);
-
 		try {
 			nominee.address = await session.node.callTransaction(tx);
 		} catch (e) {
 			return Promise.reject(staging.error(EVM_LITE, e.text));
 		}
 
-		staging.debug(
-			`Successfull fetching nominee address for entry ${i} ${
-				nominee.address
-			}`
-		);
+		staging.debug(`Received nominee address: ${nominee.address}`);
 
 		const monikerTx = contract.methods.getMoniker(
 			{
@@ -155,23 +144,17 @@ export const stage: StagingFunction<
 
 		let hex: string;
 
-		staging.debug(
-			`Attempting to fetch moniker for nominee ${nominee.address}`
-		);
-
 		try {
 			hex = await session.node.callTransaction(monikerTx);
 		} catch (e) {
 			return Promise.reject(staging.error(EVM_LITE, e.text));
 		}
 
-		staging.debug(
-			`Successfull fetching moniker for nominee ${nominee.address}`
-		);
-
 		nominee.moniker = Globals.hexToString(hex)
 			.trim()
 			.replace(/\u0000/g, '');
+
+		staging.debug(`Moniker received: ${nominee.moniker}`);
 
 		const votesTransaction = contract.methods.dev_getCurrentNomineeVotes(
 			{
@@ -180,10 +163,6 @@ export const stage: StagingFunction<
 				gasPrice: session.config.state.defaults.gasPrice
 			},
 			Utils.cleanAddress(nominee.address)
-		);
-
-		staging.debug(
-			`Attempting to fetch votes for nominee ${nominee.address}`
 		);
 
 		let votes: [string, string];
@@ -195,9 +174,6 @@ export const stage: StagingFunction<
 		} catch (e) {
 			return Promise.reject(staging.error(EVM_LITE, e.text));
 		}
-		staging.debug(
-			`Successfull fetching moniker for nominee ${nominee.address}`
-		);
 
 		nominee.upVotes = parseInt(votes[0], 10);
 		nominee.downVotes = parseInt(votes[1], 10);
@@ -205,11 +181,11 @@ export const stage: StagingFunction<
 		nominees.push(nominee);
 	}
 
-	staging.debug(`Nominees array populated with length ${nominees.length}`);
-
 	if (!formatted) {
 		return Promise.resolve(staging.success(nominees));
 	}
+
+	staging.debug(`Preparing formatted output...`);
 
 	const table = new ASCIITable().setHeading(
 		'Moniker',
@@ -217,8 +193,6 @@ export const stage: StagingFunction<
 		'Up Votes',
 		'Down Votes'
 	);
-
-	staging.debug(`Generating table for whitelist`);
 
 	for (const entry of nominees) {
 		table.addRow(
@@ -228,8 +202,6 @@ export const stage: StagingFunction<
 			entry.downVotes
 		);
 	}
-
-	staging.debug(`Table generation successful`);
 
 	return Promise.resolve(staging.success(table));
 };

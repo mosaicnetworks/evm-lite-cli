@@ -67,6 +67,8 @@ export const stage: StagingFunction<
 
 	const formatted = args.options.formatted || false;
 
+	staging.debug(`Attempting to connect: ${host}:${port}`);
+
 	if (!status) {
 		return Promise.reject(
 			staging.error(
@@ -78,18 +80,18 @@ export const stage: StagingFunction<
 
 	let poa: { address: string; abi: any[] };
 
+	staging.debug(`Attempting to fetch PoA data...`);
+
 	try {
 		poa = await session.getPOAContract();
 	} catch (e) {
-		staging.debug('POA contract info fetch error');
-
 		return Promise.reject(staging.error(EVM_LITE, e.toString()));
 	}
 
-	staging.debug('POA contract info fetch successful');
-	staging.debug(`Contract address ${poa.address}`);
-
 	const contract = Contract.load<Schema>(poa.abi, poa.address);
+
+	staging.debug(`Attempting to generate whitelist count transaction...`);
+
 	const transaction = contract.methods.getWhiteListCount({
 		gas: session.config.state.defaults.gas,
 		gasPrice: session.config.state.defaults.gasPrice
@@ -97,7 +99,7 @@ export const stage: StagingFunction<
 
 	let response: any;
 
-	staging.debug(`Attempting to fetch whitelist count from ${host}:${port}`);
+	staging.debug(`Attempting to call whitelist count transaction...`);
 
 	try {
 		response = await session.node.callTransaction(transaction);
@@ -108,7 +110,7 @@ export const stage: StagingFunction<
 	const whitelistCount = response.toNumber();
 	const whitelist: WhitelistEntry[] = [];
 
-	staging.debug(`Received whitelist count of ${whitelistCount}`);
+	staging.debug(`Attempting to fetch whitelist details...`);
 
 	for (const i of Array.from(Array(whitelistCount).keys())) {
 		const whitelistEntry: WhitelistEntry = {
@@ -124,15 +126,13 @@ export const stage: StagingFunction<
 			i
 		);
 
-		staging.debug(`Attempting to fetch whitelist address for entry ${i}`);
-
 		try {
 			whitelistEntry.address = await session.node.callTransaction(tx);
 		} catch (e) {
 			return Promise.reject(staging.error(EVM_LITE, e.text));
 		}
 
-		staging.debug(`Successfull fetching whitelist address for entry ${i}`);
+		staging.debug(`Received whitelist address: ${whitelistEntry.address}`);
 
 		const monikerTx = contract.methods.getMoniker(
 			{
@@ -144,32 +144,28 @@ export const stage: StagingFunction<
 
 		let hex: string;
 
-		staging.debug(`Attempting to fetch whitelist moniker for entry ${i}`);
-
 		try {
 			hex = await session.node.callTransaction(monikerTx);
 		} catch (e) {
 			return Promise.reject(staging.error(EVM_LITE, e.text));
 		}
 
-		staging.debug(`Successfull fetching whitelist moniker for entry ${i}`);
-
 		whitelistEntry.moniker = Globals.hexToString(hex)
 			.trim()
 			.replace(/\u0000/g, '');
 
+		staging.debug(`Moniker received: ${whitelistEntry.moniker}`);
+
 		whitelist.push(whitelistEntry);
 	}
-
-	staging.debug(`Whitelist array populated with length ${whitelist.length}`);
 
 	if (!formatted) {
 		return Promise.resolve(staging.success(whitelist));
 	}
 
-	const table = new ASCIITable().setHeading('Moniker', 'Address');
+	staging.debug(`Preparing formatted output...`);
 
-	staging.debug(`Generating table for whitelist`);
+	const table = new ASCIITable().setHeading('Moniker', 'Address');
 
 	for (const entry of whitelist) {
 		table.addRow(
@@ -177,8 +173,6 @@ export const stage: StagingFunction<
 			entry.address
 		);
 	}
-
-	staging.debug(`Table generation successful`);
 
 	return Promise.resolve(staging.success(table));
 };

@@ -89,6 +89,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	const interactive = args.options.interactive || session.interactive;
 
+	staging.debug(`Attempting to connect: ${host}:${port}`);
+
 	if (!status) {
 		return Promise.reject(
 			staging.error(
@@ -100,35 +102,24 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	let poa: { address: string; abi: any[] };
 
+	staging.debug(`Attempting to fetch PoA data...`);
+
 	try {
 		poa = await session.getPOAContract();
 	} catch (e) {
-		staging.debug('POA contract info fetch error');
-
 		return Promise.reject(staging.error(EVM_LITE, e.toString()));
 	}
 
-	staging.debug('POA contract info fetch successful');
-
-	staging.debug(
-		`Successfully connected to ${session.node.host}:${session.node.port}`
-	);
-
 	let keystores: V3JSONKeyStore[];
 
-	staging.debug(
-		`Attempting to read keystore directory at ${session.keystore.path}`
-	);
+	staging.debug(`Keystore path: ${session.keystore.path}`);
+	staging.debug(`Attempting to fetch accounts from keystore...`);
 
 	try {
 		keystores = await session.keystore.list();
-
-		staging.debug('Reading keystore successful.');
 	} catch (e) {
 		return Promise.reject(staging.error(KEYSTORE.LIST, e.toString()));
 	}
-
-	staging.debug(`Keystores length ${keystores.length}`);
 
 	if (!keystores.length) {
 		return Promise.reject(
@@ -170,9 +161,15 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 			Answers
 		>(questions);
 
+		staging.debug(`Moniker: ${moniker || 'null'}`);
+		staging.debug(`Nominee address: ${address || 'null'}`);
+		staging.debug(`From address: ${from || 'null'}`);
+		staging.debug(`Passphrase: ${p || 'null'}`);
+
 		args.address = Utils.trimHex(address);
 		args.options.from = from;
 		args.options.moniker = moniker;
+
 		passphrase = p;
 	}
 
@@ -196,8 +193,6 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	args.address = Utils.trimHex(args.address);
 
-	staging.debug(`Address to nominate ${args.address}`);
-
 	if (args.address.length !== 40) {
 		return Promise.reject(
 			staging.error(
@@ -206,6 +201,8 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 			)
 		);
 	}
+
+	staging.debug(`Nominee address validated: ${args.address}`);
 
 	const from = Utils.trimHex(
 		args.options.from || session.config.state.defaults.from
@@ -229,9 +226,11 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		);
 	}
 
-	staging.debug(`From address ${from}`);
+	staging.debug(`From address validated: ${args.options.from}`);
 
 	if (!passphrase) {
+		staging.debug(`Passphrase path: ${args.options.pwd || 'null'}`);
+
 		if (!args.options.pwd) {
 			return Promise.reject(
 				staging.error(
@@ -241,8 +240,6 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		staging.debug(`Passphrase path detected`);
-
 		if (!KeystoreUtils.exists(args.options.pwd)) {
 			return Promise.reject(
 				staging.error(
@@ -251,8 +248,6 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 				)
 			);
 		}
-
-		staging.debug(`Passphrase path exists`);
 
 		if (KeystoreUtils.isDirectory(args.options.pwd)) {
 			return Promise.reject(
@@ -265,17 +260,15 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 		passphrase = fs.readFileSync(args.options.pwd, 'utf8').trim();
 
-		staging.debug(`Successfully read passphrase from file`);
+		staging.debug(`Passphrase read successfully: ${passphrase}`);
 	}
-
-	staging.debug(`Fetching keystore for address ${args.options.from}`);
 
 	let keystore: V3JSONKeyStore;
 
+	staging.debug(`Attempting to fetch keystore for address...`);
+
 	try {
 		keystore = await session.keystore.get(from);
-
-		staging.debug(`Found keystore for account ${args.options.from}`);
 	} catch (e) {
 		return Promise.reject(
 			staging.error(
@@ -289,7 +282,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	let decrypted: Account;
 
-	staging.debug(`Attempting to decrypt keystore with passphrase`);
+	staging.debug(`Attempting to decrypt keyfile with passphrase...`);
 
 	try {
 		decrypted = Keystore.decrypt(keystore, passphrase);
@@ -302,9 +295,10 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		);
 	}
 
-	staging.debug(`Successfully decrypted keystore`);
-
 	const contract = Contract.load<Schema>(poa.abi, poa.address);
+
+	staging.debug(`Attempting to generate transaction...`);
+
 	const transaction = contract.methods.submitNominee(
 		{
 			from,
@@ -315,12 +309,9 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		args.options.moniker
 	);
 
-	staging.debug(`Contract address ${poa.address}`);
-	staging.debug(`Genrated nominate transaction`);
-
 	let receipt: TransactionReceipt;
 
-	staging.debug(`Attempting to send transaction to node ${host}:${port}`);
+	staging.debug(`Attempting to send transaction...`);
 
 	try {
 		receipt = await session.node.sendTransaction(transaction, decrypted);
@@ -338,7 +329,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		);
 	}
 
-	staging.debug(`Logs received from transaction. Parsing...`);
+	staging.debug(`Received transaction logs and parsing...`);
 
 	const nomineeProposedEvent = receipt.logs.filter(
 		log => log.event === 'NomineeProposed'
