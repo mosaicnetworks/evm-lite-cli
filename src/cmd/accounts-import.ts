@@ -5,6 +5,7 @@ import * as inquirer from 'inquirer';
 import Vorpal, { Command, Args } from 'vorpal';
 
 import { Utils, V3JSONKeyStore } from 'evm-lite-keystore';
+import { Utils as CoreUtils } from 'evm-lite-core';
 
 import Session from '../Session';
 import Staging, {
@@ -15,9 +16,11 @@ import Staging, {
 } from '../Staging';
 
 import { ACCOUNTS_IMPORT } from '../errors/accounts';
+import { ConfigurationSchema } from 'evm-lite-datadir';
 
 interface Options extends GenericOptions {
 	interactive?: boolean;
+	default?: boolean;
 	file?: string;
 }
 
@@ -34,6 +37,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.description(description)
 		.option('-i, --interactive', 'enter interactive mode')
 		.option('-d, --debug', 'show debug output')
+		.option('--default', 'set imported account as default from address')
 		.option('-f ,--file <keyfile_path>', 'keyfile file path')
 		.option('-d, --debug', 'show debug output')
 		.types({
@@ -46,6 +50,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 
 interface Answers {
 	file: string;
+	makeDefault: boolean;
 }
 
 export type Output = StagedOutput<Arguments, V3JSONKeyStore, V3JSONKeyStore>;
@@ -66,15 +71,21 @@ export const stage: StagingFunction<
 			message: 'Keyfile Path: ',
 			name: 'file',
 			type: 'input'
+		},
+		{
+			message: 'Make default: ',
+			name: 'makeDefault',
+			type: 'confirm'
 		}
 	];
 
 	if (interactive && !args.options.file) {
-		const { file } = await inquirer.prompt<Answers>(questions);
+		const { file, makeDefault } = await inquirer.prompt<Answers>(questions);
 
 		staging.debug(`Keyfile path: ${file || 'null'}`);
 
 		args.options.file = file;
+		args.options.default = makeDefault || false;
 	}
 
 	if (!args.options.file) {
@@ -127,6 +138,20 @@ export const stage: StagingFunction<
 		path.join(session.keystore.path, filename),
 		JSON.stringify(keystore)
 	);
+
+	staging.debug(`Setting as default address...`);
+
+	if (args.options.default) {
+		const newConfig: ConfigurationSchema = {
+			...session.config.state,
+			defaults: {
+				...session.config.state.defaults,
+				from: CoreUtils.cleanAddress(keystore.address)
+			}
+		};
+
+		await session.config.save(newConfig);
+	}
 
 	return Promise.resolve(staging.success(keystore));
 };
