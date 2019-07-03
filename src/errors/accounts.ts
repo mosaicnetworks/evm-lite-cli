@@ -49,12 +49,7 @@ export const TRANSFER = {
 };
 
 export const ACCOUNTS_IMPORT = {
-	PRIV_KEY_EMPTY: '@evmlc/accounts/import/PRIV_KEY_EMPTY',
-
-	PWD_PATH_EMPTY: '@evmlc/accounts/import/PWD_PATH_EMPTY',
-	PWD_IS_DIR: '@evmlc/accounts/import/PWD_IS_DIR',
-	PWD_PATH_NOT_FOUND: '@evmlc/accounts/import/PWD_PATH_NOT_FOUND',
-
-	PASS_FIELDS_BLANK: '@evmlc/accounts/import/PASS_FIELDS_BLANK',
-	PASS_DO_NOT_MATCH: '@evmlc/accounts/import/PASS_DO_NOT_MATCH'
+	FILE_PATH_EMPTY: '@evmlc/accounts/import/FILE_PATH_EMPTY',
+	FILE_IS_DIR: '@evmlc/accounts/import/FILE_IS_DIR',
+	FILE_PATH_NOT_FOUND: '@evmlc/accounts/import/FILE_PATH_NOT_FOUND'
 };

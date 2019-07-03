@@ -4,6 +4,7 @@ import * as inquirer from 'inquirer';
 import Vorpal, { Command, Args } from 'vorpal';
 
 import { Utils, V3JSONKeyStore } from 'evm-lite-keystore';
+import { Utils as CoreUtils } from 'evm-lite-core';
 
 import Session from '../Session';
 import Staging, {
@@ -79,6 +80,11 @@ export const stage: StagingFunction<
 	if (interactive) {
 		const answers = await inquirer.prompt<Answers>(questions);
 
+		staging.debug(`Passphrase received: ${answers.passphrase || 'null'}`);
+		staging.debug(
+			`Verify passphrase received: ${answers.verifyPassphrase || 'null'}`
+		);
+
 		if (!(answers.passphrase && answers.verifyPassphrase)) {
 			return Promise.reject(
 				staging.error(
@@ -87,8 +93,6 @@ export const stage: StagingFunction<
 				)
 			);
 		}
-
-		staging.debug('Both passphrase fields present');
 
 		if (answers.passphrase !== answers.verifyPassphrase) {
 			return Promise.reject(
@@ -99,12 +103,14 @@ export const stage: StagingFunction<
 			);
 		}
 
-		staging.debug('Passphrases match');
-
 		passphrase = answers.passphrase.trim();
+
+		staging.debug(`Passphrase set: ${passphrase}`);
 	}
 
 	if (!passphrase) {
+		staging.debug(`Passphrase file path: ${args.options.pwd || 'null'}`);
+
 		if (!args.options.pwd) {
 			return Promise.reject(
 				staging.error(
@@ -114,8 +120,6 @@ export const stage: StagingFunction<
 			);
 		}
 
-		staging.debug(`Passphrase file path detected ${args.options.pwd}`);
-
 		if (!Utils.exists(args.options.pwd)) {
 			return Promise.reject(
 				staging.error(
@@ -124,8 +128,6 @@ export const stage: StagingFunction<
 				)
 			);
 		}
-
-		staging.debug(`Passphrase file exists`);
 
 		if (Utils.isDirectory(args.options.pwd)) {
 			return Promise.reject(
@@ -138,11 +140,11 @@ export const stage: StagingFunction<
 
 		passphrase = fs.readFileSync(args.options.pwd, 'utf8').trim();
 
-		staging.debug(`Passphrase read successfully`);
+		staging.debug(`Passphrase read successfully: ${passphrase}`);
 	}
 
 	if (args.options.out) {
-		staging.debug(`Output path detected ${args.options.out}`);
+		staging.debug(`Output path: ${args.options.out || 'null'}`);
 
 		if (!Utils.exists(args.options.out)) {
 			return Promise.reject(
@@ -153,8 +155,6 @@ export const stage: StagingFunction<
 			);
 		}
 
-		staging.debug(`Output path exists`);
-
 		if (!Utils.isDirectory(args.options.out)) {
 			return Promise.reject(
 				staging.error(
@@ -163,7 +163,11 @@ export const stage: StagingFunction<
 				)
 			);
 		}
+
+		staging.debug(`Output path verified: ${args.options.out}`);
 	}
+
+	staging.debug(`Attempting to create account...`);
 
 	const account: V3JSONKeyStore = await session.keystore.create(
 		passphrase,
@@ -171,8 +175,9 @@ export const stage: StagingFunction<
 	);
 
 	staging.debug(
-		`Successfully written encrypted account to ${args.options.out ||
-			session.keystore.path}`
+		`Account creation successful: ${CoreUtils.cleanAddress(
+			account.address
+		)}`
 	);
 
 	return Promise.resolve(staging.success(account));

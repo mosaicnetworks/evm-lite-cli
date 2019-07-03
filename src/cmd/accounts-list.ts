@@ -66,10 +66,6 @@ export const stage: StagingFunction<
 	const port = args.options.port || session.config.state.connection.port;
 
 	if (remote && !status) {
-		staging.debug(
-			'Cannot fetch remote accounts with an invalid connection'
-		);
-
 		return Promise.reject(
 			staging.error(
 				INVALID_CONNECTION,
@@ -79,9 +75,11 @@ export const stage: StagingFunction<
 	}
 
 	if (remote && status) {
-		staging.debug('Fetching remote accounts');
+		staging.debug(`Successfully connected: ${host}:${port}`);
 
 		let accounts: BaseAccount[];
+
+		staging.debug(`Attempting to fetch remote accounts...`);
 
 		try {
 			accounts = await session.node.getAccounts();
@@ -94,11 +92,10 @@ export const stage: StagingFunction<
 
 	let keystores: V3JSONKeyStore[];
 
-	staging.debug(`Keystore path ${session.keystore.path}`);
+	staging.debug(`Attempting to fetch local accounts...`);
 
 	try {
 		keystores = await session.keystore.list();
-		staging.debug('Reading keystore successful');
 	} catch (e) {
 		return Promise.reject(staging.error(KEYSTORE.LIST, e.toString()));
 	}
@@ -111,7 +108,8 @@ export const stage: StagingFunction<
 	}));
 
 	if (status) {
-		staging.debug(`Fetching account details from ${host}:${port}`);
+		staging.debug(`Successfully connected: ${host}:${port}`);
+		staging.debug(`Attempting to fetch accounts data...`);
 
 		try {
 			const promises = keystores.map(
@@ -120,18 +118,16 @@ export const stage: StagingFunction<
 			);
 
 			accounts = await Promise.all(promises);
-
-			staging.debug(`Fetching account successful`);
 		} catch (e) {
 			return Promise.reject(staging.error(EVM_LITE, e.text));
 		}
-	} else {
-		staging.debug(`No valid connection detected`);
 	}
 
 	if (!formatted) {
 		return Promise.resolve(staging.success(accounts));
 	}
+
+	staging.debug(`Preparing formatted output...`);
 
 	const table = new ASCIITable().setHeading('Address', 'Balance', 'Nonce');
 
@@ -142,8 +138,6 @@ export const stage: StagingFunction<
 			account.nonce
 		);
 	}
-
-	staging.debug(`Table creation successful`);
 
 	return Promise.resolve(staging.success(table));
 };

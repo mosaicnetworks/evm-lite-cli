@@ -48,6 +48,8 @@ export const stage: StagingFunction<Arguments, ASCIITable, any> = async (
 	const host = args.options.host || session.config.state.connection.host;
 	const port = args.options.port || session.config.state.connection.port;
 
+	staging.debug(`Attempting to connect: ${host}:${port}`);
+
 	if (!status) {
 		return Promise.reject(
 			staging.error(
@@ -59,7 +61,7 @@ export const stage: StagingFunction<Arguments, ASCIITable, any> = async (
 
 	let information: any;
 
-	staging.debug(`Attempting to fetch node information at ${host}:${port}`);
+	staging.debug(`Attempting to fetch node information...`);
 
 	try {
 		information = await session.node.getInfo();
@@ -67,11 +69,11 @@ export const stage: StagingFunction<Arguments, ASCIITable, any> = async (
 		return Promise.reject(staging.error(EVM_LITE, e.toString()));
 	}
 
-	staging.debug(`Fetching information successful`);
-
 	if (!formatted) {
 		return Promise.resolve(staging.success(information));
 	}
+
+	staging.debug(`Preparing formatted output...`);
 
 	const table = new ASCIITable().setHeading('Key', 'Value');
 
@@ -80,8 +82,6 @@ export const stage: StagingFunction<Arguments, ASCIITable, any> = async (
 			table.addRow(key, information[key]);
 		}
 	}
-
-	staging.debug(`Table created successfully`);
 
 	return Promise.resolve(staging.success(table));
 };

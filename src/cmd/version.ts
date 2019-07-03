@@ -32,5 +32,11 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 ) => {
 	const staging = new Staging<Arguments, string, string>(session.debug, args);
 
+	staging.debug(`evm-lite-core: ${pkg.dependencies[`evm-lite-core`]}`);
+	staging.debug(
+		`evm-lite-keystore: ${pkg.dependencies[`evm-lite-keystore`]}`
+	);
+	staging.debug(`evm-lite-datadir: ${pkg.dependencies[`evm-lite-datadir`]}`);
+
 	return Promise.resolve(staging.success(`${pkg.version}`));
 };
