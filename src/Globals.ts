@@ -8,7 +8,7 @@ export default class Globals {
 	);
 
 	public static purple(message: string): void {
-		console.log(Chalk.default.bgMagenta(message));
+		console.log(Chalk.default.magenta(message));
 	}
 
 	public static success(message: any): void {

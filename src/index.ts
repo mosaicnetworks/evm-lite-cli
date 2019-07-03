@@ -38,6 +38,7 @@ import transfer from './cmd/transfer';
 import info from './cmd/info';
 import version from './cmd/version';
 import test from './cmd/test';
+import chalk from 'chalk';
 
 export type CommandFunction = (evmlc: Vorpal, session: Session) => Command;
 
@@ -124,9 +125,11 @@ init()
 	.then(async (cli: { instance: Vorpal; session: Session }) => {
 		if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
 			console.log(
-				figlet.textSync('EVM-Lite CLI', {
-					horizontalLayout: 'full'
-				})
+				chalk.bold(
+					figlet.textSync('EVM-Lite CLI', {
+						horizontalLayout: 'full'
+					})
+				)
 			);
 
 			if (process.argv[3] === '-d' || process.argv[3] === '--debug') {
@@ -135,11 +138,11 @@ init()
 			}
 
 			Globals.warning(` Mode:        Interactive`);
-			Globals.warning(` Data Dir:    ${cli.session.directory.path}`);
-			Globals.info(` Config File: ${cli.session.config.path}`);
+			Globals.info(` Data Dir:    ${cli.session.directory.path}`);
+			Globals.purple(` Config File: ${cli.session.config.path}`);
 
 			if (cli.session.keystore) {
-				Globals.info(` Keystore:    ${cli.session.keystore.path}`);
+				Globals.purple(` Keystore:    ${cli.session.keystore.path}`);
 			}
 
 			const cmdInteractive = cli.instance.find('interactive');
