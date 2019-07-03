@@ -69,7 +69,7 @@ export const stage: StagingFunction<
 		}
 	];
 
-	if (interactive) {
+	if (interactive && !args.options.file) {
 		const { file } = await inquirer.prompt<Answers>(questions);
 
 		staging.debug(`Keyfile path: ${file || 'null'}`);
