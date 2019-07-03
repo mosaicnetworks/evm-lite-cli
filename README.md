@@ -146,7 +146,7 @@ evmlc$
 
 ### 2) Create an account
 
-While still in interactive mode, type the command `accounts create -v` (`-v` specifies verbose output) and select
+While still in interactive mode, type the command `accounts create` and select
 the default option for keystore and then type in a password to encrypt the account:
 
 ```bash
