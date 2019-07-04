@@ -3,18 +3,10 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import {
-	V3JSONKeyStore,
-	Utils as KeystoreUtils,
-	Keystore
-} from 'evm-lite-keystore';
-import {
-	Utils,
-	Contract,
-	Account,
-	TransactionReceipt,
-	EVMLC
-} from 'evm-lite-core';
+import Utils from 'evm-lite-utils';
+
+import { V3JSONKeyStore, Keystore } from 'evm-lite-keystore';
+import { Contract, Account, TransactionReceipt, EVMLC } from 'evm-lite-core';
 
 import Session from '../Session';
 import Staging, {
@@ -242,7 +234,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		if (!KeystoreUtils.exists(args.options.pwd)) {
+		if (!Utils.exists(args.options.pwd)) {
 			return Promise.reject(
 				staging.error(
 					POA_VOTE.PWD_PATH_NOT_FOUND,
@@ -251,7 +243,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		if (KeystoreUtils.isDirectory(args.options.pwd)) {
+		if (Utils.isDirectory(args.options.pwd)) {
 			return Promise.reject(
 				staging.error(
 					POA_VOTE.PWD_IS_DIR,

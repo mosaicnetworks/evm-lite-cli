@@ -2,7 +2,9 @@ import ASCIITable from 'ascii-table';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import { Utils, Contract } from 'evm-lite-core';
+import Utils from 'evm-lite-utils';
+
+import { Contract } from 'evm-lite-core';
 
 import Session from '../Session';
 import Globals from '../Globals';

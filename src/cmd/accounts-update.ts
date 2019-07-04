@@ -3,12 +3,9 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import {
-	V3JSONKeyStore,
-	Utils as KeystoreUtils,
-	Keystore
-} from 'evm-lite-keystore';
-import { Utils } from 'evm-lite-core';
+import Utils from 'evm-lite-utils';
+
+import { V3JSONKeyStore, Keystore } from 'evm-lite-keystore';
 
 import Session from '../Session';
 import Staging, {
@@ -196,7 +193,7 @@ export const stage: StagingFunction<
 			);
 		}
 
-		if (!KeystoreUtils.exists(args.options.old)) {
+		if (!Utils.exists(args.options.old)) {
 			return Promise.reject(
 				staging.error(
 					ACCOUNTS_UPDATE.OLD_PWD_NOT_FOUND,
@@ -205,7 +202,7 @@ export const stage: StagingFunction<
 			);
 		}
 
-		if (KeystoreUtils.isDirectory(args.options.old)) {
+		if (Utils.isDirectory(args.options.old)) {
 			return Promise.reject(
 				staging.error(
 					ACCOUNTS_UPDATE.OLD_PWD_IS_DIR,
@@ -274,7 +271,7 @@ export const stage: StagingFunction<
 			);
 		}
 
-		if (!KeystoreUtils.exists(args.options.new)) {
+		if (!Utils.exists(args.options.new)) {
 			return Promise.reject(
 				staging.error(
 					ACCOUNTS_UPDATE.NEW_PWD_NOT_FOUND,
@@ -283,7 +280,7 @@ export const stage: StagingFunction<
 			);
 		}
 
-		if (KeystoreUtils.isDirectory(args.options.new)) {
+		if (Utils.isDirectory(args.options.new)) {
 			return Promise.reject(
 				staging.error(
 					ACCOUNTS_UPDATE.NEW_PWD_IS_DIR,

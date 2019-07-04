@@ -2,7 +2,9 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import { Utils, Contract, Transaction } from 'evm-lite-core';
+import Utils from 'evm-lite-utils';
+
+import { Contract, Transaction } from 'evm-lite-core';
 
 import Session from '../Session';
 import Staging, {

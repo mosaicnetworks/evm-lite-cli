@@ -7,7 +7,7 @@ import * as mkdir from 'mkdirp';
 
 import Vorpal, { Command } from 'vorpal';
 
-import { Utils } from 'evm-lite-keystore';
+import Utils from 'evm-lite-utils';
 
 import Globals from './Globals';
 import Session from './Session';
