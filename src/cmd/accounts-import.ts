@@ -4,8 +4,9 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import { Utils, V3JSONKeyStore } from 'evm-lite-keystore';
-import { Utils as CoreUtils } from 'evm-lite-core';
+import Utils from 'evm-lite-utils';
+
+import { V3JSONKeyStore } from 'evm-lite-keystore';
 
 import Session from '../Session';
 import Staging, {
@@ -146,7 +147,7 @@ export const stage: StagingFunction<
 			...session.config.state,
 			defaults: {
 				...session.config.state.defaults,
-				from: CoreUtils.cleanAddress(keystore.address)
+				from: Utils.cleanAddress(keystore.address)
 			}
 		};
 

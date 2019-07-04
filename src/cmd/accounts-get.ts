@@ -3,7 +3,9 @@ import * as inquirer from 'inquirer';
 import ASCIITable from 'ascii-table';
 import Vorpal, { Command, Args } from 'vorpal';
 
-import { BaseAccount, Utils } from 'evm-lite-core';
+import Utils from 'evm-lite-utils';
+
+import { BaseAccount } from 'evm-lite-core';
 
 import Session from '../Session';
 import Staging, {

@@ -1,6 +1,8 @@
 import * as nodepath from 'path';
 
-import { EVMLC, ContractABI, Utils } from 'evm-lite-core';
+import Utils from 'evm-lite-utils';
+
+import { EVMLC, ContractABI } from 'evm-lite-core';
 import { DataDirectory } from 'evm-lite-datadir';
 import { Keystore } from 'evm-lite-keystore';
 
