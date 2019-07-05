@@ -1,44 +1,47 @@
 {
-	"name": "evm-lite-cli",
-	"version": "1.0.0-alpha.9",
-	"main": "index.js",
-	"license": "MIT",
-	"scripts": {
-		"postinstall": "tsc",
-		"prepublish": "tsc",
-		"clean": "rm -rf node_modules && rm -rf dist/ && rm -rf package-lock.json",
-		"build": "tsc -p tsconfig.json",
-		"test": "jest",
-		"i": "ts-node src/index i --debug"
-	},
-	"dependencies": {
-		"ascii-table": "^0.0.9",
-		"chalk": "^2.4.2",
-		"dotenv": "^8.0.0",
-		"evm-lite-core": "1.0.0-alpha.9",
-		"evm-lite-datadir": "1.0.0-alpha.9",
-		"evm-lite-keystore": "1.0.0-alpha.9",
-		"evm-lite-utils": "1.0.0-alpha.9",
-		"figlet": "^1.2.3",
-		"inquirer": "^6.4.1",
-		"mkdirp": "^0.5.1",
-		"vorpal": "^1.12.0"
-	},
-	"devDependencies": {
-		"@types/figlet": "^1.2.0",
-		"@types/inquirer": "^6.0.3",
-		"@types/jest": "^24.0.15",
-		"@types/mkdirp": "^0.5.2",
-		"@types/node": "^12.0.10",
-		"jest": "^24.8.0",
-		"ts-jest": "^24.0.2",
-		"ts-node": "^8.3.0",
-		"tslint": "^5.18.0",
-		"tslint-config-airbnb": "^5.11.1",
-		"tslint-config-prettier": "^1.18.0",
-		"typescript": "^3.5.2"
-	},
-	"bin": {
-		"evmlc": "./dist/index.js"
-	}
+  "name": "evm-lite-cli",
+  "version": "1.0.0-alpha.9",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "tsc",
+    "prepublish": "tsc",
+    "clean": "rm -rf node_modules && rm -rf dist/ && rm -rf package-lock.json",
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "make:monet": "node --experimental-modules ./scripts/make-monet.mjs && npm link",
+    "make:evmlc": "node --experimental-modules ./scripts/make-evmlc.mjs && npm link",
+    "i": "ts-node src/index i --debug"
+  },
+  "dependencies": {
+    "ascii-table": "^0.0.9",
+    "chalk": "^2.4.2",
+    "dotenv": "^8.0.0",
+    "evm-lite-core": "1.0.0-alpha.9",
+    "evm-lite-datadir": "1.0.0-alpha.9",
+    "evm-lite-keystore": "1.0.0-alpha.9",
+    "evm-lite-utils": "1.0.0-alpha.9",
+    "figlet": "^1.2.3",
+    "inquirer": "^6.4.1",
+    "mkdirp": "^0.5.1",
+    "vorpal": "^1.12.0"
+  },
+  "devDependencies": {
+    "@types/figlet": "^1.2.0",
+    "@types/inquirer": "^6.0.3",
+    "@types/jest": "^24.0.15",
+    "@types/mkdirp": "^0.5.2",
+    "@types/node": "^12.0.10",
+    "edit-json-file": "^1.2.1",
+    "jest": "^24.8.0",
+    "ts-jest": "^24.0.2",
+    "ts-node": "^8.3.0",
+    "tslint": "^5.18.0",
+    "tslint-config-airbnb": "^5.11.1",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.5.2"
+  },
+  "bin": {
+    "monet": "./dist/index.js"
+  }
 }

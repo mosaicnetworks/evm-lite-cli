@@ -42,6 +42,18 @@ yarn install
 
 This should also transpile all typescript files into `dist/`.
 
+You can build the CLI for `evmlc` or `monet`
+
+```bash
+npm run make:evmlc
+```
+
+or
+
+```bash
+npm run make:monet
+```
+
 For development, it is advised to use
 
 ```bash
