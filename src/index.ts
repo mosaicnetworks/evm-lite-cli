@@ -162,8 +162,6 @@ init()
 
 			cli.session.interactive = true;
 
-			// Delimiter verification
-
 			let delimter = 'evmlc';
 
 			if (pkg.bin['monet'] || false) {

@@ -1,8 +1,6 @@
-# EVM-Lite CLI
+# EVM-Lite CLI [![npm version](https://badge.fury.io/js/evm-lite-cli.svg)](https://badge.fury.io/js/evm-lite-cli)
 
 > A Command Line Interface to interact with EVM-Lite.
-
-[![npm version](https://badge.fury.io/js/evm-lite-cli.svg)](https://badge.fury.io/js/evm-lite-cli)
 
 ## Table of Contents
 
@@ -10,8 +8,8 @@
 2. [Development](#Development)
 3. [Data Directory](#Data-Directory)
 4. [Commands](#Commands)
-5. [Getting Started](docs/getting-started.md)
-6. [Proof of Authority](docs/proof-of-authority.md)
+5. [Getting Started Guide](docs/getting-started.md)
+6. [Proof of Authority Commands](docs/proof-of-authority.md)
 
 ## Installation
 
@@ -84,30 +82,11 @@ gas = 1000000000000
 gasPrice = 0
 ```
 
-The easiest way to manage configuration is through the `config` command in
-interactive mode.
-
-```bash
-$ evmlc i
-  _______     ____  __       _     _ _          ____ _     ___
- | ____\ \   / /  \/  |     | |   (_) |_ ___   / ___| |   |_ _|
- |  _|  \ \ / /| |\/| |_____| |   | | __/ _ \ | |   | |    | |
- | |___  \ V / | |  | |_____| |___| | ||  __/ | |___| |___ | |
- |_____|  \_/  |_|  |_|     |_____|_|\__\___|  \____|_____|___|
-
- Mode:        Interactive
- Data Dir:    [...]/.evmlc
- Config File: [...]/.evmlc/config.toml
- Keystore:    [...]/.evmlc/keystore
-
-evmlc$
-```
-
-To change default configuration values run `config set` or `c s`. You will be
+To change default configuration values run `evmlc config set -i` or `evmlc c s -i`. You will be
 taken to an interactive prompt to change connection and default values.
 
-```bash
-evmlc$ config set
+```console
+$ evmlc config set -i
 
 ? Host: 127.0.0.1
 ? Port: 8000
