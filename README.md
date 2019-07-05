@@ -11,7 +11,7 @@
 3. [Data Directory](#Data-Directory)
 4. [Commands](#Commands)
 5. [Getting Started](docs/getting-started.md)
-6. [Proof of Authority](docs/poa.md)
+6. [Proof of Authority](docs/proof-of-authority.md)
 
 ## Installation
 

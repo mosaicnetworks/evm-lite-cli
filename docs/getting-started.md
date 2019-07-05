@@ -1,9 +1,9 @@
-## Getting Started
+# Getting Started
 
 We explain how to use `evmlc` against a single `evm-lite` node. We will walk
 through creating accounts, making transfers, and viewing account information.
 
-### 1) Run `evmlc` in interactive mode
+## 1) Run `evmlc` in interactive mode
 
 ```bash
 user:~$ evmlc i
@@ -21,7 +21,7 @@ user:~$ evmlc i
 evmlc$
 ```
 
-### 2) Create an account
+## 2) Create an account
 
 While still in interactive mode, type the command `accounts create` and select
 the default option for keystore and then type in a password to encrypt the account:
@@ -36,13 +36,13 @@ evmlc$ accounts create
 {"version":3,"id":"9097a7d3-511d-4e7d-83b0-b9bd6d46f21e","address":"477f22b53038b745bb039653b91bdaa88c8bf94d","crypto":{"ciphertext":"3172d22e2f3b8da53ad3b86f6e1cffbb1126d47ae6b563a0183ba885faf4170b","cipherparams":{"iv":"1120717f7eb46693418beeafe953f5a5"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"5623f5a14730e28be73e9ef23fabf68ed8d51d1db5d162afb8a33b1123bfda64","n":8192,"r":8,"p":1},"mac":"05ca13958cf4bee53167d9c45a93dbdb33f822c41c80776465c8c5b422be7127"}}
 ```
 
-#### What happened?
+### What happened?
 
 It created an account with address `477f22b53038b745bb039653b91bdaa88c8bf94d`,
 and added the corresponding keyfile, password protected with the password you provided,
 in the keystore directory
 
-#### What is an account?
+### What is an account?
 
 EVM-Lite uses the same account model as Ethereum. Accounts represent identities
 of external agents and are associated with a balance (and storage for Contract
@@ -70,7 +70,7 @@ that can only be used to transfer coins. The use of Contract accounts with the
 EVM makes it possible to deploy and use _Smart Contracts_ which we will explore
 in another document.
 
-#### What is an account file?
+### What is an account file?
 
 This is best explained in the
 [Ethereum Docs](http://ethdocs.org/en/latest/account-management.html):
@@ -83,7 +83,7 @@ This is best explained in the
 > always encrypted, and it is encrypted with the password you enter when you
 > create the account.
 
-### 3) Start an `evm-lite` node and pre-allocate funds to our address
+## 3) Start an `evm-lite` node and pre-allocate funds to our address
 
 If you haven't done so yet, please install and familiarize yourself with
 [EVM-Lite](https://github.com/mosaicnetworks/evm-lite), our lightweight Ethereum
@@ -114,7 +114,7 @@ ready to talk.
 
 How many coins where assigned to the account? let's check!
 
-### 4) List accounts
+## 4) List accounts
 
 Back in the interactive `evmlc` session, type `accounts list -f`
 
@@ -131,7 +131,7 @@ evmlc$ accounts list -f
 The command went through the accounts in the keystore, connected to the node to
 retrieve the corresponding balance, and displayed it nicely on the screen.
 
-### 5) Create another account
+## 5) Create another account
 
 ```bash
 evmlc$ accounts create
@@ -145,7 +145,7 @@ evmlc$ accounts create
 
 This one has the address `988456018729c15a6914a2c5ba1a753f76ec36dc`
 
-### 6) Transfer coins from one account to another
+## 6) Transfer coins from one account to another
 
 Type `transfer` and follow the instructions to transfer coins from the first
 account to the second account.
@@ -164,14 +164,14 @@ evmlc$ transfer
 Transaction submitted.
 ```
 
-#### What happened?
+### What happened?
 
 It **created a transaction** to send 100 coins from the first account to the
 second account, **signed it** with the sender's private key, and **sent it** to
 the evm-lite node. The node responded with the transaction hash, which
 identifies our transaction in EVM-Lite, and allows us to query its results.
 
-#### What is a transaction?
+### What is a transaction?
 
 A transaction is a signed data package that contains instructions for the EVM.
 It can contain instructions to move coins from one account to another, create a
@@ -189,7 +189,7 @@ encoded using the custom Ethereum scheme, RLP, and contain the following fields:
     One unit of gas corresponds to the execution of one atomic instruction, i.e., a
     computational step.
 
-### 7) Check accounts again
+## 7) Check accounts again
 
 ```bash
 evmlc$ accounts list -f
@@ -202,7 +202,7 @@ evmlc$ accounts list -f
 '----------------------------------------------------------------------------------------'
 ```
 
-### Conclusion
+## Conclusion
 
 We showed how to use `evmlc` to create an EVM-Lite account and transfer coins
 from one account to another. We used a single EVM-Lite node, running in Solo
@@ -210,5 +210,3 @@ mode, for the purpose of demonstration, but the same concepts apply with
 networks consisting of multiple nodes, powered by other consensus algorithms
 (like Babble or Raft). In another document, we will describe how to create,
 publish, and interact with smart contracts.
-
-Many more features to come...
