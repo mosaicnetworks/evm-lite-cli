@@ -9,4 +9,4 @@ pwd.txt
 tests/assets/keystore/
 tests/assets/config.toml
 yarn-error.log
-./scripts/
+./scripts
