@@ -28,19 +28,19 @@ in the installation package from the [Node website](https://nodejs.org/en/).
 
 This project was built with Node version `10.16.0`.
 
-Firstly we will need to install all dependencies
+Firstly we will need to install dependencies
 
 ```bash
 npm install
 ```
 
-or with `yarn
+or with `yarn`
 
 ```bash
 yarn install
 ```
 
-This should also transpile all typescript files into `dist/`.
+This should also transpile typescript files into `dist/`.
 
 You can build the CLI for `evmlc` or `monet`
 
@@ -62,7 +62,7 @@ npm run i
 
 to test the CLI.
 
-Alternatively you can run `npm link` and access the CLI through `evmlc` however any changes made to the typescript files needs to be transpiled before changes are seen.
+Alternatively you can run `npm link` and access the CLI through `evmlc` or `monet` (depending on which you build) however any changes made to the typescript files needs to be transpiled before changes are seen.
 
 ## Configuration
 
