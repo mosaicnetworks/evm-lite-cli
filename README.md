@@ -1,6 +1,6 @@
 # EVM-Lite CLI [![npm version](https://badge.fury.io/js/evm-lite-cli.svg)](https://badge.fury.io/js/evm-lite-cli)
 
-> A Command Line Interface to interact with [EVM-Lite](https://github.com/mosaicnetworks/monetd#readme) or [Monet](https://github.com/mosaicnetworks/evm-lite#readme) nodes
+> A Command Line Interface to interact with [EVM-Lite](https://github.com/mosaicnetworks/evm-lite#readme) or [Monet](https://github.com/mosaicnetworks/monetd#readme) nodes
 
 ## Table of Contents
 
