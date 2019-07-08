@@ -42,7 +42,7 @@ describe('accounts-list.ts', () => {
 		const args: Arguments = {
 			options: {
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -50,7 +50,7 @@ describe('accounts-list.ts', () => {
 		const success = output.display! as BaseAccount[];
 
 		expect(output.args.options.host).toBe('127.0.0.1');
-		expect(output.args.options.port).toBe(8000);
+		expect(output.args.options.port).toBe(8080);
 
 		expect(success instanceof Array).toBe(true);
 		expect(success.length).toBe(1);
@@ -66,7 +66,7 @@ describe('accounts-list.ts', () => {
 			options: {
 				formatted: true,
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -74,7 +74,7 @@ describe('accounts-list.ts', () => {
 		const success = output.display! as BaseAccount[];
 
 		expect(output.args.options.host).toBe('127.0.0.1');
-		expect(output.args.options.port).toBe(8000);
+		expect(output.args.options.port).toBe(8080);
 
 		expect(success instanceof ASCIITable).toBe(true);
 	});

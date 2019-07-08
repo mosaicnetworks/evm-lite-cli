@@ -35,7 +35,7 @@ describe('poa-nominate.ts', () => {
 		const args: Arguments = {
 			options: {
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -59,7 +59,7 @@ describe('poa-nominate.ts', () => {
 		const args: Arguments = {
 			options: {
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -84,7 +84,7 @@ describe('poa-nominate.ts', () => {
 			address: keystore.address,
 			options: {
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -141,7 +141,7 @@ describe('poa-nominate.ts', () => {
 			options: {
 				moniker: 'test',
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -151,7 +151,7 @@ describe('poa-nominate.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(
@@ -172,7 +172,7 @@ describe('poa-nominate.ts', () => {
 			options: {
 				moniker: 'test',
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -182,7 +182,7 @@ describe('poa-nominate.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(POA_NOMINATE.FROM_EMPTY);
@@ -202,7 +202,7 @@ describe('poa-nominate.ts', () => {
 				from: keystore.address + 'F',
 				moniker: 'test',
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -212,7 +212,7 @@ describe('poa-nominate.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(
@@ -234,7 +234,7 @@ describe('poa-nominate.ts', () => {
 				from: keystore.address.slice(3),
 				moniker: 'test',
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -244,7 +244,7 @@ describe('poa-nominate.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(
@@ -266,7 +266,7 @@ describe('poa-nominate.ts', () => {
 				from: keystore.address,
 				moniker: 'test',
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -276,7 +276,7 @@ describe('poa-nominate.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(POA_NOMINATE.PWD_PATH_EMPTY);
@@ -297,7 +297,7 @@ describe('poa-nominate.ts', () => {
 				pwd: '/does_not_exist/pwd.txt',
 				moniker: 'test',
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -307,7 +307,7 @@ describe('poa-nominate.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(POA_NOMINATE.PWD_PATH_NOT_FOUND);
@@ -328,7 +328,7 @@ describe('poa-nominate.ts', () => {
 				pwd: '/',
 				moniker: 'test',
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -338,7 +338,7 @@ describe('poa-nominate.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(POA_NOMINATE.PWD_IS_DIR);
@@ -359,7 +359,7 @@ describe('poa-nominate.ts', () => {
 				pwd: pwdPath,
 				moniker: 'test',
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -369,7 +369,7 @@ describe('poa-nominate.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(KEYSTORE.FETCH);
@@ -390,7 +390,7 @@ describe('poa-nominate.ts', () => {
 				pwd: otherPwdPath,
 				moniker: 'test',
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -400,7 +400,7 @@ describe('poa-nominate.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(KEYSTORE.DECRYPTION);
