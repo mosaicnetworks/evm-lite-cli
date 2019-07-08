@@ -1,4 +1,4 @@
-import { Utils } from 'evm-lite-core';
+import Utils from 'evm-lite-utils';
 
 import { session, password, pwdPath, otherPwdPath } from './stage';
 

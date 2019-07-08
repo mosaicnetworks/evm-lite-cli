@@ -1,6 +1,8 @@
 import ASCIITable from 'ascii-table';
 
-import { Account, Utils, BaseAccount } from 'evm-lite-core';
+import Utils from 'evm-lite-utils';
+
+import { Account, BaseAccount } from 'evm-lite-core';
 
 import { session } from './stage';
 
@@ -79,8 +81,8 @@ describe('accounts-get.ts', () => {
 
 			expect(output.args.options.host).toBe('127.0.0.1');
 			expect(output.args.options.port).toBe(8080);
-			expect(output.args.address).toBe(
-				Utils.trimHex(account.address.slice(3))
+			expect(Utils.cleanAddress(output.args.address!)).toBe(
+				Utils.cleanAddress(account.address.slice(3))
 			);
 
 			if (output.error) {
@@ -100,7 +102,7 @@ describe('accounts-get.ts', () => {
 			address: `${account.address}F`,
 			options: {
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -110,9 +112,9 @@ describe('accounts-get.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
-			expect(output.args.address).toBe(
-				Utils.trimHex(`${account.address}F`)
+			expect(output.args.options.port).toBe(8080);
+			expect(Utils.cleanAddress(output.args.address!)).toBe(
+				Utils.cleanAddress(`${account.address}F`)
 			);
 
 			if (output.error) {
@@ -132,14 +134,14 @@ describe('accounts-get.ts', () => {
 			address: account.address,
 			options: {
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
 		const output = await stage(args, session);
 
 		expect(output.args.options.host).toBe('127.0.0.1');
-		expect(output.args.options.port).toBe(8000);
+		expect(output.args.options.port).toBe(8080);
 		expect(output.args.address).toBe(Utils.trimHex(account.address));
 
 		let base = output.display! as BaseAccount;
@@ -163,14 +165,14 @@ describe('accounts-get.ts', () => {
 			options: {
 				formatted: true,
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
 		const output = await stage(args, session);
 
 		expect(output.args.options.host).toBe('127.0.0.1');
-		expect(output.args.options.port).toBe(8000);
+		expect(output.args.options.port).toBe(8080);
 		expect(output.args.address).toBe(Utils.trimHex(account.address));
 
 		let base = output.display!;

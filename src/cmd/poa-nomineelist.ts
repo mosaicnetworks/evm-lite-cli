@@ -158,7 +158,7 @@ export const stage: StagingFunction<
 
 		staging.debug(`Moniker received: ${nominee.moniker}`);
 
-		const votesTransaction = contract.methods.dev_getCurrentNomineeVotes(
+		const votesTransaction = contract.methods.getCurrentNomineeVotes(
 			{
 				from: session.config.state.defaults.from,
 				gas: session.config.state.defaults.gas,

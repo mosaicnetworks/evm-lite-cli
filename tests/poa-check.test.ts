@@ -36,7 +36,7 @@ describe('poa-check.ts', () => {
 		const args: Arguments = {
 			options: {
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -46,7 +46,7 @@ describe('poa-check.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(POA_CHECK.ADDRESS_EMPTY);
@@ -63,7 +63,7 @@ describe('poa-check.ts', () => {
 			address: account.address + 'A',
 			options: {
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -73,7 +73,7 @@ describe('poa-check.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(
@@ -92,7 +92,7 @@ describe('poa-check.ts', () => {
 			address: account.address.slice(3),
 			options: {
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -102,7 +102,7 @@ describe('poa-check.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(

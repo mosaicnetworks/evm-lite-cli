@@ -1,9 +1,10 @@
+import Utils from 'evm-lite-utils';
+
 import { session, pwdPath, otherPwdPath, password } from './stage';
 
 import { stage, Arguments, Output } from '../src/cmd/transfer';
 import { TRANSFER } from '../src/errors/accounts';
-import { KEYSTORE, EVM_LITE, INVALID_CONNECTION } from '../src/errors/generals';
-import { Utils } from 'evm-lite-core';
+import { KEYSTORE, INVALID_CONNECTION } from '../src/errors/generals';
 
 describe('transfer.ts', () => {
 	it('should error as invalid node conn details', async () => {
@@ -36,7 +37,7 @@ describe('transfer.ts', () => {
 		const args: Arguments = {
 			options: {
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -46,7 +47,7 @@ describe('transfer.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(KEYSTORE.EMPTY);
@@ -63,7 +64,7 @@ describe('transfer.ts', () => {
 		const args: Arguments = {
 			options: {
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -73,7 +74,7 @@ describe('transfer.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(TRANSFER.FROM_EMPTY);
@@ -91,7 +92,7 @@ describe('transfer.ts', () => {
 			options: {
 				from: `${from.address.slice(1)}F`,
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -101,7 +102,7 @@ describe('transfer.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 			expect(Utils.trimHex(output.args.options.from!)).toBe(
 				Utils.trimHex(`${from.address.slice(1)}F`)
 			);
@@ -122,7 +123,7 @@ describe('transfer.ts', () => {
 			options: {
 				from: from.address,
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -132,7 +133,7 @@ describe('transfer.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(TRANSFER.PWD_PATH_EMPTY);
@@ -151,7 +152,7 @@ describe('transfer.ts', () => {
 				pwd: '/does_not_exist/pwd.txt',
 				from: from.address,
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -161,7 +162,7 @@ describe('transfer.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(TRANSFER.PWD_PATH_NOT_FOUND);
@@ -180,7 +181,7 @@ describe('transfer.ts', () => {
 				pwd: '/',
 				from: from.address,
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -190,7 +191,7 @@ describe('transfer.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(TRANSFER.PWD_IS_DIR);
@@ -209,7 +210,7 @@ describe('transfer.ts', () => {
 				pwd: otherPwdPath,
 				from: from.address,
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -219,7 +220,7 @@ describe('transfer.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(KEYSTORE.DECRYPTION);
@@ -238,7 +239,7 @@ describe('transfer.ts', () => {
 				pwd: pwdPath,
 				from: from.address,
 				host: '127.0.0.1',
-				port: 8000
+				port: 8080
 			}
 		};
 
@@ -248,7 +249,7 @@ describe('transfer.ts', () => {
 			const output = e as Output;
 
 			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8000);
+			expect(output.args.options.port).toBe(8080);
 
 			if (output.error) {
 				expect(output.error.type).toBe(TRANSFER.TO_VALUE_EMPTY);
