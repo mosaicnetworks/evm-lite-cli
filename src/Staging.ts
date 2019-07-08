@@ -129,12 +129,16 @@ export const execute = <Arguments extends VorpalArgs<GenericOptions>, T1, T2>(
 			);
 		} catch (e) {
 			// console.log(e);
-			if (e.error.type && e.error.message) {
-				// console.log(e.error);
-				const type = e.error.type as string;
+			if (e.error) {
+				if (e.error.type && e.error.message) {
+					// console.log(e.error);
+					const type = e.error.type as string;
 
-				if (type.startsWith('@evmlc')) {
-					Globals.error(`${e.error.message as string}`);
+					if (type.startsWith('@evmlc')) {
+						Globals.error(`${e.error.message as string}`);
+					}
+				} else {
+					Globals.error(`${e.toString()}`);
 				}
 			} else {
 				Globals.error(`${e.toString()}`);
