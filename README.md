@@ -11,7 +11,6 @@
 5. [Proof of Authority](#proof-of-authority)
 6. [Developers](#developers)
 
-
 ## Installation
 
 You can easily install `evmlc` with NPM
@@ -30,12 +29,11 @@ yarn global add evm-lite-cli
 
 There is a [Getting Started Document](docs/getting-started.md) available.
 
-
 ## Commands
 
 ### Flags
 
-The following global flags are available. 
+The following global flags are available.
 
 By default, all commands will output raw JSON or strings unless the `-f, --formatted` flag
 is provided.
@@ -90,7 +88,6 @@ $ evmlc config set -i
 ## Proof of Authority
 
 The Monet Hub using Proof of Authority with EVM-Lite and Babble. A [Proof of Authority Document](docs/proof-of-authority.md) is available.
-
 
 ## Developers
 
