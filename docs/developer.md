@@ -8,6 +8,12 @@ To begin with, you will need to install Node and NPM, which are bundled together
 
 This project has been built and tested with Node version `10.16.0`.
 
+You will need to clone the repo:
+```bash
+$ svn clone https://github.com/mosaicnetworks/evm-lite-cli.git
+```
+
+
 Firstly you will need to install dependencies using `npm` or `yarn`:
 
 ```bash
