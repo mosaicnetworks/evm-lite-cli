@@ -4,12 +4,13 @@
 
 ## Table of Contents
 
-1. [Installation](#Installation)
-2. [Development](#Development)
-3. [Commands](#Commands)
-4. [Data Directory](#Data-Directory)
-5. [Getting Started](docs/getting-started.md)
-6. [Proof of Authority](docs/proof-of-authority.md)
+1. [Installation](#installation)
+2. [Getting Started](#getting-started)
+3. [Commands](#commands)
+4. [Data Directory](#data-directory)
+5. [Proof of Authority](#proof-of-authority)
+6. [Developers](#developers)
+
 
 ## Installation
 
@@ -25,38 +26,16 @@ or with `yarn`
 yarn global add evm-lite-cli
 ```
 
-## Development
+## Getting Started
 
-To begin with, you will need to install Node and NPM, which are bundled together
-in the installation package from the [Node website](https://nodejs.org/en/).
+There is a [Getting Started Document](docs/getting-started.md) available.
 
-This project was built with Node version `10.16.0`.
-
-Firstly you will need to install dependencies
-
-```bash
-npm install
-```
-
-or with `yarn`
-
-```bash
-yarn install
-```
-
-This should also transpile typescript files into `dist/`.
-
-For development, it is advised to use
-
-```bash
-npm run i
-```
-
-to test the CLI. This is a wrapper script which runs the CLI directly from the source files.
-
-Alternatively you can run `npm link` and access the CLI through `evmlc` however any changes made to the source files needs to be transpiled before changes are seen.
 
 ## Commands
+
+### Flags
+
+The following global flags are available. 
 
 By default, all commands will output raw JSON or strings unless the `-f, --formatted` flag
 is provided.
@@ -107,3 +86,12 @@ $ evmlc config set -i
 ? Gas: 1000000000000
 ? Gas Price: 0
 ```
+
+## Proof of Authority
+
+The Monet Hub using Proof of Authority with EVM-Lite and Babble. A [Proof of Authority Document](docs/proof-of-authority.md) is available.
+
+
+## Developers
+
+Notes for developers are in a [developers document](docs/developer.md).
