@@ -33,11 +33,6 @@ There is a [Getting Started Document](docs/getting-started.md) available.
 
 ### Flags
 
-The following global flags are available.
-
-By default, all commands will output raw JSON or strings unless the `-f, --formatted` flag
-is provided.
-
 The global flag `-d, --datadir` specifies the directory where `keystore` and `config.toml` are stored unless overwritten by specific flags.
 
 _Note: that if this flag is not provided, it will default to `~/.evmlc`._

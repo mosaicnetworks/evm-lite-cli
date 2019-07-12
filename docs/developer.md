@@ -1,6 +1,6 @@
 # Developers
 
-This document describes the process for building a developer environment. These steps should only be required if you want to enhance / compile your own client. For all other users, the prebuild `npm` or `yarn` releases should suffice.
+This document describes the process of building a developer environment. These steps should only be required if you want to enhance/compile your own client. For all other users, the prebuild `npm` or `yarn` releases should suffice.
 
 ## Dependencies and Project Build
 
@@ -36,4 +36,4 @@ npm run i
 
 to test the CLI. This is a wrapper script which runs the CLI directly from the source files.
 
-Alternatively you can run `npm link` and access the CLI through `evmlc` however any changes made to the source files needs to be transpiled before changes are seen.
+Alternatively, you can run `npm link` and access the CLI through `evmlc` however any changes made to the source files needs to be transpiled before changes are seen.

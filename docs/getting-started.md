@@ -3,7 +3,7 @@
 We explain how to use `evmlc` against a single `evm-lite` node. We will walk
 through creating accounts, making transfers, and viewing account information.
 
-## 1) Run `evmlc` in interactive mode
+## 1. Run `evmlc` in interactive mode
 
 ```bash
 user:~$ evmlc i
@@ -21,7 +21,7 @@ user:~$ evmlc i
 evmlc$
 ```
 
-## 2) Create an account
+## 2. Create an account
 
 While still in interactive mode, type the command `accounts create` and select
 the default option for keystore and then type in a password to encrypt the account:
@@ -75,7 +75,7 @@ in another document.
 This is best explained in the
 [Ethereum Docs](http://ethdocs.org/en/latest/account-management.html):
 
-> Every account is defined by a pair of keys, a private key and public key.
+> Every account is defined by a pair of keys, a private key, and public key.
 > Accounts are indexed by their address which is derived from the public key by
 > taking the last 20 bytes. Every private key/address pair is encoded in a
 > keyfile. Keyfiles are JSON text files which you can open and view in any text
@@ -83,7 +83,7 @@ This is best explained in the
 > always encrypted, and it is encrypted with the password you enter when you
 > create the account.
 
-## 3) Start an `evm-lite` node and pre-allocate funds to our address
+## 3. Start an `evm-lite` node and pre-allocate funds to our address
 
 If you haven't done so yet, please install and familiarize yourself with
 [EVM-Lite](https://github.com/mosaicnetworks/evm-lite), our lightweight Ethereum
@@ -112,9 +112,9 @@ This booted the node and assigned a lot of coins to our account. By default,
 `evmlc` is configured to connect to `localhost:8080`, so the client and node are
 ready to talk.
 
-How many coins where assigned to the account? let's check!
+How many coins were assigned to the account? let's check!
 
-## 4) List accounts
+## 4. List accounts
 
 Back in the interactive `evmlc` session, type `accounts list -f`
 
@@ -131,7 +131,7 @@ evmlc$ accounts list -f
 The command went through the accounts in the keystore, connected to the node to
 retrieve the corresponding balance, and displayed it nicely on the screen.
 
-## 5) Create another account
+## 5. Create another account
 
 ```bash
 evmlc$ accounts create
@@ -145,7 +145,7 @@ evmlc$ accounts create
 
 This one has the address `988456018729c15a6914a2c5ba1a753f76ec36dc`
 
-## 6) Transfer coins from one account to another
+## 6. Transfer coins from one account to another
 
 Type `transfer` and follow the instructions to transfer coins from the first
 account to the second account.
@@ -189,7 +189,7 @@ encoded using the custom Ethereum scheme, RLP, and contain the following fields:
     One unit of gas corresponds to the execution of one atomic instruction, i.e., a
     computational step.
 
-## 7) Check accounts again
+## 7. Check accounts again
 
 ```bash
 evmlc$ accounts list -f
