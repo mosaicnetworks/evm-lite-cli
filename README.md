@@ -31,6 +31,10 @@ There is a [Getting Started Document](docs/getting-started.md) available.
 
 ## Commands
 
+### Documentation
+
+A list of all supported commands along with documentation can be found [here](docs/README.md).
+
 ### Flags
 
 The global flag `-d, --datadir` specifies the directory where `keystore` and `config.toml` are stored unless overwritten by specific flags.
