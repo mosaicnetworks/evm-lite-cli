@@ -2,12 +2,12 @@
 
 ## Table of Contents
 
-1. [Installation]()
-2. [Commands]()
+1. [Installation](installation.md)
+2. Commands
     - [`accounts create`](accounts-create.md)
     - [`accounts get`](accounts-get.md)
-    - [`accounts list`]()
-    - [`accounts update`]()
+    - [`accounts list`](accounts-list.md)
+    - [`accounts update`](accounts-update.md)
     - [`transfer`]()
     - [`config set`]()
     - [`config view`]()

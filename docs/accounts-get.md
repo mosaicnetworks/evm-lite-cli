@@ -6,6 +6,8 @@
 
 Fetches `balance`, `nonce` and `bytecode` of an account from a connected node.
 
+_*Requires a valid connection*_
+
 ## Usage
 
 ```bash
@@ -28,7 +30,7 @@ Fetches `balance`, `nonce` and `bytecode` of an account from a connected node.
 ## Example
 
 ```bash
-$ accounts get 0x702B0ad02a7a6056EB16A697A96d849c228F5fB4 --host 127.0.0.1 --port 8080
+$ evmlc accounts get 0x702B0ad02a7a6056EB16A697A96d849c228F5fB4 --host 127.0.0.1 --port 8080
 
 {"address":"0x702B0ad02a7a6056EB16A697A96d849c228F5fB4","balance":100,"nonce":0,"bytecode":""}
 ```
