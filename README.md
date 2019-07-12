@@ -7,6 +7,8 @@
 1. [Installation](#installation)
 2. [Getting Started](#getting-started)
 3. [Commands](#commands)
+    - [Documentation](#documentation)
+    - [Flags](#flags)
 4. [Data Directory](#data-directory)
 5. [Proof of Authority](#proof-of-authority)
 6. [Developers](#developers)
