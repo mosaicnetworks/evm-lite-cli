@@ -315,6 +315,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 	try {
 		receipt = await session.node.sendTransaction(transaction, decrypted);
 	} catch (e) {
+		console.log(e);
 		return Promise.reject(e.text || e.toString());
 	}
 

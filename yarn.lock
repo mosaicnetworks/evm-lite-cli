@@ -1376,47 +1376,47 @@ ethjs-unit@^0.1.6:
     bn.js "4.11.6"
     number-to-bn "1.7.0"
 
-evm-lite-core@1.0.0-alpha.10, evm-lite-core@^1.0.0-alpha.10:
-  version "1.0.0-alpha.10"
-  resolved "https://registry.yarnpkg.com/evm-lite-core/-/evm-lite-core-1.0.0-alpha.10.tgz#3d02ebd0d67e78582db6b552ab1dfd1a3fd8d636"
-  integrity sha512-/5TgvYqImBrvCyFYaWTuhLt4+7L17TibVuzHtRu2RV/zvDvqiQuhQwX2hNO8HzzQXoPTSJJBZvZn86j/4AXJAw==
+evm-lite-core@1.0.0-alpha.11, evm-lite-core@^1.0.0-alpha.11:
+  version "1.0.0-alpha.11"
+  resolved "https://registry.yarnpkg.com/evm-lite-core/-/evm-lite-core-1.0.0-alpha.11.tgz#2738d2212581e6ae134714258ce710dd8aba4cb9"
+  integrity sha512-zTVHZ8Wt4XAKztcAqc6IGGRaUOj+RzfTXcLo/uo6MB8HSfYLALA1FNVfbAyV0WLbLObcOg9G3iONKr5bDFhBKg==
   dependencies:
     ascii-table "^0.0.9"
     browserify-cipher "^1.0.1"
     crypto-random-hex "^1.0.0"
     eth-lib "^0.2.8"
-    evm-lite-utils "^1.0.0-alpha.10"
+    evm-lite-utils "^1.0.0-alpha.11"
     json-bigint "0.3.0"
     keccak256 "^1.0.0"
     randombytes "^2.1.0"
     scryptsy "^2.0.0"
     uuid "^3.3.2"
     web3 "0.20.6"
-    web3-eth-iban "^1.0.0-beta.46"
-    web3-utils "^1.0.0-beta.46"
+    web3-eth-iban "1.0.0-beta.46"
+    web3-utils "1.0.0-beta.46"
 
-evm-lite-datadir@1.0.0-alpha.10:
-  version "1.0.0-alpha.10"
-  resolved "https://registry.yarnpkg.com/evm-lite-datadir/-/evm-lite-datadir-1.0.0-alpha.10.tgz#9bf2bd2eb0f9f05fc5e25add47bc1e878810ced8"
-  integrity sha512-JSpm25wHjNt0KCloKSxff0lG1HyGIt3olWM/NpGnWAD9niPcsl1SNNWeRVW1ZoN8WtfWk0ZTrcZp9+9n/EdQMw==
+evm-lite-datadir@1.0.0-alpha.11:
+  version "1.0.0-alpha.11"
+  resolved "https://registry.yarnpkg.com/evm-lite-datadir/-/evm-lite-datadir-1.0.0-alpha.11.tgz#e1efdb219f12e31e80595521b195a9453504102c"
+  integrity sha512-I0yN2egshM0OnDs0GPcdvO34zERxthC3ZRQIub2mZc47aOxe2Ctuft1o4UQAaiWtkfNrKLkwvH+2o9W/nthZhg==
   dependencies:
-    evm-lite-core "^1.0.0-alpha.10"
-    evm-lite-keystore "^1.0.0-alpha.10"
-    evm-lite-utils "^1.0.0-alpha.10"
+    evm-lite-core "^1.0.0-alpha.11"
+    evm-lite-keystore "^1.0.0-alpha.11"
+    evm-lite-utils "^1.0.0-alpha.11"
     mkdirp "^0.5.1"
     toml "^3.0.0"
     tomlify-j0.4 "^3.0.0"
 
-evm-lite-keystore@1.0.0-alpha.10, evm-lite-keystore@^1.0.0-alpha.10:
-  version "1.0.0-alpha.10"
-  resolved "https://registry.yarnpkg.com/evm-lite-keystore/-/evm-lite-keystore-1.0.0-alpha.10.tgz#7d8b16f1a5c1228d5c84218f0de99a6d4ec3a5da"
-  integrity sha512-XI59B4lrKGLPmTFUHFCg9wTexEoQuNUsWu07oa1CvTyc/G2HGK0gjwuIvd271Yzu4ifXFNjnKdHO1WtoFiaKxw==
+evm-lite-keystore@1.0.0-alpha.11, evm-lite-keystore@^1.0.0-alpha.11:
+  version "1.0.0-alpha.11"
+  resolved "https://registry.yarnpkg.com/evm-lite-keystore/-/evm-lite-keystore-1.0.0-alpha.11.tgz#ac23cae4db8109b76de3e2ccf52fb0ce29a7bb3a"
+  integrity sha512-1yiDQJEcOBwq6mLuipllP2mVladZb3fImi99Kz8JbdBeiWdiuOn2WbCz3MjzHGevLQS0/wtrgXl/P/upfTTcuw==
   dependencies:
     browserify-cipher "^1.0.1"
     crypto-random-hex "^1.0.0"
     eth-lib "^0.2.8"
-    evm-lite-core "^1.0.0-alpha.10"
-    evm-lite-utils "^1.0.0-alpha.10"
+    evm-lite-core "^1.0.0-alpha.11"
+    evm-lite-utils "^1.0.0-alpha.11"
     json-bigint "0.3.0"
     keccak256 "^1.0.0"
     mkdirp "^0.5.1"
@@ -1424,10 +1424,10 @@ evm-lite-keystore@1.0.0-alpha.10, evm-lite-keystore@^1.0.0-alpha.10:
     scryptsy "^2.0.0"
     uuid "^3.3.2"
 
-evm-lite-utils@1.0.0-alpha.10, evm-lite-utils@^1.0.0-alpha.10:
-  version "1.0.0-alpha.10"
-  resolved "https://registry.yarnpkg.com/evm-lite-utils/-/evm-lite-utils-1.0.0-alpha.10.tgz#8e0520a198f67b9814ce8e0dcca3e4653c481f3b"
-  integrity sha512-5xGgPQ04Tx1+QrxsxlqJrcBlgrRLexmcupca/7GIElgpHpRPeAljd/KQJVpC6JW9V/DD07qfNNqAIJtYxp1XUw==
+evm-lite-utils@1.0.0-alpha.11, evm-lite-utils@^1.0.0-alpha.11:
+  version "1.0.0-alpha.11"
+  resolved "https://registry.yarnpkg.com/evm-lite-utils/-/evm-lite-utils-1.0.0-alpha.11.tgz#eff94cc45b31a970841adf87332f75afac03b07b"
+  integrity sha512-dyXNez9F/PiLrRc3S3cwAKCk7w1IifjrbGh/KhvIU3uKKz/Yeq4C9psoDf29epKj82T1IPZhJSiyIvClZ8WddQ==
   dependencies:
     mkdirp "^0.5.1"
 
@@ -3494,6 +3494,11 @@ randombytes@^2.1.0:
   dependencies:
     safe-buffer "^5.1.0"
 
+randomhex@0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/randomhex/-/randomhex-0.1.5.tgz#baceef982329091400f2a2912c6cd02f1094f585"
+  integrity sha1-us7vmCMpCRQA8qKRLGzQLxCU9YU=
+
 rc@^1.2.7:
   version "1.2.8"
   resolved "https://registry.yarnpkg.com/rc/-/rc-1.2.8.tgz#cd924bf5200a075b83c188cd6b9e211b7fc0d3ed"
@@ -4515,19 +4520,19 @@ walker@^1.0.7, walker@~1.0.5:
   dependencies:
     makeerror "1.0.x"
 
-web3-eth-iban@^1.0.0-beta.46:
-  version "1.0.0-beta.55"
-  resolved "https://registry.yarnpkg.com/web3-eth-iban/-/web3-eth-iban-1.0.0-beta.55.tgz#15146a69de21addc99e7dbfb2920555b1e729637"
-  integrity sha512-a2Fxsb5Mssa+jiXgjUdIzJipE0175IcQXJbZLpKft2+zeSJWNTbaa3PQD2vPPpIM4W789q06N+f9Zc0Fyls+1g==
+web3-eth-iban@1.0.0-beta.46:
+  version "1.0.0-beta.46"
+  resolved "https://registry.yarnpkg.com/web3-eth-iban/-/web3-eth-iban-1.0.0-beta.46.tgz#55ed759d99540bf71b698e132a4aadc89e879752"
+  integrity sha512-IM9VbznRaEs58n7mYbJcPviOLMAiiveqZT1jtlcJ/DbrvMkArV0Xf6n2OyFY+ak3ppddKVMIAGISxhky6r/7cg==
   dependencies:
     "@babel/runtime" "^7.3.1"
     bn.js "4.11.8"
-    web3-utils "1.0.0-beta.55"
+    web3-utils "1.0.0-beta.46"
 
-web3-utils@1.0.0-beta.55, web3-utils@^1.0.0-beta.46:
-  version "1.0.0-beta.55"
-  resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.0.0-beta.55.tgz#beb40926b7c04208b752d36a9bc959d27a04b308"
-  integrity sha512-ASWqUi8gtWK02Tp8ZtcoAbHenMpQXNvHrakgzvqTNNZn26wgpv+Q4mdPi0KOR6ZgHFL8R/9b5BBoUTglS1WPpg==
+web3-utils@1.0.0-beta.46:
+  version "1.0.0-beta.46"
+  resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.0.0-beta.46.tgz#9984dda27c9079b129e741cbb63b665ae0f9725c"
+  integrity sha512-mSz+NrAil2fDZkxTXHPntCclZ8DofMjv8Q+BYR0VAyzTzylpYNXAV0WDdxBp/sXgniWRZXZMF7OkQNWqhZ1J9g==
   dependencies:
     "@babel/runtime" "^7.3.1"
     "@types/bn.js" "^4.11.4"
@@ -4537,7 +4542,7 @@ web3-utils@1.0.0-beta.55, web3-utils@^1.0.0-beta.46:
     ethjs-unit "^0.1.6"
     lodash "^4.17.11"
     number-to-bn "1.7.0"
-    randombytes "^2.1.0"
+    randomhex "0.1.5"
     utf8 "2.1.1"
 
 web3@0.20.6:
