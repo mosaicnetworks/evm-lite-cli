@@ -26,8 +26,6 @@ or with `yarn`
 yarn install
 ```
 
-This should also transpile typescript files into `dist/`.
-
 For development, it is advised to use
 
 ```bash
@@ -37,3 +35,11 @@ npm run i
 to test the CLI. This is a wrapper script which runs the CLI directly from the source files.
 
 Alternatively, you can run `npm link` and access the CLI through `evmlc` however any changes made to the source files needs to be transpiled before changes are seen.
+
+To build this project run
+
+```bash
+npm run build
+```
+
+This will transpile `src` files into `dist` for use with `evmlc`.

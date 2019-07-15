@@ -1,4 +1,4 @@
-[Overview](README.md) / `config view`
+[Overview](README.md) / `config set`
 
 ---
 
@@ -28,7 +28,7 @@ Update config values.
 
 ## Example
 
-```bash
+```toml
 $ evmlc config set --gas 100100100
 
 [connection]
