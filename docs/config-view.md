@@ -23,7 +23,7 @@ View current configuration for `evmlc`.
 
 ## Example
 
-```bash
+```toml
 $ evmlc config view
 
 [connection]
