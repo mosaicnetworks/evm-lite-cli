@@ -4,12 +4,10 @@
 	"main": "index.js",
 	"license": "MIT",
 	"scripts": {
-		"prepublish": "tsc",
+		"prepublish": "npm run build",
 		"clean": "rm -rf node_modules && rm -rf dist/ && rm -rf package-lock.json",
 		"build": "tsc -p tsconfig.json",
 		"test": "jest",
-		"make:monet": "node --experimental-modules ./scripts/make-monet.mjs && npm link",
-		"make:evmlc": "node --experimental-modules ./scripts/make-evmlc.mjs && npm link",
 		"i": "ts-node src/index i --debug"
 	},
 	"dependencies": {
