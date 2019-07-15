@@ -128,21 +128,23 @@ export const execute = <Arguments extends VorpalArgs<GenericOptions>, T1, T2>(
 				`${message.charAt(0).toUpperCase() + message.slice(1)}`
 			);
 		} catch (e) {
-			// console.log(e);
-			if (e.error) {
+			let error: string =
+				'Critical Error. No stack trace' +
+				'Submit an issue at `https://github.com/mosaicnetworks/evm-lite-cli/issues`';
+
+			if (e && e.error) {
 				if (e.error.type && e.error.message) {
-					// console.log(e.error);
 					const type = e.error.type as string;
 
 					if (type.startsWith('@evmlc')) {
-						Globals.error(`${e.error.message as string}`);
+						error = e.error.message;
 					}
 				} else {
-					Globals.error(`${e.toString()}`);
+					error = e.toString();
 				}
-			} else {
-				Globals.error(`${e.toString()}`);
 			}
+
+			Globals.error(error);
 		}
 
 		resolve();

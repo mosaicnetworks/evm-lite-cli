@@ -1,4 +1,4 @@
-[Overview](README.md) / `config view`
+[Overview](README.md) / `config set`
 
 ---
 
