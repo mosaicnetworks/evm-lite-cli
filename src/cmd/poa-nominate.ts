@@ -297,6 +297,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	staging.debug(`Attempting to generate transaction...`);
 
+	// could be going wrong here.
 	const transaction = contract.methods.submitNominee(
 		{
 			from,
@@ -314,7 +315,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 	try {
 		receipt = await session.node.sendTransaction(transaction, decrypted);
 	} catch (e) {
-		return Promise.reject(e.text);
+		return Promise.reject(e.text || e.toString());
 	}
 
 	if (!receipt.logs.length) {
