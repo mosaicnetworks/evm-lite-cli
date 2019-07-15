@@ -39,5 +39,5 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 	);
 	staging.debug(`evm-lite-datadir: ${pkg.dependencies[`evm-lite-datadir`]}`);
 
-	return Promise.resolve(staging.success(`${pkg.version}`));
+	return Promise.resolve(staging.success(`${pkg.version}-dev`));
 };
