@@ -65,6 +65,7 @@ export const stage: StagingFunction<
 	const host = args.options.host || session.config.state.connection.host;
 	const port = args.options.port || session.config.state.connection.port;
 
+	const interactive = session.interactive;
 	const formatted = args.options.formatted || false;
 
 	staging.debug(`Attempting to connect: ${host}:${port}`);
@@ -108,7 +109,7 @@ export const stage: StagingFunction<
 	}
 
 	const nomineeCount = response.toNumber();
-	staging.debug(`Nominee Count: ` + response);
+	staging.debug(`Nominee Count: ${response}`);
 
 	const nominees: NomineeEntry[] = [];
 
@@ -185,7 +186,7 @@ export const stage: StagingFunction<
 		nominees.push(nominee);
 	}
 
-	if (!formatted) {
+	if (!formatted && !interactive) {
 		return Promise.resolve(staging.success(nominees));
 	}
 

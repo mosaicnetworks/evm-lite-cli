@@ -65,6 +65,7 @@ export const stage: StagingFunction<
 	const host = args.options.host || session.config.state.connection.host;
 	const port = args.options.port || session.config.state.connection.port;
 
+	const interactive = session.interactive;
 	const formatted = args.options.formatted || false;
 
 	staging.debug(`Attempting to connect: ${host}:${port}`);
@@ -108,6 +109,8 @@ export const stage: StagingFunction<
 	}
 
 	const whitelistCount = response.toNumber();
+	staging.debug(`Whitelist Count: ${response}`);
+
 	const whitelist: WhitelistEntry[] = [];
 
 	staging.debug(`Attempting to fetch whitelist details...`);
@@ -159,7 +162,7 @@ export const stage: StagingFunction<
 		whitelist.push(whitelistEntry);
 	}
 
-	if (!formatted) {
+	if (!formatted && !interactive) {
 		return Promise.resolve(staging.success(whitelist));
 	}
 

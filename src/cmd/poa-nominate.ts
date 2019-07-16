@@ -331,12 +331,49 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 
 	staging.debug(`Received transaction logs and parsing...`);
 
+	let monikerAnnouceEvent;
+	const monikerAnnouceEvents = receipt.logs.filter(
+		log => log.event === 'MonikerAnnounce'
+	);
+
 	const nomineeProposedEvent = receipt.logs.filter(
 		log => log.event === 'NomineeProposed'
 	)[0];
-	const monikerAnnouceEvent = receipt.logs.filter(
-		log => log.event === 'MonikerAnnounce'
-	)[0];
+
+	staging.debug(`Parsing 'MonikerAnnouce' events...`);
+	if (monikerAnnouceEvents.length > 1) {
+		try {
+			monikerAnnouceEvent = monikerAnnouceEvents.filter(event => {
+				const moniker = Globals.hexToString(
+					event.args._moniker
+				).toLowerCase();
+
+				if (moniker.trim() === args.options.moniker!.trim()) {
+					return event;
+				}
+			})[0];
+		} catch (e) {
+			return Promise.reject(
+				staging.error(
+					TRANSACTION.EMPTY_LOGS,
+					'No logs were returned matching the specified `moniker`.'
+				)
+			);
+		}
+	} else {
+		monikerAnnouceEvent = monikerAnnouceEvents[0];
+	}
+
+	staging.debug(`Preparing output...`);
+
+	if (!monikerAnnouceEvent) {
+		return Promise.reject(
+			staging.error(
+				TRANSACTION.EMPTY_LOGS,
+				'No logs were returned matching the specified `moniker`.'
+			)
+		);
+	}
 
 	const returnData = `You (${
 		nomineeProposedEvent.args._proposer

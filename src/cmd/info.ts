@@ -43,6 +43,7 @@ export const stage: StagingFunction<Arguments, ASCIITable, any> = async (
 
 	const status = await session.connect(args.options.host, args.options.port);
 
+	const interactive = session.interactive;
 	const formatted = args.options.formatted || false;
 
 	const host = args.options.host || session.config.state.connection.host;
@@ -69,7 +70,7 @@ export const stage: StagingFunction<Arguments, ASCIITable, any> = async (
 		return Promise.reject(staging.error(EVM_LITE, e.toString()));
 	}
 
-	if (!formatted) {
+	if (!formatted && !interactive) {
 		return Promise.resolve(staging.success(information));
 	}
 

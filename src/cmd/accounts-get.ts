@@ -131,7 +131,7 @@ export const stage: StagingFunction<
 		return Promise.reject(staging.error(EVM_LITE, e.text));
 	}
 
-	if (!formatted) {
+	if (!formatted && !interactive) {
 		return Promise.resolve(staging.success(account));
 	}
 
