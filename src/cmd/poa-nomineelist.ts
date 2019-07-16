@@ -108,7 +108,7 @@ export const stage: StagingFunction<
 	}
 
 	const nomineeCount = response.toNumber();
-	staging.debug(`Nominee Count is... ` + response);
+	staging.debug(`Nominee Count: ` + response);
 
 	const nominees: NomineeEntry[] = [];
 
