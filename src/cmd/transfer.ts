@@ -311,7 +311,15 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		args.options.gasprice
 	);
 
-	console.log(transaction);
+	let tx = {
+		from: transaction.from,
+		to: transaction.to,
+		value: transaction.value,
+		gas: transaction.gas,
+		gasPrice: transaction.gasPrice
+	};
+
+	console.log(tx);
 
 	if (interactive) {
 		const { send: s } = await inquirer.prompt<FourthAnswers>(fourth);
