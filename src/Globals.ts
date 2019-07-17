@@ -38,6 +38,6 @@ export default class Globals {
 			data += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
 		}
 
-		return data;
+		return data.replace(/\u0000/g, '');
 	}
 }

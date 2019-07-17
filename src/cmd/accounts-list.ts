@@ -59,6 +59,7 @@ export const stage: StagingFunction<
 
 	const status = await session.connect(args.options.host, args.options.port);
 
+	const interactive = session.interactive;
 	const remote = args.options.remote || false;
 	const formatted = args.options.formatted || false;
 
@@ -123,7 +124,7 @@ export const stage: StagingFunction<
 		}
 	}
 
-	if (!formatted) {
+	if (!formatted && !interactive) {
 		return Promise.resolve(staging.success(accounts));
 	}
 
