@@ -52,9 +52,14 @@ evmlc --datadir [path] interactive
 ## Data Directory
 
 The first time `evmlc` runs, and if no options are specified, it creates a
-special directory in a default location (`~/.evmlc` on Linux and Mac), where it
-stores any relevant information. In particular, this directory contains the
-following items:
+special directory in a default location, where it
+stores any relevant information.
+
+-   Windows: `~/AppData/Roaming/EVMLC`
+-   Mac OS: `~/Library/EVMLC`
+-   Linux: `~/.evmlc`
+
+In particular, this directory contains the following items:
 
 -   **wallet.toml**: where global options are specified. These values may be
     overwritten by CLI flags.

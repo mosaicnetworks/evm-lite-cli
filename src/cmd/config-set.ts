@@ -112,8 +112,15 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		},
 		defaults: {
 			from: args.options.from || config.defaults.from,
-			gas: args.options.gas || config.defaults.gas,
-			gasPrice: args.options.gasprice || config.defaults.gasPrice
+			gas:
+				args.options.gas !== undefined && args.options.gas >= 0
+					? args.options.gas
+					: config.defaults.gas,
+			gasPrice:
+				args.options.gasprice !== undefined &&
+				args.options.gasprice >= 0
+					? args.options.gasprice
+					: config.defaults.gasPrice
 		}
 	};
 
