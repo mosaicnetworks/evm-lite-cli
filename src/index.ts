@@ -1,4 +1,4 @@
-// classes
+// requirements
 export {
 	default as Staging,
 	execute,
@@ -8,8 +8,11 @@ export {
 } from './Staging';
 export { default as Session } from './Session';
 export { default as Globals } from './Globals';
+export { default as init } from './init';
 
 export { Schema as POAContractSchema } from './POA';
+
+// Commands
 
 // accounts
 export { default as accountsCreate } from './cmd/accounts-create';
