@@ -2,11 +2,11 @@ import ASCIITable from 'ascii-table';
 import Vorpal, { Command, Args } from 'vorpal';
 
 import Session from '../Session';
-import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
+import Staging, { execute, IStagingFunction, IOptions } from '../Staging';
 
 import { INVALID_CONNECTION, EVM_LITE } from '../errors/generals';
 
-interface Options extends GenericOptions {
+interface Options extends IOptions {
 	formatted?: boolean;
 	host?: string;
 	port?: number;
@@ -32,7 +32,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		);
 }
 
-export const stage: StagingFunction<Arguments, ASCIITable, any> = async (
+export const stage: IStagingFunction<Arguments, ASCIITable, any> = async (
 	args: Arguments,
 	session: Session
 ) => {

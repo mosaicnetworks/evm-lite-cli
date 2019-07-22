@@ -2,16 +2,17 @@ import ASCIITable from 'ascii-table';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
+import Utils from 'evm-lite-utils';
+
 import { Contract } from 'evm-lite-core';
 
 import Session from '../Session';
-import Globals from '../Globals';
-import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
+import Staging, { execute, IStagingFunction, IOptions } from '../Staging';
 
 import { Schema } from '../POA';
 import { EVM_LITE, INVALID_CONNECTION } from '../errors/generals';
 
-interface Options extends GenericOptions {
+interface Options extends IOptions {
 	formatted?: boolean;
 	host?: string;
 	port?: number;
@@ -50,7 +51,7 @@ interface Answers {
 	from: string;
 }
 
-export const stage: StagingFunction<
+export const stage: IStagingFunction<
 	Arguments,
 	ASCIITable,
 	WhitelistEntry[]
@@ -153,9 +154,7 @@ export const stage: StagingFunction<
 			return Promise.reject(staging.error(EVM_LITE, e.text));
 		}
 
-		whitelistEntry.moniker = Globals.hexToString(hex)
-			.trim()
-			.replace(/\u0000/g, '');
+		whitelistEntry.moniker = Utils.hexToString(hex);
 
 		staging.debug(`Moniker received: ${whitelistEntry.moniker}`);
 

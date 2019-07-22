@@ -1,11 +1,11 @@
 import Vorpal, { Command, Args } from 'vorpal';
 
 import Session from '../Session';
-import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
+import Staging, { execute, IStagingFunction, IOptions } from '../Staging';
 import inquirer = require('inquirer');
 import Globals from '../Globals';
 
-interface Options extends GenericOptions {
+interface Options extends IOptions {
 	interactive?: boolean;
 	host?: string;
 	port?: number;
@@ -51,7 +51,7 @@ interface Answers {
 	gasPrice: number;
 }
 
-export const stage: StagingFunction<Arguments, string, string> = async (
+export const stage: IStagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
 ) => {

@@ -11,15 +11,15 @@ import { Account } from 'evm-lite-core';
 import Session from '../Session';
 import Staging, {
 	execute,
-	StagingFunction,
-	GenericOptions,
-	StagedOutput
+	IStagingFunction,
+	IOptions,
+	IStagedOutput
 } from '../Staging';
 
 import { TRANSFER } from '../errors/accounts';
 import { INVALID_CONNECTION, KEYSTORE } from '../errors/generals';
 
-interface Options extends GenericOptions {
+interface Options extends IOptions {
 	interactive?: boolean;
 	host?: string;
 	port?: number;
@@ -81,9 +81,9 @@ interface FourthAnswers {
 	send: boolean;
 }
 
-export type Output = StagedOutput<Arguments, string, string>;
+export type Output = IStagedOutput<Arguments, string, string>;
 
-export const stage: StagingFunction<Arguments, string, string> = async (
+export const stage: IStagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
 ) => {

@@ -7,14 +7,13 @@ import Utils from 'evm-lite-utils';
 import { Contract } from 'evm-lite-core';
 
 import Session from '../Session';
-import Globals from '../Globals';
-import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
+import Staging, { execute, IStagingFunction, IOptions } from '../Staging';
 
 import { Schema } from '../POA';
 
 import { INVALID_CONNECTION, EVM_LITE } from '../errors/generals';
 
-interface Options extends GenericOptions {
+interface Options extends IOptions {
 	formatted?: boolean;
 	host?: string;
 	port?: number;
@@ -50,7 +49,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		);
 }
 
-export const stage: StagingFunction<
+export const stage: IStagingFunction<
 	Arguments,
 	ASCIITable,
 	NomineeEntry[]
@@ -155,9 +154,7 @@ export const stage: StagingFunction<
 			return Promise.reject(staging.error(EVM_LITE, e.text));
 		}
 
-		nominee.moniker = Globals.hexToString(hex)
-			.trim()
-			.replace(/\u0000/g, '');
+		nominee.moniker = Utils.hexToString(hex);
 
 		staging.debug(`Moniker received: ${nominee.moniker}`);
 

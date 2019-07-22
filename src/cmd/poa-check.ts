@@ -9,9 +9,9 @@ import { Contract, Transaction } from 'evm-lite-core';
 import Session from '../Session';
 import Staging, {
 	execute,
-	StagingFunction,
-	GenericOptions,
-	StagedOutput
+	IStagingFunction,
+	IOptions,
+	IStagedOutput
 } from '../Staging';
 
 import { Schema } from '../POA';
@@ -19,7 +19,7 @@ import { Schema } from '../POA';
 import { POA_CHECK } from '../errors/poa';
 import { INVALID_CONNECTION, EVM_LITE, TRANSACTION } from '../errors/generals';
 
-interface Options extends GenericOptions {
+interface Options extends IOptions {
 	interactive?: boolean;
 	host?: string;
 	port?: number;
@@ -53,9 +53,9 @@ interface Answers {
 	nominee: string;
 }
 
-export type Output = StagedOutput<Arguments, boolean, boolean>;
+export type Output = IStagedOutput<Arguments, boolean, boolean>;
 
-export const stage: StagingFunction<Arguments, boolean, boolean> = async (
+export const stage: IStagingFunction<Arguments, boolean, boolean> = async (
 	args: Arguments,
 	session: Session
 ) => {

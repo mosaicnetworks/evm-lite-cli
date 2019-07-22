@@ -7,14 +7,14 @@ import { V3JSONKeyStore } from 'evm-lite-keystore';
 import Session from '../Session';
 import Staging, {
 	execute,
-	StagingFunction,
-	GenericOptions,
-	StagedOutput
+	IStagingFunction,
+	IOptions,
+	IStagedOutput
 } from '../Staging';
 
-import { EVM_LITE, INVALID_CONNECTION, KEYSTORE } from '../errors/generals';
+import { EVM_LITE, KEYSTORE } from '../errors/generals';
 
-interface Options extends GenericOptions {
+interface Options extends IOptions {
 	formatted?: boolean;
 	remote?: boolean;
 	host?: string;
@@ -33,7 +33,6 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.alias('a l')
 		.description(description)
 		.option('-f, --formatted', 'format output')
-		.option('-r, --remote', 'list remote accounts')
 		.option('-d, --debug', 'show debug output')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
@@ -45,9 +44,9 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		);
 }
 
-export type Output = StagedOutput<Arguments, ASCIITable, BaseAccount[]>;
+export type Output = IStagedOutput<Arguments, ASCIITable, BaseAccount[]>;
 
-export const stage: StagingFunction<
+export const stage: IStagingFunction<
 	Arguments,
 	ASCIITable,
 	BaseAccount[]
@@ -60,36 +59,10 @@ export const stage: StagingFunction<
 	const status = await session.connect(args.options.host, args.options.port);
 
 	const interactive = session.interactive;
-	const remote = args.options.remote || false;
 	const formatted = args.options.formatted || false;
 
 	const host = args.options.host || session.config.state.connection.host;
 	const port = args.options.port || session.config.state.connection.port;
-
-	if (remote && !status) {
-		return Promise.reject(
-			staging.error(
-				INVALID_CONNECTION,
-				`A connection could be establised to ${host}:${port}.`
-			)
-		);
-	}
-
-	if (remote && status) {
-		staging.debug(`Successfully connected: ${host}:${port}`);
-
-		let accounts: BaseAccount[];
-
-		staging.debug(`Attempting to fetch remote accounts...`);
-
-		try {
-			accounts = await session.node.getAccounts();
-		} catch (e) {
-			return Promise.reject(staging.error(EVM_LITE, e.text));
-		}
-
-		return Promise.resolve(staging.success(accounts));
-	}
 
 	let keystores: V3JSONKeyStore[];
 

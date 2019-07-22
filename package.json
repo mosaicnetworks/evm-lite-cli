@@ -1,7 +1,8 @@
 {
 	"name": "evm-lite-cli",
-	"version": "1.0.0-alpha.13",
-	"main": "index.js",
+	"version": "1.0.0-alpha.17",
+	"main": "dist/index.js",
+	"typings": "dist/typings/index.d.ts",
 	"license": "MIT",
 	"scripts": {
 		"prepublish": "npm run build",
@@ -9,16 +10,16 @@
 		"build": "tsc -p tsconfig.json",
 		"build:watch": "npm run build --watch",
 		"test": "jest",
-		"i": "ts-node src/index i --debug"
+		"i": "ts-node src/cli i --debug"
 	},
 	"dependencies": {
 		"ascii-table": "^0.0.9",
 		"chalk": "^2.4.2",
 		"dotenv": "^8.0.0",
-		"evm-lite-core": "1.0.0-alpha.12",
-		"evm-lite-datadir": "1.0.0-alpha.13",
-		"evm-lite-keystore": "1.0.0-alpha.13",
-		"evm-lite-utils": "1.0.0-alpha.11",
+		"evm-lite-core": "1.0.0-alpha.15",
+		"evm-lite-datadir": "1.0.0-alpha.15",
+		"evm-lite-keystore": "1.0.0-alpha.15",
+		"evm-lite-utils": "1.0.0-alpha.15",
 		"figlet": "^1.2.3",
 		"inquirer": "^6.4.1",
 		"mkdirp": "^0.5.1",
@@ -40,6 +41,6 @@
 		"typescript": "^3.5.2"
 	},
 	"bin": {
-		"evmlc": "./dist/index.js"
+		"evmlc": "./dist/cli.js"
 	}
 }

@@ -41,7 +41,7 @@ A list of all supported commands along with documentation can be found [here](do
 
 ### Flags
 
-The global flag `-d, --datadir` specifies the directory where `keystore` and `config.toml` are stored unless overwritten by specific flags.
+The global flag `-d, --datadir` specifies the directory where `keystore` and `wallet.toml` are stored unless overwritten by specific flags.
 
 _Note: that if this flag is not provided, it will default to `~/.evmlc`._
 
@@ -56,13 +56,13 @@ special directory in a default location (`~/.evmlc` on Linux and Mac), where it
 stores any relevant information. In particular, this directory contains the
 following items:
 
--   **config.toml**: where global options are specified. These values may be
+-   **wallet.toml**: where global options are specified. These values may be
     overwritten by CLI flags.
 -   **keystore**: where all encrypted account keys are stored.
 
-### `config.toml`
+### `wallet.toml`
 
-Example config.toml:
+Example wallet.toml:
 
 ```toml
 [connection]

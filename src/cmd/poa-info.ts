@@ -1,11 +1,11 @@
 import Vorpal, { Command, Args } from 'vorpal';
 
 import Session from '../Session';
-import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
+import Staging, { execute, IStagingFunction, IOptions } from '../Staging';
 
 import { EVM_LITE, INVALID_CONNECTION } from '../errors/generals';
 
-interface Options extends GenericOptions {
+interface Options extends IOptions {
 	host?: string;
 	port?: number;
 }
@@ -29,7 +29,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.action((args: Arguments) => execute(stage, args, session));
 }
 
-export const stage: StagingFunction<Arguments, string, string> = async (
+export const stage: IStagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
 ) => {

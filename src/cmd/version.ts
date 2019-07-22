@@ -1,11 +1,11 @@
 import Vorpal, { Command, Args } from 'vorpal';
 
 import Session from '../Session';
-import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
+import Staging, { execute, IStagingFunction, IOptions } from '../Staging';
 
 const pkg = require('../../package.json');
 
-interface Options extends GenericOptions {
+interface Options extends IOptions {
 	value: any;
 }
 
@@ -27,7 +27,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.action((args: Arguments) => execute(stage, args, session));
 }
 
-export const stage: StagingFunction<Arguments, string, string> = async (
+export const stage: IStagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
 ) => {
@@ -39,5 +39,5 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 	);
 	staging.debug(`evm-lite-datadir: ${pkg.dependencies[`evm-lite-datadir`]}`);
 
-	return Promise.resolve(staging.success(`${pkg.version}-dev`));
+	return Promise.resolve(staging.success(`evm-lite-cli ${pkg.version}`));
 };

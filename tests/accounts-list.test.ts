@@ -8,31 +8,6 @@ import { Arguments, stage, Output } from '../src/cmd/accounts-list';
 import { INVALID_CONNECTION } from '../src/errors/generals';
 
 describe('accounts-list.ts', () => {
-	it('should error as invalid node conn details (remote)', async () => {
-		expect.assertions(3);
-
-		const args: Arguments = {
-			options: {
-				remote: true,
-				host: '127.0.0.1',
-				port: 3000
-			}
-		};
-
-		try {
-			await stage(args, session);
-		} catch (e) {
-			const output = e as Output;
-
-			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(3000);
-
-			if (output.error) {
-				expect(output.error.type).toBe(INVALID_CONNECTION);
-			}
-		}
-	});
-
 	it('should list accounts an array non formatted', async () => {
 		expect.assertions(4);
 

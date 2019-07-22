@@ -6,14 +6,14 @@ import Vorpal, { Command, Args } from 'vorpal';
 import Utils from 'evm-lite-utils';
 
 import { V3JSONKeyStore, Keystore } from 'evm-lite-keystore';
-import { Contract, Account, TransactionReceipt, EVMLC } from 'evm-lite-core';
+import { Contract, Account, TransactionReceipt } from 'evm-lite-core';
 
 import Session from '../Session';
 import Staging, {
 	execute,
-	StagingFunction,
-	GenericOptions,
-	StagedOutput
+	IStagingFunction,
+	IOptions,
+	IStagedOutput
 } from '../Staging';
 
 import { Schema } from '../POA';
@@ -25,7 +25,7 @@ import {
 } from '../errors/generals';
 import { POA_VOTE } from '../errors/poa';
 
-interface Options extends GenericOptions {
+interface Options extends IOptions {
 	interactive?: boolean;
 	verdict?: boolean;
 	from?: string;
@@ -39,10 +39,10 @@ export interface Arguments extends Args<Options> {
 	options: Options;
 }
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default function command(monet: Vorpal, session: Session): Command {
 	const description = 'Vote for an nominee currently in election';
 
-	return evmlc
+	return monet
 		.command('poa vote [address]')
 		.alias('p v')
 		.description(description)
@@ -68,9 +68,16 @@ interface Answers {
 	verdict: boolean;
 }
 
-export type Output = StagedOutput<Arguments, string, string>;
+interface NomineeEntry {
+	address: string;
+	moniker: string;
+	upVotes: number;
+	downVotes: number;
+}
 
-export const stage: StagingFunction<Arguments, string, string> = async (
+export type Output = IStagedOutput<Arguments, string, string>;
+
+export const stage: IStagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
 ) => {
@@ -91,7 +98,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		return Promise.reject(
 			staging.error(
 				INVALID_CONNECTION,
-				`A connection could be establised to ${host}:${port}`
+				`A connection could not be establised to ${host}:${port}`
 			)
 		);
 	}
@@ -128,6 +135,107 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		);
 	}
 
+	const contract = Contract.load<Schema>(poa.abi, poa.address);
+
+	staging.debug(`Attempting to generate nominee count transaction...`);
+
+	const tx = contract.methods.getNomineeCount({
+		gas: session.config.state.defaults.gas,
+		gasPrice: session.config.state.defaults.gasPrice
+	});
+
+	let response: any;
+
+	staging.debug(`Attempting to call nominee count transaction...`);
+
+	try {
+		response = await session.node.callTransaction(tx);
+	} catch (e) {
+		return Promise.reject(staging.error(EVM_LITE, e.text));
+	}
+
+	const nomineeCount = response.toNumber();
+	staging.debug(`Nominee Count: ${response}`);
+
+	const nominees: NomineeEntry[] = [];
+
+	staging.debug(`Attempting to fetch nominee details...`);
+
+	for (const i of Array.from(Array(nomineeCount).keys())) {
+		const nominee: NomineeEntry = {
+			address: '',
+			moniker: '',
+			upVotes: 0,
+			downVotes: 0
+		};
+
+		const tx = contract.methods.getNomineeAddressFromIdx(
+			{
+				gas: session.config.state.defaults.gas,
+				gasPrice: session.config.state.defaults.gasPrice
+			},
+			i
+		);
+
+		try {
+			nominee.address = await session.node.callTransaction(tx);
+		} catch (e) {
+			return Promise.reject(staging.error(EVM_LITE, e.text));
+		}
+
+		staging.debug(`Received nominee address: ${nominee.address}`);
+
+		const monikerTx = contract.methods.getMoniker(
+			{
+				gas: session.config.state.defaults.gas,
+				gasPrice: session.config.state.defaults.gasPrice
+			},
+			nominee.address
+		);
+
+		let hex: string;
+
+		try {
+			hex = await session.node.callTransaction(monikerTx);
+		} catch (e) {
+			return Promise.reject(staging.error(EVM_LITE, e.text));
+		}
+
+		nominee.moniker = Utils.hexToString(hex);
+
+		staging.debug(`Moniker received: ${nominee.moniker}`);
+
+		const votesTransaction = contract.methods.getCurrentNomineeVotes(
+			{
+				from: session.config.state.defaults.from,
+				gas: session.config.state.defaults.gas,
+				gasPrice: session.config.state.defaults.gasPrice
+			},
+			Utils.cleanAddress(nominee.address)
+		);
+
+		let votes: [string, string];
+
+		try {
+			votes = await session.node.callTransaction<[string, string]>(
+				votesTransaction
+			);
+		} catch (e) {
+			return Promise.reject(staging.error(EVM_LITE, e.text));
+		}
+
+		nominee.upVotes = parseInt(votes[0], 10);
+		nominee.downVotes = parseInt(votes[1], 10);
+
+		nominees.push(nominee);
+	}
+
+	if (!nominees.length) {
+		return Promise.reject(
+			staging.error(POA_VOTE.NO_NOMINEES, 'No nominees to vote.')
+		);
+	}
+
 	const questions: inquirer.Questions<Answers> = [
 		{
 			choices: keystores.map(keystore => keystore.address),
@@ -141,9 +249,10 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 			type: 'password'
 		},
 		{
+			choices: nominees.map(nominee => nominee.address),
 			message: 'Nominee: ',
 			name: 'address',
-			type: 'input'
+			type: 'list'
 		},
 		{
 			message: 'Verdict: ',
@@ -289,9 +398,7 @@ export const stage: StagingFunction<Arguments, string, string> = async (
 		);
 	}
 
-	const contract = Contract.load<Schema>(poa.abi, poa.address);
-
-	staging.debug(`Attempting to generate transaction...`);
+	staging.debug(`Attempting to generate vote transaction...`);
 
 	const transaction = contract.methods.castNomineeVote(
 		{
