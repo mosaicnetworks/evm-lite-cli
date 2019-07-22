@@ -2,54 +2,54 @@
 
 export const ACCOUNTS_CREATE = {
 	// Non-interactive
-	PWD_PATH_EMPTY: '@evmlc/accounts/create/PWD_PATH_EMPTY',
-	PWD_IS_DIR: '@evmlc/accounts/create/PWD_IS_DIR',
-	PWD_PATH_NOT_FOUND: '@evmlc/accounts/create/PWD_PATH_NOT_FOUND',
+	PWD_PATH_EMPTY: '@error/accounts/CREATE/PWD_PATH_EMPTY',
+	PWD_IS_DIR: '@error/accounts/CREATE/PWD_IS_DIR',
+	PWD_PATH_NOT_FOUND: '@error/accounts/CREATE/PWD_PATH_NOT_FOUND',
 
-	OUT_PATH_IS_NOT_DIR: '@evmlc/accounts/create/OUT_PATH_IS_NOT_DIR',
-	OUT_PATH_NOT_FOUND: '@evmlc/accounts/create/OUT_PATH_NOT_FOUND',
+	OUT_PATH_IS_NOT_DIR: '@error/accounts/CREATE/OUT_PATH_IS_NOT_DIR',
+	OUT_PATH_NOT_FOUND: '@error/accounts/CREATE/OUT_PATH_NOT_FOUND',
 
 	// Interactive
-	PASS_FIELDS_BLANK: '@evmlc/accounts/create/PASS_FIELDS_BLANK',
-	PASS_DO_NOT_MATCH: '@evmlc/accounts/create/PASS_DO_NOT_MATCH'
+	PASS_FIELDS_BLANK: '@error/accounts/CREATE/PASS_FIELDS_BLANK',
+	PASS_DO_NOT_MATCH: '@error/accounts/CREATE/PASS_DO_NOT_MATCH'
 };
 
 export const ACCOUNTS_GET = {
-	ADDRESS_EMPTY: '@evmlc/accounts/get/ADDRESS_EMPTY',
-	ADDRESS_INVALID_LENGTH: '@evmlc/accounts/get/ADDRESS_INVALID_LENGTH'
+	ADDRESS_EMPTY: '@error/accounts/GET/ADDRESS_EMPTY',
+	ADDRESS_INVALID_LENGTH: '@error/accounts/GET/ADDRESS_INVALID_LENGTH'
 };
 
 export const ACCOUNTS_UPDATE = {
 	// Non-interactive
-	ADDRESS_EMPTY: '@evmlc/accounts/update/ADDRESS_EMPTY',
-	ADDRESS_INVALID_LENGTH: '@evmlc/accounts/update/ADDRESS_INVALID_LENGTH',
+	ADDRESS_EMPTY: '@error/accounts/UPDATE/ADDRESS_EMPTY',
+	ADDRESS_INVALID_LENGTH: '@error/accounts/UPDATE/ADDRESS_INVALID_LENGTH',
 
-	OLD_PWD_NOT_FOUND: '@evmlc/accounts/update/OLD_PWD_NOT_FOUND',
-	OLD_PWD_IS_DIR: '@evmlc/accounts/update/OLD_PWD_IS_DIR',
-	OLD_PWD_EMPTY: '@evmlc/accounts/update/OLD_PWD_EMPTY',
+	OLD_PWD_NOT_FOUND: '@error/accounts/UPDATE/OLD_PWD_NOT_FOUND',
+	OLD_PWD_IS_DIR: '@error/accounts/UPDATE/OLD_PWD_IS_DIR',
+	OLD_PWD_EMPTY: '@error/accounts/UPDATE/OLD_PWD_EMPTY',
 
-	NEW_PWD_NOT_FOUND: '@evmlc/accounts/update/NEW_PWD_NOT_FOUND',
-	NEW_PWD_IS_DIR: '@evmlc/accounts/update/NEW_PWD_IS_DIR',
-	NEW_PWD_EMPTY: '@evmlc/accounts/update/NEW_PWD_EMPTY',
+	NEW_PWD_NOT_FOUND: '@error/accounts/UPDATE/NEW_PWD_NOT_FOUND',
+	NEW_PWD_IS_DIR: '@error/accounts/UPDATE/NEW_PWD_IS_DIR',
+	NEW_PWD_EMPTY: '@error/accounts/UPDATE/NEW_PWD_EMPTY',
 
-	SAME_OLD_NEW_PWD: '@evmlc/accounts/update/SAME_OLD_NEW_PWD',
+	SAME_OLD_NEW_PWD: '@error/accounts/UPDATE/SAME_OLD_NEW_PWD',
 
 	// Interactive
-	PASS_FIELDS_BLANK: '@evmlc/accounts/update/PASS_FIELDS_BLANK',
-	PASS_DO_NOT_MATCH: '@evmlc/accounts/update/PASS_DO_NOT_MATCH'
+	PASS_FIELDS_BLANK: '@error/accounts/UPDATE/PASS_FIELDS_BLANK',
+	PASS_DO_NOT_MATCH: '@error/accounts/UPDATE/PASS_DO_NOT_MATCH'
 };
 
 export const TRANSFER = {
-	FROM_EMPTY: '@evmlc/accounts/transfer/PASS_FIELDS_BLANK',
-	TO_VALUE_EMPTY: '@evmlc/accounts/transfer/PASS_FIELDS_BLANK',
+	FROM_EMPTY: '@error/accounts/TRANSFER/PASS_FIELDS_BLANK',
+	TO_VALUE_EMPTY: '@error/accounts/TRANSFER/PASS_FIELDS_BLANK',
 
-	PWD_PATH_EMPTY: '@evmlc/accounts/transfer/PWD_PATH_EMPTY',
-	PWD_IS_DIR: '@evmlc/accounts/transfer/PWD_IS_DIR',
-	PWD_PATH_NOT_FOUND: '@evmlc/accounts/transfer/PWD_PATH_NOT_FOUND'
+	PWD_PATH_EMPTY: '@error/accounts/TRANSFER/PWD_PATH_EMPTY',
+	PWD_IS_DIR: '@error/accounts/TRANSFER/PWD_IS_DIR',
+	PWD_PATH_NOT_FOUND: '@error/accounts/TRANSFER/PWD_PATH_NOT_FOUND'
 };
 
 export const ACCOUNTS_IMPORT = {
-	FILE_PATH_EMPTY: '@evmlc/accounts/import/FILE_PATH_EMPTY',
-	FILE_IS_DIR: '@evmlc/accounts/import/FILE_IS_DIR',
-	FILE_PATH_NOT_FOUND: '@evmlc/accounts/import/FILE_PATH_NOT_FOUND'
+	FILE_PATH_EMPTY: '@error/accounts/IMPORT/FILE_PATH_EMPTY',
+	FILE_IS_DIR: '@error/accounts/IMPORT/FILE_IS_DIR',
+	FILE_PATH_NOT_FOUND: '@error/accounts/IMPORT/FILE_PATH_NOT_FOUND'
 };

@@ -134,15 +134,13 @@ export const execute = <
 				`${message.charAt(0).toUpperCase() + message.slice(1)}`
 			);
 		} catch (e) {
-			let error: string =
-				'Critical Error. No stack trace' +
-				'Submit an issue at `https://github.com/mosaicnetworks/evm-lite-cli/issues`';
+			let error: string = 'Critical Error: No stack trace availiable';
 
 			if (e && e.error) {
 				if (e.error.type && e.error.message) {
 					const type = e.error.type as string;
 
-					if (type.startsWith('@evmlc')) {
+					if (type.startsWith('@error')) {
 						error = e.error.message;
 					}
 				} else {
