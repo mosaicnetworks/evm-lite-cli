@@ -10,15 +10,15 @@ import { V3JSONKeyStore, Keystore } from 'evm-lite-keystore';
 import Session from '../Session';
 import Staging, {
 	execute,
-	StagingFunction,
-	GenericOptions,
-	StagedOutput
+	IStagingFunction,
+	IOptions,
+	IStagedOutput
 } from '../Staging';
 
 import { ACCOUNTS_UPDATE } from '../errors/accounts';
 import { KEYSTORE } from '../errors/generals';
 
-interface Options extends GenericOptions {
+interface Options extends IOptions {
 	interactive?: boolean;
 	old?: string;
 	new?: string;
@@ -61,9 +61,9 @@ interface ThirdAnswers {
 	verifyPassphrase: string;
 }
 
-export type Output = StagedOutput<Arguments, V3JSONKeyStore, V3JSONKeyStore>;
+export type Output = IStagedOutput<Arguments, V3JSONKeyStore, V3JSONKeyStore>;
 
-export const stage: StagingFunction<
+export const stage: IStagingFunction<
 	Arguments,
 	V3JSONKeyStore,
 	V3JSONKeyStore

@@ -6,6 +6,6 @@ module.exports = {
 	},
 	testMatch: ['<rootDir>/tests/**/*.test.ts'],
 	// testRegex: '(/tests/.*|(\\.|/)(test))\\.(tsx?)$',
-	moduleFileExtensions: ['ts', 'js'],
+	moduleFileExtensions: ['ts', 'js', 'node'],
 	testPathIgnorePatterns: ['<rootDir>/node_modules']
 };

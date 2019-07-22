@@ -25,20 +25,20 @@ import { Args as VorpalArgs } from 'vorpal';
 import Globals from './Globals';
 import Session from './Session';
 
-export interface GenericOptions {
+export interface IOptions {
 	debug?: boolean;
 }
 
 // The output type of the staging command
-export interface StagedOutput<
-	Arguments extends VorpalArgs<GenericOptions>,
-	FormattedType,
-	NormalType
+export interface IStagedOutput<
+	TArguments extends VorpalArgs<IOptions>,
+	TFormatted,
+	TNormal
 > {
-	args: Arguments;
+	args: TArguments;
 
 	// The generic output for all three types of commands
-	display?: FormattedType | NormalType;
+	display?: TFormatted | TNormal;
 
 	// The generic error format
 	error?: {
@@ -48,29 +48,29 @@ export interface StagedOutput<
 }
 
 // Staging function signature
-export type StagingFunction<
-	Arguments extends VorpalArgs<GenericOptions>,
-	FormattedType,
-	NormalType
+export type IStagingFunction<
+	TArguments extends VorpalArgs<IOptions>,
+	TFormatted,
+	TNormal
 > = (
-	args: Arguments,
+	args: TArguments,
 	session: Session
-) => Promise<StagedOutput<Arguments, FormattedType, NormalType>>;
+) => Promise<IStagedOutput<TArguments, TFormatted, TNormal>>;
 
 export default class Staging<
-	Arguments extends VorpalArgs<GenericOptions>,
-	T1,
-	T2
+	TArguments extends VorpalArgs<IOptions>,
+	TFormatted,
+	TNormal
 > {
 	constructor(
 		public readonly debugMode: boolean,
-		public readonly args: Arguments
+		public readonly args: TArguments
 	) {}
 
 	public error(
 		type: string,
 		message: string
-	): StagedOutput<Arguments, T1, T2> {
+	): IStagedOutput<TArguments, TFormatted, TNormal> {
 		return {
 			args: this.args,
 			error: {
@@ -80,7 +80,9 @@ export default class Staging<
 		};
 	}
 
-	public success(message: T1 | T2): StagedOutput<Arguments, T1, T2> {
+	public success(
+		message: TFormatted | TNormal
+	): IStagedOutput<TArguments, TFormatted, TNormal> {
 		return {
 			args: this.args,
 			display: message
@@ -95,9 +97,13 @@ export default class Staging<
 }
 
 // Parse output to display
-export const execute = <Arguments extends VorpalArgs<GenericOptions>, T1, T2>(
-	fn: StagingFunction<Arguments, T1, T2>,
-	args: Arguments,
+export const execute = <
+	TArguments extends VorpalArgs<IOptions>,
+	TFormatted,
+	TNormal
+>(
+	fn: IStagingFunction<TArguments, TFormatted, TNormal>,
+	args: TArguments,
 	session: Session
 ): Promise<void> => {
 	return new Promise<void>(async resolve => {
@@ -130,13 +136,13 @@ export const execute = <Arguments extends VorpalArgs<GenericOptions>, T1, T2>(
 		} catch (e) {
 			let error: string =
 				'Critical Error. No stack trace' +
-				'Submit an issue at `https://github.com/mosaicnetworks/evm-lite-cli/issues`';
+				'Submit an issue at `https://github.com/mosaicnetworks/monet/issues`';
 
 			if (e && e.error) {
 				if (e.error.type && e.error.message) {
 					const type = e.error.type as string;
 
-					if (type.startsWith('@evmlc')) {
+					if (type.startsWith('@monet')) {
 						error = e.error.message;
 					}
 				} else {

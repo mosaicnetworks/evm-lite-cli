@@ -29,3 +29,12 @@ export const POA_VOTE = {
 	PWD_IS_DIR: '@evmlc/POA/VOTE/PWD_IS_DIR',
 	PWD_PATH_NOT_FOUND: '@evmlc/POA/VOTE/PWD_PATH_NOT_FOUND'
 };
+
+export const POA_INIT = {
+	ADDRESS_EMPTY: '@evmlc/POA/init/ADDRESS_EMPTY',
+	ADDRESS_INVALID_LENGTH: '@evmlc/POA/init/ADDRESS_INVALID_LENGTH',
+
+	PWD_PATH_EMPTY: '@evmlc/POA/init/PWD_PATH_EMPTY',
+	PWD_IS_DIR: '@evmlc/POA/init/PWD_IS_DIR',
+	PWD_PATH_NOT_FOUND: '@evmlc/POA/init/PWD_PATH_NOT_FOUND'
+};

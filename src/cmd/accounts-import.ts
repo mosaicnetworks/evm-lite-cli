@@ -11,15 +11,15 @@ import { V3JSONKeyStore } from 'evm-lite-keystore';
 import Session from '../Session';
 import Staging, {
 	execute,
-	StagingFunction,
-	GenericOptions,
-	StagedOutput
+	IStagingFunction,
+	IOptions,
+	IStagedOutput
 } from '../Staging';
 
 import { ACCOUNTS_IMPORT } from '../errors/accounts';
 import { ConfigurationSchema } from 'evm-lite-datadir';
 
-interface Options extends GenericOptions {
+interface Options extends IOptions {
 	interactive?: boolean;
 	default?: boolean;
 	file?: string;
@@ -54,9 +54,9 @@ interface Answers {
 	makeDefault: boolean;
 }
 
-export type Output = StagedOutput<Arguments, V3JSONKeyStore, V3JSONKeyStore>;
+export type Output = IStagedOutput<Arguments, V3JSONKeyStore, V3JSONKeyStore>;
 
-export const stage: StagingFunction<
+export const stage: IStagingFunction<
 	Arguments,
 	V3JSONKeyStore,
 	V3JSONKeyStore

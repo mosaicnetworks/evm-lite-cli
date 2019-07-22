@@ -10,15 +10,15 @@ import { BaseAccount } from 'evm-lite-core';
 import Session from '../Session';
 import Staging, {
 	execute,
-	StagingFunction,
-	GenericOptions,
-	StagedOutput
+	IStagingFunction,
+	IOptions,
+	IStagedOutput
 } from '../Staging';
 
 import { ACCOUNTS_GET } from '../errors/accounts';
 import { INVALID_CONNECTION, EVM_LITE } from '../errors/generals';
 
-interface Options extends GenericOptions {
+interface Options extends IOptions {
 	formatted?: boolean;
 	interactive?: boolean;
 	host?: string;
@@ -54,9 +54,9 @@ interface Answers {
 	address: string;
 }
 
-export type Output = StagedOutput<Arguments, ASCIITable, BaseAccount>;
+export type Output = IStagedOutput<Arguments, ASCIITable, BaseAccount>;
 
-export const stage: StagingFunction<
+export const stage: IStagingFunction<
 	Arguments,
 	ASCIITable,
 	BaseAccount

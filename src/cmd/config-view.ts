@@ -1,9 +1,9 @@
 import Vorpal, { Command, Args } from 'vorpal';
 
 import Session from '../Session';
-import Staging, { execute, StagingFunction, GenericOptions } from '../Staging';
+import Staging, { execute, IStagingFunction, IOptions } from '../Staging';
 
-interface Options extends GenericOptions {}
+interface Options extends IOptions {}
 
 export interface Arguments extends Args<Options> {
 	options: Options;
@@ -22,7 +22,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		);
 }
 
-export const stage: StagingFunction<Arguments, string, string> = async (
+export const stage: IStagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
 ) => {

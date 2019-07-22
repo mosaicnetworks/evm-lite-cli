@@ -15,7 +15,7 @@ $ evmlc i
 
  Mode:        Interactive
  Data Dir:    /Users/danu/.evmlc
- Config File: /Users/danu/.evmlc/config.toml
+ Config File: /Users/danu/.evmlc/wallet.toml
  Keystore:    /Users/danu/.evmlc/keystore
 
 
