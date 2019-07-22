@@ -1394,10 +1394,10 @@ evm-lite-core@1.0.0-alpha.15, evm-lite-core@^1.0.0-alpha.15:
     web3-eth-iban "1.0.0-beta.46"
     web3-utils "1.0.0-beta.46"
 
-evm-lite-datadir@1.0.0-alpha.15:
-  version "1.0.0-alpha.15"
-  resolved "https://registry.yarnpkg.com/evm-lite-datadir/-/evm-lite-datadir-1.0.0-alpha.15.tgz#d2ae63930ef57f39a7930263c48f626f45693c77"
-  integrity sha512-oTg0tzoQVEyM2BH/ENIyVuz25KO17OvAk7KP6ZWTDmj0K8ICT4+QWOclO/Ks6oqX3tha8Vv127e0iS51xKRB5w==
+evm-lite-datadir@1.0.0-alpha.16:
+  version "1.0.0-alpha.16"
+  resolved "https://registry.yarnpkg.com/evm-lite-datadir/-/evm-lite-datadir-1.0.0-alpha.16.tgz#4e5bc1c0b4c0f66916ce3f87f0c2733ceed83f4d"
+  integrity sha512-j6mfncEseE1UKmcxg5e4VVklHJwQPiIgNvFvFdyF5mslg87pgINAo5gvB0Y0CGT4JbFsiBBcLrdADmHzXAXiGA==
   dependencies:
     evm-lite-core "^1.0.0-alpha.15"
     evm-lite-keystore "^1.0.0-alpha.15"
