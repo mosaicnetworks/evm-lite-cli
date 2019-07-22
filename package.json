@@ -10,7 +10,7 @@
 		"build": "tsc -p tsconfig.json",
 		"build:watch": "npm run build --watch",
 		"test": "jest",
-		"i": "ts-node src/index i --debug"
+		"i": "ts-node src/cli i --debug"
 	},
 	"dependencies": {
 		"ascii-table": "^0.0.9",

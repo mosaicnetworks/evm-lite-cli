@@ -128,15 +128,9 @@ init()
 		var pkg = require('../package.json');
 
 		if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
-			let title = 'EVM-Lite CLI';
-
-			if (pkg.bin['monet'] || false) {
-				title = 'Monet CLI';
-			}
-
 			console.log(
 				chalk.bold(
-					figlet.textSync(title, {
+					figlet.textSync('EVM-Lite CLI', {
 						horizontalLayout: 'full'
 					})
 				)
@@ -163,14 +157,7 @@ init()
 			await cli.instance.exec('help');
 
 			cli.session.interactive = true;
-
-			let delimter = 'evmlc';
-
-			if (pkg.bin['monet'] || false) {
-				delimter = 'monet';
-			}
-
-			cli.instance.delimiter(`${delimter}$`).show();
+			cli.instance.delimiter(`evmlc$`).show();
 		} else {
 			const cmdClear = cli.instance.find('clear');
 
