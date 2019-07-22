@@ -9,7 +9,6 @@ import { V3JSONKeyStore, Keystore } from 'evm-lite-keystore';
 import { Contract, Account, TransactionReceipt } from 'evm-lite-core';
 
 import Session from '../Session';
-import Globals from '../Globals';
 import Staging, {
 	execute,
 	IStagingFunction,
@@ -202,9 +201,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			return Promise.reject(staging.error(EVM_LITE, e.text));
 		}
 
-		nominee.moniker = Globals.hexToString(hex)
-			.trim()
-			.replace(/\u0000/g, '');
+		nominee.moniker = Utils.hexToString(hex);
 
 		staging.debug(`Moniker received: ${nominee.moniker}`);
 

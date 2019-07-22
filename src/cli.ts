@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import Globals from './Globals';
+import { osDataDir } from 'evm-lite-datadir';
 
 // Accounts
 import accountsCreate from './cmd/accounts-create';
@@ -33,7 +33,7 @@ import init from './init';
 
 const name = 'EVM-Lite CLI';
 const delimiter = 'evmlc';
-const datadir = Globals.evmlcDir;
+const datadir = osDataDir('EVMLC');
 const commands = [
 	// accounts
 	accountsCreate,

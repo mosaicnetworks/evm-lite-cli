@@ -9,7 +9,6 @@ import { V3JSONKeyStore, Keystore } from 'evm-lite-keystore';
 import { Contract, Account, TransactionReceipt } from 'evm-lite-core';
 
 import Session from '../Session';
-import Globals from '../Globals';
 import Staging, {
 	execute,
 	IStagingFunction,
@@ -344,7 +343,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	if (monikerAnnouceEvents.length > 1) {
 		try {
 			monikerAnnouceEvent = monikerAnnouceEvents.filter(event => {
-				const moniker = Globals.hexToString(
+				const moniker = Utils.hexToString(
 					event.args._moniker
 				).toLowerCase();
 
@@ -377,7 +376,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	const returnData = `You (${
 		nomineeProposedEvent.args._proposer
-	}) nominated '${Globals.hexToString(monikerAnnouceEvent.args._moniker)}' (${
+	}) nominated '${Utils.hexToString(monikerAnnouceEvent.args._moniker)}' (${
 		nomineeProposedEvent.args._nominee
 	})`;
 

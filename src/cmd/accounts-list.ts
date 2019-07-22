@@ -12,7 +12,7 @@ import Staging, {
 	IStagedOutput
 } from '../Staging';
 
-import { EVM_LITE, INVALID_CONNECTION, KEYSTORE } from '../errors/generals';
+import { EVM_LITE, KEYSTORE } from '../errors/generals';
 
 interface Options extends IOptions {
 	formatted?: boolean;

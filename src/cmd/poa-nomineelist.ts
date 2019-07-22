@@ -7,7 +7,6 @@ import Utils from 'evm-lite-utils';
 import { Contract } from 'evm-lite-core';
 
 import Session from '../Session';
-import Globals from '../Globals';
 import Staging, { execute, IStagingFunction, IOptions } from '../Staging';
 
 import { Schema } from '../POA';
@@ -155,9 +154,7 @@ export const stage: IStagingFunction<
 			return Promise.reject(staging.error(EVM_LITE, e.text));
 		}
 
-		nominee.moniker = Globals.hexToString(hex)
-			.trim()
-			.replace(/\u0000/g, '');
+		nominee.moniker = Utils.hexToString(hex);
 
 		staging.debug(`Moniker received: ${nominee.moniker}`);
 
