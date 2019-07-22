@@ -233,6 +233,12 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		nominees.push(nominee);
 	}
 
+	if (!nominees.length) {
+		return Promise.reject(
+			staging.error(POA_VOTE.NO_NOMINEES, 'No nominees to vote.')
+		);
+	}
+
 	const questions: inquirer.Questions<Answers> = [
 		{
 			choices: keystores.map(keystore => keystore.address),

@@ -136,13 +136,13 @@ export const execute = <
 		} catch (e) {
 			let error: string =
 				'Critical Error. No stack trace' +
-				'Submit an issue at `https://github.com/mosaicnetworks/monet/issues`';
+				'Submit an issue at `https://github.com/mosaicnetworks/evm-lite-cli/issues`';
 
 			if (e && e.error) {
 				if (e.error.type && e.error.message) {
 					const type = e.error.type as string;
 
-					if (type.startsWith('@monet')) {
+					if (type.startsWith('@evmlc')) {
 						error = e.error.message;
 					}
 				} else {
