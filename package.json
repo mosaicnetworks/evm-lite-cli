@@ -1,6 +1,6 @@
 {
 	"name": "evm-lite-cli",
-	"version": "1.0.0-alpha.19",
+	"version": "1.0.0-alpha.20",
 	"main": "dist/index.js",
 	"typings": "dist/typings/index.d.ts",
 	"license": "MIT",
@@ -17,7 +17,7 @@
 		"chalk": "^2.4.2",
 		"dotenv": "^8.0.0",
 		"evm-lite-core": "1.0.0-alpha.15",
-		"evm-lite-datadir": "1.0.0-alpha.16",
+		"evm-lite-datadir": "1.0.0-alpha.13",
 		"evm-lite-keystore": "1.0.0-alpha.15",
 		"evm-lite-utils": "1.0.0-alpha.15",
 		"figlet": "^1.2.3",
