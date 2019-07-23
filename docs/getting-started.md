@@ -15,7 +15,7 @@ user:~$ evmlc i
 
  Mode:        Interactive
  Data Dir:    [...]/.evmlc
- Config File: [...]/.evmlc/wallet.toml
+ Config File: [...]/.evmlc/config.toml
  Keystore:    [...]/.evmlc/keystore
 
 evmlc$
