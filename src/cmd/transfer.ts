@@ -6,7 +6,7 @@ import Vorpal, { Command, Args } from 'vorpal';
 import Utils from 'evm-lite-utils';
 
 import { V3JSONKeyStore, Keystore } from 'evm-lite-keystore';
-import { Account } from 'evm-lite-core';
+import { Account, TransactionReceipt } from 'evm-lite-core';
 
 import Session from '../Session';
 import Staging, {
@@ -333,11 +333,15 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	staging.debug(`Attempting to send transaction...`);
 
+	let receipt: TransactionReceipt;
+
 	try {
-		await session.node.sendTransaction(transaction, decrypted);
+		receipt = await session.node.sendTransaction(transaction, decrypted);
 	} catch (e) {
 		return Promise.reject(e.text);
 	}
+
+	staging.debug(JSON.stringify(receipt));
 
 	return Promise.resolve(
 		staging.success('Transaction submitted successfully.')

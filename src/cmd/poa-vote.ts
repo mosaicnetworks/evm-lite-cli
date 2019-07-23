@@ -420,6 +420,8 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		return Promise.reject(staging.error(EVM_LITE, e.text));
 	}
 
+	staging.debug(JSON.stringify(receipt));
+
 	if (!receipt.logs.length) {
 		return Promise.reject(
 			staging.error(

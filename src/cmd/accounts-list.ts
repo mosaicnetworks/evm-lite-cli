@@ -56,6 +56,8 @@ export const stage: IStagingFunction<
 		args
 	);
 
+	staging.debug(`Checking connection to node...`);
+
 	const status = await session.connect(args.options.host, args.options.port);
 
 	const interactive = session.interactive;
@@ -80,6 +82,10 @@ export const stage: IStagingFunction<
 		nonce: 0,
 		bytecode: ''
 	}));
+
+	if (!accounts.length) {
+		return Promise.resolve(staging.success([]));
+	}
 
 	if (status) {
 		staging.debug(`Successfully connected: ${host}:${port}`);

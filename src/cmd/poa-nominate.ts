@@ -318,6 +318,8 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		return Promise.reject(e.text || e.toString());
 	}
 
+	staging.debug(JSON.stringify(receipt));
+
 	if (!receipt.logs.length) {
 		return Promise.reject(
 			staging.error(

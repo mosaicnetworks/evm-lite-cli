@@ -268,9 +268,10 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	try {
 		receipt = await session.node.sendTransaction(transaction, decrypted);
 	} catch (e) {
-		console.log(e);
 		return Promise.reject(staging.error(EVM_LITE, e.text));
 	}
+
+	staging.debug(JSON.stringify(receipt));
 
 	return Promise.resolve(
 		staging.success('Initialized PoA contract with initial whitelist.')
