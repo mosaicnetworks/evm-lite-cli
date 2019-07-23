@@ -1,5 +1,7 @@
 # EVM-Lite CLI
 
+## _**Requires development version of `evm-lite-datadir`!**_
+
 [![npm version](https://badge.fury.io/js/evm-lite-cli.svg)](https://badge.fury.io/js/evm-lite-cli)
 
 A Command Line Interface to interact with [EVM-Lite](https://github.com/mosaicnetworks/evm-lite#readme) or [Monet](https://github.com/mosaicnetworks/monetd#readme) nodes.

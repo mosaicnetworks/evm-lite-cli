@@ -13,10 +13,10 @@ export default class Session {
 	public node: EVMLC = new EVMLC('localhost', 8080);
 	public directory: DataDirectory<Keystore>;
 
-	constructor(path: string) {
+	constructor(path: string, configName: string) {
 		const keystore = new Keystore(nodepath.join(path, 'keystore'));
 
-		this.directory = new DataDirectory(path);
+		this.directory = new DataDirectory(path, configName);
 		this.directory.setKeystore(keystore);
 	}
 
