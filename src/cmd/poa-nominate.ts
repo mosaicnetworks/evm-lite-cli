@@ -325,7 +325,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			staging.error(
 				TRANSACTION.EMPTY_LOGS,
 				'No logs were returned. ' +
-					'Possibly due to lack of `gas` or you might not be whitelisted.'
+					'Possibly due to lack of `gas` or may not be whitelisted.'
 			)
 		);
 	}

@@ -268,10 +268,22 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	try {
 		receipt = await session.node.sendTransaction(transaction, decrypted);
 	} catch (e) {
-		return Promise.reject(staging.error(EVM_LITE, e.text));
+		const err = typeof e === 'object' ? e.text : e.toString().trim();
+
+		return Promise.reject(staging.error(EVM_LITE, err));
 	}
 
 	staging.debug(JSON.stringify(receipt));
+
+	if (!receipt.logs.length) {
+		return Promise.reject(
+			staging.error(
+				TRANSACTION.EMPTY_LOGS,
+				'No logs were returned. ' +
+					'Possibly due to lack of `gas` or may not be whitelisted.'
+			)
+		);
+	}
 
 	return Promise.resolve(
 		staging.success('Initialized PoA contract with initial whitelist.')
