@@ -110,6 +110,10 @@ export const stage: IStagingFunction<
 	const nomineeCount = response.toNumber();
 	staging.debug(`Nominee Count: ${response}`);
 
+	if (!nomineeCount) {
+		return Promise.resolve(staging.success([]));
+	}
+
 	const nominees: NomineeEntry[] = [];
 
 	staging.debug(`Attempting to fetch nominee details...`);

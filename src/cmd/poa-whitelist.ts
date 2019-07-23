@@ -112,6 +112,10 @@ export const stage: IStagingFunction<
 	const whitelistCount = response.toNumber();
 	staging.debug(`Whitelist Count: ${response}`);
 
+	if (!whitelistCount) {
+		return Promise.resolve(staging.success([]));
+	}
+
 	const whitelist: WhitelistEntry[] = [];
 
 	staging.debug(`Attempting to fetch whitelist details...`);
