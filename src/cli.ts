@@ -1,5 +1,9 @@
 #!/usr/bin/env node
-import { osDataDir } from 'evm-lite-datadir';
+
+// bump `evm-lite-datadir` to `v1.0.0-alpha-16`
+// import { osDataDir } from 'evm-lite-datadir';
+
+import * as path from 'path';
 
 // Accounts
 import accountsCreate from './cmd/accounts-create';
@@ -30,6 +34,31 @@ import version from './cmd/version';
 import test from './cmd/test';
 
 import init from './init';
+
+export function osDataDir(dir: string): string {
+	const os = require('os')
+		.type()
+		.toLowerCase();
+
+	switch (os) {
+		case 'windows_nt':
+			return path.join(
+				require('os').homedir(),
+				'AppData',
+				'Roaming',
+				dir.toUpperCase()
+			);
+		case 'darwin':
+			return path.join(
+				require('os').homedir(),
+				'Library',
+				dir.toUpperCase()
+			);
+
+		default:
+			return path.join(require('os').homedir(), `.${dir.toLowerCase()}`);
+	}
+}
 
 const name = 'EVM-Lite CLI';
 const delimiter = 'evmlc';
