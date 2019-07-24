@@ -81,7 +81,7 @@ export default async function init(params: IInit, commands: CommandFunction[]) {
 
 		const cmdInteractive = cli.find('interactive');
 		if (cmdInteractive) {
-			cmdInteractive.hidden();
+			cmdInteractive.remove();
 		}
 
 		await cli.exec('help');
@@ -90,9 +90,14 @@ export default async function init(params: IInit, commands: CommandFunction[]) {
 		cli.delimiter(`${params.delimiter}$`).show();
 	} else {
 		const cmdClear = cli.find('clear');
+		const cmdDebug = cli.find('debug');
 
 		if (cmdClear) {
-			cmdClear.hidden();
+			cmdClear.remove();
+		}
+
+		if (cmdDebug) {
+			cmdDebug.remove();
 		}
 
 		cli.parse(process.argv);

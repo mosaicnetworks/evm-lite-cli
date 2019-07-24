@@ -27,6 +27,7 @@ import poaInit from './cmd/poa-init';
 
 // Misc
 import clear from './cmd/clear';
+import debug from './cmd/debug';
 import interactive from './cmd/interactive';
 import transfer from './cmd/transfer';
 import info from './cmd/info';
@@ -94,6 +95,7 @@ const commands = [
 	info,
 	test,
 	version,
+	debug,
 	transfer
 ];
 

@@ -262,6 +262,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	}
 
 	let receipt: TransactionReceipt;
+	staging.debug(JSON.stringify(transaction));
 
 	staging.debug(`Attempting to send transaction...`);
 
