@@ -26,7 +26,6 @@ import poaVote from './cmd/poa-vote';
 import poaInit from './cmd/poa-init';
 
 // Misc
-import debug from './cmd/debug';
 import transfer from './cmd/transfer';
 import info from './cmd/info';
 import version from './cmd/version';
@@ -91,7 +90,6 @@ const commands = [
 	info,
 	test,
 	version,
-	debug,
 	transfer
 ];
 

@@ -52,8 +52,7 @@ export default async function init(params: IInit, commands: CommandFunction[]) {
 	const session = new Session(dataDirPath, params.config);
 
 	if (!process.argv[2]) {
-		console.log('\n  A Command Line Interface to interact with EVM-Lite.');
-		console.log(`\n  Current Data Directory: ` + session.directory.path);
+		console.log(`\n  Data Directory: ${session.directory.path}`);
 
 		process.argv[2] = 'help';
 	}
