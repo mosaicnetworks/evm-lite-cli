@@ -1,6 +1,6 @@
 # EVM-Lite CLI
 
-## _**Requires development version of `evm-lite-datadir`!**_
+> _**Requires development version of `evm-lite-datadir`!**_
 
 [![npm version](https://badge.fury.io/js/evm-lite-cli.svg)](https://badge.fury.io/js/evm-lite-cli)
 
