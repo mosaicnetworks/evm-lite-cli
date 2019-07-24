@@ -9,6 +9,11 @@ import chalk from 'chalk';
 import Session from './Session';
 import Globals from './Globals';
 
+// default commands
+import interactive from './cmd/interactive';
+import debug from './cmd/debug';
+import clear from './cmd/clear';
+
 export type CommandFunction = (evmlc: Vorpal, session: Session) => Command;
 
 export interface IInit {
@@ -23,6 +28,8 @@ export interface IInit {
 }
 
 export default async function init(params: IInit, commands: CommandFunction[]) {
+	commands.push(interactive, debug, clear);
+
 	if (!Utils.exists(params.datadir)) {
 		mkdir.sync(params.datadir);
 	}

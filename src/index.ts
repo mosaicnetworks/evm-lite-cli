@@ -35,7 +35,5 @@ export { default as poaVote } from './cmd/poa-vote';
 export { default as poaInit } from './cmd/poa-init';
 
 // other
-export { default as clear } from './cmd/clear';
-export { default as interactive } from './cmd/interactive';
 export { default as transfer } from './cmd/transfer';
 export { default as info } from './cmd/info';
