@@ -5,18 +5,17 @@ import Vorpal, { Command, Args } from 'vorpal';
 
 import Utils from 'evm-lite-utils';
 
-import { V3JSONKeyStore, Keystore } from 'evm-lite-keystore';
+import { V3JSONKeyStore } from 'evm-lite-keystore';
 
 import Session from '../Session';
-import Staging, {
+import Frames, {
 	execute,
 	IStagingFunction,
 	IOptions,
 	IStagedOutput
-} from '../Staging';
+} from '../frames';
 
 import { ACCOUNTS_UPDATE } from '../errors/accounts';
-import { KEYSTORE } from '../errors/generals';
 
 interface Options extends IOptions {
 	interactive?: boolean;
@@ -26,7 +25,6 @@ interface Options extends IOptions {
 
 export interface Arguments extends Args<Options> {
 	address?: string;
-	options: Options;
 }
 
 export default function command(evmlc: Vorpal, session: Session): Command {
@@ -68,34 +66,21 @@ export const stage: IStagingFunction<
 	V3JSONKeyStore,
 	V3JSONKeyStore
 > = async (args: Arguments, session: Session) => {
-	const staging = new Staging<Arguments, V3JSONKeyStore, V3JSONKeyStore>(
-		session.debug,
+	const frames = new Frames<Arguments, V3JSONKeyStore, V3JSONKeyStore>(
+		session,
 		args
 	);
 
-	const interactive = args.options.interactive || session.interactive;
+	// prepare
+	const { options } = args;
 
-	let keystores: V3JSONKeyStore[];
+	const { success, debug, error } = frames.staging();
+	const { list, decrypt, get } = frames.keystore();
 
-	staging.debug(`Keystore path: ${session.keystore.path}`);
-	staging.debug(`Attempting to fetch accounts from keystore...`);
+	/** Command Execution */
+	const interactive = options.interactive || session.interactive;
 
-	try {
-		keystores = await session.keystore.list();
-	} catch (e) {
-		return Promise.reject(staging.error(KEYSTORE.LIST, e.toString()));
-	}
-
-	if (!keystores.length) {
-		return Promise.reject(
-			staging.error(
-				KEYSTORE.EMPTY,
-				`No accounts found in keystore directory ${
-					session.keystore.path
-				}`
-			)
-		);
-	}
+	let keystores = await list();
 
 	const first: inquirer.Questions<FirstAnswers> = [
 		{
@@ -132,12 +117,12 @@ export const stage: IStagingFunction<
 
 		args.address = address;
 
-		staging.debug(`Address received: ${address}`);
+		debug(`Address received: ${address}`);
 	}
 
 	if (!args.address) {
 		return Promise.reject(
-			staging.error(ACCOUNTS_UPDATE.ADDRESS_EMPTY, 'No address provided.')
+			error(ACCOUNTS_UPDATE.ADDRESS_EMPTY, 'No address provided.')
 		);
 	}
 
@@ -145,98 +130,76 @@ export const stage: IStagingFunction<
 
 	if (args.address.length !== 40) {
 		return Promise.reject(
-			staging.error(
+			error(
 				ACCOUNTS_UPDATE.ADDRESS_INVALID_LENGTH,
 				'Address provided has an invalid length.'
 			)
 		);
 	}
 
-	staging.debug(`Address validated: ${args.address}`);
-	staging.debug(`Attempting to fetch keystore for address...`);
+	debug(`Address validated: ${args.address}`);
 
-	let keystore: V3JSONKeyStore;
-
-	try {
-		keystore = await session.keystore.get(args.address);
-	} catch (e) {
-		return Promise.reject(
-			staging.error(
-				KEYSTORE.FETCH,
-				`Could not locate keystore for address ${args.address} in ${
-					session.keystore.path
-				}`
-			)
-		);
-	}
+	let keyfile = await get(args.address);
 
 	let oldPassphrase: string = '';
 	let newPassphrase: string = '';
 
-	if (!args.options.old && interactive) {
+	if (!options.old && interactive) {
 		const { passphrase } = await inquirer.prompt<SecondAnswers>(second);
 
 		oldPassphrase = passphrase.trim();
 
-		staging.debug(`Old passphrase received: ${oldPassphrase}`);
+		debug(`Old passphrase received: ${oldPassphrase}`);
 	}
 
 	if (!oldPassphrase) {
-		staging.debug(`Old passphrase path: ${args.options.old || 'null'}`);
+		debug(`Old passphrase path: ${options.old || 'null'}`);
 
-		if (!args.options.old) {
+		if (!options.old) {
 			return Promise.reject(
-				staging.error(
+				error(
 					ACCOUNTS_UPDATE.OLD_PWD_EMPTY,
 					'Old passphrase file path not provided.'
 				)
 			);
 		}
 
-		if (!Utils.exists(args.options.old)) {
+		if (!Utils.exists(options.old)) {
 			return Promise.reject(
-				staging.error(
+				error(
 					ACCOUNTS_UPDATE.OLD_PWD_NOT_FOUND,
 					'Old passphrase file path provided does not exist.'
 				)
 			);
 		}
 
-		if (Utils.isDirectory(args.options.old)) {
+		if (Utils.isDirectory(options.old)) {
 			return Promise.reject(
-				staging.error(
+				error(
 					ACCOUNTS_UPDATE.OLD_PWD_IS_DIR,
 					'Old passphrase file path provided is a directory.'
 				)
 			);
 		}
 
-		oldPassphrase = fs.readFileSync(args.options.old, 'utf8').trim();
+		oldPassphrase = fs.readFileSync(options.old, 'utf8').trim();
 
-		staging.debug(`Old passphrase read successfully: ${oldPassphrase}`);
+		debug(`Old passphrase read successfully: ${oldPassphrase}`);
 	}
 
-	staging.debug(`Attempting to decrypt keyfile with passphrase...`);
+	await decrypt(keyfile, oldPassphrase);
 
-	try {
-		Keystore.decrypt(keystore, oldPassphrase);
-	} catch (e) {
-		return Promise.reject(staging.error(KEYSTORE.DECRYPTION, e.toString()));
-	}
-
-	if (!args.options.new && interactive) {
+	if (!options.new && interactive) {
 		const { passphrase, verifyPassphrase } = await inquirer.prompt<
 			ThirdAnswers
 		>(third);
 
-		staging.debug(`Passphrase received: ${passphrase || 'null'}`);
-		staging.debug(
-			`Verify passphrase received: ${verifyPassphrase || 'null'}`
-		);
+		debug(`Passphrase received: ${passphrase || 'null'}`);
+		debug(`Verify passphrase received: ${verifyPassphrase || 'null'}`);
 
 		if (!(passphrase && verifyPassphrase)) {
 			return Promise.reject(
-				staging.error(
+				error(
 					ACCOUNTS_UPDATE.PASS_FIELDS_BLANK,
 					'Fields cannot be blank.'
 				)
@@ -245,7 +208,7 @@ export const stage: IStagingFunction<
 
 		if (passphrase !== verifyPassphrase) {
 			return Promise.reject(
-				staging.error(
+				error(
 					ACCOUNTS_UPDATE.PASS_FIELDS_BLANK,
 					'Passphrases do not match.'
 				)
@@ -254,56 +217,54 @@ export const stage: IStagingFunction<
 
 		newPassphrase = passphrase.trim();
 
-		staging.debug(`New passphrase set: ${newPassphrase}`);
+		debug(`New passphrase set: ${newPassphrase}`);
 	}
 
 	if (!newPassphrase) {
-		staging.debug(
-			`New passphrase file path: ${args.options.new || 'null'}`
-		);
+		debug(`New passphrase file path: ${options.new || 'null'}`);
 
-		if (!args.options.new) {
+		if (!options.new) {
 			return Promise.reject(
-				staging.error(
+				error(
 					ACCOUNTS_UPDATE.NEW_PWD_EMPTY,
 					'New passphrase file path not provided.'
 				)
 			);
 		}
 
-		if (!Utils.exists(args.options.new)) {
+		if (!Utils.exists(options.new)) {
 			return Promise.reject(
-				staging.error(
+				error(
 					ACCOUNTS_UPDATE.NEW_PWD_NOT_FOUND,
 					'New passphrase file path provided does not exist.'
 				)
 			);
 		}
 
-		if (Utils.isDirectory(args.options.new)) {
+		if (Utils.isDirectory(options.new)) {
 			return Promise.reject(
-				staging.error(
+				error(
 					ACCOUNTS_UPDATE.NEW_PWD_IS_DIR,
 					'Old passphrase file path provided is a directory.'
 				)
 			);
 		}
 
-		newPassphrase = fs.readFileSync(args.options.new, 'utf8').trim();
+		newPassphrase = fs.readFileSync(options.new, 'utf8').trim();
 
-		staging.debug(`New passphrase read successfully: ${newPassphrase}`);
+		debug(`New passphrase read successfully: ${newPassphrase}`);
 	}
 
 	if (oldPassphrase === newPassphrase) {
 		return Promise.reject(
-			staging.error(
+			error(
 				ACCOUNTS_UPDATE.SAME_OLD_NEW_PWD,
 				'New passphrase cannot be the same as old.'
 			)
 		);
 	}
 
-	staging.debug(`Attempting to update passphrase for address...`);
+	debug(`Attempting to update passphrase for address...`);
 
 	const newKeystore = await session.keystore.update(
 		args.address,
@@ -311,5 +272,5 @@ export const stage: IStagingFunction<
 		newPassphrase
 	);
 
-	return Promise.resolve(staging.success(newKeystore));
+	return Promise.resolve(success(newKeystore));
 };

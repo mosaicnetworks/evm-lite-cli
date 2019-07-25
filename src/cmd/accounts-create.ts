@@ -8,12 +8,12 @@ import Utils from 'evm-lite-utils';
 import { V3JSONKeyStore } from 'evm-lite-keystore';
 
 import Session from '../Session';
-import Staging, {
+import Frames, {
 	execute,
 	IStagingFunction,
 	IOptions,
 	IStagedOutput
-} from '../Staging';
+} from '../frames';
 
 import { ACCOUNTS_CREATE } from '../errors/accounts';
 
@@ -24,9 +24,7 @@ interface Options extends IOptions {
 	out?: string;
 }
 
-export interface Arguments extends Args<Options> {
-	options: Options;
-}
+export interface Arguments extends Args<Options> {}
 
 export default function command(evmlc: Vorpal, session: Session): Command {
 	const description = 'Creates an encrypted keypair locally';
@@ -57,14 +55,21 @@ export const stage: IStagingFunction<
 	V3JSONKeyStore,
 	V3JSONKeyStore
 > = async (args: Arguments, session: Session) => {
-	const staging = new Staging<Arguments, V3JSONKeyStore, V3JSONKeyStore>(
-		session.debug,
+	const frames = new Frames<Arguments, V3JSONKeyStore, V3JSONKeyStore>(
+		session,
 		args
 	);
 
+	// args
+	const { options } = args;
+
+	// decontruct
+	const { success, error, debug } = frames.staging();
+
+	/** Command Execution */
 	let passphrase: string = '';
 
-	const interactive = args.options.interactive || session.interactive;
+	const interactive = options.interactive || session.interactive;
 	const questions: inquirer.Questions<Answers> = [
 		{
 			message: 'Passphrase: ',
@@ -81,14 +86,14 @@ export const stage: IStagingFunction<
 	if (interactive) {
 		const answers = await inquirer.prompt<Answers>(questions);
 
-		staging.debug(`Passphrase received: ${answers.passphrase || 'null'}`);
-		staging.debug(
+		debug(`Passphrase received: ${answers.passphrase || 'null'}`);
+		debug(
 			`Verify passphrase received: ${answers.verifyPassphrase || 'null'}`
 		);
 
 		if (!(answers.passphrase && answers.verifyPassphrase)) {
 			return Promise.reject(
-				staging.error(
+				error(
 					ACCOUNTS_CREATE.PASS_FIELDS_BLANK,
 					'Fields cannot be blank'
 				)
@@ -97,7 +102,7 @@ export const stage: IStagingFunction<
 
 		if (answers.passphrase !== answers.verifyPassphrase) {
 			return Promise.reject(
-				staging.error(
+				error(
 					ACCOUNTS_CREATE.PASS_DO_NOT_MATCH,
 					'Passphrases do not match'
 				)
@@ -106,78 +111,78 @@ export const stage: IStagingFunction<
 
 		passphrase = answers.passphrase.trim();
 
-		staging.debug(`Passphrase set: ${passphrase}`);
+		debug(`Passphrase set: ${passphrase}`);
 	}
 
 	if (!passphrase) {
-		staging.debug(`Passphrase file path: ${args.options.pwd || 'null'}`);
+		debug(`Passphrase file path: ${options.pwd || 'null'}`);
 
-		if (!args.options.pwd) {
+		if (!options.pwd) {
 			return Promise.reject(
-				staging.error(
+				error(
 					ACCOUNTS_CREATE.PWD_PATH_EMPTY,
 					'No passphrase file path provided'
 				)
 			);
 		}
 
-		if (!Utils.exists(args.options.pwd)) {
+		if (!Utils.exists(options.pwd)) {
 			return Promise.reject(
-				staging.error(
+				error(
 					ACCOUNTS_CREATE.PWD_PATH_NOT_FOUND,
 					'Passphrase file path provided does not exist.'
 				)
 			);
 		}
 
-		if (Utils.isDirectory(args.options.pwd)) {
+		if (Utils.isDirectory(options.pwd)) {
 			return Promise.reject(
-				staging.error(
+				error(
 					ACCOUNTS_CREATE.PWD_IS_DIR,
 					'passphrase file path provided is a directory.'
 				)
 			);
 		}
 
-		passphrase = fs.readFileSync(args.options.pwd, 'utf8').trim();
+		passphrase = fs.readFileSync(options.pwd, 'utf8').trim();
 
-		staging.debug(`Passphrase read successfully: ${passphrase}`);
+		debug(`Passphrase read successfully: ${passphrase}`);
 	}
 
-	if (args.options.out) {
-		staging.debug(`Output path: ${args.options.out || 'null'}`);
+	if (options.out) {
+		debug(`Output path: ${options.out || 'null'}`);
 
-		if (!Utils.exists(args.options.out)) {
+		if (!Utils.exists(options.out)) {
 			return Promise.reject(
-				staging.error(
+				error(
 					ACCOUNTS_CREATE.OUT_PATH_NOT_FOUND,
 					'Output path provided does not exist.'
 				)
 			);
 		}
 
-		if (!Utils.isDirectory(args.options.out)) {
+		if (!Utils.isDirectory(options.out)) {
 			return Promise.reject(
-				staging.error(
+				error(
 					ACCOUNTS_CREATE.OUT_PATH_IS_NOT_DIR,
 					'Output path provided is a not a directory.'
 				)
 			);
 		}
 
-		staging.debug(`Output path verified: ${args.options.out}`);
+		debug(`Output path verified: ${options.out}`);
 	}
 
-	staging.debug(`Attempting to create account...`);
+	debug(`Attempting to create account...`);
 
 	const account: V3JSONKeyStore = await session.keystore.create(
 		passphrase,
-		args.options.out
+		options.out
 	);
 
-	staging.debug(
+	debug(
 		`Account creation successful: ${Utils.cleanAddress(account.address)}`
 	);
 
-	return Promise.resolve(staging.success(account));
+	return Promise.resolve(success(account));
 };

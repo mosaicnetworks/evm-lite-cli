@@ -1,13 +1,11 @@
 import Vorpal, { Command, Args } from 'vorpal';
 
 import Session from '../Session';
-import Staging, { execute, IStagingFunction, IOptions } from '../Staging';
+import Frames, { execute, IStagingFunction, IOptions } from '../frames';
 
 interface Options extends IOptions {}
 
-export interface Arguments extends Args<Options> {
-	options: Options;
-}
+export interface Arguments extends Args<Options> {}
 
 export default function command(evmlc: Vorpal, session: Session): Command {
 	const description = 'Toggle debug mode';
@@ -26,11 +24,15 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
 ) => {
-	const staging = new Staging<Arguments, string, string>(session.debug, args);
+	const frames = new Frames<Arguments, string, string>(session, args);
 
+	// prepare
+	const { success } = frames.staging();
+
+	/** Command Execution */
 	session.debug = !session.debug;
 
 	return Promise.resolve(
-		staging.success(`Debug: ${session.debug ? 'Enabled' : 'Disabled'}`)
+		success(`Debug: ${session.debug ? 'Enabled' : 'Disabled'}`)
 	);
 };

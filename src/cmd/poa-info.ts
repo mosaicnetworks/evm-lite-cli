@@ -1,18 +1,16 @@
 import Vorpal, { Command, Args } from 'vorpal';
 
 import Session from '../Session';
-import Staging, { execute, IStagingFunction, IOptions } from '../Staging';
+import Frames, { execute, IStagingFunction, IOptions } from '../frames';
 
-import { EVM_LITE, INVALID_CONNECTION } from '../errors/generals';
+import { EVM_LITE } from '../errors/generals';
 
 interface Options extends IOptions {
 	host?: string;
 	port?: number;
 }
 
-export interface Arguments extends Args<Options> {
-	options: Options;
-}
+export interface Arguments extends Args<Options> {}
 
 export default function command(evmlc: Vorpal, session: Session): Command {
 	const description = 'Display Proof of Authority information';
@@ -33,33 +31,33 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
 ) => {
-	const staging = new Staging<Arguments, string, string>(session.debug, args);
+	const frames = new Frames<Arguments, string, string>(session, args);
 
-	const status = await session.connect(args.options.host, args.options.port);
+	// prepare
+	const { options } = args;
+	const { state } = session.config;
 
-	const host = args.options.host || session.config.state.connection.host;
-	const port = args.options.port || session.config.state.connection.port;
+	const { success, error, debug } = frames.staging();
+	const { connect } = frames.generics();
 
-	staging.debug(`Attempting to connect: ${host}:${port}`);
+	/** Command Execution */
+	const host = options.host || state.connection.host;
+	const port = options.port || state.connection.port;
 
-	if (!status) {
-		return Promise.reject(
-			staging.error(
-				INVALID_CONNECTION,
-				`A connection could be establised to ${host}:${port}`
-			)
-		);
-	}
+	await connect(
+		host,
+		port
+	);
 
 	let poa: { address: string; abi: any[] };
 
-	staging.debug(`Attempting to fetch PoA data...`);
+	debug(`Attempting to fetch PoA data...`);
 
 	try {
 		poa = await session.getPOAContract();
 	} catch (e) {
-		return Promise.reject(staging.error(EVM_LITE, e.toString()));
+		return Promise.reject(error(EVM_LITE, e.toString()));
 	}
 
-	return Promise.resolve(staging.success(`POA Address: ${poa.address}`));
+	return Promise.resolve(success(`POA Address: ${poa.address}`));
 };

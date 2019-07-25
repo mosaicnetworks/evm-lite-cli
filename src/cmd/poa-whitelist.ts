@@ -7,9 +7,8 @@ import Utils from 'evm-lite-utils';
 import { Contract } from 'evm-lite-core';
 
 import Session from '../Session';
-import Staging, { execute, IStagingFunction, IOptions } from '../Staging';
+import Frames, { execute, IStagingFunction, IOptions } from '../frames';
 
-import { Schema } from '../POA';
 import { EVM_LITE, INVALID_CONNECTION } from '../errors/generals';
 
 interface Options extends IOptions {
@@ -18,9 +17,7 @@ interface Options extends IOptions {
 	port?: number;
 }
 
-export interface Arguments extends Args<Options> {
-	options: Options;
-}
+export interface Arguments extends Args<Options> {}
 
 interface WhitelistEntry {
 	address: string;
@@ -56,69 +53,56 @@ export const stage: IStagingFunction<
 	ASCIITable,
 	WhitelistEntry[]
 > = async (args: Arguments, session: Session) => {
-	const staging = new Staging<Arguments, ASCIITable, WhitelistEntry[]>(
-		session.debug,
+	const frames = new Frames<Arguments, ASCIITable, WhitelistEntry[]>(
+		session,
 		args
 	);
 
-	const status = await session.connect(args.options.host, args.options.port);
+	// prepare
+	const { options } = args;
+	const { state } = session.config;
 
-	const host = args.options.host || session.config.state.connection.host;
-	const port = args.options.port || session.config.state.connection.port;
+	// generate success, error, debug handlers
+	const { debug, success, error } = frames.staging();
+
+	// generate frames
+	const { connect } = frames.generics();
+	const { contract: getContract } = frames.POA();
+	const { call } = frames.transaction();
+
+	/** Command Execution */
+	const host = options.host || state.connection.host;
+	const port = options.port || state.connection.port;
 
 	const interactive = session.interactive;
 	const formatted = args.options.formatted || false;
 
-	staging.debug(`Attempting to connect: ${host}:${port}`);
+	await connect(
+		host,
+		port
+	);
 
-	if (!status) {
-		return Promise.reject(
-			staging.error(
-				INVALID_CONNECTION,
-				`A connection could be establised to ${host}:${port}`
-			)
-		);
-	}
+	const contract = await getContract();
 
-	let poa: { address: string; abi: any[] };
-
-	staging.debug(`Attempting to fetch PoA data...`);
-
-	try {
-		poa = await session.getPOAContract();
-	} catch (e) {
-		return Promise.reject(staging.error(EVM_LITE, e.toString()));
-	}
-
-	const contract = Contract.load<Schema>(poa.abi, poa.address);
-
-	staging.debug(`Attempting to generate whitelist count transaction...`);
+	debug(`Attempting to generate whitelist count transaction...`);
 
 	const transaction = contract.methods.getWhiteListCount({
 		gas: session.config.state.defaults.gas,
 		gasPrice: session.config.state.defaults.gasPrice
 	});
 
-	let response: any;
-
-	staging.debug(`Attempting to call whitelist count transaction...`);
-
-	try {
-		response = await session.node.callTransaction(transaction);
-	} catch (e) {
-		return Promise.reject(staging.error(EVM_LITE, e.text));
-	}
-
+	const response: any = await call(transaction);
 	const whitelistCount = response.toNumber();
-	staging.debug(`Whitelist Count: ${response}`);
+
+	debug(`Whitelist Count: ${response}`);
 
 	if (!whitelistCount) {
-		return Promise.resolve(staging.success([]));
+		return Promise.resolve(success([]));
 	}
 
 	const whitelist: WhitelistEntry[] = [];
 
-	staging.debug(`Attempting to fetch whitelist details...`);
+	debug(`Attempting to fetch whitelist details...`);
 
 	for (const i of Array.from(Array(whitelistCount).keys())) {
 		const whitelistEntry: WhitelistEntry = {
@@ -134,13 +118,9 @@ export const stage: IStagingFunction<
 			i
 		);
 
-		try {
-			whitelistEntry.address = await session.node.callTransaction(tx);
-		} catch (e) {
-			return Promise.reject(staging.error(EVM_LITE, e.text));
-		}
+		whitelistEntry.address = await call(tx);
 
-		staging.debug(`Received whitelist address: ${whitelistEntry.address}`);
+		debug(`Received whitelist address: ${whitelistEntry.address}`);
 
 		const monikerTx = contract.methods.getMoniker(
 			{
@@ -150,26 +130,20 @@ export const stage: IStagingFunction<
 			whitelistEntry.address
 		);
 
-		let hex: string;
-
-		try {
-			hex = await session.node.callTransaction(monikerTx);
-		} catch (e) {
-			return Promise.reject(staging.error(EVM_LITE, e.text));
-		}
+		const hex = await call<string>(monikerTx);
 
 		whitelistEntry.moniker = Utils.hexToString(hex);
 
-		staging.debug(`Moniker received: ${whitelistEntry.moniker}`);
+		debug(`Moniker received: ${whitelistEntry.moniker}`);
 
 		whitelist.push(whitelistEntry);
 	}
 
 	if (!formatted && !interactive) {
-		return Promise.resolve(staging.success(whitelist));
+		return Promise.resolve(success(whitelist));
 	}
 
-	staging.debug(`Preparing formatted output...`);
+	debug(`Preparing formatted output...`);
 
 	const table = new ASCIITable().setHeading('Moniker', 'Address');
 
@@ -180,5 +154,5 @@ export const stage: IStagingFunction<
 		);
 	}
 
-	return Promise.resolve(staging.success(table));
+	return Promise.resolve(success(table));
 };

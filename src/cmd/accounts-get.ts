@@ -8,15 +8,15 @@ import Utils from 'evm-lite-utils';
 import { BaseAccount } from 'evm-lite-core';
 
 import Session from '../Session';
-import Staging, {
+import Frames, {
 	execute,
 	IStagingFunction,
 	IOptions,
 	IStagedOutput
-} from '../Staging';
+} from '../frames';
 
 import { ACCOUNTS_GET } from '../errors/accounts';
-import { INVALID_CONNECTION, EVM_LITE } from '../errors/generals';
+import { EVM_LITE } from '../errors/generals';
 
 interface Options extends IOptions {
 	formatted?: boolean;
@@ -27,7 +27,6 @@ interface Options extends IOptions {
 
 export interface Arguments extends Args<Options> {
 	address?: string;
-	options: Options;
 }
 
 export default function command(evmlc: Vorpal, session: Session): Command {
@@ -61,29 +60,29 @@ export const stage: IStagingFunction<
 	ASCIITable,
 	BaseAccount
 > = async (args: Arguments, session: Session) => {
-	const staging = new Staging<Arguments, ASCIITable, BaseAccount>(
-		session.debug,
+	const frames = new Frames<Arguments, ASCIITable, BaseAccount>(
+		session,
 		args
 	);
 
-	const status = await session.connect(args.options.host, args.options.port);
+	// prepare
+	const { options } = args;
+	const { state } = session.config;
+	const { success, error, debug } = frames.staging();
+	const { connect } = frames.generics();
 
-	const host = args.options.host || session.config.state.connection.host;
-	const port = args.options.port || session.config.state.connection.port;
+	/** Command Execution */
+	const host = options.host || state.connection.host;
+	const port = options.port || state.connection.port;
 
-	staging.debug(`Attempting to connect: ${host}:${port}`);
+	await connect(
+		host,
+		port
+	);
 
-	if (!status) {
-		return Promise.reject(
-			staging.error(
-				INVALID_CONNECTION,
-				`A connection could be establised to ${host}:${port}`
-			)
-		);
-	}
+	debug(`Successfully connected: ${host}:${port}`);
 
-	staging.debug(`Successfully connected: ${host}:${port}`);
-
+	/** Command Execution */
 	const formatted = args.options.formatted || false;
 	const interactive = args.options.interactive || session.interactive;
 	const questions: inquirer.Questions<Answers> = [
@@ -99,12 +98,12 @@ export const stage: IStagingFunction<
 
 		args.address = address;
 
-		staging.debug(`Address received: ${address}`);
+		debug(`Address received: ${address}`);
 	}
 
 	if (!args.address) {
 		return Promise.reject(
-			staging.error(ACCOUNTS_GET.ADDRESS_EMPTY, 'No address provided.')
+			error(ACCOUNTS_GET.ADDRESS_EMPTY, 'No address provided.')
 		);
 	}
 
@@ -112,30 +111,30 @@ export const stage: IStagingFunction<
 
 	if (args.address.length !== 40) {
 		return Promise.reject(
-			staging.error(
+			error(
 				ACCOUNTS_GET.ADDRESS_INVALID_LENGTH,
 				'Address has an invalid length.'
 			)
 		);
 	}
 
-	staging.debug(`Address validated: ${args.address}`);
+	debug(`Address validated: ${args.address}`);
 
 	let account: BaseAccount;
 
-	staging.debug(`Attempting to fetch account details...`);
+	debug(`Attempting to fetch account details...`);
 
 	try {
 		account = await session.node.getAccount(args.address);
 	} catch (e) {
-		return Promise.reject(staging.error(EVM_LITE, e.text));
+		return Promise.reject(error(EVM_LITE, e.text));
 	}
 
 	if (!formatted && !interactive) {
-		return Promise.resolve(staging.success(account));
+		return Promise.resolve(success(account));
 	}
 
-	staging.debug(`Preparing formatted output...`);
+	debug(`Preparing formatted output...`);
 
 	const table: ASCIITable = new ASCIITable().setHeading(
 		'Address',
@@ -151,5 +150,5 @@ export const stage: IStagingFunction<
 		account.bytecode
 	);
 
-	return Promise.resolve(staging.success(table));
+	return Promise.resolve(success(table));
 };

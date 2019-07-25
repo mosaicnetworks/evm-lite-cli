@@ -5,26 +5,16 @@ import Vorpal, { Command, Args } from 'vorpal';
 
 import Utils from 'evm-lite-utils';
 
-import { V3JSONKeyStore, Keystore } from 'evm-lite-keystore';
-import { Contract, Account, TransactionReceipt } from 'evm-lite-core';
-
 import Session from '../Session';
-import Staging, {
+import Frames, {
 	execute,
 	IStagingFunction,
 	IOptions,
 	IStagedOutput
-} from '../Staging';
-
-import { Schema } from '../POA';
+} from '../frames';
 
 import { POA_NOMINATE } from '../errors/poa';
-import {
-	EVM_LITE,
-	TRANSACTION,
-	INVALID_CONNECTION,
-	KEYSTORE
-} from '../errors/generals';
+import { TRANSACTION } from '../errors/generals';
 
 interface Options extends IOptions {
 	interactive?: boolean;
@@ -37,7 +27,6 @@ interface Options extends IOptions {
 
 export interface Arguments extends Args<Options> {
 	address?: string;
-	options: Options;
 }
 
 export default function command(evmlc: Vorpal, session: Session): Command {
@@ -75,63 +64,41 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
 ) => {
-	const staging = new Staging<Arguments, string, string>(session.debug, args);
+	const frames = new Frames<Arguments, string, string>(session, args);
 
+	// prepare
+	const { options } = args;
+	const { state } = session.config;
+
+	// generate success, error, debug handlers
+	const { debug, success, error } = frames.staging();
+
+	// generate frames
+	const { connect } = frames.generics();
+	const { send } = frames.transaction();
+	const { list, decrypt, get } = frames.keystore();
+	const { contract: getContract } = frames.POA();
+
+	/** Command Execution */
 	let passphrase: string = '';
 
-	const status = await session.connect(args.options.host, args.options.port);
-
-	const host = args.options.host || session.config.state.connection.host;
-	const port = args.options.port || session.config.state.connection.port;
+	const host = options.host || state.connection.host;
+	const port = options.port || state.connection.port;
 
 	const interactive = args.options.interactive || session.interactive;
 
-	staging.debug(`Attempting to connect: ${host}:${port}`);
+	await connect(
+		host,
+		port
+	);
 
-	if (!status) {
-		return Promise.reject(
-			staging.error(
-				INVALID_CONNECTION,
-				`A connection could be establised to ${host}:${port}`
-			)
-		);
-	}
+	const contract = await getContract();
 
-	let poa: { address: string; abi: any[] };
-
-	staging.debug(`Attempting to fetch PoA data...`);
-
-	try {
-		poa = await session.getPOAContract();
-	} catch (e) {
-		return Promise.reject(staging.error(EVM_LITE, e.toString()));
-	}
-
-	let keystores: V3JSONKeyStore[];
-
-	staging.debug(`Keystore path: ${session.keystore.path}`);
-	staging.debug(`Attempting to fetch accounts from keystore...`);
-
-	try {
-		keystores = await session.keystore.list();
-	} catch (e) {
-		return Promise.reject(staging.error(KEYSTORE.LIST, e.toString()));
-	}
-
-	if (!keystores.length) {
-		return Promise.reject(
-			staging.error(
-				KEYSTORE.EMPTY,
-				`No accounts found in keystore directory ${
-					session.keystore.path
-				}`
-			)
-		);
-	}
+	let keystore = await list();
 
 	const questions: inquirer.Questions<Answers> = [
 		{
-			choices: keystores.map(keystore => keystore.address),
+			choices: keystore.map(keyfile => keyfile.address),
 			message: 'From: ',
 			name: 'from',
 			type: 'list'
@@ -158,30 +125,30 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			Answers
 		>(questions);
 
-		staging.debug(`Moniker: ${moniker || 'null'}`);
-		staging.debug(`Nominee address: ${address || 'null'}`);
-		staging.debug(`From address: ${from || 'null'}`);
-		staging.debug(`Passphrase: ${p || 'null'}`);
+		debug(`Moniker: ${moniker || 'null'}`);
+		debug(`Nominee address: ${address || 'null'}`);
+		debug(`From address: ${from || 'null'}`);
+		debug(`Passphrase: ${p || 'null'}`);
 
 		args.address = Utils.trimHex(address);
-		args.options.from = from;
-		args.options.moniker = moniker;
+		options.from = from;
+		options.moniker = moniker;
 
 		passphrase = p;
 	}
 
 	if (!args.address) {
 		return Promise.reject(
-			staging.error(
+			error(
 				POA_NOMINATE.ADDRESS_EMPTY,
 				'No address provided to nominate.'
 			)
 		);
 	}
 
-	if (!args.options.moniker) {
+	if (!options.moniker) {
 		return Promise.reject(
-			staging.error(
+			error(
 				POA_NOMINATE.MONIKER_EMPTY,
 				'No moniker provided for nominee.'
 			)
@@ -192,22 +159,20 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	if (args.address.length !== 40) {
 		return Promise.reject(
-			staging.error(
+			error(
 				POA_NOMINATE.ADDRESS_INVALID_LENGTH,
 				'Address has an invalid length.'
 			)
 		);
 	}
 
-	staging.debug(`Nominee address validated: ${args.address}`);
+	debug(`Nominee address validated: ${args.address}`);
 
-	const from = Utils.trimHex(
-		args.options.from || session.config.state.defaults.from
-	);
+	const from = Utils.trimHex(options.from || state.defaults.from);
 
 	if (!from) {
 		return Promise.reject(
-			staging.error(
+			error(
 				POA_NOMINATE.FROM_EMPTY,
 				'No from address provided or set in config.'
 			)
@@ -216,85 +181,54 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	if (from.length !== 40) {
 		return Promise.reject(
-			staging.error(
+			error(
 				POA_NOMINATE.FROM_INVALID_LENGTH,
 				'`from` address has an invalid length.'
 			)
 		);
 	}
 
-	staging.debug(`From address validated: ${args.options.from}`);
+	debug(`From address validated: ${options.from}`);
 
 	if (!passphrase) {
-		staging.debug(`Passphrase path: ${args.options.pwd || 'null'}`);
+		debug(`Passphrase path: ${options.pwd || 'null'}`);
 
-		if (!args.options.pwd) {
+		if (!options.pwd) {
 			return Promise.reject(
-				staging.error(
+				error(
 					POA_NOMINATE.PWD_PATH_EMPTY,
 					'Passphrase file path not provided.'
 				)
 			);
 		}
 
-		if (!Utils.exists(args.options.pwd)) {
+		if (!Utils.exists(options.pwd)) {
 			return Promise.reject(
-				staging.error(
+				error(
 					POA_NOMINATE.PWD_PATH_NOT_FOUND,
 					'Passphrase file path provided does not exist.'
 				)
 			);
 		}
 
-		if (Utils.isDirectory(args.options.pwd)) {
+		if (Utils.isDirectory(options.pwd)) {
 			return Promise.reject(
-				staging.error(
+				error(
 					POA_NOMINATE.PWD_IS_DIR,
 					'Passphrase file path provided is a directory.'
 				)
 			);
 		}
 
-		passphrase = fs.readFileSync(args.options.pwd, 'utf8').trim();
+		passphrase = fs.readFileSync(options.pwd, 'utf8').trim();
 
-		staging.debug(`Passphrase read successfully: ${passphrase}`);
+		debug(`Passphrase read successfully: ${passphrase}`);
 	}
 
-	let keystore: V3JSONKeyStore;
+	const keyfile = await get(from);
+	const decrypted = await decrypt(keyfile, passphrase);
 
-	staging.debug(`Attempting to fetch keystore for address...`);
-
-	try {
-		keystore = await session.keystore.get(from);
-	} catch (e) {
-		return Promise.reject(
-			staging.error(
-				KEYSTORE.FETCH,
-				`Could not locate keystore for address ${args.address} in ${
-					session.keystore.path
-				}`
-			)
-		);
-	}
-
-	let decrypted: Account;
-
-	staging.debug(`Attempting to decrypt keyfile with passphrase...`);
-
-	try {
-		decrypted = Keystore.decrypt(keystore, passphrase);
-	} catch (err) {
-		return Promise.reject(
-			staging.error(
-				KEYSTORE.DECRYPTION,
-				'Cannot decrypt account with passphrase provided.'
-			)
-		);
-	}
-
-	const contract = Contract.load<Schema>(poa.abi, poa.address);
-
-	staging.debug(`Attempting to generate transaction...`);
+	debug(`Attempting to generate transaction...`);
 
 	// could be going wrong here.
 	const transaction = contract.methods.submitNominee(
@@ -304,25 +238,14 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			gasPrice: session.config.state.defaults.gasPrice
 		},
 		Utils.cleanAddress(args.address),
-		args.options.moniker
+		options.moniker
 	);
 
-	let receipt: TransactionReceipt;
-
-	staging.debug(`Attempting to send transaction...`);
-
-	try {
-		receipt = await session.node.sendTransaction(transaction, decrypted);
-	} catch (e) {
-		console.log(e);
-		return Promise.reject(e.text || e.toString());
-	}
-
-	staging.debug(JSON.stringify(receipt));
+	let receipt = await send(transaction, decrypted);
 
 	if (!receipt.logs.length) {
 		return Promise.reject(
-			staging.error(
+			error(
 				TRANSACTION.EMPTY_LOGS,
 				'No logs were returned. ' +
 					'Possibly due to lack of `gas` or may not be whitelisted.'
@@ -330,7 +253,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		);
 	}
 
-	staging.debug(`Received transaction logs and parsing...`);
+	debug(`Received transaction logs and parsing...`);
 
 	let monikerAnnouceEvent;
 	const monikerAnnouceEvents = receipt.logs.filter(
@@ -341,7 +264,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		log => log.event === 'NomineeProposed'
 	)[0];
 
-	staging.debug(`Parsing 'MonikerAnnouce' events...`);
+	debug(`Parsing 'MonikerAnnouce' events...`);
 	if (monikerAnnouceEvents.length > 1) {
 		try {
 			monikerAnnouceEvent = monikerAnnouceEvents.filter(event => {
@@ -349,13 +272,13 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 					event.args._moniker
 				).toLowerCase();
 
-				if (moniker.trim() === args.options.moniker!.trim()) {
+				if (moniker.trim() === options.moniker!.trim()) {
 					return event;
 				}
 			})[0];
 		} catch (e) {
 			return Promise.reject(
-				staging.error(
+				error(
 					TRANSACTION.EMPTY_LOGS,
 					'No logs were returned matching the specified `moniker`.'
 				)
@@ -365,11 +288,11 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		monikerAnnouceEvent = monikerAnnouceEvents[0];
 	}
 
-	staging.debug(`Preparing output...`);
+	debug(`Preparing output...`);
 
 	if (!monikerAnnouceEvent) {
 		return Promise.reject(
-			staging.error(
+			error(
 				TRANSACTION.EMPTY_LOGS,
 				'No logs were returned matching the specified `moniker`.'
 			)
@@ -382,5 +305,5 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		nomineeProposedEvent.args._nominee
 	})`;
 
-	return Promise.resolve(staging.success(returnData));
+	return Promise.resolve(success(returnData));
 };

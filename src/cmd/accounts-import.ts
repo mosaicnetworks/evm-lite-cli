@@ -9,12 +9,12 @@ import Utils from 'evm-lite-utils';
 import { V3JSONKeyStore } from 'evm-lite-keystore';
 
 import Session from '../Session';
-import Staging, {
+import Frames, {
 	execute,
 	IStagingFunction,
 	IOptions,
 	IStagedOutput
-} from '../Staging';
+} from '../frames';
 
 import { ACCOUNTS_IMPORT } from '../errors/accounts';
 import { ConfigurationSchema } from 'evm-lite-datadir';
@@ -25,9 +25,7 @@ interface Options extends IOptions {
 	file?: string;
 }
 
-export interface Arguments extends Args<Options> {
-	options: Options;
-}
+export interface Arguments extends Args<Options> {}
 
 export default function command(evmlc: Vorpal, session: Session): Command {
 	const description = 'Import an encrypted keyfile to the keystore';
@@ -61,12 +59,17 @@ export const stage: IStagingFunction<
 	V3JSONKeyStore,
 	V3JSONKeyStore
 > = async (args: Arguments, session: Session) => {
-	const staging = new Staging<Arguments, V3JSONKeyStore, V3JSONKeyStore>(
-		session.debug,
+	const frames = new Frames<Arguments, V3JSONKeyStore, V3JSONKeyStore>(
+		session,
 		args
 	);
 
-	const interactive = args.options.interactive || session.interactive;
+	// prepare
+	const { options } = args;
+	const { success, error, debug } = frames.staging();
+
+	/** Command Execution */
+	const interactive = options.interactive || session.interactive;
 	const questions: inquirer.Questions<Answers> = [
 		{
 			message: 'Keyfile Path: ',
@@ -80,53 +83,48 @@ export const stage: IStagingFunction<
 		}
 	];
 
-	if (interactive && !args.options.file) {
+	if (interactive && !options.file) {
 		const { file, makeDefault } = await inquirer.prompt<Answers>(questions);
 
-		staging.debug(`Keyfile path: ${file || 'null'}`);
+		debug(`Keyfile path: ${file || 'null'}`);
 
-		args.options.file = file;
-		args.options.default = makeDefault || false;
+		options.file = file;
+		options.default = makeDefault || false;
 	}
 
-	if (!args.options.file) {
+	if (!options.file) {
 		return Promise.reject(
-			staging.error(
-				ACCOUNTS_IMPORT.FILE_PATH_EMPTY,
-				'--file path not provided.'
-			)
+			error(ACCOUNTS_IMPORT.FILE_PATH_EMPTY, '--file path not provided.')
 		);
 	}
 
-	if (!Utils.exists(args.options.file)) {
+	if (!Utils.exists(options.file)) {
 		return Promise.reject(
-			staging.error(
+			error(
 				ACCOUNTS_IMPORT.FILE_PATH_NOT_FOUND,
 				'--file path provided does not exist.'
 			)
 		);
 	}
 
-	if (Utils.isDirectory(args.options.file)) {
+	if (Utils.isDirectory(options.file)) {
 		return Promise.reject(
-			staging.error(
+			error(
 				ACCOUNTS_IMPORT.FILE_IS_DIR,
 				'--file path provided is a directory.'
 			)
 		);
 	}
 
-	staging.debug(`Keyfile path verified: ${args.options.file}`);
+	debug(`Keyfile path verified: ${options.file}`);
 
 	let keystore: V3JSONKeyStore;
 
-	staging.debug(`Keystore directory: ${session.keystore.path}`);
-	staging.debug(`Attempting to import keyfile...`);
+	debug(`Keystore directory: ${session.keystore.path}`);
+	debug(`Attempting to import keyfile...`);
 
 	try {
-		keystore = JSON.parse(
-			fs.readFileSync(path.join(args.options.file), 'utf8')
-		);
+		keystore = JSON.parse(fs.readFileSync(path.join(options.file), 'utf8'));
 	} catch (e) {
 		return Promise.reject(e);
 	}
@@ -140,9 +138,9 @@ export const stage: IStagingFunction<
 		JSON.stringify(keystore)
 	);
 
-	staging.debug(`Setting as default address...`);
+	debug(`Setting as default address...`);
 
-	if (args.options.default) {
+	if (options.default) {
 		const newConfig: ConfigurationSchema = {
 			...session.config.state,
 			defaults: {
@@ -154,5 +152,5 @@ export const stage: IStagingFunction<
 		await session.config.save(newConfig);
 	}
 
-	return Promise.resolve(staging.success(keystore));
+	return Promise.resolve(success(keystore));
 };

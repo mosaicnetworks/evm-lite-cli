@@ -1377,7 +1377,7 @@ ethjs-unit@^0.1.6:
     bn.js "4.11.6"
     number-to-bn "1.7.0"
 
-evm-lite-core@1.0.0-alpha.15, evm-lite-core@^1.0.0-alpha.15:
+evm-lite-core@1.0.0-alpha.15:
   version "1.0.0-alpha.15"
   resolved "https://registry.yarnpkg.com/evm-lite-core/-/evm-lite-core-1.0.0-alpha.15.tgz#f9ef3ec0467d66ba2982c56ff3f78819088b71ba"
   integrity sha512-rZwOgoPN6s5OetFPBdQeRfKC5iZBrxFJimz6ZD7U5sZOS7F3XRxXHFKePTZzfuxzzsPLUx+akZ9KoI8fSmIGRQ==
@@ -1401,7 +1401,7 @@ evm-lite-core@1.0.0-alpha.15, evm-lite-core@^1.0.0-alpha.15:
     browserify-cipher "^1.0.1"
     crypto-random-hex "^1.0.0"
     eth-lib "^0.2.8"
-    evm-lite-utils "file:../../../../../Library/Caches/Yarn/v4/npm-evm-lite-core-1.0.0-alpha.15-74a4f097-0339-4c75-9883-05cc5af8dffc-1563880471217/node_modules/utils"
+    evm-lite-utils "file:../../../../../Library/Caches/Yarn/v4/npm-evm-lite-core-1.0.0-alpha.15-0fa52896-bd51-4c9d-abc4-dc06979d55dc-1564067151102/node_modules/utils"
     json-bigint "0.3.0"
     randombytes "^2.1.0"
     uuid "^3.3.2"
@@ -1412,39 +1412,21 @@ evm-lite-core@1.0.0-alpha.15, evm-lite-core@^1.0.0-alpha.15:
 evm-lite-datadir@../evm-lite-js/packages/datadir:
   version "1.0.0-alpha.16"
   dependencies:
-    evm-lite-core "file:../../../../../Library/Caches/Yarn/v4/npm-evm-lite-datadir-1.0.0-alpha.16-2b62804b-20c4-4ec2-a0fa-2ffb9f9ec38d-1563880471181/node_modules/core"
-    evm-lite-keystore "file:../../../../../Library/Caches/Yarn/v4/npm-evm-lite-datadir-1.0.0-alpha.16-2b62804b-20c4-4ec2-a0fa-2ffb9f9ec38d-1563880471181/node_modules/keystore"
-    evm-lite-utils "file:../../../../../Library/Caches/Yarn/v4/npm-evm-lite-datadir-1.0.0-alpha.16-2b62804b-20c4-4ec2-a0fa-2ffb9f9ec38d-1563880471181/node_modules/utils"
+    evm-lite-core "file:../../../../../Library/Caches/Yarn/v4/npm-evm-lite-datadir-1.0.0-alpha.16-483c1e6f-4ca1-40cd-a60f-02fce70ab3d8-1564067151098/node_modules/core"
+    evm-lite-keystore "file:../../../../../Library/Caches/Yarn/v4/npm-evm-lite-datadir-1.0.0-alpha.16-483c1e6f-4ca1-40cd-a60f-02fce70ab3d8-1564067151098/node_modules/keystore"
+    evm-lite-utils "file:../../../../../Library/Caches/Yarn/v4/npm-evm-lite-datadir-1.0.0-alpha.16-483c1e6f-4ca1-40cd-a60f-02fce70ab3d8-1564067151098/node_modules/utils"
     mkdirp "^0.5.1"
     toml "^3.0.0"
     tomlify-j0.4 "^3.0.0"
 
-evm-lite-keystore@1.0.0-alpha.15:
-  version "1.0.0-alpha.15"
-  resolved "https://registry.yarnpkg.com/evm-lite-keystore/-/evm-lite-keystore-1.0.0-alpha.15.tgz#5a7c09666f5f70cb4064da47016ef699a821f8e8"
-  integrity sha512-keTaX+htSR8Wf6yzW/ZQjPqBVAsl3qjucNZeKkXwYN7h4pNHlGvRKFDzCekmMAiHxJh5sNIROQJCJKZvQfwGlA==
-  dependencies:
-    browserify-cipher "^1.0.1"
-    crypto-random-hex "^1.0.0"
-    eth-lib "^0.2.8"
-    evm-lite-core "^1.0.0-alpha.15"
-    evm-lite-utils "^1.0.0-alpha.15"
-    json-bigint "0.3.0"
-    keccak256 "^1.0.0"
-    mkdirp "^0.5.1"
-    randombytes "^2.1.0"
-    scrypt "^6.0.3"
-    scryptsy "^2.0.0"
-    uuid "^3.3.2"
-
-"evm-lite-keystore@file:../evm-lite-js/packages/keystore":
+evm-lite-keystore@1.0.0-alpha.15, "evm-lite-keystore@file:../evm-lite-js/packages/keystore":
   version "1.0.0-alpha.15"
   dependencies:
     browserify-cipher "^1.0.1"
     crypto-random-hex "^1.0.0"
     eth-lib "^0.2.8"
-    evm-lite-core "file:../../../../../Library/Caches/Yarn/v4/npm-evm-lite-keystore-1.0.0-alpha.15-8589f4c3-d53b-4594-9a66-2566531a2bdb-1563880471215/node_modules/core"
-    evm-lite-utils "file:../../../../../Library/Caches/Yarn/v4/npm-evm-lite-keystore-1.0.0-alpha.15-8589f4c3-d53b-4594-9a66-2566531a2bdb-1563880471215/node_modules/utils"
+    evm-lite-core "file:../../../../../Library/Caches/Yarn/v4/npm-evm-lite-keystore-1.0.0-alpha.15-3c78aa80-b1bf-4726-b0c4-6c5a00a3116b-1564067151105/node_modules/core"
+    evm-lite-utils "file:../../../../../Library/Caches/Yarn/v4/npm-evm-lite-keystore-1.0.0-alpha.15-3c78aa80-b1bf-4726-b0c4-6c5a00a3116b-1564067151105/node_modules/utils"
     json-bigint "0.3.0"
     keccak256 "^1.0.0"
     mkdirp "^0.5.1"

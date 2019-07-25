@@ -42,6 +42,8 @@ export default class Session {
 		const poa = await this.node.getPOAContract();
 		return {
 			...poa,
+			// TODO: Perhaps find a fix for the double parsing due
+			// to escaped strings
 			// @ts-ignore
 			abi: JSON.parse(poa.abi as string)
 		};

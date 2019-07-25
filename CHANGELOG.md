@@ -14,3 +14,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 -   Error handling for `poa init` when ran out of gas or if no logs are returned.
+-   Converted staging classes into a more generic wrapper which has access to utlity functions

@@ -1,23 +1,35 @@
-import Vorpal, { Args } from 'vorpal';
+import Vorpal, { Command, Args } from 'vorpal';
 
 import Session from '../Session';
+import Frames, { execute, IStagingFunction, IOptions } from '../frames';
 
-interface Options {}
+interface Options extends IOptions {}
 
-interface Arguments extends Args<Options> {
-	options: Options;
-}
+export interface Arguments extends Args<Options> {}
 
-export default function commandClear(evmlc: Vorpal, _: Session) {
+export default function command(evmlc: Vorpal, session: Session): Command {
+	const description = 'Clear output on screen';
+
 	return evmlc
 		.command('clear')
-		.description('Clears interactive mode console output')
-		.action(
-			(_: Arguments): Promise<void> => {
-				return new Promise<void>(resolve => {
-					process.stdout.write('\u001B[2J\u001B[0;0f');
-					resolve();
-				});
-			}
-		);
+		.description(description)
+		.types({
+			string: []
+		})
+		.action((args: Arguments) => execute(stage, args, session));
 }
+
+export const stage: IStagingFunction<Arguments, void, void> = async (
+	args: Arguments,
+	session: Session
+) => {
+	const frames = new Frames<Arguments, void, void>(session, args);
+
+	// prepare
+	const { success } = frames.staging();
+
+	/** Command Execution */
+	process.stdout.write('\u001B[2J\u001B[0;0f');
+
+	return Promise.resolve(success());
+};

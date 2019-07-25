@@ -5,24 +5,17 @@ import Vorpal, { Command, Args } from 'vorpal';
 
 import Utils from 'evm-lite-utils';
 
-import { V3JSONKeyStore, Keystore } from 'evm-lite-keystore';
-import { Contract, Account, TransactionReceipt } from 'evm-lite-core';
+import { V3JSONKeyStore } from 'evm-lite-keystore';
 
 import Session from '../Session';
-import Staging, {
+import Frames, {
 	execute,
 	IStagingFunction,
 	IOptions,
 	IStagedOutput
-} from '../Staging';
+} from '../Frames';
 
-import { Schema } from '../POA';
-import {
-	INVALID_CONNECTION,
-	KEYSTORE,
-	TRANSACTION,
-	EVM_LITE
-} from '../errors/generals';
+import { TRANSACTION, EVM_LITE } from '../errors/generals';
 import { POA_VOTE } from '../errors/poa';
 
 interface Options extends IOptions {
@@ -36,7 +29,6 @@ interface Options extends IOptions {
 
 export interface Arguments extends Args<Options> {
 	address?: string;
-	options: Options;
 }
 
 export default function command(monet: Vorpal, session: Session): Command {
@@ -81,85 +73,52 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
 ) => {
-	const staging = new Staging<Arguments, string, string>(session.debug, args);
+	const frames = new Frames<Arguments, string, string>(session, args);
 
+	// prepare
+	const { options } = args;
+	const { state } = session.config;
+
+	// generate success, error, debug handlers
+	const { debug, success, error } = frames.staging();
+
+	// generate frames
+	const { connect } = frames.generics();
+	const { call, send } = frames.transaction();
+	const { list, decrypt, get } = frames.keystore();
+	const { contract: getContract } = frames.POA();
+
+	/** Command Execution */
 	let passphrase: string = '';
 
-	const status = await session.connect(args.options.host, args.options.port);
+	const host = options.host || state.connection.host;
+	const port = options.port || state.connection.port;
 
-	const host = args.options.host || session.config.state.connection.host;
-	const port = args.options.port || session.config.state.connection.port;
+	const interactive = options.interactive || session.interactive;
 
-	const interactive = args.options.interactive || session.interactive;
+	await connect(
+		host,
+		port
+	);
 
-	staging.debug(`Attempting to connect: ${host}:${port}`);
+	const contract = await getContract();
+	const keystore: V3JSONKeyStore[] = await list();
 
-	if (!status) {
-		return Promise.reject(
-			staging.error(
-				INVALID_CONNECTION,
-				`A connection could not be establised to ${host}:${port}`
-			)
-		);
-	}
-
-	let poa: { address: string; abi: any[] };
-
-	staging.debug(`Attempting to fetch PoA data...`);
-
-	try {
-		poa = await session.getPOAContract();
-	} catch (e) {
-		return Promise.reject(e);
-	}
-
-	let keystores: V3JSONKeyStore[];
-
-	staging.debug(`Keystore path: ${session.keystore.path}`);
-	staging.debug(`Attempting to fetch accounts from keystore...`);
-
-	try {
-		keystores = await session.keystore.list();
-	} catch (e) {
-		return Promise.reject(staging.error(KEYSTORE.LIST, e.toString()));
-	}
-
-	if (!keystores.length) {
-		return Promise.reject(
-			staging.error(
-				KEYSTORE.EMPTY,
-				`No accounts found in keystore directory ${
-					session.keystore.path
-				}`
-			)
-		);
-	}
-
-	const contract = Contract.load<Schema>(poa.abi, poa.address);
-
-	staging.debug(`Attempting to generate nominee count transaction...`);
+	debug(`Attempting to generate nominee count transaction...`);
 
 	const tx = contract.methods.getNomineeCount({
 		gas: session.config.state.defaults.gas,
 		gasPrice: session.config.state.defaults.gasPrice
 	});
 
-	let response: any;
-
-	staging.debug(`Attempting to call nominee count transaction...`);
-
-	try {
-		response = await session.node.callTransaction(tx);
-	} catch (e) {
-		return Promise.reject(staging.error(EVM_LITE, e.text));
-	}
+	let response: any = await call(tx);
 
 	const nomineeCount = response.toNumber();
-	staging.debug(`Nominee Count: ${response}`);
+	debug(`Nominee Count: ${response}`);
 
 	const nominees: NomineeEntry[] = [];
 
-	staging.debug(`Attempting to fetch nominee details...`);
+	debug(`Attempting to fetch nominee details...`);
 
 	for (const i of Array.from(Array(nomineeCount).keys())) {
 		const nominee: NomineeEntry = {
@@ -180,10 +139,10 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		try {
 			nominee.address = await session.node.callTransaction(tx);
 		} catch (e) {
-			return Promise.reject(staging.error(EVM_LITE, e.text));
+			return Promise.reject(error(EVM_LITE, e.text));
 		}
 
-		staging.debug(`Received nominee address: ${nominee.address}`);
+		debug(`Received nominee address: ${nominee.address}`);
 
 		const monikerTx = contract.methods.getMoniker(
 			{
@@ -198,12 +157,12 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		try {
 			hex = await session.node.callTransaction(monikerTx);
 		} catch (e) {
-			return Promise.reject(staging.error(EVM_LITE, e.text));
+			return Promise.reject(error(EVM_LITE, e.text));
 		}
 
 		nominee.moniker = Utils.hexToString(hex);
 
-		staging.debug(`Moniker received: ${nominee.moniker}`);
+		debug(`Moniker received: ${nominee.moniker}`);
 
 		const votesTransaction = contract.methods.getCurrentNomineeVotes(
 			{
@@ -221,7 +180,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 				votesTransaction
 			);
 		} catch (e) {
-			return Promise.reject(staging.error(EVM_LITE, e.text));
+			return Promise.reject(error(EVM_LITE, e.text));
 		}
 
 		nominee.upVotes = parseInt(votes[0], 10);
@@ -232,13 +191,13 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	if (!nominees.length) {
 		return Promise.reject(
-			staging.error(POA_VOTE.NO_NOMINEES, 'No nominees to vote.')
+			error(POA_VOTE.NO_NOMINEES, 'No nominees to vote.')
 		);
 	}
 
 	const questions: inquirer.Questions<Answers> = [
 		{
-			choices: keystores.map(keystore => keystore.address),
+			choices: keystore.map(keyfile => keyfile.address),
 			message: 'From: ',
 			name: 'from',
 			type: 'list'
@@ -266,33 +225,27 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			Answers
 		>(questions);
 
-		staging.debug(`Nominee address: ${address || 'null'}`);
-		staging.debug(`From address: ${from || 'null'}`);
-		staging.debug(`Verdict: ${verdict ? 'Yes' : 'No'}`);
+		debug(`Nominee address: ${address || 'null'}`);
+		debug(`From address: ${from || 'null'}`);
+		debug(`Verdict: ${verdict ? 'Yes' : 'No'}`);
 
-		staging.debug(`Passphrase: ${p || 'null'}`);
+		debug(`Passphrase: ${p || 'null'}`);
 
 		args.address = address;
-		args.options.from = from;
-		args.options.verdict = verdict;
+		options.from = from;
+		options.verdict = verdict;
 		passphrase = p;
 	}
 
 	if (!args.address) {
 		return Promise.reject(
-			staging.error(
-				POA_VOTE.ADDRESS_EMPTY,
-				'No address provided to nominate.'
-			)
+			error(POA_VOTE.ADDRESS_EMPTY, 'No address provided to nominate.')
 		);
 	}
 
-	if (!args.options.verdict) {
+	if (!options.verdict) {
 		return Promise.reject(
-			staging.error(
-				POA_VOTE.VERDICT_EMPTY,
-				'No verdict provided for nominee.'
-			)
+			error(POA_VOTE.VERDICT_EMPTY, 'No verdict provided for nominee.')
 		);
 	}
 
@@ -300,20 +253,20 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	if (args.address.length !== 40) {
 		return Promise.reject(
-			staging.error(
+			error(
 				POA_VOTE.ADDRESS_INVALID_LENGTH,
 				'Address has an invalid length.'
 			)
 		);
 	}
 
-	staging.debug(`Nominee address validated: ${args.address}`);
+	debug(`Nominee address validated: ${args.address}`);
 
-	const from = args.options.from || session.config.state.defaults.from;
+	const from = options.from || session.config.state.defaults.from;
 
 	if (!from) {
 		return Promise.reject(
-			staging.error(
+			error(
 				POA_VOTE.FROM_EMPTY,
 				'No from address provided or set in config.'
 			)
@@ -322,21 +275,21 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	if (from.length !== 40) {
 		return Promise.reject(
-			staging.error(
+			error(
 				POA_VOTE.FROM_INVALID_LENGTH,
 				'Address has an invalid length.'
 			)
 		);
 	}
 
-	staging.debug(`From address validated: ${args.options.from}`);
+	debug(`From address validated: ${options.from}`);
 
 	if (!passphrase) {
-		staging.debug(`Passphrase path: ${args.options.pwd || 'null'}`);
+		debug(`Passphrase path: ${options.pwd || 'null'}`);
 
 		if (!args.options.pwd) {
 			return Promise.reject(
-				staging.error(
+				error(
 					POA_VOTE.PWD_PATH_EMPTY,
 					'Passphrase file path not provided.'
 				)
@@ -345,7 +298,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 		if (!Utils.exists(args.options.pwd)) {
 			return Promise.reject(
-				staging.error(
+				error(
 					POA_VOTE.PWD_PATH_NOT_FOUND,
 					'Passphrase file path provided does not exist.'
 				)
@@ -354,7 +307,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 		if (Utils.isDirectory(args.options.pwd)) {
 			return Promise.reject(
-				staging.error(
+				error(
 					POA_VOTE.PWD_IS_DIR,
 					'Passphrase file path provided is a directory.'
 				)
@@ -363,42 +316,13 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 		passphrase = fs.readFileSync(args.options.pwd, 'utf8').trim();
 
-		staging.debug(`Passphrase read successfully: ${passphrase}`);
+		debug(`Passphrase read successfully: ${passphrase}`);
 	}
 
-	let keystore: V3JSONKeyStore;
+	const keyfile = await get(from);
+	const decrypted = await decrypt(keyfile, passphrase);
 
-	staging.debug(`Attempting to fetch keystore for address...`);
-
-	try {
-		keystore = await session.keystore.get(from);
-	} catch (e) {
-		return Promise.reject(
-			staging.error(
-				KEYSTORE.FETCH,
-				`Could not locate keystore for address ${args.address} in ${
-					session.keystore.path
-				}`
-			)
-		);
-	}
-
-	let decrypted: Account;
-
-	staging.debug(`Attempting to decrypt keyfile with passphrase...`);
-
-	try {
-		decrypted = Keystore.decrypt(keystore, passphrase);
-	} catch (err) {
-		return Promise.reject(
-			staging.error(
-				KEYSTORE.DECRYPTION,
-				'Cannot decrypt account with passphrase provided.'
-			)
-		);
-	}
-
-	staging.debug(`Attempting to generate vote transaction...`);
+	debug(`Attempting to generate vote transaction...`);
 
 	const transaction = contract.methods.castNomineeVote(
 		{
@@ -407,24 +331,16 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			gasPrice: session.config.state.defaults.gasPrice
 		},
 		Utils.cleanAddress(args.address),
-		args.options.verdict
+		options.verdict
 	);
 
-	let receipt: TransactionReceipt;
+	const receipt = await send(transaction, decrypted);
 
-	staging.debug(`Attempting to send transaction...`);
-
-	try {
-		receipt = await session.node.sendTransaction(transaction, decrypted);
-	} catch (e) {
-		return Promise.reject(staging.error(EVM_LITE, e.text));
-	}
-
-	staging.debug(JSON.stringify(receipt));
+	debug(JSON.stringify(receipt));
 
 	if (!receipt.logs.length) {
 		return Promise.reject(
-			staging.error(
+			error(
 				TRANSACTION.EMPTY_LOGS,
 				'No logs were returned. ' +
 					'Possibly due to lack of `gas` or may not be whitelisted.'
@@ -432,7 +348,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		);
 	}
 
-	staging.debug(`Received transaction logs and parsing...`);
+	debug(`Received transaction logs and parsing...`);
 
 	const nomineeVoteCastEvent = receipt.logs.filter(
 		log => log.event === 'NomineeVoteCast'
@@ -465,5 +381,5 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		message += `\nElection completed with the nominee being '${accepted}'.`;
 	}
 
-	return Promise.resolve(staging.success(message));
+	return Promise.resolve(success(message));
 };

@@ -2,9 +2,9 @@ import ASCIITable from 'ascii-table';
 import Vorpal, { Command, Args } from 'vorpal';
 
 import Session from '../Session';
-import Staging, { execute, IStagingFunction, IOptions } from '../Staging';
+import Frames, { execute, IStagingFunction, IOptions } from '../frames';
 
-import { INVALID_CONNECTION, EVM_LITE } from '../errors/generals';
+import { EVM_LITE } from '../errors/generals';
 
 interface Options extends IOptions {
 	formatted?: boolean;
@@ -12,9 +12,7 @@ interface Options extends IOptions {
 	port?: number;
 }
 
-export interface Arguments extends Args<Options> {
-	options: Options;
-}
+export interface Arguments extends Args<Options> {}
 
 export default function command(evmlc: Vorpal, session: Session): Command {
 	return evmlc
@@ -36,45 +34,42 @@ export const stage: IStagingFunction<Arguments, ASCIITable, any> = async (
 	args: Arguments,
 	session: Session
 ) => {
-	const staging = new Staging<Arguments, ASCIITable, any>(
-		session.debug,
-		args
-	);
+	const frames = new Frames<Arguments, ASCIITable, any>(session, args);
 
-	const status = await session.connect(args.options.host, args.options.port);
+	// prepare
+	const { options } = args;
+	const { state } = session.config;
 
+	const { success, error, debug } = frames.staging();
+	const { connect } = frames.generics();
+
+	/** Command Execution */
 	const interactive = session.interactive;
-	const formatted = args.options.formatted || false;
+	const formatted = options.formatted || false;
 
-	const host = args.options.host || session.config.state.connection.host;
-	const port = args.options.port || session.config.state.connection.port;
+	const host = options.host || state.connection.host;
+	const port = options.port || state.connection.port;
 
-	staging.debug(`Attempting to connect: ${host}:${port}`);
-
-	if (!status) {
-		return Promise.reject(
-			staging.error(
-				INVALID_CONNECTION,
-				`A connection could be establised to ${host}:${port}`
-			)
-		);
-	}
+	await connect(
+		host,
+		port
+	);
 
 	let information: any;
 
-	staging.debug(`Attempting to fetch node information...`);
+	debug(`Attempting to fetch node information...`);
 
 	try {
 		information = await session.node.getInfo();
 	} catch (e) {
-		return Promise.reject(staging.error(EVM_LITE, e.toString()));
+		return Promise.reject(error(EVM_LITE, e.toString()));
 	}
 
 	if (!formatted && !interactive) {
-		return Promise.resolve(staging.success(information));
+		return Promise.resolve(success(information));
 	}
 
-	staging.debug(`Preparing formatted output...`);
+	debug(`Preparing formatted output...`);
 
 	const table = new ASCIITable().setHeading('Key', 'Value');
 
@@ -84,5 +79,5 @@ export const stage: IStagingFunction<Arguments, ASCIITable, any> = async (
 		}
 	}
 
-	return Promise.resolve(staging.success(table));
+	return Promise.resolve(success(table));
 };
