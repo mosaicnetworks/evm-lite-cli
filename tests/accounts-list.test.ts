@@ -4,8 +4,7 @@ import { BaseAccount } from 'evm-lite-core';
 
 import { session } from './stage';
 
-import { Arguments, stage, Output } from '../src/cmd/accounts-list';
-import { INVALID_CONNECTION } from '../src/errors/generals';
+import { Arguments, stage } from '../src/cmd/accounts-list';
 
 describe('accounts-list.ts', () => {
 	it('should list accounts an array non formatted', async () => {

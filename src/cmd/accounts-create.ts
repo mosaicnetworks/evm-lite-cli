@@ -24,7 +24,9 @@ interface Options extends IOptions {
 	out?: string;
 }
 
-export interface Arguments extends Args<Options> {}
+export interface Arguments extends Args<Options> {
+	options: Options;
+}
 
 export default function command(evmlc: Vorpal, session: Session): Command {
 	const description = 'Creates an encrypted keypair locally';

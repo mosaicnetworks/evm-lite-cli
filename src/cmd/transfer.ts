@@ -31,7 +31,9 @@ interface Options extends IOptions {
 	value?: number;
 }
 
-export interface Arguments extends Args<Options> {}
+export interface Arguments extends Args<Options> {
+	options: Options;
+}
 
 export default function command(evmlc: Vorpal, session: Session): Command {
 	const description = 'Initiate a transfer of token(s) to an address';

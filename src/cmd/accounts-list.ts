@@ -20,7 +20,9 @@ interface Options extends IOptions {
 	port?: number;
 }
 
-export interface Arguments extends Args<Options> {}
+export interface Arguments extends Args<Options> {
+	options: Options;
+}
 
 export default function command(evmlc: Vorpal, session: Session): Command {
 	const description = 'List all accounts in the local keystore directory';

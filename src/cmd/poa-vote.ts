@@ -28,6 +28,7 @@ interface Options extends IOptions {
 }
 
 export interface Arguments extends Args<Options> {
+	options: Options;
 	address?: string;
 }
 
