@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-// bump `evm-lite-datadir` to `v1.0.0-alpha-16`
-// import { osDataDir } from 'evm-lite-datadir';
+import { osDataDir } from 'evm-lite-datadir';
 
 import * as path from 'path';
 
@@ -32,31 +31,6 @@ import version from './cmd/version';
 import test from './cmd/test';
 
 import init, { IInit } from './init';
-
-export function osDataDir(dir: string): string {
-	const os = require('os')
-		.type()
-		.toLowerCase();
-
-	switch (os) {
-		case 'windows_nt':
-			return path.join(
-				require('os').homedir(),
-				'AppData',
-				'Roaming',
-				dir.toUpperCase()
-			);
-		case 'darwin':
-			return path.join(
-				require('os').homedir(),
-				'Library',
-				dir.toUpperCase()
-			);
-
-		default:
-			return path.join(require('os').homedir(), `.${dir.toLowerCase()}`);
-	}
-}
 
 const params: IInit = {
 	name: 'EVM-Lite CLI',
