@@ -26,14 +26,12 @@ import poaVote from './cmd/poa-vote';
 import poaInit from './cmd/poa-init';
 
 // Misc
-import clear from './cmd/clear';
-import interactive from './cmd/interactive';
 import transfer from './cmd/transfer';
 import info from './cmd/info';
 import version from './cmd/version';
 import test from './cmd/test';
 
-import init from './init';
+import init, { IInit } from './init';
 
 export function osDataDir(dir: string): string {
 	const os = require('os')
@@ -60,9 +58,13 @@ export function osDataDir(dir: string): string {
 	}
 }
 
-const name = 'EVM-Lite CLI';
-const delimiter = 'evmlc';
-const datadir = osDataDir('EVMLC');
+const params: IInit = {
+	name: 'EVM-Lite CLI',
+	delimiter: 'evmlc',
+	datadir: osDataDir('EVMLC'),
+	config: 'evmlc'
+};
+
 const commands = [
 	// accounts
 	accountsCreate,
@@ -85,12 +87,10 @@ const commands = [
 	poaInit,
 
 	// misc
-	clear,
-	interactive,
 	info,
 	test,
 	version,
 	transfer
 ];
 
-init(name, delimiter, datadir, commands).catch(console.log);
+init(params, commands).catch(console.log);

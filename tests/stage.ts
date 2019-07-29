@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import Session from '../src/Session';
 
 export const datadir: string = path.join(__dirname, 'assets');
-export const session: Session = new Session(datadir);
+export const session: Session = new Session(datadir, 'EVMLC');
 
 export const pwdPath = path.join(datadir, 'pwd.txt');
 export const password = fs.readFileSync(pwdPath, 'utf8').trim();

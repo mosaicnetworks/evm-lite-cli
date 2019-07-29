@@ -1,16 +1,7 @@
 // requirements
-export {
-	default as Staging,
-	execute,
-	IOptions,
-	IStagedOutput,
-	IStagingFunction
-} from './Staging';
 export { default as Session } from './Session';
 export { default as Globals } from './Globals';
-export { default as init } from './init';
-
-export { Schema as POAContractSchema } from './POA';
+export { default as init, IInit } from './init';
 
 // Commands
 
@@ -35,7 +26,13 @@ export { default as poaVote } from './cmd/poa-vote';
 export { default as poaInit } from './cmd/poa-init';
 
 // other
-export { default as clear } from './cmd/clear';
-export { default as interactive } from './cmd/interactive';
 export { default as transfer } from './cmd/transfer';
 export { default as info } from './cmd/info';
+
+export {
+	default as Frames,
+	IOptions,
+	IStagedOutput,
+	IStagingFunction,
+	execute
+} from './frames';

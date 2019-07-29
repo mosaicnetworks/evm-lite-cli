@@ -4,14 +4,8 @@ import Vorpal, { Command, Args } from 'vorpal';
 
 import Utils from 'evm-lite-utils';
 
-import { Contract } from 'evm-lite-core';
-
 import Session from '../Session';
-import Staging, { execute, IStagingFunction, IOptions } from '../Staging';
-
-import { Schema } from '../POA';
-
-import { INVALID_CONNECTION, EVM_LITE } from '../errors/generals';
+import Frames, { execute, IStagingFunction, IOptions } from '../frames';
 
 interface Options extends IOptions {
 	formatted?: boolean;
@@ -54,65 +48,56 @@ export const stage: IStagingFunction<
 	ASCIITable,
 	NomineeEntry[]
 > = async (args: Arguments, session: Session) => {
-	const staging = new Staging<Arguments, ASCIITable, NomineeEntry[]>(
-		session.debug,
+	const frames = new Frames<Arguments, ASCIITable, NomineeEntry[]>(
+		session,
 		args
 	);
 
-	const status = await session.connect(args.options.host, args.options.port);
+	// prepare
+	const { options } = args;
+	const { state } = session.config;
 
-	const host = args.options.host || session.config.state.connection.host;
-	const port = args.options.port || session.config.state.connection.port;
+	// generate success, error, debug handlers
+	const { debug, success, error } = frames.staging();
+
+	// generate frames
+	const { connect } = frames.generics();
+	const { contract: getContract } = frames.POA();
+	const { call } = frames.transaction();
+
+	/** Command Execution */
+	const host = options.host || state.connection.host;
+	const port = options.port || state.connection.port;
 
 	const interactive = session.interactive;
-	const formatted = args.options.formatted || false;
+	const formatted = options.formatted || false;
 
-	staging.debug(`Attempting to connect: ${host}:${port}`);
+	await connect(
+		host,
+		port
+	);
 
-	if (!status) {
-		return Promise.reject(
-			staging.error(
-				INVALID_CONNECTION,
-				`A connection could be establised to ${host}:${port}`
-			)
-		);
-	}
+	const contract = await getContract();
 
-	let poa: { address: string; abi: any[] };
-
-	staging.debug(`Attempting to fetch PoA data...`);
-
-	try {
-		poa = await session.getPOAContract();
-	} catch (e) {
-		return Promise.reject(staging.error(EVM_LITE, e.toString()));
-	}
-
-	const contract = Contract.load<Schema>(poa.abi, poa.address);
-
-	staging.debug(`Attempting to generate nominee count transaction...`);
+	debug(`Attempting to generate nominee count transaction...`);
 
 	const transaction = contract.methods.getNomineeCount({
-		gas: session.config.state.defaults.gas,
-		gasPrice: session.config.state.defaults.gasPrice
+		gas: state.defaults.gas,
+		gasPrice: state.defaults.gasPrice
 	});
 
-	let response: any;
-
-	staging.debug(`Attempting to call nominee count transaction...`);
-
-	try {
-		response = await session.node.callTransaction(transaction);
-	} catch (e) {
-		return Promise.reject(staging.error(EVM_LITE, e.text));
-	}
+	let response: any = await call(transaction);
 
 	const nomineeCount = response.toNumber();
-	staging.debug(`Nominee Count: ${response}`);
+	debug(`Nominee Count: ${response}`);
+
+	if (!nomineeCount) {
+		return Promise.resolve(success([]));
+	}
 
 	const nominees: NomineeEntry[] = [];
 
-	staging.debug(`Attempting to fetch nominee details...`);
+	debug(`Attempting to fetch nominee details...`);
 
 	for (const i of Array.from(Array(nomineeCount).keys())) {
 		const nominee: NomineeEntry = {
@@ -124,58 +109,40 @@ export const stage: IStagingFunction<
 
 		const tx = contract.methods.getNomineeAddressFromIdx(
 			{
-				gas: session.config.state.defaults.gas,
-				gasPrice: session.config.state.defaults.gasPrice
+				gas: state.defaults.gas,
+				gasPrice: state.defaults.gasPrice
 			},
 			i
 		);
 
-		try {
-			nominee.address = await session.node.callTransaction(tx);
-		} catch (e) {
-			return Promise.reject(staging.error(EVM_LITE, e.text));
-		}
+		nominee.address = await call(tx);
 
-		staging.debug(`Received nominee address: ${nominee.address}`);
+		debug(`Received nominee address: ${nominee.address}`);
 
 		const monikerTx = contract.methods.getMoniker(
 			{
-				gas: session.config.state.defaults.gas,
-				gasPrice: session.config.state.defaults.gasPrice
+				gas: state.defaults.gas,
+				gasPrice: state.defaults.gasPrice
 			},
 			nominee.address
 		);
 
-		let hex: string;
-
-		try {
-			hex = await session.node.callTransaction(monikerTx);
-		} catch (e) {
-			return Promise.reject(staging.error(EVM_LITE, e.text));
-		}
+		const hex: string = await call(monikerTx);
 
 		nominee.moniker = Utils.hexToString(hex);
 
-		staging.debug(`Moniker received: ${nominee.moniker}`);
+		debug(`Moniker received: ${nominee.moniker}`);
 
 		const votesTransaction = contract.methods.getCurrentNomineeVotes(
 			{
-				from: session.config.state.defaults.from,
-				gas: session.config.state.defaults.gas,
-				gasPrice: session.config.state.defaults.gasPrice
+				from: state.defaults.from,
+				gas: state.defaults.gas,
+				gasPrice: state.defaults.gasPrice
 			},
 			Utils.cleanAddress(nominee.address)
 		);
 
-		let votes: [string, string];
-
-		try {
-			votes = await session.node.callTransaction<[string, string]>(
-				votesTransaction
-			);
-		} catch (e) {
-			return Promise.reject(staging.error(EVM_LITE, e.text));
-		}
+		const votes = await call<[string, string]>(votesTransaction);
 
 		nominee.upVotes = parseInt(votes[0], 10);
 		nominee.downVotes = parseInt(votes[1], 10);
@@ -184,10 +151,10 @@ export const stage: IStagingFunction<
 	}
 
 	if (!formatted && !interactive) {
-		return Promise.resolve(staging.success(nominees));
+		return Promise.resolve(success(nominees));
 	}
 
-	staging.debug(`Preparing formatted output...`);
+	debug(`Preparing formatted output...`);
 
 	const table = new ASCIITable().setHeading(
 		'Moniker',
@@ -205,5 +172,5 @@ export const stage: IStagingFunction<
 		);
 	}
 
-	return Promise.resolve(staging.success(table));
+	return Promise.resolve(success(table));
 };

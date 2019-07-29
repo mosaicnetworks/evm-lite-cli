@@ -2,17 +2,16 @@ import ASCIITable from 'ascii-table';
 import Vorpal, { Command, Args } from 'vorpal';
 
 import { BaseAccount } from 'evm-lite-core';
-import { V3JSONKeyStore } from 'evm-lite-keystore';
 
 import Session from '../Session';
-import Staging, {
+import Frames, {
 	execute,
 	IStagingFunction,
 	IOptions,
 	IStagedOutput
-} from '../Staging';
+} from '../frames';
 
-import { EVM_LITE, KEYSTORE } from '../errors/generals';
+import { EVM_LITE } from '../errors/generals';
 
 interface Options extends IOptions {
 	formatted?: boolean;
@@ -51,28 +50,30 @@ export const stage: IStagingFunction<
 	ASCIITable,
 	BaseAccount[]
 > = async (args: Arguments, session: Session) => {
-	const staging = new Staging<Arguments, ASCIITable, BaseAccount[]>(
-		session.debug,
+	const frames = new Frames<Arguments, ASCIITable, BaseAccount[]>(
+		session,
 		args
 	);
 
-	const status = await session.connect(args.options.host, args.options.port);
+	// prepare
+	const { options } = args;
+	const { state } = session.config;
+
+	const { success, error, debug } = frames.staging();
+	const { list } = frames.keystore();
+
+	/** Command Execution */
+	debug(`Checking connection to node...`);
+
+	const status = await session.connect(options.host, options.port);
 
 	const interactive = session.interactive;
-	const formatted = args.options.formatted || false;
+	const formatted = options.formatted || false;
 
-	const host = args.options.host || session.config.state.connection.host;
-	const port = args.options.port || session.config.state.connection.port;
+	const host = options.host || state.connection.host;
+	const port = options.port || state.connection.port;
 
-	let keystores: V3JSONKeyStore[];
-
-	staging.debug(`Attempting to fetch local accounts...`);
-
-	try {
-		keystores = await session.keystore.list();
-	} catch (e) {
-		return Promise.reject(staging.error(KEYSTORE.LIST, e.toString()));
-	}
+	const keystores = await list();
 
 	let accounts: BaseAccount[] = keystores.map(keystore => ({
 		address: keystore.address,
@@ -81,9 +82,13 @@ export const stage: IStagingFunction<
 		bytecode: ''
 	}));
 
+	if (!accounts.length) {
+		return Promise.resolve(success([]));
+	}
+
 	if (status) {
-		staging.debug(`Successfully connected: ${host}:${port}`);
-		staging.debug(`Attempting to fetch accounts data...`);
+		debug(`Successfully connected: ${host}:${port}`);
+		debug(`Attempting to fetch accounts data...`);
 
 		try {
 			const promises = keystores.map(
@@ -93,15 +98,15 @@ export const stage: IStagingFunction<
 
 			accounts = await Promise.all(promises);
 		} catch (e) {
-			return Promise.reject(staging.error(EVM_LITE, e.text));
+			return Promise.reject(error(EVM_LITE, e.text));
 		}
 	}
 
 	if (!formatted && !interactive) {
-		return Promise.resolve(staging.success(accounts));
+		return Promise.resolve(success(accounts));
 	}
 
-	staging.debug(`Preparing formatted output...`);
+	debug(`Preparing formatted output...`);
 
 	const table = new ASCIITable().setHeading('Address', 'Balance', 'Nonce');
 
@@ -113,5 +118,5 @@ export const stage: IStagingFunction<
 		);
 	}
 
-	return Promise.resolve(staging.success(table));
+	return Promise.resolve(success(table));
 };

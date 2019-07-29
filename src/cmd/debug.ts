@@ -8,11 +8,11 @@ interface Options extends IOptions {}
 export interface Arguments extends Args<Options> {}
 
 export default function command(evmlc: Vorpal, session: Session): Command {
-	const description = 'Enter interactive mode';
+	const description = 'Toggle debug mode';
 
 	return evmlc
-		.command('interactive')
-		.alias('i')
+		.command('debug')
+		.alias('d')
 		.description(description)
 		.types({
 			string: []
@@ -20,14 +20,19 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.action((args: Arguments) => execute(stage, args, session));
 }
 
-export const stage: IStagingFunction<Arguments, void, void> = async (
+export const stage: IStagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
 ) => {
-	const frames = new Frames<Arguments, void, void>(session, args);
+	const frames = new Frames<Arguments, string, string>(session, args);
 
 	// prepare
 	const { success } = frames.staging();
 
-	return Promise.resolve(success());
+	/** Command Execution */
+	session.debug = !session.debug;
+
+	return Promise.resolve(
+		success(`Debug: ${session.debug ? 'Enabled' : 'Disabled'}`)
+	);
 };

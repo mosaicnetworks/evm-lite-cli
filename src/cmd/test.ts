@@ -1,18 +1,16 @@
 import Vorpal, { Command, Args } from 'vorpal';
 
 import Session from '../Session';
-import Staging, { execute, IStagingFunction, IOptions } from '../Staging';
+import Frames, { execute, IStagingFunction, IOptions } from '../frames';
 
 interface Options extends IOptions {
 	value: any;
 }
 
-export interface Arguments extends Args<Options> {
-	options: Options;
-}
+export interface Arguments extends Args<Options> {}
 
 export default function command(evmlc: Vorpal, session: Session): Command {
-	const description = 'Creates an encrypted keypair locally';
+	const description = 'Test command';
 
 	return evmlc
 		.command('test')
@@ -29,9 +27,9 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
 ) => {
-	const staging = new Staging<Arguments, string, string>(session.debug, args);
+	const frames = new Frames<Arguments, string, string>(session, args);
 
-	return Promise.resolve(
-		staging.success(`${args.options.value} - ` + typeof args.options.value)
-	);
+	const { success } = frames.staging();
+
+	return Promise.resolve(success(`test`));
 };

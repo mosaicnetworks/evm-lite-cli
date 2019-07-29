@@ -28,7 +28,6 @@ module 'vorpal' {
 	}
 
 	export interface Args<Options> {
-		[key: string]: any;
 		options: Options;
 	}
 

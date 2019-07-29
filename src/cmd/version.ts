@@ -1,7 +1,7 @@
 import Vorpal, { Command, Args } from 'vorpal';
 
 import Session from '../Session';
-import Staging, { execute, IStagingFunction, IOptions } from '../Staging';
+import Frames, { execute, IStagingFunction, IOptions } from '../frames';
 
 const pkg = require('../../package.json');
 
@@ -9,9 +9,7 @@ interface Options extends IOptions {
 	value: any;
 }
 
-export interface Arguments extends Args<Options> {
-	options: Options;
-}
+export interface Arguments extends Args<Options> {}
 
 export default function command(evmlc: Vorpal, session: Session): Command {
 	const description = 'Display current version of cli';
@@ -31,13 +29,13 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
 ) => {
-	const staging = new Staging<Arguments, string, string>(session.debug, args);
+	const frames = new Frames<Arguments, string, string>(session, args);
 
-	staging.debug(`evm-lite-core: ${pkg.dependencies[`evm-lite-core`]}`);
-	staging.debug(
-		`evm-lite-keystore: ${pkg.dependencies[`evm-lite-keystore`]}`
-	);
-	staging.debug(`evm-lite-datadir: ${pkg.dependencies[`evm-lite-datadir`]}`);
+	const { debug, success } = frames.staging();
 
-	return Promise.resolve(staging.success(`evm-lite-cli ${pkg.version}`));
+	debug(`evm-lite-core: ${pkg.dependencies[`evm-lite-core`]}`);
+	debug(`evm-lite-keystore: ${pkg.dependencies[`evm-lite-keystore`]}`);
+	debug(`evm-lite-datadir: ${pkg.dependencies[`evm-lite-datadir`]}`);
+
+	return Promise.resolve(success(`evm-lite-cli ${pkg.version}`));
 };

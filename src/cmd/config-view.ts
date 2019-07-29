@@ -1,13 +1,11 @@
 import Vorpal, { Command, Args } from 'vorpal';
 
 import Session from '../Session';
-import Staging, { execute, IStagingFunction, IOptions } from '../Staging';
+import Frames, { execute, IStagingFunction, IOptions } from '../frames';
 
 interface Options extends IOptions {}
 
-export interface Arguments extends Args<Options> {
-	options: Options;
-}
+export interface Arguments extends Args<Options> {}
 
 export default function command(evmlc: Vorpal, session: Session): Command {
 	const description = 'Output current configuration file';
@@ -26,8 +24,13 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
 ) => {
-	const staging = new Staging<Arguments, string, string>(session.debug, args);
-	staging.debug(`Reading config file: ${session.config.path}`);
+	const frames = new Frames<Arguments, string, string>(session, args);
 
-	return Promise.resolve(staging.success(session.config.toTOML()));
+	// prepare
+	const { debug, success } = frames.staging();
+
+	/** Command Execution */
+	debug(`Reading config file: ${session.config.path}`);
+
+	return Promise.resolve(success(session.config.toTOML()));
 };

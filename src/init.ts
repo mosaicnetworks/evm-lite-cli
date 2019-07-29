@@ -9,19 +9,32 @@ import chalk from 'chalk';
 import Session from './Session';
 import Globals from './Globals';
 
+// default commands
+import interactive from './cmd/interactive';
+import debug from './cmd/debug';
+import clear from './cmd/clear';
+
 export type CommandFunction = (evmlc: Vorpal, session: Session) => Command;
 
-export default async function init(
-	name: string,
-	delimiter: string,
-	datadir: string,
-	commands: CommandFunction[]
-) {
-	if (!Utils.exists(datadir)) {
-		mkdir.sync(datadir);
+export interface IInit {
+	name: string;
+	delimiter: string;
+
+	// data directory path
+	datadir: string;
+
+	// config file name (usually application name)
+	config: string;
+}
+
+export default async function init(params: IInit, commands: CommandFunction[]) {
+	commands.push(interactive, debug, clear);
+
+	if (!Utils.exists(params.datadir)) {
+		mkdir.sync(params.datadir);
 	}
 
-	let dataDirPath = datadir;
+	let dataDirPath = params.datadir;
 
 	if (process.argv[2] === '--datadir' || process.argv[2] === '-d') {
 		dataDirPath = process.argv[3];
@@ -36,11 +49,10 @@ export default async function init(
 		process.argv.splice(2, 2);
 	}
 
-	const session = new Session(dataDirPath);
+	const session = new Session(dataDirPath, params.config);
 
 	if (!process.argv[2]) {
-		console.log('\n  A Command Line Interface to interact with EVM-Lite.');
-		console.log(`\n  Current Data Directory: ` + session.directory.path);
+		console.log(`\n  Data Directory: ${session.directory.path}`);
 
 		process.argv[2] = 'help';
 	}
@@ -54,7 +66,7 @@ export default async function init(
 	if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
 		console.log(
 			chalk.bold(
-				figlet.textSync(name, {
+				figlet.textSync(params.name, {
 					horizontalLayout: 'full'
 				})
 			)
@@ -75,18 +87,23 @@ export default async function init(
 
 		const cmdInteractive = cli.find('interactive');
 		if (cmdInteractive) {
-			cmdInteractive.hidden();
+			cmdInteractive.remove();
 		}
 
 		await cli.exec('help');
 
 		session.interactive = true;
-		cli.delimiter(`${delimiter}$`).show();
+		cli.delimiter(`${params.delimiter}$`).show();
 	} else {
 		const cmdClear = cli.find('clear');
+		const cmdDebug = cli.find('debug');
 
 		if (cmdClear) {
-			cmdClear.hidden();
+			cmdClear.remove();
+		}
+
+		if (cmdDebug) {
+			cmdDebug.remove();
 		}
 
 		cli.parse(process.argv);

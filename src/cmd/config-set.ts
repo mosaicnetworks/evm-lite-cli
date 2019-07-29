@@ -1,9 +1,10 @@
+import * as inquirer from 'inquirer';
+
 import Vorpal, { Command, Args } from 'vorpal';
 
 import Session from '../Session';
-import Staging, { execute, IStagingFunction, IOptions } from '../Staging';
-import inquirer = require('inquirer');
 import Globals from '../Globals';
+import Frames, { execute, IStagingFunction, IOptions } from '../frames';
 
 interface Options extends IOptions {
 	interactive?: boolean;
@@ -14,9 +15,7 @@ interface Options extends IOptions {
 	gasprice?: number;
 }
 
-export interface Arguments extends Args<Options> {
-	options: Options;
-}
+export interface Arguments extends Args<Options> {}
 
 export default function commandConfigSet(
 	evmlc: Vorpal,
@@ -55,40 +54,44 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
 ) => {
-	const staging = new Staging<Arguments, string, string>(session.debug, args);
+	const frames = new Frames<Arguments, string, string>(session, args);
 
-	const config = session.config.state;
+	// prepare
+	const { options } = args;
+	const { state } = session.config;
+	const { success, debug } = frames.staging();
 
-	staging.debug(`Successfully read configuration: ${session.config.path}`);
+	/** Command Execution */
+	debug(`Successfully read configuration: ${session.config.path}`);
 
-	const interactive = args.options.interactive || session.interactive;
+	const interactive = options.interactive || session.interactive;
 	const questions: inquirer.Questions<Answers> = [
 		{
-			default: config.connection.host,
+			default: state.connection.host,
 			message: 'Host',
 			name: 'host',
 			type: 'input'
 		},
 		{
-			default: config.connection.port,
+			default: state.connection.port,
 			message: 'Port',
 			name: 'port',
 			type: 'number'
 		},
 		{
-			default: config.defaults.from,
+			default: state.defaults.from,
 			message: 'From',
 			name: 'from',
 			type: 'input'
 		},
 		{
-			default: config.defaults.gas,
+			default: state.defaults.gas,
 			message: 'Gas',
 			name: 'gas',
 			type: 'number'
 		},
 		{
-			default: config.defaults.gasPrice,
+			default: state.defaults.gasPrice,
 			message: 'Gas Price',
 			name: 'gasPrice',
 			type: 'number'
@@ -98,37 +101,36 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	if (interactive) {
 		const answers = await inquirer.prompt<Answers>(questions);
 
-		args.options.host = answers.host;
-		args.options.port = answers.port;
-		args.options.gas = answers.gas;
-		args.options.gasprice = answers.gasPrice;
-		args.options.from = answers.from;
+		options.host = answers.host;
+		options.port = answers.port;
+		options.gas = answers.gas;
+		options.gasprice = answers.gasPrice;
+		options.from = answers.from;
 	}
 
 	const newConfig = {
 		connection: {
-			host: args.options.host || config.connection.host,
-			port: args.options.port || config.connection.port
+			host: options.host || state.connection.host,
+			port: options.port || state.connection.port
 		},
 		defaults: {
-			from: args.options.from || config.defaults.from,
+			from: options.from || state.defaults.from,
 			gas:
-				args.options.gas !== undefined && args.options.gas >= 0
-					? args.options.gas
-					: config.defaults.gas,
+				options.gas !== undefined && options.gas >= 0
+					? options.gas
+					: state.defaults.gas,
 			gasPrice:
-				args.options.gasprice !== undefined &&
-				args.options.gasprice >= 0
-					? args.options.gasprice
-					: config.defaults.gasPrice
+				options.gasprice !== undefined && options.gasprice >= 0
+					? options.gasprice
+					: state.defaults.gasPrice
 		}
 	};
 
-	staging.debug(`Attempting to write modified configuration...`);
+	debug(`Attempting to write modified configuration...`);
 
 	await session.config.save(newConfig);
 
 	Globals.info(session.config.toTOML());
 
-	return Promise.resolve(staging.success('Configuration saved'));
+	return Promise.resolve(success('Configuration saved'));
 };

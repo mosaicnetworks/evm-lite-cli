@@ -5,19 +5,17 @@ import Vorpal, { Command, Args } from 'vorpal';
 
 import Utils from 'evm-lite-utils';
 
-import { V3JSONKeyStore, Keystore } from 'evm-lite-keystore';
 import { Account } from 'evm-lite-core';
 
 import Session from '../Session';
-import Staging, {
+import Frames, {
 	execute,
 	IStagingFunction,
 	IOptions,
 	IStagedOutput
-} from '../Staging';
+} from '../frames';
 
 import { TRANSFER } from '../errors/accounts';
-import { INVALID_CONNECTION, KEYSTORE } from '../errors/generals';
 
 interface Options extends IOptions {
 	interactive?: boolean;
@@ -87,53 +85,35 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	args: Arguments,
 	session: Session
 ) => {
-	const staging = new Staging<Arguments, string, string>(session.debug, args);
+	const frames = new Frames<Arguments, string, string>(session, args);
 
+	// prepare
+	const { options } = args;
+	const { state } = session.config;
+
+	const { success, error, debug } = frames.staging();
+	const { connect } = frames.generics();
+	const { send } = frames.transaction();
+	const { list, get, decrypt } = frames.keystore();
+
+	/** Command Execution */
 	let passphrase: string = '';
 
-	const status = await session.connect(args.options.host, args.options.port);
+	const host = options.host || state.connection.host;
+	const port = options.port || state.connection.port;
 
-	const host = args.options.host || session.config.state.connection.host;
-	const port = args.options.port || session.config.state.connection.port;
+	const interactive = options.interactive || session.interactive;
 
-	staging.debug(`Attempting to connect: ${host}:${port}`);
+	await connect(
+		host,
+		port
+	);
 
-	if (!status) {
-		return Promise.reject(
-			staging.error(
-				INVALID_CONNECTION,
-				`A connection could be establised to ${host}:${port}`
-			)
-		);
-	}
-
-	const interactive = args.options.interactive || session.interactive;
-
-	let keystores: V3JSONKeyStore[];
-
-	staging.debug(`Keystore path: ${session.keystore.path}`);
-	staging.debug(`Attempting to fetch accounts from keystore...`);
-
-	try {
-		keystores = await session.keystore.list();
-	} catch (e) {
-		return Promise.reject(staging.error(KEYSTORE.LIST, e.toString()));
-	}
-
-	if (!keystores.length) {
-		return Promise.reject(
-			staging.error(
-				KEYSTORE.EMPTY,
-				`No accounts found in keystore directory ${
-					session.keystore.path
-				}`
-			)
-		);
-	}
+	const keystore = await list();
 
 	const first: inquirer.Questions<FirstAnswers> = [
 		{
-			choices: keystores.map(keystore => keystore.address),
+			choices: keystore.map(keyfile => keyfile.address),
 			message: 'From: ',
 			name: 'from',
 			type: 'list'
@@ -185,130 +165,99 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	if (interactive) {
 		const { from } = await inquirer.prompt<FirstAnswers>(first);
 
-		args.options.from = Utils.trimHex(from);
+		options.from = Utils.trimHex(from);
 
-		staging.debug(`From address received: ${from}`);
+		debug(`From address received: ${from}`);
 	}
 
-	if (!args.options.from) {
+	if (!options.from) {
 		return Promise.reject(
-			staging.error(TRANSFER.FROM_EMPTY, 'Argument `from` not provided.')
+			error(TRANSFER.FROM_EMPTY, 'Argument `from` not provided.')
 		);
 	}
 
-	staging.debug(`From address validated: ${args.options.from}`);
-	staging.debug(`Attempting to fetch keystore for address...`);
+	debug(`From address validated: ${options.from}`);
 
-	let keystore: V3JSONKeyStore;
-
-	try {
-		keystore = await session.keystore.get(args.options.from);
-	} catch (e) {
-		return Promise.reject(
-			staging.error(
-				KEYSTORE.FETCH,
-				`Could not locate keystore for address ${args.address} in ${
-					session.keystore.path
-				}`
-			)
-		);
-	}
+	const keyfile = await get(options.from);
 
 	if (interactive) {
 		const { passphrase: p } = await inquirer.prompt<SecondAnswers>(second);
 
 		passphrase = p.trim();
 
-		staging.debug(`Passphrase received: ${p}`);
+		debug(`Passphrase received: ${p}`);
 	}
 
 	if (!passphrase) {
-		staging.debug(`Passphrase path: ${args.options.pwd || 'null'}`);
+		debug(`Passphrase path: ${options.pwd || 'null'}`);
 
-		if (!args.options.pwd) {
+		if (!options.pwd) {
 			return Promise.reject(
-				staging.error(
-					TRANSFER.PWD_PATH_EMPTY,
-					'--pwd file path not provided.'
-				)
+				error(TRANSFER.PWD_PATH_EMPTY, '--pwd file path not provided.')
 			);
 		}
 
-		if (!Utils.exists(args.options.pwd)) {
+		if (!Utils.exists(options.pwd)) {
 			return Promise.reject(
-				staging.error(
+				error(
 					TRANSFER.PWD_PATH_NOT_FOUND,
 					'--pwd file path provided does not exist.'
 				)
 			);
 		}
 
-		if (Utils.isDirectory(args.options.pwd)) {
+		if (Utils.isDirectory(options.pwd)) {
 			return Promise.reject(
-				staging.error(
+				error(
 					TRANSFER.PWD_IS_DIR,
 					'--pwd file path provided is a directory.'
 				)
 			);
 		}
 
-		passphrase = fs.readFileSync(args.options.pwd, 'utf8').trim();
+		passphrase = fs.readFileSync(options.pwd, 'utf8').trim();
 
-		staging.debug(`Passphrase read successfully: ${passphrase}`);
+		debug(`Passphrase read successfully: ${passphrase}`);
 	}
 
-	let decrypted: Account;
-
-	staging.debug(`Attempting to decrypt keyfile with passphrase...`);
-
-	try {
-		decrypted = Keystore.decrypt(keystore, passphrase);
-	} catch (err) {
-		return Promise.reject(
-			staging.error(
-				KEYSTORE.DECRYPTION,
-				'Cannot decrypt account with passphrase provided.'
-			)
-		);
-	}
+	const decrypted = await decrypt(keyfile, passphrase);
 
 	if (interactive) {
 		const answers = await inquirer.prompt<ThirdAnswers>(third);
 
-		args.options.to = answers.to;
-		args.options.value = answers.value;
-		args.options.gas = answers.gas;
-		args.options.gasprice = answers.gasPrice;
+		options.to = answers.to;
+		options.value = answers.value;
+		options.gas = answers.gas;
+		options.gasprice = answers.gasPrice;
 
-		staging.debug(`To received: ${answers.to || 'null'}`);
-		staging.debug(`Value received: ${answers.value || 'null'}`);
-		staging.debug(`Gas received: ${answers.gas || 'null'}`);
-		staging.debug(`Gas Price received: ${answers.gasPrice || 'null'}`);
+		debug(`To received: ${answers.to || 'null'}`);
+		debug(`Value received: ${answers.value || 'null'}`);
+		debug(`Gas received: ${answers.gas || 'null'}`);
+		debug(`Gas Price received: ${answers.gasPrice || 'null'}`);
 	}
 
-	args.options.gas = args.options.gas || session.config.state.defaults.gas;
-	args.options.gasprice =
-		args.options.gasprice || session.config.state.defaults.gasPrice;
+	options.gas = options.gas || state.defaults.gas;
+	options.gasprice = options.gasprice || state.defaults.gasPrice;
 
-	if (!args.options.to || !args.options.value) {
+	if (!options.to || !options.value) {
 		return Promise.reject(
-			staging.error(
+			error(
 				TRANSFER.TO_VALUE_EMPTY,
 				'Provide `to` address and `value` to send'
 			)
 		);
 	}
 
-	let send: boolean = true;
+	let confirm: boolean = true;
 
-	staging.debug(`Attempting to generate transaction...`);
+	debug(`Attempting to generate transaction...`);
 
 	const transaction = Account.prepareTransfer(
-		args.options.from,
-		args.options.to,
-		args.options.value,
-		args.options.gas,
-		args.options.gasprice
+		options.from,
+		options.to,
+		options.value,
+		options.gas,
+		options.gasprice
 	);
 
 	let tx = {
@@ -324,22 +273,14 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	if (interactive) {
 		const { send: s } = await inquirer.prompt<FourthAnswers>(fourth);
 
-		send = s;
+		confirm = s;
 	}
 
-	if (!send) {
-		return Promise.resolve(staging.success('Transaction aborted.'));
+	if (!confirm) {
+		return Promise.resolve(success('Transaction aborted.'));
 	}
 
-	staging.debug(`Attempting to send transaction...`);
+	await send(transaction, decrypted);
 
-	try {
-		await session.node.sendTransaction(transaction, decrypted);
-	} catch (e) {
-		return Promise.reject(e.text);
-	}
-
-	return Promise.resolve(
-		staging.success('Transaction submitted successfully.')
-	);
+	return Promise.resolve(success('Transaction submitted successfully.'));
 };
