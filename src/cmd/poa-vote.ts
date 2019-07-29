@@ -13,7 +13,7 @@ import Frames, {
 	IStagingFunction,
 	IOptions,
 	IStagedOutput
-} from '../Frames';
+} from '../frames';
 
 import { TRANSACTION, EVM_LITE } from '../errors/generals';
 import { POA_VOTE } from '../errors/poa';

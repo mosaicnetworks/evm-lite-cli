@@ -29,4 +29,10 @@ export { default as poaInit } from './cmd/poa-init';
 export { default as transfer } from './cmd/transfer';
 export { default as info } from './cmd/info';
 
-export * from './frames';
+export {
+	default as Frames,
+	IOptions,
+	IStagedOutput,
+	IStagingFunction,
+	execute
+} from './frames';

@@ -1,10 +1,8 @@
 import { Args } from 'vorpal';
 
-import { Transaction, TransactionReceipt, Account } from 'evm-lite-core';
-
 import Frames, { IOptions } from './Frames';
 
-import { INVALID_CONNECTION, EVM_LITE } from '../errors/generals';
+import { INVALID_CONNECTION } from '../errors/generals';
 
 export interface IGenericFrames {
 	connect: (host: string, port: number) => Promise<boolean>;

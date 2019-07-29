@@ -7,8 +7,6 @@ import Utils from 'evm-lite-utils';
 import Session from '../Session';
 import Frames, { execute, IStagingFunction, IOptions } from '../frames';
 
-import { EVM_LITE } from '../errors/generals';
-
 interface Options extends IOptions {
 	formatted?: boolean;
 	host?: string;
