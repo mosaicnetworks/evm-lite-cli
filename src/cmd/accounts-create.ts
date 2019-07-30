@@ -25,6 +25,7 @@ interface Options extends IOptions {
 }
 
 export interface Arguments extends Args<Options> {
+	moniker?: string;
 	options: Options;
 }
 
@@ -32,7 +33,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 	const description = 'Creates an encrypted keypair locally';
 
 	return evmlc
-		.command('accounts create')
+		.command('accounts create [moniker]')
 		.alias('a c')
 		.description(description)
 		.option('-i, --interactive', 'enter interactive mode')
@@ -40,12 +41,14 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.option('--pwd <file_path>', 'passphrase file path')
 		.option('--out <output_path>', 'write keystore to output path')
 		.types({
-			string: ['pwd', 'out']
+			string: ['_', 'pwd', 'out']
 		})
 		.action((args: Arguments) => execute(stage, args, session));
 }
 
 interface Answers {
+	moniker: string;
+	outpath: string;
 	passphrase: string;
 	verifyPassphrase: string;
 }
@@ -74,6 +77,17 @@ export const stage: IStagingFunction<
 	const interactive = options.interactive || session.interactive;
 	const questions: inquirer.Questions<Answers> = [
 		{
+			message: 'Moniker: ',
+			name: 'moniker',
+			type: 'input'
+		},
+		{
+			message: 'Output Path: ',
+			name: 'outpath',
+			type: 'input',
+			default: session.keystore.path
+		},
+		{
 			message: 'Passphrase: ',
 			name: 'passphrase',
 			type: 'password'
@@ -88,6 +102,8 @@ export const stage: IStagingFunction<
 	if (interactive) {
 		const answers = await inquirer.prompt<Answers>(questions);
 
+		debug(`Moniker received: ${answers.moniker || 'null'}`);
+		debug(`Output Path received: ${answers.outpath || 'null'}`);
 		debug(`Passphrase received: ${answers.passphrase || 'null'}`);
 		debug(
 			`Verify passphrase received: ${answers.verifyPassphrase || 'null'}`
@@ -111,9 +127,18 @@ export const stage: IStagingFunction<
 			);
 		}
 
+		args.moniker = answers.moniker;
+		options.out = answers.outpath;
+
 		passphrase = answers.passphrase.trim();
 
 		debug(`Passphrase set: ${passphrase}`);
+	}
+
+	if (!args.moniker) {
+		return Promise.reject(
+			error(ACCOUNTS_CREATE.EMPTY_MONIKER, 'Moniker cannot be empty')
+		);
 	}
 
 	if (!passphrase) {
@@ -177,10 +202,18 @@ export const stage: IStagingFunction<
 
 	debug(`Attempting to create account...`);
 
-	const account: V3JSONKeyStore = await session.keystore.create(
-		passphrase,
-		options.out
-	);
+	let account: V3JSONKeyStore;
+	try {
+		account = await session.keystore.create(
+			args.moniker,
+			passphrase,
+			options.out
+		);
+	} catch (e) {
+		return Promise.reject(
+			error(ACCOUNTS_CREATE.KEYSTORE_CREATE, e.toString())
+		);
+	}
 
 	debug(
 		`Account creation successful: ${Utils.cleanAddress(account.address)}`

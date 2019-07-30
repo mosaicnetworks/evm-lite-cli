@@ -25,14 +25,14 @@ interface Options extends IOptions {
 
 export interface Arguments extends Args<Options> {
 	options: Options;
-	address?: string;
+	moniker?: string;
 }
 
 export default function command(evmlc: Vorpal, session: Session): Command {
 	const description = 'Update passphrase for a local account';
 
 	return evmlc
-		.command('accounts update [address]')
+		.command('accounts update [moniker]')
 		.alias('a u')
 		.description(description)
 		.option('-i, --interactive', 'enter interactive mode')
@@ -48,7 +48,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 }
 
 interface FirstAnswers {
-	address: string;
+	moniker: string;
 }
 
 interface SecondAnswers {
@@ -81,13 +81,13 @@ export const stage: IStagingFunction<
 	/** Command Execution */
 	const interactive = options.interactive || session.interactive;
 
-	let keystores = await list();
+	let keystore = await list();
 
 	const first: inquirer.Questions<FirstAnswers> = [
 		{
-			choices: keystores.map(keystore => keystore.address),
-			message: 'Address: ',
-			name: 'address',
+			choices: Object.keys(keystore).map(moniker => moniker),
+			message: 'Moniker: ',
+			name: 'moniker',
 			type: 'list'
 		}
 	];
@@ -113,34 +113,23 @@ export const stage: IStagingFunction<
 		}
 	];
 
-	if (interactive && !args.address) {
-		const { address } = await inquirer.prompt<FirstAnswers>(first);
+	if (interactive && !args.moniker) {
+		const { moniker } = await inquirer.prompt<FirstAnswers>(first);
 
-		args.address = address;
+		args.moniker = moniker;
 
-		debug(`Address received: ${address}`);
+		debug(`Moniker received: ${moniker}`);
 	}
 
-	if (!args.address) {
+	if (!args.moniker) {
 		return Promise.reject(
-			error(ACCOUNTS_UPDATE.ADDRESS_EMPTY, 'No address provided.')
+			error(ACCOUNTS_UPDATE.MONIKER_EMPTY, 'No moniker provided.')
 		);
 	}
 
-	args.address = Utils.trimHex(args.address);
+	debug(`Moniker validated: ${args.moniker}`);
 
-	if (args.address.length !== 40) {
-		return Promise.reject(
-			error(
-				ACCOUNTS_UPDATE.ADDRESS_INVALID_LENGTH,
-				'Address provided has an invalid length.'
-			)
-		);
-	}
-
-	debug(`Address validated: ${args.address}`);
-
-	let keyfile = await get(args.address);
+	let keyfile = await get(args.moniker);
 
 	let oldPassphrase: string = '';
 	let newPassphrase: string = '';
@@ -268,7 +257,7 @@ export const stage: IStagingFunction<
 	debug(`Attempting to update passphrase for address...`);
 
 	const newKeystore = await session.keystore.update(
-		args.address,
+		args.moniker,
 		oldPassphrase,
 		newPassphrase
 	);

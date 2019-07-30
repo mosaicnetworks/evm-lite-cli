@@ -55,16 +55,16 @@ const commands = [
 	poaCheck,
 	poaWhitelist,
 	poaNomineelist,
-	poaNominate,
-	poaVote,
+	// poaNominate,
+	// poaVote,
 	poaInfo,
-	poaInit,
+	// poaInit,
 
 	// misc
 	info,
 	test,
-	version,
-	transfer
+	version
+	// transfer
 ];
 
 init(params, commands).catch(console.log);

@@ -1,14 +1,14 @@
 import { Args } from 'vorpal';
 
 import { Account } from 'evm-lite-core';
-import { V3JSONKeyStore, Keystore } from 'evm-lite-keystore';
+import { V3JSONKeyStore, Keystore, MonikerKeyfile } from 'evm-lite-keystore';
 
 import Frames, { IOptions } from './Frames';
 
 import { KEYSTORE } from '../errors/generals';
 
 export interface IKeystoreFrames {
-	list: () => Promise<V3JSONKeyStore[]>;
+	list: () => Promise<MonikerKeyfile>;
 	get: (address: string) => Promise<V3JSONKeyStore>;
 	decrypt: (keyfile: V3JSONKeyStore, password: string) => Promise<Account>;
 }
@@ -25,16 +25,16 @@ export default <A extends Args<IOptions>, F, N>(
 
 const list = async <A extends Args<IOptions>, F, N>(
 	frames: Frames<A, F, N>
-): Promise<V3JSONKeyStore[]> => {
+): Promise<MonikerKeyfile> => {
 	const { debug, error } = frames.staging();
 
 	debug(`Keystore path: ${frames.session.keystore.path}`);
 	debug(`Attempting to fetch accounts from keystore...`);
 
 	try {
-		const keystores = await frames.session.keystore.list();
+		const mapping = await frames.session.keystore.list();
 
-		if (!keystores.length) {
+		if (!Object.keys(mapping).length) {
 			return Promise.reject(
 				error(
 					KEYSTORE.EMPTY,
@@ -45,7 +45,7 @@ const list = async <A extends Args<IOptions>, F, N>(
 			);
 		}
 
-		return keystores;
+		return mapping;
 	} catch (e) {
 		return Promise.reject(error(KEYSTORE.LIST, e.toString()));
 	}

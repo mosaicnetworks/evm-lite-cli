@@ -9,6 +9,10 @@ export const ACCOUNTS_CREATE = {
 	OUT_PATH_IS_NOT_DIR: '@error/accounts/CREATE/OUT_PATH_IS_NOT_DIR',
 	OUT_PATH_NOT_FOUND: '@error/accounts/CREATE/OUT_PATH_NOT_FOUND',
 
+	EMPTY_MONIKER: '@error/accounts/CREATE/EMPTY_MONIKER',
+
+	KEYSTORE_CREATE: '@error/accounts/CREATE/KEYSTORE_CREATE',
+
 	// Interactive
 	PASS_FIELDS_BLANK: '@error/accounts/CREATE/PASS_FIELDS_BLANK',
 	PASS_DO_NOT_MATCH: '@error/accounts/CREATE/PASS_DO_NOT_MATCH'
@@ -21,7 +25,8 @@ export const ACCOUNTS_GET = {
 
 export const ACCOUNTS_UPDATE = {
 	// Non-interactive
-	ADDRESS_EMPTY: '@error/accounts/UPDATE/ADDRESS_EMPTY',
+	MONIKER_EMPTY: '@error/accounts/UPDATE/ADDRESS_EMPTY',
+
 	ADDRESS_INVALID_LENGTH: '@error/accounts/UPDATE/ADDRESS_INVALID_LENGTH',
 
 	OLD_PWD_NOT_FOUND: '@error/accounts/UPDATE/OLD_PWD_NOT_FOUND',

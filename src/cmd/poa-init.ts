@@ -1,3 +1,5 @@
+// TODO: Need to sort out default from address
+
 import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 
@@ -85,11 +87,11 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	let passphrase: string = '';
 
 	const contract = await getContract();
-	const keystores = await list();
+	const keystore = await list();
 
 	const questions: inquirer.Questions<Answers> = [
 		{
-			choices: keystores.map(keystore => keystore.address),
+			choices: Object.keys(keystore).map(moniker => moniker),
 			message: 'From: ',
 			name: 'from',
 			type: 'list'
@@ -176,7 +178,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	try {
 		transaction = contract.methods.init({
-			from: options.from,
+			from: keystore[options.from],
 			gas: state.defaults.gas,
 			gasPrice: state.defaults.gasPrice
 		});
