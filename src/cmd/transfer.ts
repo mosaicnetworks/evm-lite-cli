@@ -110,10 +110,24 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	);
 
 	const keystore = await list();
+	const accounts = await Promise.all(
+		keystore.map(
+			async keyfile => await session.node.getAccount(keyfile.address)
+		)
+	);
 
+	const parseBalance = (s: string | any) => {
+		if (typeof s === 'object') {
+			return s.toFormat(0);
+		} else {
+			return s;
+		}
+	};
 	const first: inquirer.Questions<FirstAnswers> = [
 		{
-			choices: keystore.map(keyfile => keyfile.address),
+			choices: accounts.map(
+				acc => `${acc.address} (${parseBalance(acc.balance)})`
+			),
 			message: 'From: ',
 			name: 'from',
 			type: 'list'
@@ -265,10 +279,10 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		to: transaction.to,
 		value: transaction.value,
 		gas: transaction.gas,
-		gasPrice: transaction.gasPrice
+		gasPrice: transaction.gasPrice ? transaction.gasPrice : 0
 	};
 
-	console.log(tx);
+	console.log(JSON.stringify(tx, null, 2));
 
 	if (interactive) {
 		const { send: s } = await inquirer.prompt<FourthAnswers>(fourth);
