@@ -4,8 +4,8 @@ import { Arguments, stage, Output } from '../src/cmd/accounts-create';
 import { ACCOUNTS_CREATE } from '../src/errors/accounts';
 
 describe('accounts-create.ts', () => {
-	it('should error as --pwd path empty', async () => {
-		expect.assertions(2);
+	it('should error as [moniker] is empty', async () => {
+		expect.assertions(1);
 
 		const args: Arguments = {
 			options: {}
@@ -16,10 +16,27 @@ describe('accounts-create.ts', () => {
 		} catch (e) {
 			const output = e as Output;
 
-			expect(output.args.options.pwd).toBe(undefined);
+			if (output.error) {
+				expect(output.error.type).toBe(ACCOUNTS_CREATE.EMPTY_MONIKER);
+			}
+		}
+	});
+
+	it('should error as moniker provided has wrong format', async () => {
+		expect.assertions(1);
+
+		const args: Arguments = {
+			moniker: 'danu-123!',
+			options: {}
+		};
+
+		try {
+			await stage(args, session);
+		} catch (e) {
+			const output = e as Output;
 
 			if (output.error) {
-				expect(output.error.type).toBe(ACCOUNTS_CREATE.PWD_PATH_EMPTY);
+				expect(output.error.type).toBe(ACCOUNTS_CREATE.INVALID_MONIKER);
 			}
 		}
 	});
@@ -30,6 +47,7 @@ describe('accounts-create.ts', () => {
 		const path = '/path_does_not_exist/pwd.txt';
 
 		const args: Arguments = {
+			moniker: 'danu',
 			options: {
 				pwd: path
 			}
@@ -56,6 +74,7 @@ describe('accounts-create.ts', () => {
 		const path = '/';
 
 		const args: Arguments = {
+			moniker: 'danu',
 			options: {
 				pwd: path
 			}
@@ -80,6 +99,7 @@ describe('accounts-create.ts', () => {
 		const path = '/does_not_exist/';
 
 		const args: Arguments = {
+			moniker: 'danu',
 			options: {
 				pwd: pwdPath,
 				out: path
@@ -105,6 +125,7 @@ describe('accounts-create.ts', () => {
 		expect.assertions(2);
 
 		const args: Arguments = {
+			moniker: 'danu',
 			options: {
 				pwd: pwdPath,
 				out: pwdPath
@@ -130,6 +151,7 @@ describe('accounts-create.ts', () => {
 		expect.assertions(4);
 
 		const args: Arguments = {
+			moniker: 'danu',
 			options: {
 				pwd: pwdPath,
 				out: session.keystore.path

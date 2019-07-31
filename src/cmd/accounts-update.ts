@@ -5,7 +5,7 @@ import Vorpal, { Command, Args } from 'vorpal';
 
 import Utils from 'evm-lite-utils';
 
-import { V3JSONKeyStore } from 'evm-lite-keystore';
+import { V3Keyfile } from 'evm-lite-keystore';
 
 import Session from '../Session';
 import Frames, {
@@ -60,17 +60,13 @@ interface ThirdAnswers {
 	verifyPassphrase: string;
 }
 
-export type Output = IStagedOutput<Arguments, V3JSONKeyStore, V3JSONKeyStore>;
+export type Output = IStagedOutput<Arguments, V3Keyfile, V3Keyfile>;
 
-export const stage: IStagingFunction<
-	Arguments,
-	V3JSONKeyStore,
-	V3JSONKeyStore
-> = async (args: Arguments, session: Session) => {
-	const frames = new Frames<Arguments, V3JSONKeyStore, V3JSONKeyStore>(
-		session,
-		args
-	);
+export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
+	args: Arguments,
+	session: Session
+) => {
+	const frames = new Frames<Arguments, V3Keyfile, V3Keyfile>(session, args);
 
 	// prepare
 	const { options } = args;
@@ -124,6 +120,15 @@ export const stage: IStagingFunction<
 	if (!args.moniker) {
 		return Promise.reject(
 			error(ACCOUNTS_UPDATE.MONIKER_EMPTY, 'No moniker provided.')
+		);
+	}
+
+	if (!Utils.validMoniker(args.moniker)) {
+		return Promise.reject(
+			error(
+				ACCOUNTS_UPDATE.INVALID_MONIKER,
+				'Invalid characters in moniker.'
+			)
 		);
 	}
 

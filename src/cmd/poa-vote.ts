@@ -5,7 +5,7 @@ import Vorpal, { Command, Args } from 'vorpal';
 
 import Utils from 'evm-lite-utils';
 
-import { V3JSONKeyStore } from 'evm-lite-keystore';
+import { V3Keyfile } from 'evm-lite-keystore';
 
 import Session from '../Session';
 import Frames, {
@@ -103,7 +103,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	);
 
 	const contract = await getContract();
-	const keystore: V3JSONKeyStore[] = await list();
+	const keystore = await list();
 
 	debug(`Attempting to generate nominee count transaction...`);
 
@@ -198,7 +198,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	const questions: inquirer.Questions<Answers> = [
 		{
-			choices: keystore.map(keyfile => keyfile.address),
+			choices: Object.keys(keystore).map(moniker => moniker),
 			message: 'From: ',
 			name: 'from',
 			type: 'list'
@@ -263,7 +263,15 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	debug(`Nominee address validated: ${args.address}`);
 
-	const from = options.from || session.config.state.defaults.from;
+	if (!options.from) {
+		return Promise.reject(
+			error(POA_VOTE.FROM_EMPTY, 'No `from` address provided.')
+		);
+	}
+
+	const from = Utils.trimHex(
+		keystore[options.from].address || session.config.state.defaults.from
+	);
 
 	if (!from) {
 		return Promise.reject(
@@ -320,7 +328,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		debug(`Passphrase read successfully: ${passphrase}`);
 	}
 
-	const keyfile = await get(from);
+	const keyfile = await get(options.from);
 	const decrypted = await decrypt(keyfile, passphrase);
 
 	debug(`Attempting to generate vote transaction...`);

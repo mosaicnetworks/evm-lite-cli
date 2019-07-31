@@ -1,5 +1,3 @@
-// TODO: Need to sort out default from address
-
 import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 
@@ -39,7 +37,7 @@ export default function command(monet: Vorpal, session: Session): Command {
 		.description(description)
 		.option('-d, --debug', 'show debug output')
 		.option('--pwd <password>', 'passphase file path')
-		.option('--from <address>', 'from address')
+		.option('--from <moniker>', 'from moniker')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.types({
@@ -115,7 +113,15 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		debug(`Passphrase received: ${p}`);
 	}
 
-	const from = Utils.trimHex(options.from || state.defaults.from);
+	if (!options.from) {
+		return Promise.reject(
+			error(POA_INIT.ADDRESS_EMPTY, 'No `from` address provided.')
+		);
+	}
+
+	const from = Utils.trimHex(
+		keystore[options.from].address || state.defaults.from
+	);
 
 	if (!from) {
 		return Promise.reject(
@@ -169,7 +175,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		debug(`Passphrase read successfully: ${passphrase}`);
 	}
 
-	const keyfile = await get(from);
+	const keyfile = await get(options.from);
 	const decrypted = await decrypt(keyfile, passphrase);
 
 	let transaction: Transaction;
@@ -178,7 +184,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	try {
 		transaction = contract.methods.init({
-			from: keystore[options.from],
+			from,
 			gas: state.defaults.gas,
 			gasPrice: state.defaults.gasPrice
 		});

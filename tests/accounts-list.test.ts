@@ -11,7 +11,7 @@ describe('accounts-list.ts', () => {
 		expect.assertions(4);
 
 		// create keystore
-		await session.keystore.create('password');
+		await session.keystore.create('danu', 'password');
 
 		const args: Arguments = {
 			options: {
@@ -34,7 +34,7 @@ describe('accounts-list.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		await session.keystore.create('password');
+		await session.keystore.create('danu2', 'password');
 
 		const args: Arguments = {
 			options: {

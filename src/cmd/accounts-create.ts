@@ -5,7 +5,7 @@ import Vorpal, { Command, Args } from 'vorpal';
 
 import Utils from 'evm-lite-utils';
 
-import { V3JSONKeyStore } from 'evm-lite-keystore';
+import { V3Keyfile } from 'evm-lite-keystore';
 
 import Session from '../Session';
 import Frames, {
@@ -53,17 +53,13 @@ interface Answers {
 	verifyPassphrase: string;
 }
 
-export type Output = IStagedOutput<Arguments, V3JSONKeyStore, V3JSONKeyStore>;
+export type Output = IStagedOutput<Arguments, V3Keyfile, V3Keyfile>;
 
-export const stage: IStagingFunction<
-	Arguments,
-	V3JSONKeyStore,
-	V3JSONKeyStore
-> = async (args: Arguments, session: Session) => {
-	const frames = new Frames<Arguments, V3JSONKeyStore, V3JSONKeyStore>(
-		session,
-		args
-	);
+export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
+	args: Arguments,
+	session: Session
+) => {
+	const frames = new Frames<Arguments, V3Keyfile, V3Keyfile>(session, args);
 
 	// args
 	const { options } = args;
@@ -141,6 +137,15 @@ export const stage: IStagingFunction<
 		);
 	}
 
+	if (!Utils.validMoniker(args.moniker)) {
+		return Promise.reject(
+			error(
+				ACCOUNTS_CREATE.INVALID_MONIKER,
+				'Moniker contains illegal characters'
+			)
+		);
+	}
+
 	if (!passphrase) {
 		debug(`Passphrase file path: ${options.pwd || 'null'}`);
 
@@ -202,7 +207,7 @@ export const stage: IStagingFunction<
 
 	debug(`Attempting to create account...`);
 
-	let account: V3JSONKeyStore;
+	let account: V3Keyfile;
 	try {
 		account = await session.keystore.create(
 			args.moniker,

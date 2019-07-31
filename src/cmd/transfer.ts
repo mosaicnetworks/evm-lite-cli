@@ -5,6 +5,7 @@ import Vorpal, { Command, Args } from 'vorpal';
 
 import Utils from 'evm-lite-utils';
 
+import { MonikerBaseAccount } from 'evm-lite-keystore';
 import { Account } from 'evm-lite-core';
 
 import Session from '../Session';
@@ -48,7 +49,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.option('-g, --gas <value>', 'gas')
 		.option('-gp, --gasprice <value>', 'gas price')
 		.option('-t, --to <address>', 'send to address')
-		.option('-f, --from <address>', 'send from address')
+		.option('-f, --from <moniker>', 'moniker of sender')
 		.option('--pwd <password>', 'passphrase file path')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
@@ -110,10 +111,17 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	);
 
 	const keystore = await list();
-	const accounts = await Promise.all(
-		keystore.map(
-			async keyfile => await session.node.getAccount(keyfile.address)
-		)
+	const accounts: MonikerBaseAccount[] = await Promise.all(
+		Object.keys(keystore).map(async moniker => {
+			const base = await session.node.getAccount(
+				keystore[moniker].address
+			);
+
+			return {
+				...base,
+				moniker
+			};
+		})
 	);
 
 	const parseBalance = (s: string | any) => {
@@ -126,7 +134,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	const first: inquirer.Questions<FirstAnswers> = [
 		{
 			choices: accounts.map(
-				acc => `${acc.address} (${parseBalance(acc.balance)})`
+				acc => `${acc.moniker} (${parseBalance(acc.balance)})`
 			),
 			message: 'From: ',
 			name: 'from',
@@ -179,7 +187,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	if (interactive) {
 		const { from } = await inquirer.prompt<FirstAnswers>(first);
 
-		options.from = Utils.trimHex(from);
+		options.from = Utils.trimHex(from.split(' ')[0]);
 
 		debug(`From address received: ${from}`);
 	}
@@ -247,7 +255,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		debug(`To received: ${answers.to || 'null'}`);
 		debug(`Value received: ${answers.value || 'null'}`);
 		debug(`Gas received: ${answers.gas || 'null'}`);
-		debug(`Gas Price received: ${answers.gasPrice || 'null'}`);
+		debug(`Gas Price received: ${answers.gasPrice ? answers.gasPrice : 0}`);
 	}
 
 	options.gas = options.gas || state.defaults.gas;
@@ -262,12 +270,18 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		);
 	}
 
+	if (Utils.trimHex(options.to).length !== 40) {
+		return Promise.reject(
+			error(TRANSFER.ADDRESS_INVALID_LENGTH, 'Invalid `to` address')
+		);
+	}
+
 	let confirm: boolean = true;
 
 	debug(`Attempting to generate transaction...`);
 
 	const transaction = Account.prepareTransfer(
-		options.from,
+		keystore[options.from].address,
 		options.to,
 		options.value,
 		options.gas,
@@ -282,7 +296,9 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		gasPrice: transaction.gasPrice ? transaction.gasPrice : 0
 	};
 
-	console.log(JSON.stringify(tx, null, 2));
+	if (interactive) {
+		console.log(JSON.stringify(tx, null, 2));
+	}
 
 	if (interactive) {
 		const { send: s } = await inquirer.prompt<FourthAnswers>(fourth);

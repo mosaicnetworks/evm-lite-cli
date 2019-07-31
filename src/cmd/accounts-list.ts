@@ -3,6 +3,7 @@ import Vorpal, { Command, Args } from 'vorpal';
 
 import Utils from 'evm-lite-utils';
 import { BaseAccount } from 'evm-lite-core';
+import { MonikerBaseAccount } from 'evm-lite-keystore';
 
 import Session from '../Session';
 import Frames, {
@@ -19,10 +20,6 @@ interface Options extends IOptions {
 	remote?: boolean;
 	host?: string;
 	port?: number;
-}
-
-interface MonikerBaseAccount extends BaseAccount {
-	moniker: string;
 }
 
 export interface Arguments extends Args<Options> {

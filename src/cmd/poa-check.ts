@@ -15,7 +15,7 @@ import Frames, {
 } from '../frames';
 
 import { POA_CHECK } from '../errors/poa';
-import { EVM_LITE, TRANSACTION } from '../errors/generals';
+import { TRANSACTION } from '../errors/generals';
 
 interface Options extends IOptions {
 	interactive?: boolean;

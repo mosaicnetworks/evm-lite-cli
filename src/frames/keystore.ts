@@ -1,16 +1,16 @@
 import { Args } from 'vorpal';
 
 import { Account } from 'evm-lite-core';
-import { V3JSONKeyStore, Keystore, MonikerKeyfile } from 'evm-lite-keystore';
+import { V3Keyfile, Keystore, MonikerKeystore } from 'evm-lite-keystore';
 
 import Frames, { IOptions } from './Frames';
 
 import { KEYSTORE } from '../errors/generals';
 
 export interface IKeystoreFrames {
-	list: () => Promise<MonikerKeyfile>;
-	get: (address: string) => Promise<V3JSONKeyStore>;
-	decrypt: (keyfile: V3JSONKeyStore, password: string) => Promise<Account>;
+	list: () => Promise<MonikerKeystore>;
+	get: (address: string) => Promise<V3Keyfile>;
+	decrypt: (keyfile: V3Keyfile, password: string) => Promise<Account>;
 }
 
 export default <A extends Args<IOptions>, F, N>(
@@ -25,7 +25,7 @@ export default <A extends Args<IOptions>, F, N>(
 
 const list = async <A extends Args<IOptions>, F, N>(
 	frames: Frames<A, F, N>
-): Promise<MonikerKeyfile> => {
+): Promise<MonikerKeystore> => {
 	const { debug, error } = frames.staging();
 
 	debug(`Keystore path: ${frames.session.keystore.path}`);
@@ -53,19 +53,19 @@ const list = async <A extends Args<IOptions>, F, N>(
 
 const get = async <A extends Args<IOptions>, F, N>(
 	frames: Frames<A, F, N>,
-	address: string
-): Promise<V3JSONKeyStore> => {
+	moniker: string
+): Promise<V3Keyfile> => {
 	const { debug, error } = frames.staging();
 
 	debug(`Attempting to fetch keystore for address...`);
 
 	try {
-		return await frames.session.keystore.get(address);
+		return await frames.session.keystore.get(moniker);
 	} catch (e) {
 		return Promise.reject(
 			error(
 				KEYSTORE.FETCH,
-				`Could not locate keystore for address '${address}' in '${
+				`Could not locate keystore for address '${moniker}' in '${
 					frames.session.keystore.path
 				}'`
 			)
@@ -75,7 +75,7 @@ const get = async <A extends Args<IOptions>, F, N>(
 
 const decrypt = async <A extends Args<IOptions>, F, N>(
 	frames: Frames<A, F, N>,
-	keyfile: V3JSONKeyStore,
+	keyfile: V3Keyfile,
 	passphrase: string
 ): Promise<Account> => {
 	const { debug, error } = frames.staging();

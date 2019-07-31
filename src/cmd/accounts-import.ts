@@ -6,7 +6,7 @@ import Vorpal, { Command, Args } from 'vorpal';
 
 import Utils from 'evm-lite-utils';
 
-import { V3JSONKeyStore } from 'evm-lite-keystore';
+import { V3Keyfile } from 'evm-lite-keystore';
 
 import Session from '../Session';
 import Frames, {
@@ -52,17 +52,13 @@ interface Answers {
 	makeDefault: boolean;
 }
 
-export type Output = IStagedOutput<Arguments, V3JSONKeyStore, V3JSONKeyStore>;
+export type Output = IStagedOutput<Arguments, V3Keyfile, V3Keyfile>;
 
-export const stage: IStagingFunction<
-	Arguments,
-	V3JSONKeyStore,
-	V3JSONKeyStore
-> = async (args: Arguments, session: Session) => {
-	const frames = new Frames<Arguments, V3JSONKeyStore, V3JSONKeyStore>(
-		session,
-		args
-	);
+export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
+	args: Arguments,
+	session: Session
+) => {
+	const frames = new Frames<Arguments, V3Keyfile, V3Keyfile>(session, args);
 
 	// prepare
 	const { options } = args;
@@ -118,7 +114,7 @@ export const stage: IStagingFunction<
 
 	debug(`Keyfile path verified: ${options.file}`);
 
-	let keystore: V3JSONKeyStore;
+	let keystore: V3Keyfile;
 
 	debug(`Keystore directory: ${session.keystore.path}`);
 	debug(`Attempting to import keyfile...`);
