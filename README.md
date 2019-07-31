@@ -71,14 +71,16 @@ Example evmlc.toml:
 
 ```toml
 [connection]
-host = "127.0.0.1"
-port = 8000
+host = "localhost"
+port = 8080
 
 [defaults]
-from = "0x702B0ad02a7a6056EB16A697A96d849c228F5fB4"
-gas = 1000000000000
+from = "moniker"
+gas = 1000000
 gasPrice = 0
 ```
+
+**_Note: `from` refers to the `moniker` of the account not the `address`_**
 
 To change default configuration values run `evmlc config set -i` or `evmlc c s -i`. You will be
 taken to an interactive prompt to change connection and default values.
@@ -86,10 +88,10 @@ taken to an interactive prompt to change connection and default values.
 ```console
 $ evmlc config set -i
 
-? Host: 127.0.0.1
-? Port: 8000
-? From: 0x702B0ad02a7a6056EB16A697A96d849c228F5fB4
-? Gas: 1000000000000
+? Host: localhost
+? Port: 8080
+? From: moniker
+? Gas: 1000000
 ? Gas Price: 0
 ```
 
