@@ -43,8 +43,6 @@ A list of all supported commands along with documentation can be found [here](do
 
 The global flag `-d, --datadir` specifies the directory where `keystore` and `evmlc.toml` are stored unless overwritten by specific flags.
 
-_Note: that if this flag is not provided, it will default to `~/.evmlc`._
-
 ```bash
 evmlc --datadir [path] interactive
 ```
@@ -73,6 +71,7 @@ Example evmlc.toml:
 host = "localhost"
 port = 8080
 
+# transaction defaults
 [defaults]
 from = "moniker"
 gas = 1000000
