@@ -55,15 +55,14 @@ The first time `evmlc` runs, and if no options are specified, it creates a
 special directory in a default location, where it
 stores any relevant information.
 
--   Windows: `~/AppData/Roaming/EVMLC`
--   Mac OS: `~/Library/EVMLC`
 -   Linux: `~/.evmlc`
+-   Mac OS: `~/Library/EVMLC`
+-   Windows: `~/AppData/Roaming/EVMLC`
 
 In particular, this directory contains the following items:
 
--   **evmlc.toml**: where global options are specified. These values may be
-    overwritten by CLI flags.
--   **keystore**: where all encrypted account keys are stored.
+-   **evmlc.toml**: where global options are specified
+-   **keystore**: where all encrypted account keys are stored
 
 ### `evmlc.toml`
 
@@ -80,7 +79,7 @@ gas = 1000000
 gasPrice = 0
 ```
 
-**_Note: `from` refers to the `moniker` of the account not the `address`_**
+_Note: `from` refers to the `moniker` of the account not the `address`._
 
 To change default configuration values run `evmlc config set -i` or `evmlc c s -i`. You will be
 taken to an interactive prompt to change connection and default values.
@@ -97,7 +96,9 @@ $ evmlc config set -i
 
 ## Proof of Authority
 
-The Monet Hub using Proof of Authority with EVM-Lite and Babble. A [Proof of Authority Document](docs/proof-of-authority.md) is available.
+The Monet Hub uses Proof of Authority with EVM-Lite and Babble.
+
+A [Proof of Authority Document](docs/proof-of-authority.md) is available.
 
 ## Developers
 
