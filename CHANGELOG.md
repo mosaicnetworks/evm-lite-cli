@@ -12,8 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 -   `transfer` now lists accounts in interactive mode with balances formatted nicely
--   all `from` are now referenced by `moniker`
--   default `from` in config refers to `moniker`
+-   All `from` are now referenced by `moniker`
+-   Default `from` in config refers to `moniker`
+-   All commands now use the `moniker` and the primary reference to an account
 
 ## 1.0.0-alpha.21
 
