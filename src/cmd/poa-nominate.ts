@@ -169,35 +169,18 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	debug(`Nominee address validated: ${args.address}`);
 
-	if (!options.from) {
-		return Promise.reject(
-			error(POA_NOMINATE.FROM_EMPTY, 'No `from` moniker provided.')
-		);
-	}
-
-	const from = Utils.trimHex(
-		keystore[options.from].address || state.defaults.from
-	);
+	const from = Utils.trimHex(options.from || state.defaults.from);
 
 	if (!from) {
 		return Promise.reject(
 			error(
 				POA_NOMINATE.FROM_EMPTY,
-				'No from address provided or set in config.'
+				'No `from` moniker provided or set in config.'
 			)
 		);
 	}
 
-	if (from.length !== 40) {
-		return Promise.reject(
-			error(
-				POA_NOMINATE.FROM_INVALID_LENGTH,
-				'`from` address has an invalid length.'
-			)
-		);
-	}
-
-	debug(`From address validated: ${from}`);
+	debug(`From moniker validated: ${from}`);
 
 	if (!passphrase) {
 		debug(`Passphrase path: ${options.pwd || 'null'}`);
@@ -234,7 +217,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		debug(`Passphrase read successfully: ${passphrase}`);
 	}
 
-	const keyfile = await get(options.from);
+	const keyfile = await get(from);
 	const decrypted = await decrypt(keyfile, passphrase);
 
 	debug(`Attempting to generate transaction...`);
@@ -242,7 +225,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	// could be going wrong here.
 	const transaction = contract.methods.submitNominee(
 		{
-			from,
+			from: keyfile.address,
 			gas: session.config.state.defaults.gas,
 			gasPrice: session.config.state.defaults.gasPrice
 		},

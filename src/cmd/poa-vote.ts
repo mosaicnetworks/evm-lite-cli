@@ -269,29 +269,18 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		);
 	}
 
-	const from = Utils.trimHex(
-		keystore[options.from].address || session.config.state.defaults.from
-	);
+	const from = Utils.trimHex(options.from || state.defaults.from);
 
 	if (!from) {
 		return Promise.reject(
 			error(
 				POA_VOTE.FROM_EMPTY,
-				'No from address provided or set in config.'
+				'No from moniker provided or set in config.'
 			)
 		);
 	}
 
-	if (from.length !== 40) {
-		return Promise.reject(
-			error(
-				POA_VOTE.FROM_INVALID_LENGTH,
-				'Address has an invalid length.'
-			)
-		);
-	}
-
-	debug(`From address validated: ${options.from}`);
+	debug(`From moniker validated: ${options.from}`);
 
 	if (!passphrase) {
 		debug(`Passphrase path: ${options.pwd || 'null'}`);
@@ -335,7 +324,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	const transaction = contract.methods.castNomineeVote(
 		{
-			from,
+			from: keyfile.address,
 			gas: session.config.state.defaults.gas,
 			gasPrice: session.config.state.defaults.gasPrice
 		},

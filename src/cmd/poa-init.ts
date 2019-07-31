@@ -113,32 +113,18 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		debug(`Passphrase received: ${p}`);
 	}
 
-	if (!options.from) {
-		return Promise.reject(
-			error(POA_INIT.ADDRESS_EMPTY, 'No `from` address provided.')
-		);
-	}
-
-	const from = Utils.trimHex(
-		keystore[options.from].address || state.defaults.from
-	);
+	const from = Utils.trimHex(options.from || state.defaults.from);
 
 	if (!from) {
 		return Promise.reject(
-			error(POA_INIT.ADDRESS_EMPTY, 'No `from` address provided.')
-		);
-	}
-
-	if (from.length !== 40) {
-		return Promise.reject(
 			error(
-				POA_INIT.ADDRESS_INVALID_LENGTH,
-				'`from` address has an invalid length.'
+				POA_INIT.ADDRESS_EMPTY,
+				'No `from` moniker provided or set in config.'
 			)
 		);
 	}
 
-	debug(`'from' address validated: ${from}`);
+	debug(`'from' moniker validated: ${from}`);
 
 	if (!passphrase) {
 		debug(`Passphrase path: ${options.pwd || 'null'}`);
@@ -175,7 +161,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		debug(`Passphrase read successfully: ${passphrase}`);
 	}
 
-	const keyfile = await get(options.from);
+	const keyfile = await get(from);
 	const decrypted = await decrypt(keyfile, passphrase);
 
 	let transaction: Transaction;
@@ -184,7 +170,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	try {
 		transaction = contract.methods.init({
-			from,
+			from: keyfile.address,
 			gas: state.defaults.gas,
 			gasPrice: state.defaults.gasPrice
 		});

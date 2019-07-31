@@ -192,15 +192,18 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		debug(`From address received: ${from}`);
 	}
 
-	if (!options.from) {
+	const from = options.from || state.defaults.from;
+
+	if (!from) {
 		return Promise.reject(
-			error(TRANSFER.FROM_EMPTY, 'Argument `from` not provided.')
+			error(
+				TRANSFER.FROM_EMPTY,
+				'No `from` moniker provided or set in config.'
+			)
 		);
 	}
 
-	debug(`From address validated: ${options.from}`);
-
-	const keyfile = await get(options.from);
+	const keyfile = await get(from);
 
 	if (interactive) {
 		const { passphrase: p } = await inquirer.prompt<SecondAnswers>(second);
@@ -281,7 +284,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	debug(`Attempting to generate transaction...`);
 
 	const transaction = Account.prepareTransfer(
-		keystore[options.from].address,
+		keyfile.address,
 		options.to,
 		options.value,
 		options.gas,
