@@ -43,7 +43,7 @@ export default function command(monet: Vorpal, session: Session): Command {
 		.option('-d, --debug', 'show debug output')
 		.option('--verdict <boolean>', 'verdict for given address')
 		.option('--pwd <password>', 'passphrase file path')
-		.option('--from <address>', 'from address')
+		.option('--from <moniker>', 'from moniker')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.types({

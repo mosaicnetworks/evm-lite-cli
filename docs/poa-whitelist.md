@@ -22,7 +22,6 @@ _*Requires a valid connection*_
     --help             output usage information
     -d, --debug        show debug output
     -f, --formatted    format output
-    --from <address>   from address
     -h, --host <ip>    override config host value
     -p, --port <port>  override config port value
 ```
