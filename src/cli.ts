@@ -1,8 +1,5 @@
 #!/usr/bin/env node
-
-import { osDataDir } from 'evm-lite-datadir';
-
-import * as path from 'path';
+import { osdatadir } from 'evm-lite-datadir';
 
 // Accounts
 import accountsCreate from './cmd/accounts-create';
@@ -35,7 +32,7 @@ import init, { IInit } from './init';
 const params: IInit = {
 	name: 'EVM-Lite CLI',
 	delimiter: 'evmlc',
-	datadir: osDataDir('EVMLC'),
+	datadir: osdatadir('EVMLC'),
 	config: 'evmlc'
 };
 
