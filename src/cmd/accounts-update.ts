@@ -3,9 +3,9 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
-import { V3JSONKeyStore } from 'evm-lite-keystore';
+import { V3Keyfile } from 'evm-lite-keystore';
 
 import Session from '../Session';
 import Frames, {
@@ -25,14 +25,14 @@ interface Options extends IOptions {
 
 export interface Arguments extends Args<Options> {
 	options: Options;
-	address?: string;
+	moniker?: string;
 }
 
 export default function command(evmlc: Vorpal, session: Session): Command {
 	const description = 'Update passphrase for a local account';
 
 	return evmlc
-		.command('accounts update [address]')
+		.command('accounts update [moniker]')
 		.alias('a u')
 		.description(description)
 		.option('-i, --interactive', 'enter interactive mode')
@@ -48,7 +48,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 }
 
 interface FirstAnswers {
-	address: string;
+	moniker: string;
 }
 
 interface SecondAnswers {
@@ -60,17 +60,13 @@ interface ThirdAnswers {
 	verifyPassphrase: string;
 }
 
-export type Output = IStagedOutput<Arguments, V3JSONKeyStore, V3JSONKeyStore>;
+export type Output = IStagedOutput<Arguments, V3Keyfile, V3Keyfile>;
 
-export const stage: IStagingFunction<
-	Arguments,
-	V3JSONKeyStore,
-	V3JSONKeyStore
-> = async (args: Arguments, session: Session) => {
-	const frames = new Frames<Arguments, V3JSONKeyStore, V3JSONKeyStore>(
-		session,
-		args
-	);
+export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
+	args: Arguments,
+	session: Session
+) => {
+	const frames = new Frames<Arguments, V3Keyfile, V3Keyfile>(session, args);
 
 	// prepare
 	const { options } = args;
@@ -81,13 +77,13 @@ export const stage: IStagingFunction<
 	/** Command Execution */
 	const interactive = options.interactive || session.interactive;
 
-	let keystores = await list();
+	let keystore = await list();
 
 	const first: inquirer.Questions<FirstAnswers> = [
 		{
-			choices: keystores.map(keystore => keystore.address),
-			message: 'Address: ',
-			name: 'address',
+			choices: Object.keys(keystore).map(moniker => moniker),
+			message: 'Moniker: ',
+			name: 'moniker',
 			type: 'list'
 		}
 	];
@@ -113,34 +109,32 @@ export const stage: IStagingFunction<
 		}
 	];
 
-	if (interactive && !args.address) {
-		const { address } = await inquirer.prompt<FirstAnswers>(first);
+	if (interactive && !args.moniker) {
+		const { moniker } = await inquirer.prompt<FirstAnswers>(first);
 
-		args.address = address;
+		args.moniker = moniker;
 
-		debug(`Address received: ${address}`);
+		debug(`Moniker received: ${moniker}`);
 	}
 
-	if (!args.address) {
+	if (!args.moniker) {
 		return Promise.reject(
-			error(ACCOUNTS_UPDATE.ADDRESS_EMPTY, 'No address provided.')
+			error(ACCOUNTS_UPDATE.MONIKER_EMPTY, 'No moniker provided.')
 		);
 	}
 
-	args.address = Utils.trimHex(args.address);
-
-	if (args.address.length !== 40) {
+	if (!utils.validMoniker(args.moniker)) {
 		return Promise.reject(
 			error(
-				ACCOUNTS_UPDATE.ADDRESS_INVALID_LENGTH,
-				'Address provided has an invalid length.'
+				ACCOUNTS_UPDATE.INVALID_MONIKER,
+				'Invalid characters in moniker.'
 			)
 		);
 	}
 
-	debug(`Address validated: ${args.address}`);
+	debug(`Moniker validated: ${args.moniker}`);
 
-	let keyfile = await get(args.address);
+	let keyfile = await get(args.moniker);
 
 	let oldPassphrase: string = '';
 	let newPassphrase: string = '';
@@ -165,7 +159,7 @@ export const stage: IStagingFunction<
 			);
 		}
 
-		if (!Utils.exists(options.old)) {
+		if (!utils.exists(options.old)) {
 			return Promise.reject(
 				error(
 					ACCOUNTS_UPDATE.OLD_PWD_NOT_FOUND,
@@ -174,7 +168,7 @@ export const stage: IStagingFunction<
 			);
 		}
 
-		if (Utils.isDirectory(options.old)) {
+		if (utils.isDirectory(options.old)) {
 			return Promise.reject(
 				error(
 					ACCOUNTS_UPDATE.OLD_PWD_IS_DIR,
@@ -233,7 +227,7 @@ export const stage: IStagingFunction<
 			);
 		}
 
-		if (!Utils.exists(options.new)) {
+		if (!utils.exists(options.new)) {
 			return Promise.reject(
 				error(
 					ACCOUNTS_UPDATE.NEW_PWD_NOT_FOUND,
@@ -242,7 +236,7 @@ export const stage: IStagingFunction<
 			);
 		}
 
-		if (Utils.isDirectory(options.new)) {
+		if (utils.isDirectory(options.new)) {
 			return Promise.reject(
 				error(
 					ACCOUNTS_UPDATE.NEW_PWD_IS_DIR,
@@ -268,7 +262,7 @@ export const stage: IStagingFunction<
 	debug(`Attempting to update passphrase for address...`);
 
 	const newKeystore = await session.keystore.update(
-		args.address,
+		args.moniker,
 		oldPassphrase,
 		newPassphrase
 	);

@@ -3,7 +3,7 @@ import * as inquirer from 'inquirer';
 import ASCIITable from 'ascii-table';
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
 import { BaseAccount } from 'evm-lite-core';
 
@@ -108,7 +108,7 @@ export const stage: IStagingFunction<
 		);
 	}
 
-	args.address = Utils.trimHex(args.address);
+	args.address = utils.trimHex(args.address);
 
 	if (args.address.length !== 40) {
 		return Promise.reject(

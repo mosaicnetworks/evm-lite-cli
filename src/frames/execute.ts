@@ -51,7 +51,11 @@ export const execute = <
 					const type = e.error.type as string;
 
 					if (type.startsWith('@error')) {
-						error = e.error.message;
+						if (e.error.message.startsWith('Error:')) {
+							error = `${e.error.message}`;
+						} else {
+							error = `Error: ${e.error.message}`;
+						}
 					}
 				} else {
 					error = e.toString();

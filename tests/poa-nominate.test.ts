@@ -54,7 +54,7 @@ describe('poa-nominate.ts', () => {
 		expect.assertions(1);
 
 		// create keystore
-		await session.keystore.create(password);
+		await session.keystore.create('danu', password);
 
 		const args: Arguments = {
 			options: {
@@ -78,7 +78,7 @@ describe('poa-nominate.ts', () => {
 		expect.assertions(1);
 
 		// create keystore
-		const keystore = await session.keystore.create(password);
+		const keystore = await session.keystore.create('danu', password);
 
 		const args: Arguments = {
 			address: keystore.address,
@@ -103,7 +103,7 @@ describe('poa-nominate.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		const keystore = await session.keystore.create(password);
+		const keystore = await session.keystore.create('danu', password);
 
 		const args: Arguments = {
 			address: keystore.address.slice(3),
@@ -134,7 +134,7 @@ describe('poa-nominate.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		const keystore = await session.keystore.create(password);
+		const keystore = await session.keystore.create('danu', password);
 
 		const args: Arguments = {
 			address: `${keystore.address}F`,
@@ -161,11 +161,11 @@ describe('poa-nominate.ts', () => {
 		}
 	});
 
-	it('should error as --from address is empty', async () => {
+	it('should error as --from moniker empty', async () => {
 		expect.assertions(3);
 
 		// create keystore
-		const keystore = await session.keystore.create(password);
+		const keystore = await session.keystore.create('danu', password);
 
 		const args: Arguments = {
 			address: keystore.address,
@@ -190,80 +190,16 @@ describe('poa-nominate.ts', () => {
 		}
 	});
 
-	it('should error as --from address too long', async () => {
-		expect.assertions(3);
-
-		// create keystore
-		const keystore = await session.keystore.create(password);
-
-		const args: Arguments = {
-			address: keystore.address,
-			options: {
-				from: keystore.address + 'F',
-				moniker: 'test',
-				host: '127.0.0.1',
-				port: 8080
-			}
-		};
-
-		try {
-			await stage(args, session);
-		} catch (e) {
-			const output = e as Output;
-
-			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8080);
-
-			if (output.error) {
-				expect(output.error.type).toBe(
-					POA_NOMINATE.FROM_INVALID_LENGTH
-				);
-			}
-		}
-	});
-
-	it('should error as --from address too short', async () => {
-		expect.assertions(3);
-
-		// create keystore
-		const keystore = await session.keystore.create(password);
-
-		const args: Arguments = {
-			address: keystore.address,
-			options: {
-				from: keystore.address.slice(3),
-				moniker: 'test',
-				host: '127.0.0.1',
-				port: 8080
-			}
-		};
-
-		try {
-			await stage(args, session);
-		} catch (e) {
-			const output = e as Output;
-
-			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8080);
-
-			if (output.error) {
-				expect(output.error.type).toBe(
-					POA_NOMINATE.FROM_INVALID_LENGTH
-				);
-			}
-		}
-	});
-
 	it('should error as --pwd path empty', async () => {
 		expect.assertions(3);
 
 		// create keystore
-		const keystore = await session.keystore.create(password);
+		const keystore = await session.keystore.create('danu', password);
 
 		const args: Arguments = {
 			address: keystore.address,
 			options: {
-				from: keystore.address,
+				from: 'danu',
 				moniker: 'test',
 				host: '127.0.0.1',
 				port: 8080
@@ -288,12 +224,12 @@ describe('poa-nominate.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		const keystore = await session.keystore.create(password);
+		const keystore = await session.keystore.create('danu', password);
 
 		const args: Arguments = {
 			address: keystore.address,
 			options: {
-				from: keystore.address,
+				from: 'danu',
 				pwd: '/does_not_exist/pwd.txt',
 				moniker: 'test',
 				host: '127.0.0.1',
@@ -319,12 +255,12 @@ describe('poa-nominate.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		const keystore = await session.keystore.create(password);
+		const keystore = await session.keystore.create('danu', password);
 
 		const args: Arguments = {
 			address: keystore.address,
 			options: {
-				from: keystore.address,
+				from: 'danu',
 				pwd: '/',
 				moniker: 'test',
 				host: '127.0.0.1',
@@ -346,47 +282,16 @@ describe('poa-nominate.ts', () => {
 		}
 	});
 
-	it('should error as --from address keystore not found', async () => {
-		expect.assertions(3);
-
-		// create keystore
-		const keystore = await session.keystore.create(password);
-
-		const args: Arguments = {
-			address: keystore.address,
-			options: {
-				from: keystore.address.slice(1) + '0',
-				pwd: pwdPath,
-				moniker: 'test',
-				host: '127.0.0.1',
-				port: 8080
-			}
-		};
-
-		try {
-			await stage(args, session);
-		} catch (e) {
-			const output = e as Output;
-
-			expect(output.args.options.host).toBe('127.0.0.1');
-			expect(output.args.options.port).toBe(8080);
-
-			if (output.error) {
-				expect(output.error.type).toBe(KEYSTORE.FETCH);
-			}
-		}
-	});
-
 	it('should error as could not decrypt --from with --pwd', async () => {
 		expect.assertions(3);
 
 		// create keystore
-		const keystore = await session.keystore.create(password);
+		const keystore = await session.keystore.create('danu', password);
 
 		const args: Arguments = {
 			address: keystore.address,
 			options: {
-				from: keystore.address,
+				from: 'danu',
 				pwd: otherPwdPath,
 				moniker: 'test',
 				host: '127.0.0.1',

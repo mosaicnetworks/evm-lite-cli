@@ -2,7 +2,7 @@ import ASCIITable from 'ascii-table';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
 import Session from '../Session';
 import Frames, { execute, IStagingFunction, IOptions } from '../frames';
@@ -36,7 +36,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.types({
-			string: ['from', 'host', 'h']
+			string: ['host', 'h']
 		})
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
@@ -129,7 +129,7 @@ export const stage: IStagingFunction<
 
 		const hex: string = await call(monikerTx);
 
-		nominee.moniker = Utils.hexToString(hex);
+		nominee.moniker = utils.hexToString(hex);
 
 		debug(`Moniker received: ${nominee.moniker}`);
 
@@ -139,7 +139,7 @@ export const stage: IStagingFunction<
 				gas: state.defaults.gas,
 				gasPrice: state.defaults.gasPrice
 			},
-			Utils.cleanAddress(nominee.address)
+			utils.cleanAddress(nominee.address)
 		);
 
 		const votes = await call<[string, string]>(votesTransaction);

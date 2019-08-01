@@ -6,6 +6,7 @@ tsconfig.tsbuildinfo
 coverage
 .env
 pwd.txt
+package-lock.json
 tests/assets/keystore/
 tests/assets/wallet.toml
 tests/assets/evmlc.toml

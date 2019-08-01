@@ -55,11 +55,11 @@ describe('transfer.ts', () => {
 		}
 	});
 
-	it('should error as `from` address not provided', async () => {
+	it('should error as `from` moniker not provided', async () => {
 		expect.assertions(3);
 
 		// create keystore
-		await session.keystore.create(password);
+		await session.keystore.create('danu', password);
 
 		const args: Arguments = {
 			options: {
@@ -83,14 +83,14 @@ describe('transfer.ts', () => {
 	});
 
 	it('should error as `from` address keystore cannot be located', async () => {
-		expect.assertions(4);
+		expect.assertions(3);
 
 		// create keystore
-		const from = await session.keystore.create(password);
+		await session.keystore.create('danu', password);
 
 		const args: Arguments = {
 			options: {
-				from: `${from.address.slice(1)}F`,
+				from: `danu123`,
 				host: '127.0.0.1',
 				port: 8080
 			}
@@ -103,9 +103,6 @@ describe('transfer.ts', () => {
 
 			expect(output.args.options.host).toBe('127.0.0.1');
 			expect(output.args.options.port).toBe(8080);
-			expect(Utils.trimHex(output.args.options.from!)).toBe(
-				Utils.trimHex(`${from.address.slice(1)}F`)
-			);
 
 			if (output.error) {
 				expect(output.error.type).toBe(KEYSTORE.FETCH);
@@ -117,11 +114,11 @@ describe('transfer.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		const from = await session.keystore.create(password);
+		await session.keystore.create('danu', password);
 
 		const args: Arguments = {
 			options: {
-				from: from.address,
+				from: 'danu',
 				host: '127.0.0.1',
 				port: 8080
 			}
@@ -145,12 +142,12 @@ describe('transfer.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		const from = await session.keystore.create(password);
+		await session.keystore.create('danu', password);
 
 		const args: Arguments = {
 			options: {
 				pwd: '/does_not_exist/pwd.txt',
-				from: from.address,
+				from: 'danu',
 				host: '127.0.0.1',
 				port: 8080
 			}
@@ -174,12 +171,12 @@ describe('transfer.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		const from = await session.keystore.create(password);
+		await session.keystore.create('danu', password);
 
 		const args: Arguments = {
 			options: {
 				pwd: '/',
-				from: from.address,
+				from: 'danu',
 				host: '127.0.0.1',
 				port: 8080
 			}
@@ -203,12 +200,12 @@ describe('transfer.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		const from = await session.keystore.create(password);
+		await session.keystore.create('danu', password);
 
 		const args: Arguments = {
 			options: {
 				pwd: otherPwdPath,
-				from: from.address,
+				from: 'danu',
 				host: '127.0.0.1',
 				port: 8080
 			}
@@ -232,12 +229,12 @@ describe('transfer.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		const from = await session.keystore.create(password);
+		await session.keystore.create('danu', password);
 
 		const args: Arguments = {
 			options: {
 				pwd: pwdPath,
-				from: from.address,
+				from: 'danu',
 				host: '127.0.0.1',
 				port: 8080
 			}

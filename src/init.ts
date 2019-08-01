@@ -52,6 +52,11 @@ export default async function init(params: IInit, commands: CommandFunction[]) {
 	const session = new Session(dataDirPath, params.config);
 
 	if (!process.argv[2]) {
+		console.log(
+			`\n  Change datadir by: ${
+				params.delimiter
+			} --datadir [path] [command]`
+		);
 		console.log(`\n  Data Directory: ${session.directory.path}`);
 
 		process.argv[2] = 'help';

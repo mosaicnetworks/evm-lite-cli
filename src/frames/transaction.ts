@@ -37,6 +37,7 @@ const send = async <A extends Args<IOptions>, F, N>(
 
 		return receipt;
 	} catch (e) {
+		console.log(e);
 		const err = typeof e === 'object' ? e.text : e.toString().trim();
 
 		return Promise.reject(error(EVM_LITE, err));

@@ -3,8 +3,9 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
+import { MonikerBaseAccount } from 'evm-lite-keystore';
 import { Account } from 'evm-lite-core';
 
 import Session from '../Session';
@@ -48,7 +49,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.option('-g, --gas <value>', 'gas')
 		.option('-gp, --gasprice <value>', 'gas price')
 		.option('-t, --to <address>', 'send to address')
-		.option('-f, --from <address>', 'send from address')
+		.option('-f, --from <moniker>', 'moniker of sender')
 		.option('--pwd <password>', 'passphrase file path')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
@@ -110,10 +111,31 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	);
 
 	const keystore = await list();
+	const accounts: MonikerBaseAccount[] = await Promise.all(
+		Object.keys(keystore).map(async moniker => {
+			const base = await session.node.getAccount(
+				keystore[moniker].address
+			);
 
+			return {
+				...base,
+				moniker
+			};
+		})
+	);
+
+	const parseBalance = (s: string | any) => {
+		if (typeof s === 'object') {
+			return s.toFormat(0);
+		} else {
+			return s;
+		}
+	};
 	const first: inquirer.Questions<FirstAnswers> = [
 		{
-			choices: keystore.map(keyfile => keyfile.address),
+			choices: accounts.map(
+				acc => `${acc.moniker} (${parseBalance(acc.balance)})`
+			),
 			message: 'From: ',
 			name: 'from',
 			type: 'list'
@@ -165,20 +187,23 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	if (interactive) {
 		const { from } = await inquirer.prompt<FirstAnswers>(first);
 
-		options.from = Utils.trimHex(from);
+		options.from = utils.trimHex(from.split(' ')[0]);
 
 		debug(`From address received: ${from}`);
 	}
 
-	if (!options.from) {
+	const from = options.from || state.defaults.from;
+
+	if (!from) {
 		return Promise.reject(
-			error(TRANSFER.FROM_EMPTY, 'Argument `from` not provided.')
+			error(
+				TRANSFER.FROM_EMPTY,
+				'No `from` moniker provided or set in config.'
+			)
 		);
 	}
 
-	debug(`From address validated: ${options.from}`);
-
-	const keyfile = await get(options.from);
+	const keyfile = await get(from);
 
 	if (interactive) {
 		const { passphrase: p } = await inquirer.prompt<SecondAnswers>(second);
@@ -197,7 +222,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		if (!Utils.exists(options.pwd)) {
+		if (!utils.exists(options.pwd)) {
 			return Promise.reject(
 				error(
 					TRANSFER.PWD_PATH_NOT_FOUND,
@@ -206,7 +231,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		if (Utils.isDirectory(options.pwd)) {
+		if (utils.isDirectory(options.pwd)) {
 			return Promise.reject(
 				error(
 					TRANSFER.PWD_IS_DIR,
@@ -233,7 +258,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		debug(`To received: ${answers.to || 'null'}`);
 		debug(`Value received: ${answers.value || 'null'}`);
 		debug(`Gas received: ${answers.gas || 'null'}`);
-		debug(`Gas Price received: ${answers.gasPrice || 'null'}`);
+		debug(`Gas Price received: ${answers.gasPrice ? answers.gasPrice : 0}`);
 	}
 
 	options.gas = options.gas || state.defaults.gas;
@@ -248,12 +273,18 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		);
 	}
 
+	if (utils.trimHex(options.to).length !== 40) {
+		return Promise.reject(
+			error(TRANSFER.ADDRESS_INVALID_LENGTH, 'Invalid `to` address')
+		);
+	}
+
 	let confirm: boolean = true;
 
 	debug(`Attempting to generate transaction...`);
 
 	const transaction = Account.prepareTransfer(
-		options.from,
+		keyfile.address,
 		options.to,
 		options.value,
 		options.gas,
@@ -265,10 +296,12 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		to: transaction.to,
 		value: transaction.value,
 		gas: transaction.gas,
-		gasPrice: transaction.gasPrice
+		gasPrice: transaction.gasPrice ? transaction.gasPrice : 0
 	};
 
-	console.log(tx);
+	if (interactive) {
+		console.log(JSON.stringify(tx, null, 2));
+	}
 
 	if (interactive) {
 		const { send: s } = await inquirer.prompt<FourthAnswers>(fourth);
