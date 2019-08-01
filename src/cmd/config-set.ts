@@ -31,7 +31,7 @@ export default function commandConfigSet(
 		.option('-i, --interactive', 'enter interactive mode')
 		.option('-h, --host <host>', 'default host')
 		.option('-p, --port <port>', 'default port')
-		.option('--from <from>', 'default from')
+		.option('--from <moniker>', 'default from moniker')
 		.option('--gas <gas>', 'default gas')
 		.option('--gasprice <gasprice>', 'gas price')
 		.types({
@@ -61,8 +61,12 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	const { state } = session.config;
 	const { success, debug } = frames.staging();
 
+	const { list } = frames.keystore();
+
 	/** Command Execution */
 	debug(`Successfully read configuration: ${session.config.path}`);
+
+	const keystore = await list();
 
 	const interactive = options.interactive || session.interactive;
 	const questions: inquirer.Questions<Answers> = [
@@ -79,10 +83,11 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			type: 'number'
 		},
 		{
+			choices: Object.keys(keystore).map(moniker => moniker),
 			default: state.defaults.from,
 			message: 'From',
 			name: 'from',
-			type: 'input'
+			type: 'list'
 		},
 		{
 			default: state.defaults.gas,

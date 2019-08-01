@@ -4,9 +4,9 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
-import { V3JSONKeyStore } from 'evm-lite-keystore';
+import { V3Keyfile } from 'evm-lite-keystore';
 
 import Session from '../Session';
 import Frames, {
@@ -52,17 +52,13 @@ interface Answers {
 	makeDefault: boolean;
 }
 
-export type Output = IStagedOutput<Arguments, V3JSONKeyStore, V3JSONKeyStore>;
+export type Output = IStagedOutput<Arguments, V3Keyfile, V3Keyfile>;
 
-export const stage: IStagingFunction<
-	Arguments,
-	V3JSONKeyStore,
-	V3JSONKeyStore
-> = async (args: Arguments, session: Session) => {
-	const frames = new Frames<Arguments, V3JSONKeyStore, V3JSONKeyStore>(
-		session,
-		args
-	);
+export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
+	args: Arguments,
+	session: Session
+) => {
+	const frames = new Frames<Arguments, V3Keyfile, V3Keyfile>(session, args);
 
 	// prepare
 	const { options } = args;
@@ -98,7 +94,7 @@ export const stage: IStagingFunction<
 		);
 	}
 
-	if (!Utils.exists(options.file)) {
+	if (!utils.exists(options.file)) {
 		return Promise.reject(
 			error(
 				ACCOUNTS_IMPORT.FILE_PATH_NOT_FOUND,
@@ -107,7 +103,7 @@ export const stage: IStagingFunction<
 		);
 	}
 
-	if (Utils.isDirectory(options.file)) {
+	if (utils.isDirectory(options.file)) {
 		return Promise.reject(
 			error(
 				ACCOUNTS_IMPORT.FILE_IS_DIR,
@@ -118,7 +114,7 @@ export const stage: IStagingFunction<
 
 	debug(`Keyfile path verified: ${options.file}`);
 
-	let keystore: V3JSONKeyStore;
+	let keystore: V3Keyfile;
 
 	debug(`Keystore directory: ${session.keystore.path}`);
 	debug(`Attempting to import keyfile...`);
@@ -145,7 +141,7 @@ export const stage: IStagingFunction<
 			...session.config.state,
 			defaults: {
 				...session.config.state.defaults,
-				from: Utils.cleanAddress(keystore.address)
+				from: utils.cleanAddress(keystore.address)
 			}
 		};
 

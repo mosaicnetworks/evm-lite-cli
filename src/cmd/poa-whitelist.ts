@@ -2,7 +2,7 @@ import ASCIITable from 'ascii-table';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
 import { Contract } from 'evm-lite-core';
 
@@ -33,11 +33,10 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.description(description)
 		.option('-d, --debug', 'show debug output')
 		.option('-f, --formatted', 'format output')
-		.option('--from <address>', 'from address')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.types({
-			string: ['from', 'host', 'h']
+			string: ['host', 'h']
 		})
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
@@ -132,7 +131,7 @@ export const stage: IStagingFunction<
 
 		const hex = await call<string>(monikerTx);
 
-		whitelistEntry.moniker = Utils.hexToString(hex);
+		whitelistEntry.moniker = utils.hexToString(hex);
 
 		debug(`Moniker received: ${whitelistEntry.moniker}`);
 

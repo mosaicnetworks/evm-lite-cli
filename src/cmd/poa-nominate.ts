@@ -3,7 +3,7 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
 import Session from '../Session';
 import Frames, {
@@ -41,7 +41,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.option('-d, --debug', 'show debug output')
 		.option('--pwd <password>', 'passphase file path')
 		.option('--moniker <moniker>', 'moniker of the nominee')
-		.option('--from <address>', 'from address')
+		.option('--from <moniker>', 'from moniker')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.types({
@@ -56,7 +56,7 @@ interface Answers {
 	from: string;
 	address: string;
 	passphrase: string;
-	moniker: string;
+	nomineeMoniker: string;
 }
 
 export type Output = IStagedOutput<Arguments, string, string>;
@@ -99,7 +99,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	const questions: inquirer.Questions<Answers> = [
 		{
-			choices: keystore.map(keyfile => keyfile.address),
+			choices: Object.keys(keystore).map(moniker => moniker),
 			message: 'From: ',
 			name: 'from',
 			type: 'list'
@@ -116,34 +116,34 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		},
 		{
 			message: 'Moniker: ',
-			name: 'moniker',
+			name: 'nomineeMoniker',
 			type: 'input'
 		}
 	];
 
 	if (interactive) {
-		const { address, from, passphrase: p, moniker } = await inquirer.prompt<
-			Answers
-		>(questions);
+		const {
+			address,
+			from,
+			passphrase: p,
+			nomineeMoniker
+		} = await inquirer.prompt<Answers>(questions);
 
-		debug(`Moniker: ${moniker || 'null'}`);
+		debug(`Nominee Moniker: ${nomineeMoniker || 'null'}`);
 		debug(`Nominee address: ${address || 'null'}`);
 		debug(`From address: ${from || 'null'}`);
 		debug(`Passphrase: ${p || 'null'}`);
 
-		args.address = Utils.trimHex(address);
+		args.address = utils.trimHex(address);
 		options.from = from;
-		options.moniker = moniker;
+		options.moniker = nomineeMoniker;
 
 		passphrase = p;
 	}
 
 	if (!args.address) {
 		return Promise.reject(
-			error(
-				POA_NOMINATE.ADDRESS_EMPTY,
-				'No address provided to nominate.'
-			)
+			error(POA_NOMINATE.ADDRESS_EMPTY, 'No nominee address provided.')
 		);
 	}
 
@@ -156,40 +156,31 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		);
 	}
 
-	args.address = Utils.trimHex(args.address);
+	args.address = utils.trimHex(args.address);
 
 	if (args.address.length !== 40) {
 		return Promise.reject(
 			error(
 				POA_NOMINATE.ADDRESS_INVALID_LENGTH,
-				'Address has an invalid length.'
+				'Nominee address has an invalid length.'
 			)
 		);
 	}
 
 	debug(`Nominee address validated: ${args.address}`);
 
-	const from = Utils.trimHex(options.from || state.defaults.from);
+	const from = utils.trimHex(options.from || state.defaults.from);
 
 	if (!from) {
 		return Promise.reject(
 			error(
 				POA_NOMINATE.FROM_EMPTY,
-				'No from address provided or set in config.'
+				'No `from` moniker provided or set in config.'
 			)
 		);
 	}
 
-	if (from.length !== 40) {
-		return Promise.reject(
-			error(
-				POA_NOMINATE.FROM_INVALID_LENGTH,
-				'`from` address has an invalid length.'
-			)
-		);
-	}
-
-	debug(`From address validated: ${options.from}`);
+	debug(`From moniker validated: ${from}`);
 
 	if (!passphrase) {
 		debug(`Passphrase path: ${options.pwd || 'null'}`);
@@ -203,7 +194,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		if (!Utils.exists(options.pwd)) {
+		if (!utils.exists(options.pwd)) {
 			return Promise.reject(
 				error(
 					POA_NOMINATE.PWD_PATH_NOT_FOUND,
@@ -212,7 +203,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		if (Utils.isDirectory(options.pwd)) {
+		if (utils.isDirectory(options.pwd)) {
 			return Promise.reject(
 				error(
 					POA_NOMINATE.PWD_IS_DIR,
@@ -234,11 +225,11 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	// could be going wrong here.
 	const transaction = contract.methods.submitNominee(
 		{
-			from,
+			from: keyfile.address,
 			gas: session.config.state.defaults.gas,
 			gasPrice: session.config.state.defaults.gasPrice
 		},
-		Utils.cleanAddress(args.address),
+		utils.cleanAddress(args.address),
 		options.moniker
 	);
 
@@ -269,9 +260,9 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	if (monikerAnnouceEvents.length > 1) {
 		try {
 			monikerAnnouceEvent = monikerAnnouceEvents.filter(event => {
-				const moniker = Utils.hexToString(
-					event.args._moniker
-				).toLowerCase();
+				const moniker = utils
+					.hexToString(event.args._moniker)
+					.toLowerCase();
 
 				if (moniker.trim() === options.moniker!.trim()) {
 					return event;
@@ -302,7 +293,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	const returnData = `You (${
 		nomineeProposedEvent.args._proposer
-	}) nominated '${Utils.hexToString(monikerAnnouceEvent.args._moniker)}' (${
+	}) nominated '${utils.hexToString(monikerAnnouceEvent.args._moniker)}' (${
 		nomineeProposedEvent.args._nominee
 	})`;
 

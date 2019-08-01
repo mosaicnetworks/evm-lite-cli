@@ -24,7 +24,7 @@ _*Requires a valid connection*_
     -d, --debug          show debug output
     --pwd <password>     passphase file path
     --moniker <moniker>  moniker of the nominee
-    --from <address>     from address
+    --from <moniker>     from moniker
     -h, --host <ip>      override config host value
     -p, --port <port>    override config port value
 ```
@@ -32,7 +32,7 @@ _*Requires a valid connection*_
 ## Example
 
 ```bash
-$ evmlc poa nominate 0x702b0ad02a7a6056eb16a697a96d849c228f5fb4 --from 0x07ba865451d9417714e8bb89e715acbc789a1bb7 --pwd /home/jake/pwd.txt --moniker node2
+$ evmlc poa nominate 0x702b0ad02a7a6056eb16a697a96d849c228f5fb4 --from moniker --pwd /home/jake/pwd.txt --moniker node2
 
-You (0x07ba865451d9417714e8bb89e715acbc789a1bb7) voted 'Yes' for '0x702b0ad02a7a6056eb16a697a96d849c228f5fb4'.
+Successfully nominated
 ```

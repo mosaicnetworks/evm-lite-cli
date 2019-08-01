@@ -43,8 +43,6 @@ A list of all supported commands along with documentation can be found [here](do
 
 The global flag `-d, --datadir` specifies the directory where `keystore` and `evmlc.toml` are stored unless overwritten by specific flags.
 
-_Note: that if this flag is not provided, it will default to `~/.evmlc`._
-
 ```bash
 evmlc --datadir [path] interactive
 ```
@@ -55,15 +53,14 @@ The first time `evmlc` runs, and if no options are specified, it creates a
 special directory in a default location, where it
 stores any relevant information.
 
--   Windows: `~/AppData/Roaming/EVMLC`
--   Mac OS: `~/Library/EVMLC`
 -   Linux: `~/.evmlc`
+-   Mac OS: `~/Library/EVMLC`
+-   Windows: `~/AppData/Roaming/EVMLC`
 
 In particular, this directory contains the following items:
 
--   **evmlc.toml**: where global options are specified. These values may be
-    overwritten by CLI flags.
--   **keystore**: where all encrypted account keys are stored.
+-   **evmlc.toml**: where global options are specified
+-   **keystore**: where all encrypted account keys are stored
 
 ### `evmlc.toml`
 
@@ -71,14 +68,17 @@ Example evmlc.toml:
 
 ```toml
 [connection]
-host = "127.0.0.1"
-port = 8000
+host = "localhost"
+port = 8080
 
+# transaction defaults
 [defaults]
-from = "0x702B0ad02a7a6056EB16A697A96d849c228F5fB4"
-gas = 1000000000000
+from = "moniker"
+gas = 1000000
 gasPrice = 0
 ```
+
+_Note: `from` refers to the `moniker` of the account not the `address`._
 
 To change default configuration values run `evmlc config set -i` or `evmlc c s -i`. You will be
 taken to an interactive prompt to change connection and default values.
@@ -86,16 +86,18 @@ taken to an interactive prompt to change connection and default values.
 ```console
 $ evmlc config set -i
 
-? Host: 127.0.0.1
-? Port: 8000
-? From: 0x702B0ad02a7a6056EB16A697A96d849c228F5fB4
-? Gas: 1000000000000
+? Host: localhost
+? Port: 8080
+? From: moniker
+? Gas: 1000000
 ? Gas Price: 0
 ```
 
 ## Proof of Authority
 
-The Monet Hub using Proof of Authority with EVM-Lite and Babble. A [Proof of Authority Document](docs/proof-of-authority.md) is available.
+The Monet Hub uses Proof of Authority with EVM-Lite and Babble.
+
+A [Proof of Authority Document](docs/proof-of-authority.md) is available.
 
 ## Developers
 

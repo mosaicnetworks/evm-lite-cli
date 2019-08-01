@@ -9,6 +9,11 @@ export const ACCOUNTS_CREATE = {
 	OUT_PATH_IS_NOT_DIR: '@error/accounts/CREATE/OUT_PATH_IS_NOT_DIR',
 	OUT_PATH_NOT_FOUND: '@error/accounts/CREATE/OUT_PATH_NOT_FOUND',
 
+	EMPTY_MONIKER: '@error/accounts/CREATE/EMPTY_MONIKER',
+	INVALID_MONIKER: '@error/accounts/CREATE/INVALID_MONIKER',
+
+	KEYSTORE_CREATE: '@error/accounts/CREATE/KEYSTORE_CREATE',
+
 	// Interactive
 	PASS_FIELDS_BLANK: '@error/accounts/CREATE/PASS_FIELDS_BLANK',
 	PASS_DO_NOT_MATCH: '@error/accounts/CREATE/PASS_DO_NOT_MATCH'
@@ -21,7 +26,9 @@ export const ACCOUNTS_GET = {
 
 export const ACCOUNTS_UPDATE = {
 	// Non-interactive
-	ADDRESS_EMPTY: '@error/accounts/UPDATE/ADDRESS_EMPTY',
+	MONIKER_EMPTY: '@error/accounts/UPDATE/ADDRESS_EMPTY',
+	INVALID_MONIKER: '@error/accounts/UPDATE/INVALID_MONIKER',
+
 	ADDRESS_INVALID_LENGTH: '@error/accounts/UPDATE/ADDRESS_INVALID_LENGTH',
 
 	OLD_PWD_NOT_FOUND: '@error/accounts/UPDATE/OLD_PWD_NOT_FOUND',
@@ -40,12 +47,14 @@ export const ACCOUNTS_UPDATE = {
 };
 
 export const TRANSFER = {
-	FROM_EMPTY: '@error/accounts/TRANSFER/PASS_FIELDS_BLANK',
-	TO_VALUE_EMPTY: '@error/accounts/TRANSFER/PASS_FIELDS_BLANK',
+	FROM_EMPTY: '@error/accounts/TRANSFER/FROM_EMPTY',
+	TO_VALUE_EMPTY: '@error/accounts/TRANSFER/TO_VALUE_EMPTY',
 
 	PWD_PATH_EMPTY: '@error/accounts/TRANSFER/PWD_PATH_EMPTY',
 	PWD_IS_DIR: '@error/accounts/TRANSFER/PWD_IS_DIR',
-	PWD_PATH_NOT_FOUND: '@error/accounts/TRANSFER/PWD_PATH_NOT_FOUND'
+	PWD_PATH_NOT_FOUND: '@error/accounts/TRANSFER/PWD_PATH_NOT_FOUND',
+
+	ADDRESS_INVALID_LENGTH: '@error/accounts/UPDATE/ADDRESS_INVALID_LENGTH'
 };
 
 export const ACCOUNTS_IMPORT = {

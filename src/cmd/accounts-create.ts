@@ -3,9 +3,9 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
-import { V3JSONKeyStore } from 'evm-lite-keystore';
+import { V3Keyfile } from 'evm-lite-keystore';
 
 import Session from '../Session';
 import Frames, {
@@ -25,6 +25,7 @@ interface Options extends IOptions {
 }
 
 export interface Arguments extends Args<Options> {
+	moniker?: string;
 	options: Options;
 }
 
@@ -32,7 +33,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 	const description = 'Creates an encrypted keypair locally';
 
 	return evmlc
-		.command('accounts create')
+		.command('accounts create [moniker]')
 		.alias('a c')
 		.description(description)
 		.option('-i, --interactive', 'enter interactive mode')
@@ -40,27 +41,25 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.option('--pwd <file_path>', 'passphrase file path')
 		.option('--out <output_path>', 'write keystore to output path')
 		.types({
-			string: ['pwd', 'out']
+			string: ['_', 'pwd', 'out']
 		})
 		.action((args: Arguments) => execute(stage, args, session));
 }
 
 interface Answers {
+	moniker: string;
+	outpath: string;
 	passphrase: string;
 	verifyPassphrase: string;
 }
 
-export type Output = IStagedOutput<Arguments, V3JSONKeyStore, V3JSONKeyStore>;
+export type Output = IStagedOutput<Arguments, V3Keyfile, V3Keyfile>;
 
-export const stage: IStagingFunction<
-	Arguments,
-	V3JSONKeyStore,
-	V3JSONKeyStore
-> = async (args: Arguments, session: Session) => {
-	const frames = new Frames<Arguments, V3JSONKeyStore, V3JSONKeyStore>(
-		session,
-		args
-	);
+export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
+	args: Arguments,
+	session: Session
+) => {
+	const frames = new Frames<Arguments, V3Keyfile, V3Keyfile>(session, args);
 
 	// args
 	const { options } = args;
@@ -73,6 +72,17 @@ export const stage: IStagingFunction<
 
 	const interactive = options.interactive || session.interactive;
 	const questions: inquirer.Questions<Answers> = [
+		{
+			message: 'Moniker: ',
+			name: 'moniker',
+			type: 'input'
+		},
+		{
+			message: 'Output Path: ',
+			name: 'outpath',
+			type: 'input',
+			default: session.keystore.path
+		},
 		{
 			message: 'Passphrase: ',
 			name: 'passphrase',
@@ -88,6 +98,8 @@ export const stage: IStagingFunction<
 	if (interactive) {
 		const answers = await inquirer.prompt<Answers>(questions);
 
+		debug(`Moniker received: ${answers.moniker || 'null'}`);
+		debug(`Output Path received: ${answers.outpath || 'null'}`);
 		debug(`Passphrase received: ${answers.passphrase || 'null'}`);
 		debug(
 			`Verify passphrase received: ${answers.verifyPassphrase || 'null'}`
@@ -111,9 +123,27 @@ export const stage: IStagingFunction<
 			);
 		}
 
+		args.moniker = answers.moniker;
+		options.out = answers.outpath;
+
 		passphrase = answers.passphrase.trim();
 
 		debug(`Passphrase set: ${passphrase}`);
+	}
+
+	if (!args.moniker) {
+		return Promise.reject(
+			error(ACCOUNTS_CREATE.EMPTY_MONIKER, 'Moniker cannot be empty')
+		);
+	}
+
+	if (!utils.validMoniker(args.moniker)) {
+		return Promise.reject(
+			error(
+				ACCOUNTS_CREATE.INVALID_MONIKER,
+				'Moniker contains illegal characters'
+			)
+		);
 	}
 
 	if (!passphrase) {
@@ -128,7 +158,7 @@ export const stage: IStagingFunction<
 			);
 		}
 
-		if (!Utils.exists(options.pwd)) {
+		if (!utils.exists(options.pwd)) {
 			return Promise.reject(
 				error(
 					ACCOUNTS_CREATE.PWD_PATH_NOT_FOUND,
@@ -137,7 +167,7 @@ export const stage: IStagingFunction<
 			);
 		}
 
-		if (Utils.isDirectory(options.pwd)) {
+		if (utils.isDirectory(options.pwd)) {
 			return Promise.reject(
 				error(
 					ACCOUNTS_CREATE.PWD_IS_DIR,
@@ -154,7 +184,7 @@ export const stage: IStagingFunction<
 	if (options.out) {
 		debug(`Output path: ${options.out || 'null'}`);
 
-		if (!Utils.exists(options.out)) {
+		if (!utils.exists(options.out)) {
 			return Promise.reject(
 				error(
 					ACCOUNTS_CREATE.OUT_PATH_NOT_FOUND,
@@ -163,7 +193,7 @@ export const stage: IStagingFunction<
 			);
 		}
 
-		if (!Utils.isDirectory(options.out)) {
+		if (!utils.isDirectory(options.out)) {
 			return Promise.reject(
 				error(
 					ACCOUNTS_CREATE.OUT_PATH_IS_NOT_DIR,
@@ -177,13 +207,21 @@ export const stage: IStagingFunction<
 
 	debug(`Attempting to create account...`);
 
-	const account: V3JSONKeyStore = await session.keystore.create(
-		passphrase,
-		options.out
-	);
+	let account: V3Keyfile;
+	try {
+		account = await session.keystore.create(
+			args.moniker,
+			passphrase,
+			options.out
+		);
+	} catch (e) {
+		return Promise.reject(
+			error(ACCOUNTS_CREATE.KEYSTORE_CREATE, e.toString())
+		);
+	}
 
 	debug(
-		`Account creation successful: ${Utils.cleanAddress(account.address)}`
+		`Account creation successful: ${utils.cleanAddress(account.address)}`
 	);
 
 	return Promise.resolve(success(account));

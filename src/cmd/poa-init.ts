@@ -3,7 +3,7 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
 import { Transaction } from 'evm-lite-core';
 
@@ -37,7 +37,7 @@ export default function command(monet: Vorpal, session: Session): Command {
 		.description(description)
 		.option('-d, --debug', 'show debug output')
 		.option('--pwd <password>', 'passphase file path')
-		.option('--from <address>', 'from address')
+		.option('--from <moniker>', 'from moniker')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.types({
@@ -85,11 +85,11 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	let passphrase: string = '';
 
 	const contract = await getContract();
-	const keystores = await list();
+	const keystore = await list();
 
 	const questions: inquirer.Questions<Answers> = [
 		{
-			choices: keystores.map(keystore => keystore.address),
+			choices: Object.keys(keystore).map(moniker => moniker),
 			message: 'From: ',
 			name: 'from',
 			type: 'list'
@@ -113,24 +113,18 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		debug(`Passphrase received: ${p}`);
 	}
 
-	const from = Utils.trimHex(options.from || state.defaults.from);
+	const from = utils.trimHex(options.from || state.defaults.from);
 
 	if (!from) {
 		return Promise.reject(
-			error(POA_INIT.ADDRESS_EMPTY, 'No `from` address provided.')
-		);
-	}
-
-	if (from.length !== 40) {
-		return Promise.reject(
 			error(
-				POA_INIT.ADDRESS_INVALID_LENGTH,
-				'`from` address has an invalid length.'
+				POA_INIT.ADDRESS_EMPTY,
+				'No `from` moniker provided or set in config.'
 			)
 		);
 	}
 
-	debug(`'from' address validated: ${from}`);
+	debug(`'from' moniker validated: ${from}`);
 
 	if (!passphrase) {
 		debug(`Passphrase path: ${options.pwd || 'null'}`);
@@ -144,7 +138,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		if (!Utils.exists(options.pwd)) {
+		if (!utils.exists(options.pwd)) {
 			return Promise.reject(
 				error(
 					POA_INIT.PWD_PATH_NOT_FOUND,
@@ -153,7 +147,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		if (Utils.isDirectory(options.pwd)) {
+		if (utils.isDirectory(options.pwd)) {
 			return Promise.reject(
 				error(
 					POA_INIT.PWD_IS_DIR,
@@ -176,7 +170,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	try {
 		transaction = contract.methods.init({
-			from: options.from,
+			from: keyfile.address,
 			gas: state.defaults.gas,
 			gasPrice: state.defaults.gasPrice
 		});

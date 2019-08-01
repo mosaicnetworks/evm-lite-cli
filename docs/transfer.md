@@ -26,7 +26,7 @@ _*A valid connection is required.*_
     -g, --gas <value>        gas
     -gp, --gasprice <value>  gas price
     -t, --to <address>       send to address
-    -f, --from <address>     send from address
+    -f, --from <moniker>     moniker of sender
     --pwd <password>         passphrase file path
     -h, --host <ip>          override config host value
     -p, --port <port>        override config port value
@@ -35,7 +35,7 @@ _*A valid connection is required.*_
 ## Example
 
 ```bash
-$ evmlc transfer -f 702b0ad02a7a6056eb16a697a96d849c228f5fb4 -t 4f6ed4bfd7b4acd24c7d8130b7df0b6f78880048 -v 100 -g 1000000000 -gp 0 --pwd /home/jake/pwd.txt
+$ evmlc transfer -f moniker -t 4f6ed4bfd7b4acd24c7d8130b7df0b6f78880048 -v 100 -g 1000000000 -gp 0 --pwd /home/jake/pwd.txt
 
 Transaction submitted successfully.
 ```
