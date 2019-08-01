@@ -3,7 +3,7 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
 import { V3Keyfile } from 'evm-lite-keystore';
 
@@ -161,7 +161,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			return Promise.reject(error(EVM_LITE, e.text));
 		}
 
-		nominee.moniker = Utils.hexToString(hex);
+		nominee.moniker = utils.hexToString(hex);
 
 		debug(`Moniker received: ${nominee.moniker}`);
 
@@ -171,7 +171,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 				gas: session.config.state.defaults.gas,
 				gasPrice: session.config.state.defaults.gasPrice
 			},
-			Utils.cleanAddress(nominee.address)
+			utils.cleanAddress(nominee.address)
 		);
 
 		let votes: [string, string];
@@ -250,7 +250,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		);
 	}
 
-	args.address = Utils.trimHex(args.address);
+	args.address = utils.trimHex(args.address);
 
 	if (args.address.length !== 40) {
 		return Promise.reject(
@@ -269,7 +269,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		);
 	}
 
-	const from = Utils.trimHex(options.from || state.defaults.from);
+	const from = utils.trimHex(options.from || state.defaults.from);
 
 	if (!from) {
 		return Promise.reject(
@@ -294,7 +294,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		if (!Utils.exists(args.options.pwd)) {
+		if (!utils.exists(args.options.pwd)) {
 			return Promise.reject(
 				error(
 					POA_VOTE.PWD_PATH_NOT_FOUND,
@@ -303,7 +303,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		if (Utils.isDirectory(args.options.pwd)) {
+		if (utils.isDirectory(args.options.pwd)) {
 			return Promise.reject(
 				error(
 					POA_VOTE.PWD_IS_DIR,
@@ -328,7 +328,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			gas: session.config.state.defaults.gas,
 			gasPrice: session.config.state.defaults.gasPrice
 		},
-		Utils.cleanAddress(args.address),
+		utils.cleanAddress(args.address),
 		options.verdict
 	);
 

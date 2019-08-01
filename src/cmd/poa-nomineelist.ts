@@ -2,7 +2,7 @@ import ASCIITable from 'ascii-table';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
 import Session from '../Session';
 import Frames, { execute, IStagingFunction, IOptions } from '../frames';
@@ -129,7 +129,7 @@ export const stage: IStagingFunction<
 
 		const hex: string = await call(monikerTx);
 
-		nominee.moniker = Utils.hexToString(hex);
+		nominee.moniker = utils.hexToString(hex);
 
 		debug(`Moniker received: ${nominee.moniker}`);
 
@@ -139,7 +139,7 @@ export const stage: IStagingFunction<
 				gas: state.defaults.gas,
 				gasPrice: state.defaults.gasPrice
 			},
-			Utils.cleanAddress(nominee.address)
+			utils.cleanAddress(nominee.address)
 		);
 
 		const votes = await call<[string, string]>(votesTransaction);

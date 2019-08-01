@@ -1,7 +1,7 @@
 import ASCIITable from 'ascii-table';
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 import { BaseAccount } from 'evm-lite-core';
 import { MonikerBaseAccount } from 'evm-lite-keystore';
 
@@ -123,7 +123,7 @@ export const stage: IStagingFunction<
 	for (const account of accounts) {
 		table.addRow(
 			account.moniker,
-			Utils.cleanAddress(account.address),
+			utils.cleanAddress(account.address),
 			account.balance.toString(10),
 			account.nonce
 		);

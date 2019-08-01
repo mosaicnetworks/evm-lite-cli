@@ -2,7 +2,7 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
 import { Transaction } from 'evm-lite-core';
 
@@ -102,7 +102,7 @@ export const stage: IStagingFunction<Arguments, boolean, boolean> = async (
 		);
 	}
 
-	args.address = Utils.trimHex(args.address);
+	args.address = utils.trimHex(args.address);
 
 	if (args.address.length !== 40) {
 		return Promise.reject(
@@ -125,7 +125,7 @@ export const stage: IStagingFunction<Arguments, boolean, boolean> = async (
 				gas: session.config.state.defaults.gas,
 				gasPrice: session.config.state.defaults.gasPrice
 			},
-			Utils.cleanAddress(args.address)
+			utils.cleanAddress(args.address)
 		);
 	} catch (e) {
 		return Promise.reject(error(TRANSACTION.GENERATION, e.toString()));

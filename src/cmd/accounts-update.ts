@@ -3,7 +3,7 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
 import { V3Keyfile } from 'evm-lite-keystore';
 
@@ -123,7 +123,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 		);
 	}
 
-	if (!Utils.validMoniker(args.moniker)) {
+	if (!utils.validMoniker(args.moniker)) {
 		return Promise.reject(
 			error(
 				ACCOUNTS_UPDATE.INVALID_MONIKER,
@@ -159,7 +159,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 			);
 		}
 
-		if (!Utils.exists(options.old)) {
+		if (!utils.exists(options.old)) {
 			return Promise.reject(
 				error(
 					ACCOUNTS_UPDATE.OLD_PWD_NOT_FOUND,
@@ -168,7 +168,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 			);
 		}
 
-		if (Utils.isDirectory(options.old)) {
+		if (utils.isDirectory(options.old)) {
 			return Promise.reject(
 				error(
 					ACCOUNTS_UPDATE.OLD_PWD_IS_DIR,
@@ -227,7 +227,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 			);
 		}
 
-		if (!Utils.exists(options.new)) {
+		if (!utils.exists(options.new)) {
 			return Promise.reject(
 				error(
 					ACCOUNTS_UPDATE.NEW_PWD_NOT_FOUND,
@@ -236,7 +236,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 			);
 		}
 
-		if (Utils.isDirectory(options.new)) {
+		if (utils.isDirectory(options.new)) {
 			return Promise.reject(
 				error(
 					ACCOUNTS_UPDATE.NEW_PWD_IS_DIR,

@@ -4,7 +4,7 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
 import { V3Keyfile } from 'evm-lite-keystore';
 
@@ -94,7 +94,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 		);
 	}
 
-	if (!Utils.exists(options.file)) {
+	if (!utils.exists(options.file)) {
 		return Promise.reject(
 			error(
 				ACCOUNTS_IMPORT.FILE_PATH_NOT_FOUND,
@@ -103,7 +103,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 		);
 	}
 
-	if (Utils.isDirectory(options.file)) {
+	if (utils.isDirectory(options.file)) {
 		return Promise.reject(
 			error(
 				ACCOUNTS_IMPORT.FILE_IS_DIR,
@@ -141,7 +141,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 			...session.config.state,
 			defaults: {
 				...session.config.state.defaults,
-				from: Utils.cleanAddress(keystore.address)
+				from: utils.cleanAddress(keystore.address)
 			}
 		};
 

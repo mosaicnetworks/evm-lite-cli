@@ -3,7 +3,7 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
 import { V3Keyfile } from 'evm-lite-keystore';
 
@@ -137,7 +137,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 		);
 	}
 
-	if (!Utils.validMoniker(args.moniker)) {
+	if (!utils.validMoniker(args.moniker)) {
 		return Promise.reject(
 			error(
 				ACCOUNTS_CREATE.INVALID_MONIKER,
@@ -158,7 +158,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 			);
 		}
 
-		if (!Utils.exists(options.pwd)) {
+		if (!utils.exists(options.pwd)) {
 			return Promise.reject(
 				error(
 					ACCOUNTS_CREATE.PWD_PATH_NOT_FOUND,
@@ -167,7 +167,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 			);
 		}
 
-		if (Utils.isDirectory(options.pwd)) {
+		if (utils.isDirectory(options.pwd)) {
 			return Promise.reject(
 				error(
 					ACCOUNTS_CREATE.PWD_IS_DIR,
@@ -184,7 +184,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 	if (options.out) {
 		debug(`Output path: ${options.out || 'null'}`);
 
-		if (!Utils.exists(options.out)) {
+		if (!utils.exists(options.out)) {
 			return Promise.reject(
 				error(
 					ACCOUNTS_CREATE.OUT_PATH_NOT_FOUND,
@@ -193,7 +193,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 			);
 		}
 
-		if (!Utils.isDirectory(options.out)) {
+		if (!utils.isDirectory(options.out)) {
 			return Promise.reject(
 				error(
 					ACCOUNTS_CREATE.OUT_PATH_IS_NOT_DIR,
@@ -221,7 +221,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 	}
 
 	debug(
-		`Account creation successful: ${Utils.cleanAddress(account.address)}`
+		`Account creation successful: ${utils.cleanAddress(account.address)}`
 	);
 
 	return Promise.resolve(success(account));

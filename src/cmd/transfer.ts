@@ -3,7 +3,7 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
 import { MonikerBaseAccount } from 'evm-lite-keystore';
 import { Account } from 'evm-lite-core';
@@ -187,7 +187,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	if (interactive) {
 		const { from } = await inquirer.prompt<FirstAnswers>(first);
 
-		options.from = Utils.trimHex(from.split(' ')[0]);
+		options.from = utils.trimHex(from.split(' ')[0]);
 
 		debug(`From address received: ${from}`);
 	}
@@ -222,7 +222,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		if (!Utils.exists(options.pwd)) {
+		if (!utils.exists(options.pwd)) {
 			return Promise.reject(
 				error(
 					TRANSFER.PWD_PATH_NOT_FOUND,
@@ -231,7 +231,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		if (Utils.isDirectory(options.pwd)) {
+		if (utils.isDirectory(options.pwd)) {
 			return Promise.reject(
 				error(
 					TRANSFER.PWD_IS_DIR,
@@ -273,7 +273,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		);
 	}
 
-	if (Utils.trimHex(options.to).length !== 40) {
+	if (utils.trimHex(options.to).length !== 40) {
 		return Promise.reject(
 			error(TRANSFER.ADDRESS_INVALID_LENGTH, 'Invalid `to` address')
 		);

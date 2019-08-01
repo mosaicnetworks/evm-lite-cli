@@ -3,7 +3,7 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
 import { Transaction } from 'evm-lite-core';
 
@@ -113,7 +113,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		debug(`Passphrase received: ${p}`);
 	}
 
-	const from = Utils.trimHex(options.from || state.defaults.from);
+	const from = utils.trimHex(options.from || state.defaults.from);
 
 	if (!from) {
 		return Promise.reject(
@@ -138,7 +138,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		if (!Utils.exists(options.pwd)) {
+		if (!utils.exists(options.pwd)) {
 			return Promise.reject(
 				error(
 					POA_INIT.PWD_PATH_NOT_FOUND,
@@ -147,7 +147,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		if (Utils.isDirectory(options.pwd)) {
+		if (utils.isDirectory(options.pwd)) {
 			return Promise.reject(
 				error(
 					POA_INIT.PWD_IS_DIR,

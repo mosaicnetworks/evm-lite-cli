@@ -2,7 +2,7 @@ import ASCIITable from 'ascii-table';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
 import { Contract } from 'evm-lite-core';
 
@@ -132,7 +132,7 @@ export const stage: IStagingFunction<
 
 		const hex = await call<string>(monikerTx);
 
-		whitelistEntry.moniker = Utils.hexToString(hex);
+		whitelistEntry.moniker = utils.hexToString(hex);
 
 		debug(`Moniker received: ${whitelistEntry.moniker}`);
 

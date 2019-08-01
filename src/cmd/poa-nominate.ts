@@ -3,7 +3,7 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Command, Args } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
+import utils from 'evm-lite-utils';
 
 import Session from '../Session';
 import Frames, {
@@ -134,7 +134,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		debug(`From address: ${from || 'null'}`);
 		debug(`Passphrase: ${p || 'null'}`);
 
-		args.address = Utils.trimHex(address);
+		args.address = utils.trimHex(address);
 		options.from = from;
 		options.moniker = nomineeMoniker;
 
@@ -156,7 +156,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		);
 	}
 
-	args.address = Utils.trimHex(args.address);
+	args.address = utils.trimHex(args.address);
 
 	if (args.address.length !== 40) {
 		return Promise.reject(
@@ -169,7 +169,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	debug(`Nominee address validated: ${args.address}`);
 
-	const from = Utils.trimHex(options.from || state.defaults.from);
+	const from = utils.trimHex(options.from || state.defaults.from);
 
 	if (!from) {
 		return Promise.reject(
@@ -194,7 +194,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		if (!Utils.exists(options.pwd)) {
+		if (!utils.exists(options.pwd)) {
 			return Promise.reject(
 				error(
 					POA_NOMINATE.PWD_PATH_NOT_FOUND,
@@ -203,7 +203,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			);
 		}
 
-		if (Utils.isDirectory(options.pwd)) {
+		if (utils.isDirectory(options.pwd)) {
 			return Promise.reject(
 				error(
 					POA_NOMINATE.PWD_IS_DIR,
@@ -229,7 +229,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			gas: session.config.state.defaults.gas,
 			gasPrice: session.config.state.defaults.gasPrice
 		},
-		Utils.cleanAddress(args.address),
+		utils.cleanAddress(args.address),
 		options.moniker
 	);
 
@@ -260,9 +260,9 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	if (monikerAnnouceEvents.length > 1) {
 		try {
 			monikerAnnouceEvent = monikerAnnouceEvents.filter(event => {
-				const moniker = Utils.hexToString(
-					event.args._moniker
-				).toLowerCase();
+				const moniker = utils
+					.hexToString(event.args._moniker)
+					.toLowerCase();
 
 				if (moniker.trim() === options.moniker!.trim()) {
 					return event;
@@ -293,7 +293,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	const returnData = `You (${
 		nomineeProposedEvent.args._proposer
-	}) nominated '${Utils.hexToString(monikerAnnouceEvent.args._moniker)}' (${
+	}) nominated '${utils.hexToString(monikerAnnouceEvent.args._moniker)}' (${
 		nomineeProposedEvent.args._nominee
 	})`;
 
