@@ -32,7 +32,7 @@ import init, { IInit } from './init';
 const params: IInit = {
 	name: 'EVM-Lite CLI',
 	delimiter: 'evmlc',
-	datadir: osdatadir('EVMLC'),
+	datadir: osdatadir('evm-lite'),
 	config: 'evmlc'
 };
 
