@@ -53,9 +53,9 @@ The first time `evmlc` runs, and if no options are specified, it creates a
 special directory in a default location, where it
 stores any relevant information.
 
--   Linux: `~/.evmlc`
--   Mac OS: `~/Library/EVMLC`
--   Windows: `~/AppData/Roaming/EVMLC`
+-   Linux: `~/.evm-lite`
+-   Mac OS: `~/Library/EVM-LITE`
+-   Windows: `~/AppData/Roaming/EVM-LITE`
 
 In particular, this directory contains the following items:
 

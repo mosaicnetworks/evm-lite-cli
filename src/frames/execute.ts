@@ -54,7 +54,7 @@ export const execute = <
 						if (e.error.message.startsWith('Error:')) {
 							error = `${e.error.message}`;
 						} else {
-							error = `Error: ${e.error.message}`;
+							error = `${e.error.message}`;
 						}
 					}
 				} else {
