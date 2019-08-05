@@ -25,13 +25,16 @@ interface Options extends IOptions {
 	file?: string;
 }
 
-export interface Arguments extends Args<Options> {}
+export interface Arguments extends Args<Options> {
+	options: Options;
+	moniker?: string;
+}
 
 export default function command(evmlc: Vorpal, session: Session): Command {
 	const description = 'Import an encrypted keyfile to the keystore';
 
 	return evmlc
-		.command('accounts import')
+		.command('accounts import [moniker]')
 		.alias('a i')
 		.description(description)
 		.option('-i, --interactive', 'enter interactive mode')
@@ -48,6 +51,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 }
 
 interface Answers {
+	moniker: string;
 	file: string;
 	makeDefault: boolean;
 }
@@ -68,6 +72,11 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 	const interactive = options.interactive || session.interactive;
 	const questions: inquirer.Questions<Answers> = [
 		{
+			message: 'Moniker: ',
+			name: 'moniker',
+			type: 'input'
+		},
+		{
 			message: 'Keyfile Path: ',
 			name: 'file',
 			type: 'input'
@@ -80,12 +89,31 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 	];
 
 	if (interactive && !options.file) {
-		const { file, makeDefault } = await inquirer.prompt<Answers>(questions);
+		const { file, makeDefault, moniker } = await inquirer.prompt<Answers>(
+			questions
+		);
 
 		debug(`Keyfile path: ${file || 'null'}`);
 
+		args.moniker = moniker;
 		options.file = file;
 		options.default = makeDefault || false;
+	}
+
+	// validate moniker
+	if (!args.moniker) {
+		return Promise.reject(
+			error(ACCOUNTS_IMPORT.EMPTY_MONIKER, 'Moniker cannot be empty')
+		);
+	}
+
+	if (!utils.validMoniker(args.moniker)) {
+		return Promise.reject(
+			error(
+				ACCOUNTS_IMPORT.INVALID_MONIKER,
+				'Moniker contains illegal characters'
+			)
+		);
 	}
 
 	if (!options.file) {
@@ -114,25 +142,23 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 
 	debug(`Keyfile path verified: ${options.file}`);
 
-	let keystore: V3Keyfile;
+	let keyfile: V3Keyfile;
 
 	debug(`Keystore directory: ${session.keystore.path}`);
 	debug(`Attempting to import keyfile...`);
 
 	try {
-		keystore = JSON.parse(fs.readFileSync(path.join(options.file), 'utf8'));
+		keyfile = JSON.parse(fs.readFileSync(path.join(options.file), 'utf8'));
 	} catch (e) {
 		return Promise.reject(e);
 	}
 
-	const filename = `UTC--${JSON.stringify(new Date())}--${keystore.address}`
-		.replace(/"/g, '')
-		.replace(/:/g, '-');
-
-	fs.writeFileSync(
-		path.join(session.keystore.path, filename),
-		JSON.stringify(keystore)
-	);
+	// write file
+	try {
+		await session.keystore.import(args.moniker, keyfile);
+	} catch (e) {
+		return Promise.reject(e.toString());
+	}
 
 	debug(`Setting as default address...`);
 
@@ -141,12 +167,12 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 			...session.config.state,
 			defaults: {
 				...session.config.state.defaults,
-				from: utils.cleanAddress(keystore.address)
+				from: args.moniker
 			}
 		};
 
 		await session.config.save(newConfig);
 	}
 
-	return Promise.resolve(success(keystore));
+	return Promise.resolve(success(keyfile));
 };

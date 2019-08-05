@@ -60,5 +60,8 @@ export const TRANSFER = {
 export const ACCOUNTS_IMPORT = {
 	FILE_PATH_EMPTY: '@error/accounts/IMPORT/FILE_PATH_EMPTY',
 	FILE_IS_DIR: '@error/accounts/IMPORT/FILE_IS_DIR',
-	FILE_PATH_NOT_FOUND: '@error/accounts/IMPORT/FILE_PATH_NOT_FOUND'
+	FILE_PATH_NOT_FOUND: '@error/accounts/IMPORT/FILE_PATH_NOT_FOUND',
+
+	INVALID_MONIKER: '@error/accounts/IMPORT/INVALID_MONIKER',
+	EMPTY_MONIKER: '@error/accounts/IMPORT/EMPTY_MONIKER'
 };
