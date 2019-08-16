@@ -1,22 +1,31 @@
 import { Args } from 'vorpal';
 
-import { Contract, AbstractSchema, Transaction, TX } from 'evm-lite-core';
+import Contract, { IAbstractSchema } from 'evm-lite-contract';
+import Transaction, { ITransaction } from 'evm-lite-transaction';
 
 import Frames, { IOptions } from './Frames';
 
 import { EVM_LITE } from '../errors/generals';
 
-interface Schema extends AbstractSchema {
-	checkAuthorised(tx: TX, address: string): Transaction;
-	submitNominee(tx: TX, address: string, moniker: string): Transaction;
-	castNomineeVote(tx: TX, address: string, verdict: boolean): Transaction;
-	getCurrentNomineeVotes(tx: TX, address: string): Transaction;
-	getWhiteListCount(tx: TX): Transaction;
-	getWhiteListAddressFromIdx(tx: TX, id: number): Transaction;
-	getMoniker(tx: TX, address: string): Transaction;
-	getNomineeCount(tx: TX): Transaction;
-	getNomineeAddressFromIdx(tx: TX, id: number): Transaction;
-	isNominee(tx: TX, address: string): Transaction;
+interface Schema extends IAbstractSchema {
+	checkAuthorised(tx: ITransaction, address: string): Transaction;
+	submitNominee(
+		tx: ITransaction,
+		address: string,
+		moniker: string
+	): Transaction;
+	castNomineeVote(
+		tx: ITransaction,
+		address: string,
+		verdict: boolean
+	): Transaction;
+	getCurrentNomineeVotes(tx: ITransaction, address: string): Transaction;
+	getWhiteListCount(tx: ITransaction): Transaction;
+	getWhiteListAddressFromIdx(tx: ITransaction, id: number): Transaction;
+	getMoniker(tx: ITransaction, address: string): Transaction;
+	getNomineeCount(tx: ITransaction): Transaction;
+	getNomineeAddressFromIdx(tx: ITransaction, id: number): Transaction;
+	isNominee(tx: ITransaction, address: string): Transaction;
 }
 
 export interface IPOAFrames {

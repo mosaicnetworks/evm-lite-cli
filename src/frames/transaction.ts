@@ -1,13 +1,16 @@
 import { Args } from 'vorpal';
 
-import { Transaction, TransactionReceipt, Account } from 'evm-lite-core';
+import Account from 'evm-lite-account';
+import Transaction from 'evm-lite-transaction';
+
+import { IReceipt } from 'evm-lite-client';
 
 import Frames, { IOptions } from './Frames';
 
 import { EVM_LITE } from '../errors/generals';
 
 export interface ITransactionFrames {
-	send: (tx: Transaction, account: Account) => Promise<TransactionReceipt>;
+	send: (tx: Transaction, account: Account) => Promise<IReceipt>;
 	call: <Response>(tx: Transaction) => Promise<Response>;
 }
 
@@ -24,7 +27,7 @@ const send = async <A extends Args<IOptions>, F, N>(
 	frames: Frames<A, F, N>,
 	tx: Transaction,
 	account: Account
-): Promise<TransactionReceipt> => {
+): Promise<IReceipt> => {
 	const { debug, error } = frames.staging();
 
 	debug(JSON.stringify(tx));

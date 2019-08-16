@@ -1,22 +1,24 @@
-import * as mkdir from 'mkdirp';
 import * as figlet from 'figlet';
+import * as mkdir from 'mkdirp';
 
 import Vorpal, { Command } from 'vorpal';
 
-import Utils from 'evm-lite-utils';
-import chalk from 'chalk';
+import AbstractConsensus from 'evm-lite-consensus';
 
-import Session from './Session';
+import chalk from 'chalk';
+import Utils from 'evm-lite-utils';
+
 import Globals from './Globals';
+import Session from './Session';
 
 // default commands
-import interactive from './cmd/interactive';
-import debug from './cmd/debug';
 import clear from './cmd/clear';
+import debug from './cmd/debug';
+import interactive from './cmd/interactive';
 
 export type CommandFunction = (evmlc: Vorpal, session: Session) => Command;
 
-export interface IInit {
+export interface ICLIConfig<TConsensus extends AbstractConsensus> {
 	name: string;
 	delimiter: string;
 
@@ -25,9 +27,15 @@ export interface IInit {
 
 	// config file name (usually application name)
 	config: string;
+
+	// consensus system
+	consensus?: TConsensus;
 }
 
-export default async function init(params: IInit, commands: CommandFunction[]) {
+export default async function init<TConsensus extends AbstractConsensus>(
+	params: ICLIConfig<TConsensus>,
+	commands: CommandFunction[]
+) {
 	commands.push(interactive, debug, clear);
 
 	if (!Utils.exists(params.datadir)) {
@@ -49,7 +57,7 @@ export default async function init(params: IInit, commands: CommandFunction[]) {
 		process.argv.splice(2, 2);
 	}
 
-	const session = new Session(dataDirPath, params.config);
+	const session = new Session<TConsensus>(dataDirPath, params.config);
 
 	if (!process.argv[2]) {
 		console.log(
@@ -57,7 +65,7 @@ export default async function init(params: IInit, commands: CommandFunction[]) {
 				params.delimiter
 			} --datadir [path] [command]`
 		);
-		console.log(`\n  Data Directory: ${session.directory.path}`);
+		console.log(`\n  Data Directory: ${session.datadir.path}`);
 
 		process.argv[2] = 'help';
 	}
@@ -83,12 +91,9 @@ export default async function init(params: IInit, commands: CommandFunction[]) {
 		}
 
 		Globals.warning(` Mode:        Interactive`);
-		Globals.info(` Data Dir:    ${session.directory.path}`);
-		Globals.purple(` Config File: ${session.config.path}`);
-
-		if (session.keystore) {
-			Globals.purple(` Keystore:    ${session.keystore.path}`);
-		}
+		Globals.info(` Data Dir:    ${session.datadir.path}`);
+		Globals.purple(` Config File: ${session.datadir.configPath}`);
+		Globals.purple(` Keystore:    ${session.datadir.keystorePath}`);
 
 		const cmdInteractive = cli.find('interactive');
 		if (cmdInteractive) {

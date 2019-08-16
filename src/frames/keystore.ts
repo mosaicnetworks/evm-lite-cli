@@ -1,16 +1,20 @@
 import { Args } from 'vorpal';
 
-import { Account } from 'evm-lite-core';
-import { V3Keyfile, Keystore, MonikerKeystore } from 'evm-lite-keystore';
+import Account from 'evm-lite-account';
+import {
+	AbstractKeystore,
+	IMonikerKeystore,
+	IV3Keyfile
+} from 'evm-lite-keystore';
 
 import Frames, { IOptions } from './Frames';
 
 import { KEYSTORE } from '../errors/generals';
 
 export interface IKeystoreFrames {
-	list: () => Promise<MonikerKeystore>;
-	get: (address: string) => Promise<V3Keyfile>;
-	decrypt: (keyfile: V3Keyfile, password: string) => Promise<Account>;
+	list: () => Promise<IMonikerKeystore>;
+	get: (address: string) => Promise<IV3Keyfile>;
+	decrypt: (keyfile: IV3Keyfile, password: string) => Promise<Account>;
 }
 
 export default <A extends Args<IOptions>, F, N>(
@@ -25,21 +29,21 @@ export default <A extends Args<IOptions>, F, N>(
 
 const list = async <A extends Args<IOptions>, F, N>(
 	frames: Frames<A, F, N>
-): Promise<MonikerKeystore> => {
+): Promise<IMonikerKeystore> => {
 	const { debug, error } = frames.staging();
 
-	debug(`Keystore path: ${frames.session.keystore.path}`);
+	debug(`Keystore path: ${frames.session.datadir.keystorePath}`);
 	debug(`Attempting to fetch accounts from keystore...`);
 
 	try {
-		const mapping = await frames.session.keystore.list();
+		const mapping = await frames.session.datadir.listKeyfiles();
 
 		if (!Object.keys(mapping).length) {
 			return Promise.reject(
 				error(
 					KEYSTORE.EMPTY,
 					`No accounts found in keystore '${
-						frames.session.keystore.path
+						frames.session.datadir.keystorePath
 					}'`
 				)
 			);
@@ -54,19 +58,19 @@ const list = async <A extends Args<IOptions>, F, N>(
 const get = async <A extends Args<IOptions>, F, N>(
 	frames: Frames<A, F, N>,
 	moniker: string
-): Promise<V3Keyfile> => {
+): Promise<IV3Keyfile> => {
 	const { debug, error } = frames.staging();
 
 	debug(`Attempting to fetch keystore for address...`);
 
 	try {
-		return await frames.session.keystore.get(moniker);
+		return await frames.session.datadir.getKeyfile(moniker);
 	} catch (e) {
 		return Promise.reject(
 			error(
 				KEYSTORE.FETCH,
 				`Could not locate keystore for address '${moniker}' in '${
-					frames.session.keystore.path
+					frames.session.datadir.keystorePath
 				}'`
 			)
 		);
@@ -75,7 +79,7 @@ const get = async <A extends Args<IOptions>, F, N>(
 
 const decrypt = async <A extends Args<IOptions>, F, N>(
 	frames: Frames<A, F, N>,
-	keyfile: V3Keyfile,
+	keyfile: IV3Keyfile,
 	passphrase: string
 ): Promise<Account> => {
 	const { debug, error } = frames.staging();
@@ -83,7 +87,7 @@ const decrypt = async <A extends Args<IOptions>, F, N>(
 	debug(`Attempting to decrypt keystore...`);
 
 	try {
-		return Keystore.decrypt(keyfile, passphrase);
+		return AbstractKeystore.decrypt(keyfile, passphrase);
 	} catch (err) {
 		return Promise.reject(
 			error(

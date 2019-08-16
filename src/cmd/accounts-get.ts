@@ -1,19 +1,19 @@
 import * as inquirer from 'inquirer';
 
 import ASCIITable from 'ascii-table';
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import { BaseAccount } from 'evm-lite-core';
+import { IBaseAccount } from 'evm-lite-client';
 
-import Session from '../Session';
 import Frames, {
 	execute,
-	IStagingFunction,
 	IOptions,
-	IStagedOutput
+	IStagedOutput,
+	IStagingFunction
 } from '../frames';
+import Session from '../Session';
 
 import { ACCOUNTS_GET } from '../errors/accounts';
 import { EVM_LITE } from '../errors/generals';
@@ -54,21 +54,21 @@ interface Answers {
 	address: string;
 }
 
-export type Output = IStagedOutput<Arguments, ASCIITable, BaseAccount>;
+export type Output = IStagedOutput<Arguments, ASCIITable, IBaseAccount>;
 
 export const stage: IStagingFunction<
 	Arguments,
 	ASCIITable,
-	BaseAccount
+	IBaseAccount
 > = async (args: Arguments, session: Session) => {
-	const frames = new Frames<Arguments, ASCIITable, BaseAccount>(
+	const frames = new Frames<Arguments, ASCIITable, IBaseAccount>(
 		session,
 		args
 	);
 
 	// prepare
 	const { options } = args;
-	const { state } = session.config;
+	const state = session.datadir.config;
 	const { success, error, debug } = frames.staging();
 	const { connect } = frames.generics();
 
@@ -121,7 +121,7 @@ export const stage: IStagingFunction<
 
 	debug(`Address validated: ${args.address}`);
 
-	let account: BaseAccount;
+	let account: IBaseAccount;
 
 	debug(`Attempting to fetch account details...`);
 

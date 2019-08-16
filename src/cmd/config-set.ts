@@ -1,10 +1,10 @@
 import * as inquirer from 'inquirer';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
-import Session from '../Session';
+import Frames, { execute, IOptions, IStagingFunction } from '../frames';
 import Globals from '../Globals';
-import Frames, { execute, IStagingFunction, IOptions } from '../frames';
+import Session from '../Session';
 
 interface Options extends IOptions {
 	interactive?: boolean;

@@ -1,23 +1,23 @@
 import * as fs from 'fs';
-import * as path from 'path';
 import * as inquirer from 'inquirer';
+import * as path from 'path';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import { V3Keyfile } from 'evm-lite-keystore';
+import { IConfiguration } from 'evm-lite-datadir';
+import { IV3Keyfile } from 'evm-lite-keystore';
 
-import Session from '../Session';
 import Frames, {
 	execute,
-	IStagingFunction,
 	IOptions,
-	IStagedOutput
+	IStagedOutput,
+	IStagingFunction
 } from '../frames';
+import Session from '../Session';
 
 import { ACCOUNTS_IMPORT } from '../errors/accounts';
-import { ConfigurationSchema } from 'evm-lite-datadir';
 
 interface Options extends IOptions {
 	interactive?: boolean;
@@ -56,13 +56,14 @@ interface Answers {
 	makeDefault: boolean;
 }
 
-export type Output = IStagedOutput<Arguments, V3Keyfile, V3Keyfile>;
+export type Output = IStagedOutput<Arguments, IV3Keyfile, IV3Keyfile>;
 
-export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
-	args: Arguments,
-	session: Session
-) => {
-	const frames = new Frames<Arguments, V3Keyfile, V3Keyfile>(session, args);
+export const stage: IStagingFunction<
+	Arguments,
+	IV3Keyfile,
+	IV3Keyfile
+> = async (args: Arguments, session: Session) => {
+	const frames = new Frames<Arguments, IV3Keyfile, IV3Keyfile>(session, args);
 
 	// prepare
 	const { options } = args;
@@ -142,9 +143,9 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 
 	debug(`Keyfile path verified: ${options.file}`);
 
-	let keyfile: V3Keyfile;
+	let keyfile: IV3Keyfile;
 
-	debug(`Keystore directory: ${session.keystore.path}`);
+	debug(`Keystore directory: ${session.datadir.keystorePath}`);
 	debug(`Attempting to import keyfile...`);
 
 	try {
@@ -155,7 +156,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 
 	// write file
 	try {
-		await session.keystore.import(args.moniker, keyfile);
+		await session.datadir.importKeyfile(args.moniker, keyfile);
 	} catch (e) {
 		return Promise.reject(e.toString());
 	}
@@ -163,15 +164,15 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 	debug(`Setting as default address...`);
 
 	if (options.default) {
-		const newConfig: ConfigurationSchema = {
-			...session.config.state,
+		const newConfig: IConfiguration = {
+			...session.datadir.config,
 			defaults: {
-				...session.config.state.defaults,
+				...session.datadir.config.defaults,
 				from: args.moniker
 			}
 		};
 
-		await session.config.save(newConfig);
+		await session.datadir.saveConfig(newConfig);
 	}
 
 	return Promise.resolve(success(keyfile));

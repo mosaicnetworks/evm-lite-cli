@@ -1,19 +1,19 @@
 import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import { V3Keyfile } from 'evm-lite-keystore';
+import { IV3Keyfile } from 'evm-lite-keystore';
 
-import Session from '../Session';
 import Frames, {
 	execute,
-	IStagingFunction,
 	IOptions,
-	IStagedOutput
+	IStagedOutput,
+	IStagingFunction
 } from '../frames';
+import Session from '../Session';
 
 import { ACCOUNTS_UPDATE } from '../errors/accounts';
 
@@ -60,13 +60,14 @@ interface ThirdAnswers {
 	verifyPassphrase: string;
 }
 
-export type Output = IStagedOutput<Arguments, V3Keyfile, V3Keyfile>;
+export type Output = IStagedOutput<Arguments, IV3Keyfile, IV3Keyfile>;
 
-export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
-	args: Arguments,
-	session: Session
-) => {
-	const frames = new Frames<Arguments, V3Keyfile, V3Keyfile>(session, args);
+export const stage: IStagingFunction<
+	Arguments,
+	IV3Keyfile,
+	IV3Keyfile
+> = async (args: Arguments, session: Session) => {
+	const frames = new Frames<Arguments, IV3Keyfile, IV3Keyfile>(session, args);
 
 	// prepare
 	const { options } = args;
@@ -77,7 +78,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 	/** Command Execution */
 	const interactive = options.interactive || session.interactive;
 
-	let keystore = await list();
+	const keystore = await list();
 
 	const first: inquirer.Questions<FirstAnswers> = [
 		{
@@ -134,7 +135,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 
 	debug(`Moniker validated: ${args.moniker}`);
 
-	let keyfile = await get(args.moniker);
+	const keyfile = await get(args.moniker);
 
 	let oldPassphrase: string = '';
 	let newPassphrase: string = '';
@@ -261,7 +262,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 
 	debug(`Attempting to update passphrase for address...`);
 
-	const newKeystore = await session.keystore.update(
+	const newKeystore = await session.datadir.updateKeyfile(
 		args.moniker,
 		oldPassphrase,
 		newPassphrase

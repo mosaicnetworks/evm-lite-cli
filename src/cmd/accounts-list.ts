@@ -1,17 +1,18 @@
 import ASCIITable from 'ascii-table';
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
-import { BaseAccount } from 'evm-lite-core';
-import { MonikerBaseAccount } from 'evm-lite-keystore';
 
-import Session from '../Session';
+import { IBaseAccount } from 'evm-lite-client';
+import { IMonikerBaseAccount } from 'evm-lite-keystore';
+
 import Frames, {
 	execute,
-	IStagingFunction,
 	IOptions,
-	IStagedOutput
+	IStagedOutput,
+	IStagingFunction
 } from '../frames';
+import Session from '../Session';
 
 import { EVM_LITE } from '../errors/generals';
 
@@ -45,21 +46,21 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		);
 }
 
-export type Output = IStagedOutput<Arguments, ASCIITable, BaseAccount[]>;
+export type Output = IStagedOutput<Arguments, ASCIITable, IBaseAccount[]>;
 
 export const stage: IStagingFunction<
 	Arguments,
 	ASCIITable,
-	BaseAccount[]
+	IBaseAccount[]
 > = async (args: Arguments, session: Session) => {
-	const frames = new Frames<Arguments, ASCIITable, BaseAccount[]>(
+	const frames = new Frames<Arguments, ASCIITable, IBaseAccount[]>(
 		session,
 		args
 	);
 
 	// prepare
 	const { options } = args;
-	const { state } = session.config;
+	const state = session.datadir.config;
 
 	const { success, error, debug } = frames.staging();
 	const { list } = frames.keystore();
@@ -76,13 +77,15 @@ export const stage: IStagingFunction<
 	const port = options.port || state.connection.port;
 
 	const keystore = await list();
-	let accounts: MonikerBaseAccount[] = Object.keys(keystore).map(moniker => ({
-		moniker,
-		address: keystore[moniker].address,
-		balance: 0,
-		nonce: 0,
-		bytecode: ''
-	}));
+	let accounts: IMonikerBaseAccount[] = Object.keys(keystore).map(
+		moniker => ({
+			moniker,
+			address: keystore[moniker].address,
+			balance: 0,
+			nonce: 0,
+			bytecode: ''
+		})
+	);
 
 	if (!accounts.length) {
 		return Promise.resolve(success([]));
