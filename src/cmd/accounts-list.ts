@@ -3,7 +3,6 @@ import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import { IBaseAccount } from 'evm-lite-client';
 import { IMonikerBaseAccount } from 'evm-lite-keystore';
 
 import Frames, {
@@ -46,14 +45,18 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		);
 }
 
-export type Output = IStagedOutput<Arguments, ASCIITable, IBaseAccount[]>;
+export type Output = IStagedOutput<
+	Arguments,
+	ASCIITable,
+	IMonikerBaseAccount[]
+>;
 
 export const stage: IStagingFunction<
 	Arguments,
 	ASCIITable,
-	IBaseAccount[]
+	IMonikerBaseAccount[]
 > = async (args: Arguments, session: Session) => {
-	const frames = new Frames<Arguments, ASCIITable, IBaseAccount[]>(
+	const frames = new Frames<Arguments, ASCIITable, IMonikerBaseAccount[]>(
 		session,
 		args
 	);
