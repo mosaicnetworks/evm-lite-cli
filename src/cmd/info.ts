@@ -1,8 +1,8 @@
 import ASCIITable from 'ascii-table';
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
+import Frames, { execute, IOptions, IStagingFunction } from '../frames';
 import Session from '../Session';
-import Frames, { execute, IStagingFunction, IOptions } from '../frames';
 
 import { EVM_LITE } from '../errors/generals';
 
@@ -38,7 +38,7 @@ export const stage: IStagingFunction<Arguments, ASCIITable, any> = async (
 
 	// prepare
 	const { options } = args;
-	const { state } = session.config;
+	const state = session.datadir.config;
 
 	const { success, error, debug } = frames.staging();
 	const { connect } = frames.generics();

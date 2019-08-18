@@ -1,21 +1,21 @@
 import * as inquirer from 'inquirer';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import { Transaction } from 'evm-lite-core';
+import Transaction from 'evm-lite-transaction';
 
-import Session from '../Session';
 import Frames, {
 	execute,
-	IStagingFunction,
 	IOptions,
-	IStagedOutput
+	IStagedOutput,
+	IStagingFunction
 } from '../frames';
+import Session from '../Session';
 
-import { POA_CHECK } from '../errors/poa';
 import { TRANSACTION } from '../errors/generals';
+import { POA_CHECK } from '../errors/poa';
 
 interface Options extends IOptions {
 	interactive?: boolean;
@@ -61,7 +61,7 @@ export const stage: IStagingFunction<Arguments, boolean, boolean> = async (
 
 	// prepare
 	const { options } = args;
-	const { state } = session.config;
+	const state = session.datadir.config;
 
 	const { success, error, debug } = frames.staging();
 	const { connect } = frames.generics();
@@ -122,8 +122,8 @@ export const stage: IStagingFunction<Arguments, boolean, boolean> = async (
 	try {
 		transaction = contract.methods.checkAuthorised(
 			{
-				gas: session.config.state.defaults.gas,
-				gasPrice: session.config.state.defaults.gasPrice
+				gas: state.defaults.gas,
+				gasPrice: state.defaults.gasPrice
 			},
 			utils.cleanAddress(args.address)
 		);

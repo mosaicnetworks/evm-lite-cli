@@ -57,14 +57,14 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	const frames = new Frames<Arguments, string, string>(session, args);
 
 	// prepare
+	const state = session.datadir.config;
 	const { options } = args;
-	const { state } = session.config;
 	const { success, debug } = frames.staging();
 
 	const { list } = frames.keystore();
 
 	/** Command Execution */
-	debug(`Successfully read configuration: ${session.config.path}`);
+	debug(`Successfully read configuration: ${session.datadir.configPath}`);
 
 	const keystore = await list();
 
@@ -133,9 +133,9 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	debug(`Attempting to write modified configuration...`);
 
-	await session.config.save(newConfig);
+	await session.datadir.saveConfig(newConfig);
 
-	Globals.info(session.config.toTOML());
+	Globals.info(session.datadir.configToml);
 
 	return Promise.resolve(success('Configuration saved'));
 };

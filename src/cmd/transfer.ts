@@ -1,20 +1,20 @@
 import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import { MonikerBaseAccount } from 'evm-lite-keystore';
-import { Account } from 'evm-lite-core';
+import Account from 'evm-lite-account';
+import { IMonikerBaseAccount } from 'evm-lite-keystore';
 
-import Session from '../Session';
 import Frames, {
 	execute,
-	IStagingFunction,
 	IOptions,
-	IStagedOutput
+	IStagedOutput,
+	IStagingFunction
 } from '../frames';
+import Session from '../Session';
 
 import { TRANSFER } from '../errors/accounts';
 
@@ -90,7 +90,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	// prepare
 	const { options } = args;
-	const { state } = session.config;
+	const state = session.datadir.config;
 
 	const { success, error, debug } = frames.staging();
 	const { connect } = frames.generics();
@@ -111,7 +111,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	);
 
 	const keystore = await list();
-	const accounts: MonikerBaseAccount[] = await Promise.all(
+	const accounts: IMonikerBaseAccount[] = await Promise.all(
 		Object.keys(keystore).map(async moniker => {
 			const base = await session.node.getAccount(
 				keystore[moniker].address
@@ -163,13 +163,13 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			type: 'number'
 		},
 		{
-			default: session.config.state.defaults.gas || 100000,
+			default: state.defaults.gas || 100000,
 			message: 'Gas: ',
 			name: 'gas',
 			type: 'number'
 		},
 		{
-			default: session.config.state.defaults.gasPrice || 0,
+			default: state.defaults.gasPrice || 0,
 			message: 'Gas Price: ',
 			name: 'gasPrice',
 			type: 'number'

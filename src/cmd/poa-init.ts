@@ -1,22 +1,22 @@
 import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import { Transaction } from 'evm-lite-core';
+import Transaction from 'evm-lite-transaction';
 
-import Session from '../Session';
 import Frames, {
 	execute,
-	IStagingFunction,
 	IOptions,
-	IStagedOutput
+	IStagedOutput,
+	IStagingFunction
 } from '../frames';
+import Session from '../Session';
 
-import { POA_INIT } from '../errors/poa';
 import { TRANSACTION } from '../errors/generals';
+import { POA_INIT } from '../errors/poa';
 
 interface Options extends IOptions {
 	interactive?: boolean;
@@ -63,7 +63,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	// deconstruct options
 	const { options } = args;
-	const { state } = session.config;
+	const state = session.datadir.config;
 
 	// generate success, error, debug handlers
 	const { debug, success, error } = frames.staging();

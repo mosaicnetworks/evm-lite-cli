@@ -1,20 +1,20 @@
 import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import Session from '../Session';
 import Frames, {
 	execute,
-	IStagingFunction,
 	IOptions,
-	IStagedOutput
+	IStagedOutput,
+	IStagingFunction
 } from '../frames';
+import Session from '../Session';
 
-import { POA_NOMINATE } from '../errors/poa';
 import { TRANSACTION } from '../errors/generals';
+import { POA_NOMINATE } from '../errors/poa';
 
 interface Options extends IOptions {
 	interactive?: boolean;
@@ -69,7 +69,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	// prepare
 	const { options } = args;
-	const { state } = session.config;
+	const state = session.datadir.config;
 
 	// generate success, error, debug handlers
 	const { debug, success, error } = frames.staging();
@@ -226,14 +226,14 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	const transaction = contract.methods.submitNominee(
 		{
 			from: keyfile.address,
-			gas: session.config.state.defaults.gas,
-			gasPrice: session.config.state.defaults.gasPrice
+			gas: state.defaults.gas,
+			gasPrice: state.defaults.gasPrice
 		},
 		utils.cleanAddress(args.address),
 		options.moniker
 	);
 
-	let receipt = await send(transaction, decrypted);
+	const receipt = await send(transaction, decrypted);
 
 	if (!receipt.logs.length) {
 		return Promise.reject(

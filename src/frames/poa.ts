@@ -48,7 +48,7 @@ export const contract = async <A extends Args<IOptions>, F, N>(
 	debug(`Attempting to fetch PoA data...`);
 
 	try {
-		const poa = await frames.session.getPOAContract();
+		const poa = await frames.session.POA();
 		return Contract.load<Schema>(poa.abi, poa.address);
 	} catch (e) {
 		return Promise.reject(error(EVM_LITE, e.toString()));

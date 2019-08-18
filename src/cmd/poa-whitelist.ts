@@ -1,15 +1,11 @@
 import ASCIITable from 'ascii-table';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import { Contract } from 'evm-lite-core';
-
+import Frames, { execute, IOptions, IStagingFunction } from '../frames';
 import Session from '../Session';
-import Frames, { execute, IStagingFunction, IOptions } from '../frames';
-
-import { EVM_LITE, INVALID_CONNECTION } from '../errors/generals';
 
 interface Options extends IOptions {
 	formatted?: boolean;
@@ -59,7 +55,7 @@ export const stage: IStagingFunction<
 
 	// prepare
 	const { options } = args;
-	const { state } = session.config;
+	const state = session.datadir.config;
 
 	// generate success, error, debug handlers
 	const { debug, success, error } = frames.staging();
@@ -86,8 +82,8 @@ export const stage: IStagingFunction<
 	debug(`Attempting to generate whitelist count transaction...`);
 
 	const transaction = contract.methods.getWhiteListCount({
-		gas: session.config.state.defaults.gas,
-		gasPrice: session.config.state.defaults.gasPrice
+		gas: state.defaults.gas,
+		gasPrice: state.defaults.gasPrice
 	});
 
 	const response: any = await call(transaction);
@@ -111,8 +107,8 @@ export const stage: IStagingFunction<
 
 		const tx = contract.methods.getWhiteListAddressFromIdx(
 			{
-				gas: session.config.state.defaults.gas,
-				gasPrice: session.config.state.defaults.gasPrice
+				gas: state.defaults.gas,
+				gasPrice: state.defaults.gasPrice
 			},
 			i
 		);
@@ -123,8 +119,8 @@ export const stage: IStagingFunction<
 
 		const monikerTx = contract.methods.getMoniker(
 			{
-				gas: session.config.state.defaults.gas,
-				gasPrice: session.config.state.defaults.gasPrice
+				gas: state.defaults.gas,
+				gasPrice: state.defaults.gasPrice
 			},
 			whitelistEntry.address
 		);

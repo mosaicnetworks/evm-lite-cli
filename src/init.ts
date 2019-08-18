@@ -57,7 +57,7 @@ export default async function init<TConsensus extends AbstractConsensus>(
 		process.argv.splice(2, 2);
 	}
 
-	const session = new Session<TConsensus>(dataDirPath, params.config);
+	const session = new Session(dataDirPath, params.config);
 
 	if (!process.argv[2]) {
 		console.log(

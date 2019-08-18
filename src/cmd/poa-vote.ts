@@ -1,21 +1,19 @@
 import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import { V3Keyfile } from 'evm-lite-keystore';
-
-import Session from '../Session';
 import Frames, {
 	execute,
-	IStagingFunction,
 	IOptions,
-	IStagedOutput
+	IStagedOutput,
+	IStagingFunction
 } from '../frames';
+import Session from '../Session';
 
-import { TRANSACTION, EVM_LITE } from '../errors/generals';
+import { EVM_LITE, TRANSACTION } from '../errors/generals';
 import { POA_VOTE } from '../errors/poa';
 
 interface Options extends IOptions {
@@ -78,7 +76,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	// prepare
 	const { options } = args;
-	const { state } = session.config;
+	const state = session.datadir.config;
 
 	// generate success, error, debug handlers
 	const { debug, success, error } = frames.staging();
@@ -108,8 +106,8 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	debug(`Attempting to generate nominee count transaction...`);
 
 	const tx = contract.methods.getNomineeCount({
-		gas: session.config.state.defaults.gas,
-		gasPrice: session.config.state.defaults.gasPrice
+		gas: state.defaults.gas,
+		gasPrice: state.defaults.gasPrice
 	});
 
 	let response: any = await call(tx);
@@ -131,8 +129,8 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 		const tx = contract.methods.getNomineeAddressFromIdx(
 			{
-				gas: session.config.state.defaults.gas,
-				gasPrice: session.config.state.defaults.gasPrice
+				gas: state.defaults.gas,
+				gasPrice: state.defaults.gasPrice
 			},
 			i
 		);
@@ -147,8 +145,8 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 		const monikerTx = contract.methods.getMoniker(
 			{
-				gas: session.config.state.defaults.gas,
-				gasPrice: session.config.state.defaults.gasPrice
+				gas: state.defaults.gas,
+				gasPrice: state.defaults.gasPrice
 			},
 			nominee.address
 		);
@@ -167,9 +165,9 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 		const votesTransaction = contract.methods.getCurrentNomineeVotes(
 			{
-				from: session.config.state.defaults.from,
-				gas: session.config.state.defaults.gas,
-				gasPrice: session.config.state.defaults.gasPrice
+				from: state.defaults.from,
+				gas: state.defaults.gas,
+				gasPrice: state.defaults.gasPrice
 			},
 			utils.cleanAddress(nominee.address)
 		);
@@ -325,8 +323,8 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	const transaction = contract.methods.castNomineeVote(
 		{
 			from: keyfile.address,
-			gas: session.config.state.defaults.gas,
-			gasPrice: session.config.state.defaults.gasPrice
+			gas: state.defaults.gas,
+			gasPrice: state.defaults.gasPrice
 		},
 		utils.cleanAddress(args.address),
 		options.verdict
