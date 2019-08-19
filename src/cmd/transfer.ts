@@ -188,11 +188,11 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	];
 
 	if (interactive) {
-		const { from } = await inquirer.prompt<FirstAnswers>(first);
+		const { from: f } = await inquirer.prompt<FirstAnswers>(first);
 
-		options.from = utils.trimHex(from.split(' ')[0]);
+		options.from = utils.trimHex(f.split(' ')[0]);
 
-		debug(`From address received: ${from}`);
+		debug(`From address received: ${f}`);
 	}
 
 	const from = options.from || config.defaults.from;
@@ -294,7 +294,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		options.gasprice
 	);
 
-	let tx = {
+	const tx = {
 		from: transaction.from,
 		to: transaction.to,
 		value: transaction.value,

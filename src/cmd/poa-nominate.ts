@@ -97,7 +97,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	const contract = await getContract();
 
-	let keystore = await list();
+	const keystore = await list();
 
 	const questions: inquirer.Questions<Answers> = [
 		{
@@ -126,18 +126,18 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	if (interactive) {
 		const {
 			address,
-			from,
+			from: f,
 			passphrase: p,
 			nomineeMoniker
 		} = await inquirer.prompt<Answers>(questions);
 
 		debug(`Nominee Moniker: ${nomineeMoniker || 'null'}`);
 		debug(`Nominee address: ${address || 'null'}`);
-		debug(`From address: ${from || 'null'}`);
+		debug(`From address: ${f || 'null'}`);
 		debug(`Passphrase: ${p || 'null'}`);
 
 		args.address = utils.trimHex(address);
-		options.from = from;
+		options.from = f;
 		options.moniker = nomineeMoniker;
 
 		passphrase = p;

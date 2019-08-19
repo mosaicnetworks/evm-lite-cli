@@ -1,7 +1,7 @@
 // requirements
 export { default as Session } from './Session';
 export { default as Globals } from './Globals';
-export { default as init, IInit } from './init';
+export { default as init, ICLIConfig } from './init';
 
 // Commands
 

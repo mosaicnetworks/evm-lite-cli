@@ -105,12 +105,12 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	debug(`Attempting to generate nominee count transaction...`);
 
-	const tx = contract.methods.getNomineeCount({
+	const countTx = contract.methods.getNomineeCount({
 		gas: state.defaults.gas,
 		gasPrice: state.defaults.gasPrice
 	});
 
-	let response: any = await call(tx);
+	const response: any = await call(countTx);
 
 	const nomineeCount = response.toNumber();
 	debug(`Nominee Count: ${response}`);
@@ -220,18 +220,21 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	];
 
 	if (interactive) {
-		const { address, from, passphrase: p, verdict } = await inquirer.prompt<
-			Answers
-		>(questions);
+		const {
+			address,
+			from: f,
+			passphrase: p,
+			verdict
+		} = await inquirer.prompt<Answers>(questions);
 
 		debug(`Nominee address: ${address || 'null'}`);
-		debug(`From address: ${from || 'null'}`);
+		debug(`From address: ${f || 'null'}`);
 		debug(`Verdict: ${verdict ? 'Yes' : 'No'}`);
 
 		debug(`Passphrase: ${p || 'null'}`);
 
 		args.address = address;
-		options.from = from;
+		options.from = f;
 		options.verdict = verdict;
 		passphrase = p;
 	}

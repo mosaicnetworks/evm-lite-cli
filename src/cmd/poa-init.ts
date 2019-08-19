@@ -104,14 +104,14 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	];
 
 	if (interactive) {
-		const { from, passphrase: p } = await inquirer.prompt<Answers>(
+		const { from: f, passphrase: p } = await inquirer.prompt<Answers>(
 			questions
 		);
 
-		options.from = from;
+		options.from = f;
 		passphrase = p;
 
-		debug(`From received: ${from}`);
+		debug(`From received: ${f}`);
 		debug(`Passphrase received: ${p}`);
 	}
 
@@ -180,7 +180,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		return Promise.reject(error(TRANSACTION.GENERATION, e.toString()));
 	}
 
-	let receipt = await send(transaction, decrypted);
+	const receipt = await send(transaction, decrypted);
 
 	if (!receipt.logs.length) {
 		return Promise.reject(
