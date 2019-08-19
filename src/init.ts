@@ -6,6 +6,8 @@ import Vorpal, { Command } from 'vorpal';
 import chalk from 'chalk';
 import Utils from 'evm-lite-utils';
 
+import { IConsensus } from 'evm-lite-node';
+
 import Globals from './Globals';
 import Session from './Session';
 
@@ -15,8 +17,6 @@ import debug from './cmd/debug';
 import interactive from './cmd/interactive';
 
 export type CommandFunction = (evmlc: Vorpal, session: Session) => Command;
-
-type Consensus = 'solo' | 'babble';
 
 export interface ICLIConfig {
 	name: string;
@@ -28,9 +28,8 @@ export interface ICLIConfig {
 	// config file name (usually application name)
 	config: string;
 
-	// temp
 	// consensus system
-	consensus?: Consensus;
+	consensus: IConsensus;
 }
 
 export default async function init(
@@ -58,7 +57,7 @@ export default async function init(
 		process.argv.splice(2, 2);
 	}
 
-	const session = new Session(dataDirPath, params.config);
+	const session = new Session(dataDirPath, params.config, params.consensus);
 
 	if (!process.argv[2]) {
 		console.log(

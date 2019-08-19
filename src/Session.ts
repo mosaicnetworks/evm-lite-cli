@@ -4,7 +4,8 @@ import Utils from 'evm-lite-utils';
 
 import DataDirectory from 'evm-lite-datadir';
 import Keystore from 'evm-lite-keystore';
-import Node from 'evm-lite-node';
+
+import Node, { IConsensus } from 'evm-lite-node';
 
 import { IContractABI } from 'evm-lite-client';
 
@@ -12,13 +13,17 @@ export default class Session {
 	public interactive: boolean = false;
 	public debug: boolean = false;
 
-	public node: Node<any>;
+	public node: Node;
 	public datadir: DataDirectory<Keystore>;
 
-	constructor(path: string, configName: string) {
+	constructor(
+		path: string,
+		configName: string,
+		public readonly consensus: IConsensus
+	) {
 		const keystore = new Keystore(nodepath.join(path, 'keystore'));
 
-		this.node = new Node('localhost', 8080);
+		this.node = new Node('localhost', 8080, consensus);
 		this.datadir = new DataDirectory(path, configName, keystore);
 	}
 
@@ -54,7 +59,7 @@ export default class Session {
 			forcedHost || config.connection.host || '127.0.0.1';
 		const port: number = forcedPort || config.connection.port || 8080;
 
-		const node = new Node(host, port);
+		const node = new Node(host, port, this.consensus);
 
 		try {
 			await node.getInfo();
