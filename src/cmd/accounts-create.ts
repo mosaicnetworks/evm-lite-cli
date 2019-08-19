@@ -68,7 +68,7 @@ export const stage: IStagingFunction<
 	// decontruct
 	const { success, error, debug } = frames.staging();
 
-	/** Command Execution */
+	// command execution
 	let passphrase: string = '';
 
 	const interactive = options.interactive || session.interactive;

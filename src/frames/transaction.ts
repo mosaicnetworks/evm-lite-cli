@@ -34,7 +34,7 @@ const send = async <A extends Args<IOptions>, F, N>(
 	debug(`Attempting to send transaction...`);
 
 	try {
-		const receipt = await frames.session.node.sendTransaction(tx, account);
+		const receipt = await frames.session.node.sendTx(tx, account);
 
 		debug(JSON.stringify(receipt));
 
@@ -56,7 +56,7 @@ const call = async <A extends Args<IOptions>, F, N>(
 	debug(`Attempting to call transaction...`);
 
 	try {
-		return await frames.session.node.callTransaction<boolean>(tx);
+		return await frames.session.node.callTx<boolean>(tx);
 	} catch (e) {
 		return Promise.reject(error(EVM_LITE, e.text));
 	}

@@ -35,14 +35,15 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	// prepare
 	const { options } = args;
-	const state = session.datadir.config;
-
 	const { success, error, debug } = frames.staging();
 	const { connect } = frames.generics();
 
-	/** Command Execution */
-	const host = options.host || state.connection.host;
-	const port = options.port || state.connection.port;
+	// config
+	const config = session.datadir.config;
+
+	// command execution
+	const host = options.host || config.connection.host;
+	const port = options.port || config.connection.port;
 
 	await connect(
 		host,

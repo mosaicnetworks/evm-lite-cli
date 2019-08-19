@@ -3,8 +3,6 @@ import * as mkdir from 'mkdirp';
 
 import Vorpal, { Command } from 'vorpal';
 
-import AbstractConsensus from 'evm-lite-consensus';
-
 import chalk from 'chalk';
 import Utils from 'evm-lite-utils';
 
@@ -18,7 +16,9 @@ import interactive from './cmd/interactive';
 
 export type CommandFunction = (evmlc: Vorpal, session: Session) => Command;
 
-export interface ICLIConfig<TConsensus extends AbstractConsensus> {
+type Consensus = 'solo' | 'babble';
+
+export interface ICLIConfig {
 	name: string;
 	delimiter: string;
 
@@ -28,12 +28,13 @@ export interface ICLIConfig<TConsensus extends AbstractConsensus> {
 	// config file name (usually application name)
 	config: string;
 
+	// temp
 	// consensus system
-	consensus?: TConsensus;
+	consensus?: Consensus;
 }
 
-export default async function init<TConsensus extends AbstractConsensus>(
-	params: ICLIConfig<TConsensus>,
+export default async function init(
+	params: ICLIConfig,
 	commands: CommandFunction[]
 ) {
 	commands.push(interactive, debug, clear);

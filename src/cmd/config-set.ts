@@ -57,13 +57,15 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	const frames = new Frames<Arguments, string, string>(session, args);
 
 	// prepare
-	const state = session.datadir.config;
 	const { options } = args;
 	const { success, debug } = frames.staging();
 
+	// config
+	const config = session.datadir.config;
+
 	const { list } = frames.keystore();
 
-	/** Command Execution */
+	// command execution
 	debug(`Successfully read configuration: ${session.datadir.configPath}`);
 
 	const keystore = await list();
@@ -71,32 +73,32 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	const interactive = options.interactive || session.interactive;
 	const questions: inquirer.Questions<Answers> = [
 		{
-			default: state.connection.host,
+			default: config.connection.host,
 			message: 'Host',
 			name: 'host',
 			type: 'input'
 		},
 		{
-			default: state.connection.port,
+			default: config.connection.port,
 			message: 'Port',
 			name: 'port',
 			type: 'number'
 		},
 		{
 			choices: Object.keys(keystore).map(moniker => moniker),
-			default: state.defaults.from,
+			default: config.defaults.from,
 			message: 'From',
 			name: 'from',
 			type: 'list'
 		},
 		{
-			default: state.defaults.gas,
+			default: config.defaults.gas,
 			message: 'Gas',
 			name: 'gas',
 			type: 'number'
 		},
 		{
-			default: state.defaults.gasPrice,
+			default: config.defaults.gasPrice,
 			message: 'Gas Price',
 			name: 'gasPrice',
 			type: 'number'
@@ -115,19 +117,19 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	const newConfig = {
 		connection: {
-			host: options.host || state.connection.host,
-			port: options.port || state.connection.port
+			host: options.host || config.connection.host,
+			port: options.port || config.connection.port
 		},
 		defaults: {
-			from: options.from || state.defaults.from,
+			from: options.from || config.defaults.from,
 			gas:
 				options.gas !== undefined && options.gas >= 0
 					? options.gas
-					: state.defaults.gas,
+					: config.defaults.gas,
 			gasPrice:
 				options.gasprice !== undefined && options.gasprice >= 0
 					? options.gasprice
-					: state.defaults.gasPrice
+					: config.defaults.gasPrice
 		}
 	};
 

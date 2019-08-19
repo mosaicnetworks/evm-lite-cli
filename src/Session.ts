@@ -9,7 +9,6 @@ import Node from 'evm-lite-node';
 import { IContractABI } from 'evm-lite-client';
 
 export default class Session {
-	// session variables
 	public interactive: boolean = false;
 	public debug: boolean = false;
 
@@ -34,7 +33,7 @@ export default class Session {
 			};
 		}
 
-		const poa = await this.node.getPOAContract();
+		const poa = await this.node.getPOA();
 
 		return {
 			...poa,

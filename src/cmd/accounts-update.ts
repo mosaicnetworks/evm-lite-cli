@@ -75,7 +75,7 @@ export const stage: IStagingFunction<
 	const { success, debug, error } = frames.staging();
 	const { list, decrypt, get } = frames.keystore();
 
-	/** Command Execution */
+	// command exectuion
 	const interactive = options.interactive || session.interactive;
 
 	const keystore = await list();

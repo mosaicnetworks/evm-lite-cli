@@ -69,7 +69,9 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	// prepare
 	const { options } = args;
-	const state = session.datadir.config;
+
+	// config
+	const config = session.datadir.config;
 
 	// generate success, error, debug handlers
 	const { debug, success, error } = frames.staging();
@@ -80,11 +82,11 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	const { list, decrypt, get } = frames.keystore();
 	const { contract: getContract } = frames.POA();
 
-	/** Command Execution */
+	// command execution
 	let passphrase: string = '';
 
-	const host = options.host || state.connection.host;
-	const port = options.port || state.connection.port;
+	const host = options.host || config.connection.host;
+	const port = options.port || config.connection.port;
 
 	const interactive = args.options.interactive || session.interactive;
 
@@ -169,7 +171,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	debug(`Nominee address validated: ${args.address}`);
 
-	const from = utils.trimHex(options.from || state.defaults.from);
+	const from = utils.trimHex(options.from || config.defaults.from);
 
 	if (!from) {
 		return Promise.reject(
@@ -226,8 +228,8 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	const transaction = contract.methods.submitNominee(
 		{
 			from: keyfile.address,
-			gas: state.defaults.gas,
-			gasPrice: state.defaults.gasPrice
+			gas: config.defaults.gas,
+			gasPrice: config.defaults.gasPrice
 		},
 		utils.cleanAddress(args.address),
 		options.moniker

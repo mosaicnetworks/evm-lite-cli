@@ -1,7 +1,7 @@
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
+import Frames, { execute, IOptions, IStagingFunction } from '../frames';
 import Session from '../Session';
-import Frames, { execute, IStagingFunction, IOptions } from '../frames';
 
 interface Options extends IOptions {}
 
@@ -29,7 +29,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	// prepare
 	const { success } = frames.staging();
 
-	/** Command Execution */
+	// command execution
 	session.debug = !session.debug;
 
 	return Promise.resolve(

@@ -39,10 +39,6 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		);
 }
 
-interface Answers {
-	from: string;
-}
-
 export const stage: IStagingFunction<
 	Arguments,
 	ASCIITable,
@@ -55,7 +51,9 @@ export const stage: IStagingFunction<
 
 	// prepare
 	const { options } = args;
-	const state = session.datadir.config;
+
+	// config
+	const config = session.datadir.config;
 
 	// generate success, error, debug handlers
 	const { debug, success, error } = frames.staging();
@@ -65,9 +63,9 @@ export const stage: IStagingFunction<
 	const { contract: getContract } = frames.POA();
 	const { call } = frames.transaction();
 
-	/** Command Execution */
-	const host = options.host || state.connection.host;
-	const port = options.port || state.connection.port;
+	// command
+	const host = options.host || config.connection.host;
+	const port = options.port || config.connection.port;
 
 	const interactive = session.interactive;
 	const formatted = args.options.formatted || false;
@@ -82,8 +80,8 @@ export const stage: IStagingFunction<
 	debug(`Attempting to generate whitelist count transaction...`);
 
 	const transaction = contract.methods.getWhiteListCount({
-		gas: state.defaults.gas,
-		gasPrice: state.defaults.gasPrice
+		gas: config.defaults.gas,
+		gasPrice: config.defaults.gasPrice
 	});
 
 	const response: any = await call(transaction);
@@ -107,8 +105,8 @@ export const stage: IStagingFunction<
 
 		const tx = contract.methods.getWhiteListAddressFromIdx(
 			{
-				gas: state.defaults.gas,
-				gasPrice: state.defaults.gasPrice
+				gas: config.defaults.gas,
+				gasPrice: config.defaults.gasPrice
 			},
 			i
 		);
@@ -119,8 +117,8 @@ export const stage: IStagingFunction<
 
 		const monikerTx = contract.methods.getMoniker(
 			{
-				gas: state.defaults.gas,
-				gasPrice: state.defaults.gasPrice
+				gas: config.defaults.gas,
+				gasPrice: config.defaults.gasPrice
 			},
 			whitelistEntry.address
 		);

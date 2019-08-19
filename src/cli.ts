@@ -29,11 +29,12 @@ import version from './cmd/version';
 
 import init, { ICLIConfig } from './init';
 
-const params: ICLIConfig<any> = {
+const params: ICLIConfig = {
 	name: 'EVM-Lite CLI',
 	delimiter: 'evmlc',
 	datadir: osdatadir('evm-lite'),
-	config: 'evmlc'
+	config: 'evmlc',
+	consensus: 'solo'
 };
 
 const commands = [

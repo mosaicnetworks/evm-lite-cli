@@ -87,7 +87,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	const { list, decrypt, get } = frames.keystore();
 	const { contract: getContract } = frames.POA();
 
-	/** Command Execution */
+	// command execution
 	let passphrase: string = '';
 
 	const host = options.host || state.connection.host;
@@ -136,7 +136,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		);
 
 		try {
-			nominee.address = await session.node.callTransaction(tx);
+			nominee.address = await session.node.callTx(tx);
 		} catch (e) {
 			return Promise.reject(error(EVM_LITE, e.text));
 		}
@@ -154,7 +154,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		let hex: string;
 
 		try {
-			hex = await session.node.callTransaction(monikerTx);
+			hex = await session.node.callTx(monikerTx);
 		} catch (e) {
 			return Promise.reject(error(EVM_LITE, e.text));
 		}
@@ -175,7 +175,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		let votes: [string, string];
 
 		try {
-			votes = await session.node.callTransaction<[string, string]>(
+			votes = await session.node.callTx<[string, string]>(
 				votesTransaction
 			);
 		} catch (e) {

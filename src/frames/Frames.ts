@@ -50,6 +50,30 @@ class Frames<TArguments extends VorpalArgs<IOptions>, TFormatted, TNormal> {
 		public readonly args: TArguments
 	) {}
 
+	public staging() {
+		return {
+			success: this.success.bind(this),
+			error: this.error.bind(this),
+			debug: this.debug.bind(this)
+		};
+	}
+
+	public generics(): IGenericFrames {
+		return genericFrames(this);
+	}
+
+	public keystore(): IKeystoreFrames {
+		return keystoreFrames(this);
+	}
+
+	public POA(): IPOAFrames {
+		return POAFrames(this);
+	}
+
+	public transaction(): ITransactionFrames {
+		return txFrames(this);
+	}
+
 	private error(
 		type: string,
 		message: string
@@ -76,30 +100,6 @@ class Frames<TArguments extends VorpalArgs<IOptions>, TFormatted, TNormal> {
 		if (this.args.options.debug || this.session.debug) {
 			Globals.warning(`[DEBUG] ${message}`);
 		}
-	}
-
-	public staging() {
-		return {
-			success: this.success.bind(this),
-			error: this.error.bind(this),
-			debug: this.debug.bind(this)
-		};
-	}
-
-	public generics(): IGenericFrames {
-		return genericFrames(this);
-	}
-
-	public keystore(): IKeystoreFrames {
-		return keystoreFrames(this);
-	}
-
-	public POA(): IPOAFrames {
-		return POAFrames(this);
-	}
-
-	public transaction(): ITransactionFrames {
-		return txFrames(this);
 	}
 }
 

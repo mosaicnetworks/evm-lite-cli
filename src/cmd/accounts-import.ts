@@ -69,7 +69,7 @@ export const stage: IStagingFunction<
 	const { options } = args;
 	const { success, error, debug } = frames.staging();
 
-	/** Command Execution */
+	// command execution
 	const interactive = options.interactive || session.interactive;
 	const questions: inquirer.Questions<Answers> = [
 		{

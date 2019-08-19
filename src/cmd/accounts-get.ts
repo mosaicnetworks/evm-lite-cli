@@ -68,13 +68,15 @@ export const stage: IStagingFunction<
 
 	// prepare
 	const { options } = args;
-	const state = session.datadir.config;
 	const { success, error, debug } = frames.staging();
 	const { connect } = frames.generics();
 
-	/** Command Execution */
-	const host = options.host || state.connection.host;
-	const port = options.port || state.connection.port;
+	// config
+	const config = session.datadir.config;
+
+	// command execution
+	const host = options.host || config.connection.host;
+	const port = options.port || config.connection.port;
 
 	await connect(
 		host,
@@ -83,7 +85,6 @@ export const stage: IStagingFunction<
 
 	debug(`Successfully connected: ${host}:${port}`);
 
-	/** Command Execution */
 	const formatted = args.options.formatted || false;
 	const interactive = args.options.interactive || session.interactive;
 	const questions: inquirer.Questions<Answers> = [

@@ -55,10 +55,12 @@ export const stage: IStagingFunction<
 
 	// prepare
 	const { options } = args;
-	const state = session.datadir.config;
+
+	// config
+	const config = session.datadir.config;
 
 	// generate success, error, debug handlers
-	const { debug, success, error } = frames.staging();
+	const { debug, success } = frames.staging();
 
 	// generate frames
 	const { connect } = frames.generics();
@@ -66,8 +68,8 @@ export const stage: IStagingFunction<
 	const { call } = frames.transaction();
 
 	/** Command Execution */
-	const host = options.host || state.connection.host;
-	const port = options.port || state.connection.port;
+	const host = options.host || config.connection.host;
+	const port = options.port || config.connection.port;
 
 	const interactive = session.interactive;
 	const formatted = options.formatted || false;
@@ -82,11 +84,11 @@ export const stage: IStagingFunction<
 	debug(`Attempting to generate nominee count transaction...`);
 
 	const transaction = contract.methods.getNomineeCount({
-		gas: state.defaults.gas,
-		gasPrice: state.defaults.gasPrice
+		gas: config.defaults.gas,
+		gasPrice: config.defaults.gasPrice
 	});
 
-	let response: any = await call(transaction);
+	const response: any = await call(transaction);
 
 	const nomineeCount = response.toNumber();
 	debug(`Nominee Count: ${response}`);
@@ -109,8 +111,8 @@ export const stage: IStagingFunction<
 
 		const tx = contract.methods.getNomineeAddressFromIdx(
 			{
-				gas: state.defaults.gas,
-				gasPrice: state.defaults.gasPrice
+				gas: config.defaults.gas,
+				gasPrice: config.defaults.gasPrice
 			},
 			i
 		);
@@ -121,8 +123,8 @@ export const stage: IStagingFunction<
 
 		const monikerTx = contract.methods.getMoniker(
 			{
-				gas: state.defaults.gas,
-				gasPrice: state.defaults.gasPrice
+				gas: config.defaults.gas,
+				gasPrice: config.defaults.gasPrice
 			},
 			nominee.address
 		);
@@ -135,9 +137,9 @@ export const stage: IStagingFunction<
 
 		const votesTransaction = contract.methods.getCurrentNomineeVotes(
 			{
-				from: state.defaults.from,
-				gas: state.defaults.gas,
-				gasPrice: state.defaults.gasPrice
+				from: config.defaults.from,
+				gas: config.defaults.gas,
+				gasPrice: config.defaults.gasPrice
 			},
 			utils.cleanAddress(nominee.address)
 		);

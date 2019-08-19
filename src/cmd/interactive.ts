@@ -1,7 +1,7 @@
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
+import Frames, { execute, IOptions, IStagingFunction } from '../frames';
 import Session from '../Session';
-import Frames, { execute, IStagingFunction, IOptions } from '../frames';
 
 interface Options extends IOptions {}
 

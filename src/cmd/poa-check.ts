@@ -61,16 +61,17 @@ export const stage: IStagingFunction<Arguments, boolean, boolean> = async (
 
 	// prepare
 	const { options } = args;
-	const state = session.datadir.config;
-
 	const { success, error, debug } = frames.staging();
 	const { connect } = frames.generics();
 	const { contract: getContract } = frames.POA();
 	const { call } = frames.transaction();
 
-	/** Command Execution */
-	const host = options.host || state.connection.host;
-	const port = options.port || state.connection.port;
+	// config
+	const config = session.datadir.config;
+
+	// command execution
+	const host = options.host || config.connection.host;
+	const port = options.port || config.connection.port;
 
 	const interactive = options.interactive || session.interactive;
 
@@ -122,8 +123,8 @@ export const stage: IStagingFunction<Arguments, boolean, boolean> = async (
 	try {
 		transaction = contract.methods.checkAuthorised(
 			{
-				gas: state.defaults.gas,
-				gasPrice: state.defaults.gasPrice
+				gas: config.defaults.gas,
+				gasPrice: config.defaults.gasPrice
 			},
 			utils.cleanAddress(args.address)
 		);

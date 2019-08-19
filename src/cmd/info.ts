@@ -38,17 +38,18 @@ export const stage: IStagingFunction<Arguments, ASCIITable, any> = async (
 
 	// prepare
 	const { options } = args;
-	const state = session.datadir.config;
-
 	const { success, error, debug } = frames.staging();
 	const { connect } = frames.generics();
 
-	/** Command Execution */
+	// config
+	const config = session.datadir.config;
+
+	// command execution
 	const interactive = session.interactive;
 	const formatted = options.formatted || false;
 
-	const host = options.host || state.connection.host;
-	const port = options.port || state.connection.port;
+	const host = options.host || config.connection.host;
+	const port = options.port || config.connection.port;
 
 	await connect(
 		host,

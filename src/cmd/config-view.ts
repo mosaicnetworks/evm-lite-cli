@@ -29,7 +29,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	// prepare
 	const { debug, success } = frames.staging();
 
-	/** Command Execution */
+	// command execution
 	debug(`Reading config file: ${session.datadir.configPath}`);
 
 	return Promise.resolve(success(session.datadir.configToml));

@@ -90,18 +90,21 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	// prepare
 	const { options } = args;
-	const state = session.datadir.config;
 
+	// config
+	const config = session.datadir.config;
+
+	// frames
 	const { success, error, debug } = frames.staging();
 	const { connect } = frames.generics();
 	const { send } = frames.transaction();
 	const { list, get, decrypt } = frames.keystore();
 
-	/** Command Execution */
+	// command execution
 	let passphrase: string = '';
 
-	const host = options.host || state.connection.host;
-	const port = options.port || state.connection.port;
+	const host = options.host || config.connection.host;
+	const port = options.port || config.connection.port;
 
 	const interactive = options.interactive || session.interactive;
 
@@ -163,13 +166,13 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			type: 'number'
 		},
 		{
-			default: state.defaults.gas || 100000,
+			default: config.defaults.gas || 100000,
 			message: 'Gas: ',
 			name: 'gas',
 			type: 'number'
 		},
 		{
-			default: state.defaults.gasPrice || 0,
+			default: config.defaults.gasPrice || 0,
 			message: 'Gas Price: ',
 			name: 'gasPrice',
 			type: 'number'
@@ -192,7 +195,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		debug(`From address received: ${from}`);
 	}
 
-	const from = options.from || state.defaults.from;
+	const from = options.from || config.defaults.from;
 
 	if (!from) {
 		return Promise.reject(
@@ -261,8 +264,8 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		debug(`Gas Price received: ${answers.gasPrice ? answers.gasPrice : 0}`);
 	}
 
-	options.gas = options.gas || state.defaults.gas;
-	options.gasprice = options.gasprice || state.defaults.gasPrice;
+	options.gas = options.gas || config.defaults.gas;
+	options.gasprice = options.gasprice || config.defaults.gasPrice;
 
 	if (!options.to || !options.value) {
 		return Promise.reject(

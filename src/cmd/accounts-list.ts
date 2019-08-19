@@ -61,14 +61,15 @@ export const stage: IStagingFunction<
 		args
 	);
 
+	// config
+	const config = session.datadir.config;
+
 	// prepare
 	const { options } = args;
-	const state = session.datadir.config;
-
 	const { success, error, debug } = frames.staging();
 	const { list } = frames.keystore();
 
-	/** Command Execution */
+	// command execution
 	debug(`Checking connection to node...`);
 
 	const status = await session.connect(options.host, options.port);
@@ -76,8 +77,8 @@ export const stage: IStagingFunction<
 	const interactive = session.interactive;
 	const formatted = options.formatted || false;
 
-	const host = options.host || state.connection.host;
-	const port = options.port || state.connection.port;
+	const host = options.host || config.connection.host;
+	const port = options.port || config.connection.port;
 
 	const keystore = await list();
 	let accounts: IMonikerBaseAccount[] = Object.keys(keystore).map(

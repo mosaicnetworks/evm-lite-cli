@@ -63,7 +63,9 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	// deconstruct options
 	const { options } = args;
-	const state = session.datadir.config;
+
+	// config
+	const config = session.datadir.config;
 
 	// generate success, error, debug handlers
 	const { debug, success, error } = frames.staging();
@@ -74,12 +76,12 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	const { list, decrypt, get } = frames.keystore();
 	const { contract: getContract } = frames.POA();
 
-	/** Begin Command Execution */
+	// command execution
 	const interactive = options.interactive || session.interactive;
 
 	await connect(
-		options.host || state.connection.host,
-		options.port || state.connection.port
+		options.host || config.connection.host,
+		options.port || config.connection.port
 	);
 
 	let passphrase: string = '';
@@ -113,7 +115,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		debug(`Passphrase received: ${p}`);
 	}
 
-	const from = utils.trimHex(options.from || state.defaults.from);
+	const from = utils.trimHex(options.from || config.defaults.from);
 
 	if (!from) {
 		return Promise.reject(
@@ -171,8 +173,8 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	try {
 		transaction = contract.methods.init({
 			from: keyfile.address,
-			gas: state.defaults.gas,
-			gasPrice: state.defaults.gasPrice
+			gas: config.defaults.gas,
+			gasPrice: config.defaults.gasPrice
 		});
 	} catch (e) {
 		return Promise.reject(error(TRANSACTION.GENERATION, e.toString()));
