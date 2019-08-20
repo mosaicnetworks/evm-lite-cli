@@ -41,9 +41,7 @@ const send = async <A extends Args<IOptions>, F, N>(
 		return receipt;
 	} catch (e) {
 		console.log(e);
-		const err = typeof e === 'object' ? e.text : e.toString().trim();
-
-		return Promise.reject(error(EVM_LITE, err));
+		return Promise.reject(error(EVM_LITE, e.text || e.toString().trim()));
 	}
 };
 
@@ -58,6 +56,6 @@ const call = async <A extends Args<IOptions>, F, N>(
 	try {
 		return await frames.session.node.callTx<boolean>(tx);
 	} catch (e) {
-		return Promise.reject(error(EVM_LITE, e.text));
+		return Promise.reject(error(EVM_LITE, e.text || e.toString().trim()));
 	}
 };

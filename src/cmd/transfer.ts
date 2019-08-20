@@ -17,6 +17,7 @@ import Frames, {
 import Session from '../Session';
 
 import { TRANSFER } from '../errors/accounts';
+import { EVM_LITE } from '../errors/generals';
 
 interface Options extends IOptions {
 	interactive?: boolean;
@@ -284,22 +285,12 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	let confirm: boolean = true;
 
-	debug(`Attempting to generate transaction...`);
-
-	const transaction = Account.prepareTransfer(
-		keyfile.address,
-		options.to,
-		options.value,
-		options.gas,
-		options.gasprice
-	);
-
 	const tx = {
-		from: transaction.from,
-		to: transaction.to,
-		value: transaction.value,
-		gas: transaction.gas,
-		gasPrice: transaction.gasPrice ? transaction.gasPrice : 0
+		from: keyfile.address,
+		to: options.to,
+		value: options.value,
+		gas: options.gas,
+		gasPrice: options.gasprice ? options.gasprice : 0
 	};
 
 	if (interactive) {
@@ -316,7 +307,18 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		return Promise.resolve(success('Transaction aborted.'));
 	}
 
-	await send(transaction, decrypted);
+	debug('Attemping to send tranfer transaction...');
+	try {
+		await session.node.transfer(
+			decrypted,
+			options.to,
+			options.value,
+			options.gas,
+			options.gasprice
+		);
+	} catch (e) {
+		return Promise.reject(error(EVM_LITE, e.text || e.toString()));
+	}
 
 	return Promise.resolve(success('Transaction submitted successfully.'));
 };

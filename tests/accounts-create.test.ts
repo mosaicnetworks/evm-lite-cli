@@ -1,6 +1,6 @@
-import { session, pwdPath } from './stage';
+import { pwdPath, session } from './stage';
 
-import { Arguments, stage, Output } from '../src/cmd/accounts-create';
+import { Arguments, Output, stage } from '../src/cmd/accounts-create';
 import { ACCOUNTS_CREATE } from '../src/errors/accounts';
 
 describe('accounts-create.ts', () => {
@@ -154,13 +154,13 @@ describe('accounts-create.ts', () => {
 			moniker: 'danu',
 			options: {
 				pwd: pwdPath,
-				out: session.keystore.path
+				out: session.datadir.keystorePath
 			}
 		};
 
 		const output = await stage(args, session);
 
-		expect(output.args.options.out).toBe(session.keystore.path);
+		expect(output.args.options.out).toBe(session.datadir.keystorePath);
 		expect(output.args.options.pwd).toBe(pwdPath);
 
 		expect(output.display).not.toBe(undefined);

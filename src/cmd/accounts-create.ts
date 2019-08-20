@@ -210,7 +210,7 @@ export const stage: IStagingFunction<
 
 	let account: IV3Keyfile;
 	try {
-		account = await session.datadir.createKeyfile(
+		account = await session.datadir.newKeyfile(
 			args.moniker,
 			passphrase,
 			options.out
