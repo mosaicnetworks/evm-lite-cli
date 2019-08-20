@@ -6,7 +6,7 @@ import Solo from 'evm-lite-solo';
 
 import Globals from '../Globals';
 import Session from '../Session';
-import Staging, { execute, IOptions, IStagingFunction } from '../staging';
+import Staging, { execute, IOptions } from '../staging';
 
 interface Options extends IOptions {
 	interactive?: boolean;

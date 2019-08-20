@@ -8,12 +8,7 @@ import utils from 'evm-lite-utils';
 import Solo from 'evm-lite-solo';
 
 import Session from '../Session';
-import Staging, {
-	execute,
-	IOptions,
-	IStagedOutput,
-	IStagingFunction
-} from '../staging';
+import Staging, { execute, IOptions, IStagedOutput } from '../staging';
 
 import { TRANSACTION } from '../errors/generals';
 import { POA_NOMINATE } from '../errors/poa';

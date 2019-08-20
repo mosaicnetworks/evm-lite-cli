@@ -9,12 +9,7 @@ import utils from 'evm-lite-utils';
 import Transaction from 'evm-lite-transaction';
 
 import Session from '../Session';
-import Staging, {
-	execute,
-	IOptions,
-	IStagedOutput,
-	IStagingFunction
-} from '../staging';
+import Staging, { execute, IOptions, IStagedOutput } from '../staging';
 
 import { TRANSACTION } from '../errors/generals';
 import { POA_INIT } from '../errors/poa';

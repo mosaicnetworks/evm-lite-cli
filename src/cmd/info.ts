@@ -4,7 +4,7 @@ import Vorpal, { Args, Command } from 'vorpal';
 import Solo from 'evm-lite-solo';
 
 import Session from '../Session';
-import Staging, { execute, IOptions, IStagingFunction } from '../staging';
+import Staging, { execute, IOptions } from '../staging';
 
 import { EVM_LITE } from '../errors/generals';
 

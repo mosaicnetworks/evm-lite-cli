@@ -9,12 +9,7 @@ import utils from 'evm-lite-utils';
 import { IV3Keyfile } from 'evm-lite-keystore';
 
 import Session from '../Session';
-import Staging, {
-	execute,
-	IOptions,
-	IStagedOutput,
-	IStagingFunction
-} from '../staging';
+import Staging, { execute, IOptions, IStagedOutput } from '../staging';
 
 import { ACCOUNTS_UPDATE } from '../errors/accounts';
 

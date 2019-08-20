@@ -6,7 +6,7 @@ import Solo from 'evm-lite-solo';
 import utils from 'evm-lite-utils';
 
 import Session from '../Session';
-import Staging, { execute, IOptions, IStagingFunction } from '../staging';
+import Staging, { execute, IOptions } from '../staging';
 
 interface Options extends IOptions {
 	formatted?: boolean;
