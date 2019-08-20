@@ -3,17 +3,18 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
+import Solo from 'evm-lite-solo';
 import utils from 'evm-lite-utils';
 
 import { IV3Keyfile } from 'evm-lite-keystore';
 
-import Frames, {
+import Session from '../Session';
+import Staging, {
 	execute,
 	IOptions,
 	IStagedOutput,
 	IStagingFunction
-} from '../frames';
-import Session from '../Session';
+} from '../staging';
 
 import { ACCOUNTS_UPDATE } from '../errors/accounts';
 
@@ -28,7 +29,10 @@ export interface Arguments extends Args<Options> {
 	moniker?: string;
 }
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default function command(
+	evmlc: Vorpal,
+	session: Session<Solo>
+): Command {
 	const description = 'Update passphrase for a local account';
 
 	return evmlc
@@ -63,17 +67,21 @@ interface ThirdAnswers {
 export type Output = IStagedOutput<Arguments, IV3Keyfile, IV3Keyfile>;
 
 export const stage: IStagingFunction<
+	Solo,
 	Arguments,
 	IV3Keyfile,
 	IV3Keyfile
-> = async (args: Arguments, session: Session) => {
-	const frames = new Frames<Arguments, IV3Keyfile, IV3Keyfile>(session, args);
+> = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, IV3Keyfile, IV3Keyfile>(args);
 
 	// prepare
 	const { options } = args;
 
-	const { success, debug, error } = frames.staging();
-	const { list, decrypt, get } = frames.keystore();
+	// handlers
+	const { success, debug, error } = staging.handlers(session.debug);
+
+	// hooks
+	const { list, decrypt, get } = staging.keystoreHooks(session);
 
 	// command exectuion
 	const interactive = options.interactive || session.interactive;

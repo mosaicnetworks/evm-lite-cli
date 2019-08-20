@@ -3,15 +3,16 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
+import Solo from 'evm-lite-solo';
 import utils from 'evm-lite-utils';
 
-import Frames, {
+import Session from '../Session';
+import Staging, {
 	execute,
 	IOptions,
 	IStagedOutput,
 	IStagingFunction
-} from '../frames';
-import Session from '../Session';
+} from '../staging';
 
 import { EVM_LITE, TRANSACTION } from '../errors/generals';
 import { POA_VOTE } from '../errors/poa';
@@ -30,7 +31,10 @@ export interface Arguments extends Args<Options> {
 	address?: string;
 }
 
-export default function command(monet: Vorpal, session: Session): Command {
+export default function command(
+	monet: Vorpal,
+	session: Session<Solo>
+): Command {
 	const description = 'Vote for an nominee currently in election';
 
 	return monet
@@ -68,30 +72,32 @@ interface NomineeEntry {
 
 export type Output = IStagedOutput<Arguments, string, string>;
 
-export const stage: IStagingFunction<Arguments, string, string> = async (
+export const stage: IStagingFunction<Solo, Arguments, string, string> = async (
 	args: Arguments,
-	session: Session
+	session: Session<Solo>
 ) => {
-	const frames = new Frames<Arguments, string, string>(session, args);
+	const staging = new Staging<Arguments, string, string>(args);
 
 	// prepare
 	const { options } = args;
-	const state = session.datadir.config;
+
+	// config
+	const config = session.datadir.config;
 
 	// generate success, error, debug handlers
-	const { debug, success, error } = frames.staging();
+	const { debug, success, error } = staging.handlers(session.debug);
 
-	// generate frames
-	const { connect } = frames.generics();
-	const { call, send } = frames.transaction();
-	const { list, decrypt, get } = frames.keystore();
-	const { contract: getContract } = frames.POA();
+	// generate hooks
+	const { connect } = staging.genericHooks(session);
+	const { call, send } = staging.txHooks(session);
+	const { list, decrypt, get } = staging.keystoreHooks(session);
+	const { contract: getContract } = staging.poaHooks(session);
 
 	// command execution
 	let passphrase: string = '';
 
-	const host = options.host || state.connection.host;
-	const port = options.port || state.connection.port;
+	const host = options.host || config.connection.host;
+	const port = options.port || config.connection.port;
 
 	const interactive = options.interactive || session.interactive;
 
@@ -106,8 +112,8 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	debug(`Attempting to generate nominee count transaction...`);
 
 	const countTx = contract.methods.getNomineeCount({
-		gas: state.defaults.gas,
-		gasPrice: state.defaults.gasPrice
+		gas: config.defaults.gas,
+		gasPrice: config.defaults.gasPrice
 	});
 
 	const response: any = await call(countTx);
@@ -129,8 +135,8 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 		const tx = contract.methods.getNomineeAddressFromIdx(
 			{
-				gas: state.defaults.gas,
-				gasPrice: state.defaults.gasPrice
+				gas: config.defaults.gas,
+				gasPrice: config.defaults.gasPrice
 			},
 			i
 		);
@@ -145,8 +151,8 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 		const monikerTx = contract.methods.getMoniker(
 			{
-				gas: state.defaults.gas,
-				gasPrice: state.defaults.gasPrice
+				gas: config.defaults.gas,
+				gasPrice: config.defaults.gasPrice
 			},
 			nominee.address
 		);
@@ -165,9 +171,9 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 		const votesTransaction = contract.methods.getCurrentNomineeVotes(
 			{
-				from: state.defaults.from,
-				gas: state.defaults.gas,
-				gasPrice: state.defaults.gasPrice
+				from: config.defaults.from,
+				gas: config.defaults.gas,
+				gasPrice: config.defaults.gasPrice
 			},
 			utils.cleanAddress(nominee.address)
 		);
@@ -270,7 +276,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		);
 	}
 
-	const from = utils.trimHex(options.from || state.defaults.from);
+	const from = utils.trimHex(options.from || config.defaults.from);
 
 	if (!from) {
 		return Promise.reject(
@@ -326,8 +332,8 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	const transaction = contract.methods.castNomineeVote(
 		{
 			from: keyfile.address,
-			gas: state.defaults.gas,
-			gasPrice: state.defaults.gasPrice
+			gas: config.defaults.gas,
+			gasPrice: config.defaults.gasPrice
 		},
 		utils.cleanAddress(args.address),
 		options.verdict

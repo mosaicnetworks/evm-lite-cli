@@ -3,18 +3,18 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
+import Solo from 'evm-lite-solo';
 import utils from 'evm-lite-utils';
 
-import Account from 'evm-lite-account';
 import { IMonikerBaseAccount } from 'evm-lite-keystore';
 
-import Frames, {
+import Session from '../Session';
+import Staging, {
 	execute,
 	IOptions,
 	IStagedOutput,
 	IStagingFunction
-} from '../frames';
-import Session from '../Session';
+} from '../staging';
 
 import { TRANSFER } from '../errors/accounts';
 import { EVM_LITE } from '../errors/generals';
@@ -37,7 +37,10 @@ export interface Arguments extends Args<Options> {
 	options: Options;
 }
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default function command(
+	evmlc: Vorpal,
+	session: Session<Solo>
+): Command {
 	const description = 'Initiate a transfer of token(s) to an address';
 
 	return evmlc
@@ -83,11 +86,11 @@ interface FourthAnswers {
 
 export type Output = IStagedOutput<Arguments, string, string>;
 
-export const stage: IStagingFunction<Arguments, string, string> = async (
+export const stage: IStagingFunction<Solo, Arguments, string, string> = async (
 	args: Arguments,
-	session: Session
+	session: Session<Solo>
 ) => {
-	const frames = new Frames<Arguments, string, string>(session, args);
+	const staging = new Staging<Arguments, string, string>(args);
 
 	// prepare
 	const { options } = args;
@@ -95,11 +98,13 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	// config
 	const config = session.datadir.config;
 
-	// frames
-	const { success, error, debug } = frames.staging();
-	const { connect } = frames.generics();
-	const { send } = frames.transaction();
-	const { list, get, decrypt } = frames.keystore();
+	// handlers
+	const { success, error, debug } = staging.handlers(session.debug);
+
+	// hooks
+	const { connect } = staging.genericHooks(session);
+	const { send } = staging.txHooks(session);
+	const { list, get, decrypt } = staging.keystoreHooks(session);
 
 	// command execution
 	let passphrase: string = '';

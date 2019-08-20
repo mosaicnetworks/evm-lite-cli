@@ -1,22 +1,25 @@
 import * as figlet from 'figlet';
 import * as mkdir from 'mkdirp';
 
+import { IAbstractConsensus } from 'evm-lite-solo';
+
 import Vorpal, { Command } from 'vorpal';
 
 import chalk from 'chalk';
 import Utils from 'evm-lite-utils';
 
-import { IConsensus } from 'evm-lite-node';
-
 import Globals from './Globals';
 import Session from './Session';
 
 // default commands
-import clear from './cmd/clear';
-import debug from './cmd/debug';
-import interactive from './cmd/interactive';
+// import clear from './cmd/clear';
+// import debug from './cmd/debug';
+// import interactive from './cmd/interactive';
 
-export type CommandFunction = (evmlc: Vorpal, session: Session) => Command;
+export type CommandFunction<TConsensus extends IAbstractConsensus> = (
+	evmlc: Vorpal,
+	session: Session<TConsensus>
+) => Command;
 
 export interface ICLIConfig {
 	name: string;
@@ -27,16 +30,14 @@ export interface ICLIConfig {
 
 	// config file name (usually application name)
 	config: string;
-
-	// consensus system
-	consensus: IConsensus;
 }
 
-export default async function init(
+export default async function init<TConsensus extends IAbstractConsensus>(
 	params: ICLIConfig,
-	commands: CommandFunction[]
+	consensus: new (host: string, port: number) => TConsensus,
+	commands: Array<CommandFunction<TConsensus>>
 ) {
-	commands.push(interactive, debug, clear);
+	// commands.push(interactive, debug, clear);
 
 	if (!Utils.exists(params.datadir)) {
 		mkdir.sync(params.datadir);
@@ -57,7 +58,11 @@ export default async function init(
 		process.argv.splice(2, 2);
 	}
 
-	const session = new Session(dataDirPath, params.config, params.consensus);
+	const session = new Session<TConsensus>(
+		dataDirPath,
+		params.config,
+		consensus
+	);
 
 	if (!process.argv[2]) {
 		console.log(
@@ -72,7 +77,7 @@ export default async function init(
 
 	const cli = new Vorpal();
 
-	commands.forEach((command: CommandFunction) => {
+	commands.forEach((command: CommandFunction<TConsensus>) => {
 		command(cli, session);
 	});
 

@@ -1,29 +1,31 @@
 import * as nodepath from 'path';
 
+import { IAbstractConsensus } from 'evm-lite-solo';
+
 import Utils from 'evm-lite-utils';
 
 import DataDirectory from 'evm-lite-datadir';
 import Keystore from 'evm-lite-keystore';
 
-import Node, { IConsensus } from 'evm-lite-node';
+import Node from 'evm-lite-node';
 
 import { IContractABI } from 'evm-lite-client';
 
-export default class Session {
+export default class Session<TConsensus extends IAbstractConsensus> {
 	public interactive: boolean = false;
 	public debug: boolean = false;
 
-	public node: Node;
+	public node: Node<TConsensus>;
 	public datadir: DataDirectory<Keystore>;
 
 	constructor(
 		path: string,
 		configName: string,
-		public readonly consensus: IConsensus
+		public readonly concls: new (host: string, port: number) => TConsensus
 	) {
 		const keystore = new Keystore(nodepath.join(path, 'keystore'));
 
-		this.node = new Node('localhost', 8080, consensus);
+		this.node = new Node('localhost', 8080, new concls('127.0.0.1', 8080));
 		this.datadir = new DataDirectory(path, configName, keystore);
 	}
 
@@ -59,7 +61,8 @@ export default class Session {
 			forcedHost || config.connection.host || '127.0.0.1';
 		const port: number = forcedPort || config.connection.port || 8080;
 
-		const node = new Node(host, port, this.consensus);
+		const consensus = new this.concls(host, port);
+		const node = new Node(host, port, consensus);
 
 		try {
 			await node.getInfo();

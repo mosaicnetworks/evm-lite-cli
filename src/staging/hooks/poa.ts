@@ -1,11 +1,14 @@
 import { Args } from 'vorpal';
 
+import { IAbstractConsensus } from 'evm-lite-solo';
+
 import Contract, { IAbstractSchema } from 'evm-lite-contract';
 import Transaction, { ITransaction } from 'evm-lite-transaction';
 
-import Frames, { IOptions } from './Frames';
+import Session from '../../Session';
+import Staging, { IOptions } from '../Staging';
 
-import { EVM_LITE } from '../errors/generals';
+import { EVM_LITE } from '../../errors/generals';
 
 interface Schema extends IAbstractSchema {
 	checkAuthorised(tx: ITransaction, address: string): Transaction;
@@ -28,27 +31,39 @@ interface Schema extends IAbstractSchema {
 	isNominee(tx: ITransaction, address: string): Transaction;
 }
 
-export interface IPOAFrames {
+export interface IPOAHooks {
 	contract: () => Promise<Contract<Schema>>;
 }
 
-export default <A extends Args<IOptions>, F, N>(
-	frames: Frames<A, F, N>
-): IPOAFrames => {
+export default function<
+	TConsensus extends IAbstractConsensus,
+	TArguments extends Args<IOptions>,
+	TFormatted,
+	TNormal = TFormatted
+>(
+	staging: Staging<TArguments, TFormatted, TNormal>,
+	session: Session<TConsensus>
+): IPOAHooks {
 	return {
-		contract: contract.bind(null, frames)
+		contract: contract.bind(null, staging, session)
 	};
-};
+}
 
-export const contract = async <A extends Args<IOptions>, F, N>(
-	frames: Frames<A, F, N>
+export const contract = async <
+	TConsensus extends IAbstractConsensus,
+	TArguments extends Args<IOptions>,
+	TFormatted,
+	TNormal = TFormatted
+>(
+	staging: Staging<TArguments, TFormatted, TNormal>,
+	session: Session<TConsensus>
 ): Promise<Contract<Schema>> => {
-	const { debug, error } = frames.staging();
+	const { debug, error } = staging.handlers(session.debug);
 
 	debug(`Attempting to fetch PoA data...`);
 
 	try {
-		const poa = await frames.session.POA();
+		const poa = await session.POA();
 		return Contract.load<Schema>(poa.abi, poa.address);
 	} catch (e) {
 		return Promise.reject(error(EVM_LITE, e.toString()));

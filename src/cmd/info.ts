@@ -1,8 +1,10 @@
 import ASCIITable from 'ascii-table';
 import Vorpal, { Args, Command } from 'vorpal';
 
-import Frames, { execute, IOptions, IStagingFunction } from '../frames';
+import Solo from 'evm-lite-solo';
+
 import Session from '../Session';
+import Staging, { execute, IOptions, IStagingFunction } from '../staging';
 
 import { EVM_LITE } from '../errors/generals';
 
@@ -14,7 +16,10 @@ interface Options extends IOptions {
 
 export interface Arguments extends Args<Options> {}
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default function command(
+	evmlc: Vorpal,
+	session: Session<Solo>
+): Command {
 	return evmlc
 		.command('info')
 		.description('Display information about node')
@@ -30,16 +35,20 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		);
 }
 
-export const stage: IStagingFunction<Arguments, ASCIITable, any> = async (
+export const stage: IStagingFunction<Solo, Arguments, ASCIITable, any> = async (
 	args: Arguments,
-	session: Session
+	session: Session<Solo>
 ) => {
-	const frames = new Frames<Arguments, ASCIITable, any>(session, args);
+	const staging = new Staging<Arguments, ASCIITable, any>(args);
 
 	// prepare
 	const { options } = args;
-	const { success, error, debug } = frames.staging();
-	const { connect } = frames.generics();
+
+	// handlers
+	const { success, error, debug } = staging.handlers(session.debug);
+
+	// hooks
+	const { connect } = staging.genericHooks(session);
 
 	// config
 	const config = session.datadir.config;

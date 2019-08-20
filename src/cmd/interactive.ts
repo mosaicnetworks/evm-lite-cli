@@ -1,13 +1,18 @@
 import Vorpal, { Args, Command } from 'vorpal';
 
-import Frames, { execute, IOptions, IStagingFunction } from '../frames';
+import Solo from 'evm-lite-solo';
+
 import Session from '../Session';
+import Staging, { execute, IOptions, IStagingFunction } from '../staging';
 
 interface Options extends IOptions {}
 
 export interface Arguments extends Args<Options> {}
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default function command(
+	evmlc: Vorpal,
+	session: Session<Solo>
+): Command {
 	const description = 'Enter interactive mode';
 
 	return evmlc
@@ -20,14 +25,14 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.action((args: Arguments) => execute(stage, args, session));
 }
 
-export const stage: IStagingFunction<Arguments, void, void> = async (
+export const stage: IStagingFunction<Solo, Arguments, void, void> = async (
 	args: Arguments,
-	session: Session
+	session: Session<Solo>
 ) => {
-	const frames = new Frames<Arguments, void, void>(session, args);
+	const staging = new Staging<Arguments, void, void>(args);
 
 	// prepare
-	const { success } = frames.staging();
+	const { success } = staging.handlers(session.debug);
 
 	return Promise.resolve(success());
 };

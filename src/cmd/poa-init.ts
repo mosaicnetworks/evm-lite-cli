@@ -3,17 +3,18 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
+import Solo from 'evm-lite-solo';
 import utils from 'evm-lite-utils';
 
 import Transaction from 'evm-lite-transaction';
 
-import Frames, {
+import Session from '../Session';
+import Staging, {
 	execute,
 	IOptions,
 	IStagedOutput,
 	IStagingFunction
-} from '../frames';
-import Session from '../Session';
+} from '../staging';
 
 import { TRANSACTION } from '../errors/generals';
 import { POA_INIT } from '../errors/poa';
@@ -28,7 +29,10 @@ interface Options extends IOptions {
 
 export interface Arguments extends Args<Options> {}
 
-export default function command(monet: Vorpal, session: Session): Command {
+export default function command(
+	monet: Vorpal,
+	session: Session<Solo>
+): Command {
 	const description = 'Initialize PoA contract';
 
 	return monet
@@ -55,11 +59,11 @@ interface Answers {
 
 export type Output = IStagedOutput<Arguments, string, string>;
 
-export const stage: IStagingFunction<Arguments, string, string> = async (
+export const stage: IStagingFunction<Solo, Arguments, string, string> = async (
 	args: Arguments,
-	session: Session
+	session: Session<Solo>
 ) => {
-	const frames = new Frames<Arguments, string, string>(session, args);
+	const staging = new Staging<Arguments, string, string>(args);
 
 	// deconstruct options
 	const { options } = args;
@@ -68,13 +72,13 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	const config = session.datadir.config;
 
 	// generate success, error, debug handlers
-	const { debug, success, error } = frames.staging();
+	const { debug, success, error } = staging.handlers(session.debug);
 
-	// generate frames
-	const { connect } = frames.generics();
-	const { send } = frames.transaction();
-	const { list, decrypt, get } = frames.keystore();
-	const { contract: getContract } = frames.POA();
+	// generate frhooksames
+	const { connect } = staging.genericHooks(session);
+	const { send } = staging.txHooks(session);
+	const { list, decrypt, get } = staging.keystoreHooks(session);
+	const { contract: getContract } = staging.poaHooks(session);
 
 	// command execution
 	const interactive = options.interactive || session.interactive;

@@ -1,17 +1,18 @@
 import ASCIITable from 'ascii-table';
 import Vorpal, { Args, Command } from 'vorpal';
 
+import Solo from 'evm-lite-solo';
 import utils from 'evm-lite-utils';
 
 import { IMonikerBaseAccount } from 'evm-lite-keystore';
 
-import Frames, {
+import Session from '../Session';
+import Staging, {
 	execute,
 	IOptions,
 	IStagedOutput,
 	IStagingFunction
-} from '../frames';
-import Session from '../Session';
+} from '../staging';
 
 import { EVM_LITE } from '../errors/generals';
 
@@ -26,7 +27,10 @@ export interface Arguments extends Args<Options> {
 	options: Options;
 }
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default function command(
+	evmlc: Vorpal,
+	session: Session<Solo>
+): Command {
 	const description = 'List all accounts in the local keystore directory';
 
 	return evmlc
@@ -52,12 +56,12 @@ export type Output = IStagedOutput<
 >;
 
 export const stage: IStagingFunction<
+	Solo,
 	Arguments,
 	ASCIITable,
 	IMonikerBaseAccount[]
-> = async (args: Arguments, session: Session) => {
-	const frames = new Frames<Arguments, ASCIITable, IMonikerBaseAccount[]>(
-		session,
+> = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, ASCIITable, IMonikerBaseAccount[]>(
 		args
 	);
 
@@ -66,8 +70,12 @@ export const stage: IStagingFunction<
 
 	// prepare
 	const { options } = args;
-	const { success, error, debug } = frames.staging();
-	const { list } = frames.keystore();
+
+	// handlers
+	const { success, error, debug } = staging.handlers(session.debug);
+
+	// hooks
+	const { list } = staging.keystoreHooks(session);
 
 	// command execution
 	debug(`Checking connection to node...`);

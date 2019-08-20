@@ -2,9 +2,11 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
-import Frames, { execute, IOptions, IStagingFunction } from '../frames';
+import Solo from 'evm-lite-solo';
+
 import Globals from '../Globals';
 import Session from '../Session';
+import Staging, { execute, IOptions, IStagingFunction } from '../staging';
 
 interface Options extends IOptions {
 	interactive?: boolean;
@@ -19,7 +21,7 @@ export interface Arguments extends Args<Options> {}
 
 export default function commandConfigSet(
 	evmlc: Vorpal,
-	session: Session
+	session: Session<Solo>
 ): Command {
 	const description =
 		'Set values of the configuration inside the data directory';
@@ -50,20 +52,20 @@ interface Answers {
 	gasPrice: number;
 }
 
-export const stage: IStagingFunction<Arguments, string, string> = async (
+export const stage: IStagingFunction<Solo, Arguments, string, string> = async (
 	args: Arguments,
-	session: Session
+	session: Session<Solo>
 ) => {
-	const frames = new Frames<Arguments, string, string>(session, args);
+	const staging = new Staging<Arguments, string, string>(args);
 
 	// prepare
 	const { options } = args;
-	const { success, debug } = frames.staging();
+	const { success, debug } = staging.handlers(session.debug);
 
 	// config
 	const config = session.datadir.config;
 
-	const { list } = frames.keystore();
+	const { list } = staging.keystoreHooks(session);
 
 	// command execution
 	debug(`Successfully read configuration: ${session.datadir.configPath}`);

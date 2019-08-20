@@ -2,10 +2,11 @@ import ASCIITable from 'ascii-table';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
+import Solo from 'evm-lite-solo';
 import utils from 'evm-lite-utils';
 
-import Frames, { execute, IOptions, IStagingFunction } from '../frames';
 import Session from '../Session';
+import Staging, { execute, IOptions, IStagingFunction } from '../staging';
 
 interface Options extends IOptions {
 	formatted?: boolean;
@@ -20,7 +21,10 @@ interface WhitelistEntry {
 	moniker: string;
 }
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default function command(
+	evmlc: Vorpal,
+	session: Session<Solo>
+): Command {
 	const description = 'List whitelist entries for a connected node';
 
 	return evmlc
@@ -40,14 +44,12 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 }
 
 export const stage: IStagingFunction<
+	Solo,
 	Arguments,
 	ASCIITable,
 	WhitelistEntry[]
-> = async (args: Arguments, session: Session) => {
-	const frames = new Frames<Arguments, ASCIITable, WhitelistEntry[]>(
-		session,
-		args
-	);
+> = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, ASCIITable, WhitelistEntry[]>(args);
 
 	// prepare
 	const { options } = args;
@@ -56,12 +58,12 @@ export const stage: IStagingFunction<
 	const config = session.datadir.config;
 
 	// generate success, error, debug handlers
-	const { debug, success, error } = frames.staging();
+	const { debug, success, error } = staging.handlers(session.debug);
 
-	// generate frames
-	const { connect } = frames.generics();
-	const { contract: getContract } = frames.POA();
-	const { call } = frames.transaction();
+	// generate hooks
+	const { connect } = staging.genericHooks(session);
+	const { contract: getContract } = staging.poaHooks(session);
+	const { call } = staging.txHooks(session);
 
 	// command
 	const host = options.host || config.connection.host;

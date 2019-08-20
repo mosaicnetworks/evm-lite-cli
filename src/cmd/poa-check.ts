@@ -2,17 +2,18 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
+import Solo from 'evm-lite-solo';
 import utils from 'evm-lite-utils';
 
 import Transaction from 'evm-lite-transaction';
 
-import Frames, {
+import Session from '../Session';
+import Staging, {
 	execute,
 	IOptions,
 	IStagedOutput,
 	IStagingFunction
-} from '../frames';
-import Session from '../Session';
+} from '../staging';
 
 import { TRANSACTION } from '../errors/generals';
 import { POA_CHECK } from '../errors/poa';
@@ -28,7 +29,10 @@ export interface Arguments extends Args<Options> {
 	address?: string;
 }
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default function command(
+	evmlc: Vorpal,
+	session: Session<Solo>
+): Command {
 	const description = 'Check whether an address is on the whitelist';
 
 	return evmlc
@@ -53,18 +57,24 @@ interface Answers {
 
 export type Output = IStagedOutput<Arguments, boolean, boolean>;
 
-export const stage: IStagingFunction<Arguments, boolean, boolean> = async (
-	args: Arguments,
-	session: Session
-) => {
-	const frames = new Frames<Arguments, boolean, boolean>(session, args);
+export const stage: IStagingFunction<
+	Solo,
+	Arguments,
+	boolean,
+	boolean
+> = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, boolean, boolean>(args);
 
 	// prepare
 	const { options } = args;
-	const { success, error, debug } = frames.staging();
-	const { connect } = frames.generics();
-	const { contract: getContract } = frames.POA();
-	const { call } = frames.transaction();
+
+	// handlers
+	const { success, error, debug } = staging.handlers(session.debug);
+
+	// hooks
+	const { connect } = staging.genericHooks(session);
+	const { contract: getContract } = staging.poaHooks(session);
+	const { call } = staging.txHooks(session);
 
 	// config
 	const config = session.datadir.config;

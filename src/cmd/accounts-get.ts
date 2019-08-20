@@ -3,17 +3,18 @@ import * as inquirer from 'inquirer';
 import ASCIITable from 'ascii-table';
 import Vorpal, { Args, Command } from 'vorpal';
 
+import Solo from 'evm-lite-solo';
 import utils from 'evm-lite-utils';
 
 import { IBaseAccount } from 'evm-lite-client';
 
-import Frames, {
+import Session from '../Session';
+import Staging, {
 	execute,
 	IOptions,
 	IStagedOutput,
 	IStagingFunction
-} from '../frames';
-import Session from '../Session';
+} from '../staging';
 
 import { ACCOUNTS_GET } from '../errors/accounts';
 import { EVM_LITE } from '../errors/generals';
@@ -30,7 +31,10 @@ export interface Arguments extends Args<Options> {
 	address?: string;
 }
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default function command(
+	evmlc: Vorpal,
+	session: Session<Solo>
+): Command {
 	const description = 'Fetches account details from a connected node';
 
 	return evmlc
@@ -57,19 +61,19 @@ interface Answers {
 export type Output = IStagedOutput<Arguments, ASCIITable, IBaseAccount>;
 
 export const stage: IStagingFunction<
+	Solo,
 	Arguments,
 	ASCIITable,
 	IBaseAccount
-> = async (args: Arguments, session: Session) => {
-	const frames = new Frames<Arguments, ASCIITable, IBaseAccount>(
-		session,
-		args
-	);
+> = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, ASCIITable, IBaseAccount>(args);
 
 	// prepare
 	const { options } = args;
-	const { success, error, debug } = frames.staging();
-	const { connect } = frames.generics();
+	const { success, error, debug } = staging.handlers(session.debug);
+
+	// hooks
+	const { connect } = staging.genericHooks(session);
 
 	// config
 	const config = session.datadir.config;

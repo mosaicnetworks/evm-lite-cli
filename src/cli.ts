@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { osdatadir } from 'evm-lite-datadir';
 
+import Solo from 'evm-lite-solo';
+
 // Accounts
 import accountsCreate from './cmd/accounts-create';
 import accountsGet from './cmd/accounts-get';
@@ -22,6 +24,8 @@ import poaVote from './cmd/poa-vote';
 import poaWhitelist from './cmd/poa-whitelist';
 
 // Misc
+import clear from './cmd/clear';
+import debug from './cmd/debug';
 import info from './cmd/info';
 import test from './cmd/test';
 import transfer from './cmd/transfer';
@@ -33,8 +37,7 @@ const params: ICLIConfig = {
 	name: 'EVM-Lite CLI',
 	delimiter: 'evmlc',
 	datadir: osdatadir('evm-lite'),
-	config: 'evmlc',
-	consensus: 'solo'
+	config: 'evmlc'
 };
 
 const commands = [
@@ -62,7 +65,9 @@ const commands = [
 	info,
 	test,
 	version,
+	debug,
+	clear,
 	transfer
 ];
 
-init(params, commands).catch(console.log);
+init(params, Solo, commands).catch(console.log);

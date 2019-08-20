@@ -5,13 +5,15 @@ import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import Frames, {
+import Solo from 'evm-lite-solo';
+
+import Session from '../Session';
+import Staging, {
 	execute,
 	IOptions,
 	IStagedOutput,
 	IStagingFunction
-} from '../frames';
-import Session from '../Session';
+} from '../staging';
 
 import { TRANSACTION } from '../errors/generals';
 import { POA_NOMINATE } from '../errors/poa';
@@ -30,7 +32,10 @@ export interface Arguments extends Args<Options> {
 	address?: string;
 }
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default function command(
+	evmlc: Vorpal,
+	session: Session<Solo>
+): Command {
 	const description = 'Nominate an address to proceed to election';
 
 	return evmlc
@@ -61,11 +66,11 @@ interface Answers {
 
 export type Output = IStagedOutput<Arguments, string, string>;
 
-export const stage: IStagingFunction<Arguments, string, string> = async (
+export const stage: IStagingFunction<Solo, Arguments, string, string> = async (
 	args: Arguments,
-	session: Session
+	session: Session<Solo>
 ) => {
-	const frames = new Frames<Arguments, string, string>(session, args);
+	const staging = new Staging<Arguments, string, string>(args);
 
 	// prepare
 	const { options } = args;
@@ -74,13 +79,13 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	const config = session.datadir.config;
 
 	// generate success, error, debug handlers
-	const { debug, success, error } = frames.staging();
+	const { debug, success, error } = staging.handlers(session.debug);
 
-	// generate frames
-	const { connect } = frames.generics();
-	const { send } = frames.transaction();
-	const { list, decrypt, get } = frames.keystore();
-	const { contract: getContract } = frames.POA();
+	// generate hooks
+	const { connect } = staging.genericHooks(session);
+	const { send } = staging.txHooks(session);
+	const { list, decrypt, get } = staging.keystoreHooks(session);
+	const { contract: getContract } = staging.poaHooks(session);
 
 	// command execution
 	let passphrase: string = '';

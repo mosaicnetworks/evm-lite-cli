@@ -1,7 +1,9 @@
 import Vorpal, { Args, Command } from 'vorpal';
 
-import Frames, { execute, IOptions, IStagingFunction } from '../frames';
+import Solo from 'evm-lite-solo';
+
 import Session from '../Session';
+import Staging, { execute, IOptions, IStagingFunction } from '../staging';
 
 import { EVM_LITE } from '../errors/generals';
 
@@ -12,7 +14,10 @@ interface Options extends IOptions {
 
 export interface Arguments extends Args<Options> {}
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default function command(
+	evmlc: Vorpal,
+	session: Session<Solo>
+): Command {
 	const description = 'Display Proof of Authority information';
 
 	return evmlc
@@ -27,16 +32,20 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.action((args: Arguments) => execute(stage, args, session));
 }
 
-export const stage: IStagingFunction<Arguments, string, string> = async (
+export const stage: IStagingFunction<Solo, Arguments, string, string> = async (
 	args: Arguments,
-	session: Session
+	session: Session<Solo>
 ) => {
-	const frames = new Frames<Arguments, string, string>(session, args);
+	const staging = new Staging<Arguments, string, string>(args);
 
 	// prepare
 	const { options } = args;
-	const { success, error, debug } = frames.staging();
-	const { connect } = frames.generics();
+
+	// handlers
+	const { success, error, debug } = staging.handlers(session.debug);
+
+	// hooks
+	const { connect } = staging.genericHooks(session);
 
 	// config
 	const config = session.datadir.config;

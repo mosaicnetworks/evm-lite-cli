@@ -1,12 +1,14 @@
 import { Args as VorpalArgs } from 'vorpal';
 
+import { IAbstractConsensus } from 'evm-lite-solo';
+
 import Globals from '../Globals';
 import Session from '../Session';
 
-import genericFrames, { IGenericFrames } from './generics';
-import keystoreFrames, { IKeystoreFrames } from './keystore';
-import POAFrames, { IPOAFrames } from './poa';
-import txFrames, { ITransactionFrames } from './transaction';
+import genericHooks, { IGenericHooks } from './hooks/generics';
+import keystoreHooks, { IKeystoreHooks } from './hooks/keystore';
+import poaHooks, { IPOAHooks } from './hooks/poa';
+import txHooks, { ITxHooks } from './hooks/transaction';
 
 // default options for all commands
 export interface IOptions {
@@ -23,7 +25,7 @@ interface IError {
 export interface IStagedOutput<
 	TArguments extends VorpalArgs<IOptions>,
 	TFormatted,
-	TNormal
+	TNormal = TFormatted
 > {
 	args: TArguments;
 
@@ -36,42 +38,44 @@ export interface IStagedOutput<
 
 // Staging function signature
 export type IStagingFunction<
+	TConsensus extends IAbstractConsensus,
 	TArguments extends VorpalArgs<IOptions>,
 	TFormatted,
 	TNormal
 > = (
 	args: TArguments,
-	session: Session
+	session: Session<TConsensus>
 ) => Promise<IStagedOutput<TArguments, TFormatted, TNormal>>;
 
-class Frames<TArguments extends VorpalArgs<IOptions>, TFormatted, TNormal> {
-	constructor(
-		public readonly session: Session,
-		public readonly args: TArguments
-	) {}
+class Staging<
+	TArguments extends VorpalArgs<IOptions>,
+	TFormatted,
+	TNormal = TFormatted
+> {
+	constructor(public readonly args: TArguments) {}
 
-	public staging() {
+	public handlers(debug: boolean) {
 		return {
 			success: this.success.bind(this),
 			error: this.error.bind(this),
-			debug: this.debug.bind(this)
+			debug: this.debug.bind(this, debug)
 		};
 	}
 
-	public generics(): IGenericFrames {
-		return genericFrames(this);
+	public genericHooks(session: Session<any>): IGenericHooks {
+		return genericHooks(this, session);
 	}
 
-	public keystore(): IKeystoreFrames {
-		return keystoreFrames(this);
+	public keystoreHooks(session: Session<any>): IKeystoreHooks {
+		return keystoreHooks(this, session);
 	}
 
-	public POA(): IPOAFrames {
-		return POAFrames(this);
+	public poaHooks(session: Session<any>): IPOAHooks {
+		return poaHooks(this, session);
 	}
 
-	public transaction(): ITransactionFrames {
-		return txFrames(this);
+	public txHooks(session: Session<any>): ITxHooks {
+		return txHooks(this, session);
 	}
 
 	private error(
@@ -96,11 +100,11 @@ class Frames<TArguments extends VorpalArgs<IOptions>, TFormatted, TNormal> {
 		};
 	}
 
-	private debug(message: string): void {
-		if (this.args.options.debug || this.session.debug) {
+	private debug(debug: boolean, message: string): void {
+		if (this.args.options.debug || debug) {
 			Globals.warning(`[DEBUG] ${message}`);
 		}
 	}
 }
 
-export default Frames;
+export default Staging;

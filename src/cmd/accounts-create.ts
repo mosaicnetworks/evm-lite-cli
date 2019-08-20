@@ -3,17 +3,13 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
+import Solo from 'evm-lite-solo';
 import utils from 'evm-lite-utils';
 
 import { IV3Keyfile } from 'evm-lite-keystore';
 
-import Frames, {
-	execute,
-	IOptions,
-	IStagedOutput,
-	IStagingFunction
-} from '../frames';
 import Session from '../Session';
+import Staging, { execute, IOptions, IStagedOutput } from '../staging';
 
 import { ACCOUNTS_CREATE } from '../errors/accounts';
 
@@ -29,7 +25,7 @@ export interface Arguments extends Args<Options> {
 	options: Options;
 }
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Creates an encrypted keypair locally';
 
 	return evmlc
@@ -44,7 +40,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 			string: ['_', 'pwd', 'out']
 		})
 		.action((args: Arguments) => execute(stage, args, session));
-}
+};
 
 interface Answers {
 	moniker: string;
@@ -53,20 +49,16 @@ interface Answers {
 	verifyPassphrase: string;
 }
 
-export type Output = IStagedOutput<Arguments, IV3Keyfile, IV3Keyfile>;
+export type Output = IStagedOutput<Arguments, IV3Keyfile>;
 
-export const stage: IStagingFunction<
-	Arguments,
-	IV3Keyfile,
-	IV3Keyfile
-> = async (args: Arguments, session: Session) => {
-	const frames = new Frames<Arguments, IV3Keyfile, IV3Keyfile>(session, args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, IV3Keyfile>(args);
 
 	// args
 	const { options } = args;
 
 	// decontruct
-	const { success, error, debug } = frames.staging();
+	const { success, error, debug } = staging.handlers(session.debug);
 
 	// command execution
 	let passphrase: string = '';
