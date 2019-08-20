@@ -57,13 +57,8 @@ interface Answers {
 
 export type Output = IStagedOutput<Arguments, boolean, boolean>;
 
-export const stage: IStagingFunction<
-	Solo,
-	Arguments,
-	boolean,
-	boolean
-> = async (args: Arguments, session: Session<Solo>) => {
-	const staging = new Staging<Arguments, boolean, boolean>(args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, boolean>(args);
 
 	// prepare
 	const { options } = args;

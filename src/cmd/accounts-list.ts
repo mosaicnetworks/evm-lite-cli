@@ -55,12 +55,7 @@ export type Output = IStagedOutput<
 	IMonikerBaseAccount[]
 >;
 
-export const stage: IStagingFunction<
-	Solo,
-	Arguments,
-	ASCIITable,
-	IMonikerBaseAccount[]
-> = async (args: Arguments, session: Session<Solo>) => {
+export const stage = async (args: Arguments, session: Session<Solo>) => {
 	const staging = new Staging<Arguments, ASCIITable, IMonikerBaseAccount[]>(
 		args
 	);

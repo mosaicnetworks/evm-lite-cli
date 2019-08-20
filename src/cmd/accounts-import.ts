@@ -11,12 +11,7 @@ import { IConfiguration } from 'evm-lite-datadir';
 import { IV3Keyfile } from 'evm-lite-keystore';
 
 import Session from '../Session';
-import Staging, {
-	execute,
-	IOptions,
-	IStagedOutput,
-	IStagingFunction
-} from '../staging';
+import Staging, { execute, IOptions, IStagedOutput } from '../staging';
 
 import { ACCOUNTS_IMPORT } from '../errors/accounts';
 
@@ -62,13 +57,8 @@ interface Answers {
 
 export type Output = IStagedOutput<Arguments, IV3Keyfile, IV3Keyfile>;
 
-export const stage: IStagingFunction<
-	Solo,
-	Arguments,
-	IV3Keyfile,
-	IV3Keyfile
-> = async (args: Arguments, session: Session<Solo>) => {
-	const staging = new Staging<Arguments, IV3Keyfile, IV3Keyfile>(args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, IV3Keyfile>(args);
 
 	// prepare
 	const { options } = args;

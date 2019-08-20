@@ -25,11 +25,8 @@ export default function command(
 		.action((args: Arguments) => execute(stage, args, session));
 }
 
-export const stage: IStagingFunction<Solo, Arguments, string, string> = async (
-	args: Arguments,
-	session: Session<Solo>
-) => {
-	const staging = new Staging<Arguments, string, string>(args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, string>(args);
 
 	// prepare
 	const { success } = staging.handlers(session.debug);

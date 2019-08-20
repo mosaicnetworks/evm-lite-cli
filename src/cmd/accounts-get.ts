@@ -9,12 +9,7 @@ import utils from 'evm-lite-utils';
 import { IBaseAccount } from 'evm-lite-client';
 
 import Session from '../Session';
-import Staging, {
-	execute,
-	IOptions,
-	IStagedOutput,
-	IStagingFunction
-} from '../staging';
+import Staging, { execute, IOptions, IStagedOutput } from '../staging';
 
 import { ACCOUNTS_GET } from '../errors/accounts';
 import { EVM_LITE } from '../errors/generals';
@@ -60,12 +55,7 @@ interface Answers {
 
 export type Output = IStagedOutput<Arguments, ASCIITable, IBaseAccount>;
 
-export const stage: IStagingFunction<
-	Solo,
-	Arguments,
-	ASCIITable,
-	IBaseAccount
-> = async (args: Arguments, session: Session<Solo>) => {
+export const stage = async (args: Arguments, session: Session<Solo>) => {
 	const staging = new Staging<Arguments, ASCIITable, IBaseAccount>(args);
 
 	// prepare

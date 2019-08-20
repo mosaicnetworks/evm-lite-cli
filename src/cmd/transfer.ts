@@ -86,11 +86,8 @@ interface FourthAnswers {
 
 export type Output = IStagedOutput<Arguments, string, string>;
 
-export const stage: IStagingFunction<Solo, Arguments, string, string> = async (
-	args: Arguments,
-	session: Session<Solo>
-) => {
-	const staging = new Staging<Arguments, string, string>(args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, string>(args);
 
 	// prepare
 	const { options } = args;

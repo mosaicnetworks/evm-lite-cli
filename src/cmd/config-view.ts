@@ -3,7 +3,7 @@ import Vorpal, { Args, Command } from 'vorpal';
 import Solo from 'evm-lite-solo';
 
 import Session from '../Session';
-import Staging, { execute, IOptions, IStagingFunction } from '../staging';
+import Staging, { execute, IOptions } from '../staging';
 
 interface Options extends IOptions {}
 
@@ -25,11 +25,8 @@ export default function command(
 		);
 }
 
-export const stage: IStagingFunction<Solo, Arguments, string, string> = async (
-	args: Arguments,
-	session: Session<Solo>
-) => {
-	const staging = new Staging<Arguments, string, string>(args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, string>(args);
 
 	// prepare
 	const { debug, success } = staging.handlers(session.debug);
