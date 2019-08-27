@@ -1,17 +1,13 @@
 import ASCIITable from 'ascii-table';
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
-import { BaseAccount } from 'evm-lite-core';
-import { MonikerBaseAccount } from 'evm-lite-keystore';
+
+import { Solo } from 'evm-lite-consensus';
+import { IMonikerBaseAccount } from 'evm-lite-keystore';
 
 import Session from '../Session';
-import Frames, {
-	execute,
-	IStagingFunction,
-	IOptions,
-	IStagedOutput
-} from '../frames';
+import Staging, { execute, IOptions, IStagedOutput } from '../staging';
 
 import { EVM_LITE } from '../errors/generals';
 
@@ -26,7 +22,7 @@ export interface Arguments extends Args<Options> {
 	options: Options;
 }
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'List all accounts in the local keystore directory';
 
 	return evmlc
@@ -43,28 +39,32 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
-export type Output = IStagedOutput<Arguments, ASCIITable, BaseAccount[]>;
-
-export const stage: IStagingFunction<
+export type Output = IStagedOutput<
 	Arguments,
 	ASCIITable,
-	BaseAccount[]
-> = async (args: Arguments, session: Session) => {
-	const frames = new Frames<Arguments, ASCIITable, BaseAccount[]>(
-		session,
+	IMonikerBaseAccount[]
+>;
+
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, ASCIITable, IMonikerBaseAccount[]>(
 		args
 	);
 
+	// config
+	const config = session.datadir.config;
+
 	// prepare
 	const { options } = args;
-	const { state } = session.config;
 
-	const { success, error, debug } = frames.staging();
-	const { list } = frames.keystore();
+	// handlers
+	const { success, error, debug } = staging.handlers(session.debug);
 
-	/** Command Execution */
+	// hooks
+	const { list } = staging.keystoreHooks(session);
+
+	// command execution
 	debug(`Checking connection to node...`);
 
 	const status = await session.connect(options.host, options.port);
@@ -72,17 +72,19 @@ export const stage: IStagingFunction<
 	const interactive = session.interactive;
 	const formatted = options.formatted || false;
 
-	const host = options.host || state.connection.host;
-	const port = options.port || state.connection.port;
+	const host = options.host || config.connection.host;
+	const port = options.port || config.connection.port;
 
 	const keystore = await list();
-	let accounts: MonikerBaseAccount[] = Object.keys(keystore).map(moniker => ({
-		moniker,
-		address: keystore[moniker].address,
-		balance: 0,
-		nonce: 0,
-		bytecode: ''
-	}));
+	let accounts: IMonikerBaseAccount[] = Object.keys(keystore).map(
+		moniker => ({
+			moniker,
+			address: keystore[moniker].address,
+			balance: 0,
+			nonce: 0,
+			bytecode: ''
+		})
+	);
 
 	if (!accounts.length) {
 		return Promise.resolve(success([]));

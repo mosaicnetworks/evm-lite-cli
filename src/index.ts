@@ -1,7 +1,7 @@
 // requirements
 export { default as Session } from './Session';
 export { default as Globals } from './Globals';
-export { default as init, IInit } from './init';
+export { default as init, ICLIConfig } from './init';
 
 // Commands
 
@@ -30,9 +30,9 @@ export { default as transfer } from './cmd/transfer';
 export { default as info } from './cmd/info';
 
 export {
-	default as Frames,
+	default as Staging,
 	IOptions,
 	IStagedOutput,
 	IStagingFunction,
 	execute
-} from './frames';
+} from './staging';

@@ -1,11 +1,13 @@
 import ASCIITable from 'ascii-table';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
+import { Solo } from 'evm-lite-consensus';
+
 import Session from '../Session';
-import Frames, { execute, IStagingFunction, IOptions } from '../frames';
+import Staging, { execute, IOptions } from '../staging';
 
 interface Options extends IOptions {
 	formatted?: boolean;
@@ -24,7 +26,7 @@ interface NomineeEntry {
 	downVotes: number;
 }
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'List nominees for a connected node';
 
 	return evmlc
@@ -41,33 +43,28 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
-export const stage: IStagingFunction<
-	Arguments,
-	ASCIITable,
-	NomineeEntry[]
-> = async (args: Arguments, session: Session) => {
-	const frames = new Frames<Arguments, ASCIITable, NomineeEntry[]>(
-		session,
-		args
-	);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, ASCIITable, NomineeEntry[]>(args);
 
 	// prepare
 	const { options } = args;
-	const { state } = session.config;
+
+	// config
+	const config = session.datadir.config;
 
 	// generate success, error, debug handlers
-	const { debug, success, error } = frames.staging();
+	const { debug, success } = staging.handlers(session.debug);
 
-	// generate frames
-	const { connect } = frames.generics();
-	const { contract: getContract } = frames.POA();
-	const { call } = frames.transaction();
+	// generate hooks
+	const { connect } = staging.genericHooks(session);
+	const { contract: getContract } = staging.poaHooks(session);
+	const { call } = staging.txHooks(session);
 
-	/** Command Execution */
-	const host = options.host || state.connection.host;
-	const port = options.port || state.connection.port;
+	// command execution
+	const host = options.host || config.connection.host;
+	const port = options.port || config.connection.port;
 
 	const interactive = session.interactive;
 	const formatted = options.formatted || false;
@@ -82,11 +79,11 @@ export const stage: IStagingFunction<
 	debug(`Attempting to generate nominee count transaction...`);
 
 	const transaction = contract.methods.getNomineeCount({
-		gas: state.defaults.gas,
-		gasPrice: state.defaults.gasPrice
+		gas: config.defaults.gas,
+		gasPrice: config.defaults.gasPrice
 	});
 
-	let response: any = await call(transaction);
+	const response: any = await call(transaction);
 
 	const nomineeCount = response.toNumber();
 	debug(`Nominee Count: ${response}`);
@@ -109,8 +106,8 @@ export const stage: IStagingFunction<
 
 		const tx = contract.methods.getNomineeAddressFromIdx(
 			{
-				gas: state.defaults.gas,
-				gasPrice: state.defaults.gasPrice
+				gas: config.defaults.gas,
+				gasPrice: config.defaults.gasPrice
 			},
 			i
 		);
@@ -121,8 +118,8 @@ export const stage: IStagingFunction<
 
 		const monikerTx = contract.methods.getMoniker(
 			{
-				gas: state.defaults.gas,
-				gasPrice: state.defaults.gasPrice
+				gas: config.defaults.gas,
+				gasPrice: config.defaults.gasPrice
 			},
 			nominee.address
 		);
@@ -135,9 +132,9 @@ export const stage: IStagingFunction<
 
 		const votesTransaction = contract.methods.getCurrentNomineeVotes(
 			{
-				from: state.defaults.from,
-				gas: state.defaults.gas,
-				gasPrice: state.defaults.gasPrice
+				from: config.defaults.from,
+				gas: config.defaults.gas,
+				gasPrice: config.defaults.gasPrice
 			},
 			utils.cleanAddress(nominee.address)
 		);

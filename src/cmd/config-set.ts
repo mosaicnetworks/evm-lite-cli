@@ -1,10 +1,12 @@
 import * as inquirer from 'inquirer';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
-import Session from '../Session';
+import { Solo } from 'evm-lite-consensus';
+
 import Globals from '../Globals';
-import Frames, { execute, IStagingFunction, IOptions } from '../frames';
+import Session from '../Session';
+import Staging, { execute, IOptions } from '../staging';
 
 interface Options extends IOptions {
 	interactive?: boolean;
@@ -17,10 +19,7 @@ interface Options extends IOptions {
 
 export interface Arguments extends Args<Options> {}
 
-export default function commandConfigSet(
-	evmlc: Vorpal,
-	session: Session
-): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description =
 		'Set values of the configuration inside the data directory';
 
@@ -40,7 +39,7 @@ export default function commandConfigSet(
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
 interface Answers {
 	host: string;
@@ -50,53 +49,52 @@ interface Answers {
 	gasPrice: number;
 }
 
-export const stage: IStagingFunction<Arguments, string, string> = async (
-	args: Arguments,
-	session: Session
-) => {
-	const frames = new Frames<Arguments, string, string>(session, args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, string>(args);
 
 	// prepare
 	const { options } = args;
-	const { state } = session.config;
-	const { success, debug } = frames.staging();
+	const { success, debug } = staging.handlers(session.debug);
 
-	const { list } = frames.keystore();
+	// config
+	const config = session.datadir.config;
 
-	/** Command Execution */
-	debug(`Successfully read configuration: ${session.config.path}`);
+	const { list } = staging.keystoreHooks(session);
+
+	// command execution
+	debug(`Successfully read configuration: ${session.datadir.configPath}`);
 
 	const keystore = await list();
 
 	const interactive = options.interactive || session.interactive;
 	const questions: inquirer.Questions<Answers> = [
 		{
-			default: state.connection.host,
+			default: config.connection.host,
 			message: 'Host',
 			name: 'host',
 			type: 'input'
 		},
 		{
-			default: state.connection.port,
+			default: config.connection.port,
 			message: 'Port',
 			name: 'port',
 			type: 'number'
 		},
 		{
 			choices: Object.keys(keystore).map(moniker => moniker),
-			default: state.defaults.from,
+			default: config.defaults.from,
 			message: 'From',
 			name: 'from',
 			type: 'list'
 		},
 		{
-			default: state.defaults.gas,
+			default: config.defaults.gas,
 			message: 'Gas',
 			name: 'gas',
 			type: 'number'
 		},
 		{
-			default: state.defaults.gasPrice,
+			default: config.defaults.gasPrice,
 			message: 'Gas Price',
 			name: 'gasPrice',
 			type: 'number'
@@ -115,27 +113,27 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	const newConfig = {
 		connection: {
-			host: options.host || state.connection.host,
-			port: options.port || state.connection.port
+			host: options.host || config.connection.host,
+			port: options.port || config.connection.port
 		},
 		defaults: {
-			from: options.from || state.defaults.from,
+			from: options.from || config.defaults.from,
 			gas:
 				options.gas !== undefined && options.gas >= 0
 					? options.gas
-					: state.defaults.gas,
+					: config.defaults.gas,
 			gasPrice:
 				options.gasprice !== undefined && options.gasprice >= 0
 					? options.gasprice
-					: state.defaults.gasPrice
+					: config.defaults.gasPrice
 		}
 	};
 
 	debug(`Attempting to write modified configuration...`);
 
-	await session.config.save(newConfig);
+	await session.datadir.saveConfig(newConfig);
 
-	Globals.info(session.config.toTOML());
+	Globals.info(session.datadir.configToml);
 
 	return Promise.resolve(success('Configuration saved'));
 };

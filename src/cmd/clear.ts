@@ -1,13 +1,15 @@
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
+
+import { Solo } from 'evm-lite-consensus';
 
 import Session from '../Session';
-import Frames, { execute, IStagingFunction, IOptions } from '../frames';
+import Staging, { execute, IOptions } from '../staging';
 
 interface Options extends IOptions {}
 
 export interface Arguments extends Args<Options> {}
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Clear output on screen';
 
 	return evmlc
@@ -17,18 +19,15 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 			string: []
 		})
 		.action((args: Arguments) => execute(stage, args, session));
-}
+};
 
-export const stage: IStagingFunction<Arguments, void, void> = async (
-	args: Arguments,
-	session: Session
-) => {
-	const frames = new Frames<Arguments, void, void>(session, args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, void>(args);
 
 	// prepare
-	const { success } = frames.staging();
+	const { success } = staging.handlers(session.debug);
 
-	/** Command Execution */
+	// command execution
 	process.stdout.write('\u001B[2J\u001B[0;0f');
 
 	return Promise.resolve(success());

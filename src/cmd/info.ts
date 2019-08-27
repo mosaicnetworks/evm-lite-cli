@@ -1,8 +1,10 @@
 import ASCIITable from 'ascii-table';
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
+
+import { Solo } from 'evm-lite-consensus';
 
 import Session from '../Session';
-import Frames, { execute, IStagingFunction, IOptions } from '../frames';
+import Staging, { execute, IOptions } from '../staging';
 
 import { EVM_LITE } from '../errors/generals';
 
@@ -14,7 +16,7 @@ interface Options extends IOptions {
 
 export interface Arguments extends Args<Options> {}
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	return evmlc
 		.command('info')
 		.description('Display information about node')
@@ -28,27 +30,29 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
-export const stage: IStagingFunction<Arguments, ASCIITable, any> = async (
-	args: Arguments,
-	session: Session
-) => {
-	const frames = new Frames<Arguments, ASCIITable, any>(session, args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, ASCIITable, any>(args);
 
 	// prepare
 	const { options } = args;
-	const { state } = session.config;
 
-	const { success, error, debug } = frames.staging();
-	const { connect } = frames.generics();
+	// handlers
+	const { success, error, debug } = staging.handlers(session.debug);
 
-	/** Command Execution */
+	// hooks
+	const { connect } = staging.genericHooks(session);
+
+	// config
+	const config = session.datadir.config;
+
+	// command execution
 	const interactive = session.interactive;
 	const formatted = options.formatted || false;
 
-	const host = options.host || state.connection.host;
-	const port = options.port || state.connection.port;
+	const host = options.host || config.connection.host;
+	const port = options.port || config.connection.port;
 
 	await connect(
 		host,

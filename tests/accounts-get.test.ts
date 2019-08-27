@@ -1,12 +1,13 @@
 import ASCIITable from 'ascii-table';
 
+import Account from 'evm-lite-account';
 import Utils from 'evm-lite-utils';
 
-import { Account, BaseAccount } from 'evm-lite-core';
+import { IBaseAccount } from 'evm-lite-client';
 
 import { session } from './stage';
 
-import { Arguments, stage, Output } from '../src/cmd/accounts-get';
+import { Arguments, Output, stage } from '../src/cmd/accounts-get';
 
 import { ACCOUNTS_GET } from '../src/errors/accounts';
 import { INVALID_CONNECTION } from '../src/errors/generals';
@@ -64,7 +65,7 @@ describe('accounts-get.ts', () => {
 	it('should error as [address] is too short', async () => {
 		expect.assertions(4);
 
-		const account = Account.create();
+		const account = Account.new();
 
 		const args: Arguments = {
 			address: account.address.slice(3),
@@ -96,7 +97,7 @@ describe('accounts-get.ts', () => {
 	it('should error as [address] is too long', async () => {
 		expect.assertions(4);
 
-		const account = Account.create();
+		const account = Account.new();
 
 		const args: Arguments = {
 			address: `${account.address}F`,
@@ -128,7 +129,7 @@ describe('accounts-get.ts', () => {
 	it('should get account and display in json format', async () => {
 		expect.assertions(8);
 
-		const account = Account.create();
+		const account = Account.new();
 
 		const args: Arguments = {
 			address: account.address,
@@ -144,7 +145,7 @@ describe('accounts-get.ts', () => {
 		expect(output.args.options.port).toBe(8080);
 		expect(output.args.address).toBe(Utils.trimHex(account.address));
 
-		let base = output.display! as BaseAccount;
+		const base = output.display! as IBaseAccount;
 
 		expect(base).not.toBe(undefined);
 		expect(base.balance).not.toBe(undefined);
@@ -158,7 +159,7 @@ describe('accounts-get.ts', () => {
 	it('should get account and display in table format', async () => {
 		expect.assertions(4);
 
-		const account = Account.create();
+		const account = Account.new();
 
 		const args: Arguments = {
 			address: account.address,
@@ -175,7 +176,7 @@ describe('accounts-get.ts', () => {
 		expect(output.args.options.port).toBe(8080);
 		expect(output.args.address).toBe(Utils.trimHex(account.address));
 
-		let base = output.display!;
+		const base = output.display!;
 
 		expect(base instanceof ASCIITable).toBe(true);
 	});

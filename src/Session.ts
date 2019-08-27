@@ -1,36 +1,37 @@
 import * as nodepath from 'path';
 
+import { IAbstractConsensus } from 'evm-lite-consensus';
+
 import Utils from 'evm-lite-utils';
 
-import { EVMLC, ContractABI } from 'evm-lite-core';
-import { DataDirectory } from 'evm-lite-datadir';
-import { Keystore } from 'evm-lite-keystore';
+import DataDirectory from 'evm-lite-datadir';
+import Keystore from 'evm-lite-keystore';
 
-export default class Session {
+import Node from 'evm-lite-core';
+
+import { IContractABI } from 'evm-lite-client';
+
+export default class Session<TConsensus extends IAbstractConsensus> {
 	public interactive: boolean = false;
 	public debug: boolean = false;
 
-	public node: EVMLC = new EVMLC('localhost', 8080);
-	public directory: DataDirectory<Keystore>;
+	public node: Node<TConsensus>;
+	public datadir: DataDirectory<Keystore>;
 
-	constructor(path: string, configName: string) {
+	constructor(
+		path: string,
+		configName: string,
+		public readonly concls: new (host: string, port: number) => TConsensus
+	) {
 		const keystore = new Keystore(nodepath.join(path, 'keystore'));
 
-		this.directory = new DataDirectory(path, configName);
-		this.directory.setKeystore(keystore);
+		this.node = new Node('localhost', 8080, new concls('127.0.0.1', 8080));
+		this.datadir = new DataDirectory(path, configName, keystore);
 	}
 
-	get keystore() {
-		return this.directory.keystore!;
-	}
-
-	get config() {
-		return this.directory.config;
-	}
-
-	public async getPOAContract(): Promise<{
+	public async POA(): Promise<{
 		address: string;
-		abi: ContractABI;
+		abi: IContractABI;
 	}> {
 		if (process.env.DEBUG) {
 			return {
@@ -39,7 +40,8 @@ export default class Session {
 			};
 		}
 
-		const poa = await this.node.getPOAContract();
+		const poa = await this.node.getPOA();
+
 		return {
 			...poa,
 			// TODO: Perhaps find a fix for the double parsing due
@@ -53,12 +55,14 @@ export default class Session {
 		forcedHost?: string,
 		forcedPort?: number
 	): Promise<boolean> {
-		const { state } = this.directory.config;
+		const config = this.datadir.config;
 
-		const host: string = forcedHost || state.connection.host || '127.0.0.1';
-		const port: number = forcedPort || state.connection.port || 8080;
+		const host: string =
+			forcedHost || config.connection.host || '127.0.0.1';
+		const port: number = forcedPort || config.connection.port || 8080;
 
-		const node = new EVMLC(host, port);
+		const consensus = new this.concls(host, port);
+		const node = new Node(host, port, consensus);
 
 		try {
 			await node.getInfo();

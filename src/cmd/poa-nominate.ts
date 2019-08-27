@@ -1,20 +1,17 @@
 import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import Session from '../Session';
-import Frames, {
-	execute,
-	IStagingFunction,
-	IOptions,
-	IStagedOutput
-} from '../frames';
+import { Solo } from 'evm-lite-consensus';
 
-import { POA_NOMINATE } from '../errors/poa';
+import Session from '../Session';
+import Staging, { execute, IOptions, IStagedOutput } from '../staging';
+
 import { TRANSACTION } from '../errors/generals';
+import { POA_NOMINATE } from '../errors/poa';
 
 interface Options extends IOptions {
 	interactive?: boolean;
@@ -30,7 +27,7 @@ export interface Arguments extends Args<Options> {
 	address?: string;
 }
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Nominate an address to proceed to election';
 
 	return evmlc
@@ -50,7 +47,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
 interface Answers {
 	from: string;
@@ -61,30 +58,29 @@ interface Answers {
 
 export type Output = IStagedOutput<Arguments, string, string>;
 
-export const stage: IStagingFunction<Arguments, string, string> = async (
-	args: Arguments,
-	session: Session
-) => {
-	const frames = new Frames<Arguments, string, string>(session, args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, string>(args);
 
 	// prepare
 	const { options } = args;
-	const { state } = session.config;
+
+	// config
+	const config = session.datadir.config;
 
 	// generate success, error, debug handlers
-	const { debug, success, error } = frames.staging();
+	const { debug, success, error } = staging.handlers(session.debug);
 
-	// generate frames
-	const { connect } = frames.generics();
-	const { send } = frames.transaction();
-	const { list, decrypt, get } = frames.keystore();
-	const { contract: getContract } = frames.POA();
+	// generate hooks
+	const { connect } = staging.genericHooks(session);
+	const { send } = staging.txHooks(session);
+	const { list, decrypt, get } = staging.keystoreHooks(session);
+	const { contract: getContract } = staging.poaHooks(session);
 
-	/** Command Execution */
+	// command execution
 	let passphrase: string = '';
 
-	const host = options.host || state.connection.host;
-	const port = options.port || state.connection.port;
+	const host = options.host || config.connection.host;
+	const port = options.port || config.connection.port;
 
 	const interactive = args.options.interactive || session.interactive;
 
@@ -95,7 +91,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	const contract = await getContract();
 
-	let keystore = await list();
+	const keystore = await list();
 
 	const questions: inquirer.Questions<Answers> = [
 		{
@@ -124,18 +120,18 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	if (interactive) {
 		const {
 			address,
-			from,
+			from: f,
 			passphrase: p,
 			nomineeMoniker
 		} = await inquirer.prompt<Answers>(questions);
 
 		debug(`Nominee Moniker: ${nomineeMoniker || 'null'}`);
 		debug(`Nominee address: ${address || 'null'}`);
-		debug(`From address: ${from || 'null'}`);
+		debug(`From address: ${f || 'null'}`);
 		debug(`Passphrase: ${p || 'null'}`);
 
 		args.address = utils.trimHex(address);
-		options.from = from;
+		options.from = f;
 		options.moniker = nomineeMoniker;
 
 		passphrase = p;
@@ -169,7 +165,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	debug(`Nominee address validated: ${args.address}`);
 
-	const from = utils.trimHex(options.from || state.defaults.from);
+	const from = utils.trimHex(options.from || config.defaults.from);
 
 	if (!from) {
 		return Promise.reject(
@@ -226,14 +222,14 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	const transaction = contract.methods.submitNominee(
 		{
 			from: keyfile.address,
-			gas: session.config.state.defaults.gas,
-			gasPrice: session.config.state.defaults.gasPrice
+			gas: config.defaults.gas,
+			gasPrice: config.defaults.gasPrice
 		},
 		utils.cleanAddress(args.address),
 		options.moniker
 	);
 
-	let receipt = await send(transaction, decrypted);
+	const receipt = await send(transaction, decrypted);
 
 	if (!receipt.logs.length) {
 		return Promise.reject(

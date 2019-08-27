@@ -1,21 +1,17 @@
 import * as inquirer from 'inquirer';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
+import { Solo } from 'evm-lite-consensus';
 import { Transaction } from 'evm-lite-core';
 
 import Session from '../Session';
-import Frames, {
-	execute,
-	IStagingFunction,
-	IOptions,
-	IStagedOutput
-} from '../frames';
+import Staging, { execute, IOptions, IStagedOutput } from '../staging';
 
-import { POA_CHECK } from '../errors/poa';
 import { TRANSACTION } from '../errors/generals';
+import { POA_CHECK } from '../errors/poa';
 
 interface Options extends IOptions {
 	interactive?: boolean;
@@ -28,7 +24,7 @@ export interface Arguments extends Args<Options> {
 	address?: string;
 }
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Check whether an address is on the whitelist';
 
 	return evmlc
@@ -45,7 +41,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
 interface Answers {
 	nominee: string;
@@ -53,24 +49,26 @@ interface Answers {
 
 export type Output = IStagedOutput<Arguments, boolean, boolean>;
 
-export const stage: IStagingFunction<Arguments, boolean, boolean> = async (
-	args: Arguments,
-	session: Session
-) => {
-	const frames = new Frames<Arguments, boolean, boolean>(session, args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, boolean>(args);
 
 	// prepare
 	const { options } = args;
-	const { state } = session.config;
 
-	const { success, error, debug } = frames.staging();
-	const { connect } = frames.generics();
-	const { contract: getContract } = frames.POA();
-	const { call } = frames.transaction();
+	// handlers
+	const { success, error, debug } = staging.handlers(session.debug);
 
-	/** Command Execution */
-	const host = options.host || state.connection.host;
-	const port = options.port || state.connection.port;
+	// hooks
+	const { connect } = staging.genericHooks(session);
+	const { contract: getContract } = staging.poaHooks(session);
+	const { call } = staging.txHooks(session);
+
+	// config
+	const config = session.datadir.config;
+
+	// command execution
+	const host = options.host || config.connection.host;
+	const port = options.port || config.connection.port;
 
 	const interactive = options.interactive || session.interactive;
 
@@ -122,8 +120,8 @@ export const stage: IStagingFunction<Arguments, boolean, boolean> = async (
 	try {
 		transaction = contract.methods.checkAuthorised(
 			{
-				gas: session.config.state.defaults.gas,
-				gasPrice: session.config.state.defaults.gasPrice
+				gas: config.defaults.gas,
+				gasPrice: config.defaults.gasPrice
 			},
 			utils.cleanAddress(args.address)
 		);

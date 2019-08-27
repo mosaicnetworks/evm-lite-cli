@@ -1,9 +1,11 @@
 import { session } from './stage';
 
-import { stage, Arguments, Output } from '../src/cmd/poa-check';
-import { POA_CHECK } from '../src/errors/poa';
+import Account from 'evm-lite-account';
+
+import { Arguments, Output, stage } from '../src/cmd/poa-check';
+
 import { INVALID_CONNECTION } from '../src/errors/generals';
-import { Account } from 'evm-lite-core';
+import { POA_CHECK } from '../src/errors/poa';
 
 describe('poa-check.ts', () => {
 	it('should error as invalid node conn details', async () => {
@@ -57,7 +59,7 @@ describe('poa-check.ts', () => {
 	it('should error as [address] is too long', async () => {
 		expect.assertions(3);
 
-		const account = Account.create();
+		const account = Account.new();
 
 		const args: Arguments = {
 			address: account.address + 'A',
@@ -86,7 +88,7 @@ describe('poa-check.ts', () => {
 	it('should error as [address] is too short', async () => {
 		expect.assertions(3);
 
-		const account = Account.create();
+		const account = Account.new();
 
 		const args: Arguments = {
 			address: account.address.slice(3),

@@ -1,7 +1,9 @@
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
+
+import { Solo } from 'evm-lite-consensus';
 
 import Session from '../Session';
-import Frames, { execute, IStagingFunction, IOptions } from '../frames';
+import Staging, { execute, IOptions } from '../staging';
 
 interface Options extends IOptions {
 	value: any;
@@ -9,27 +11,27 @@ interface Options extends IOptions {
 
 export interface Arguments extends Args<Options> {}
 
-export default function command(evmlc: Vorpal, session: Session): Command {
-	const description = 'Test command';
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
+	const d = 'Test command';
 
 	return evmlc
 		.command('test')
 		.hidden()
-		.description(description)
+		.description(d)
 		.option('--value <value>', 'test valye')
-		.types({
-			string: []
-		})
 		.action((args: Arguments) => execute(stage, args, session));
-}
+};
 
-export const stage: IStagingFunction<Arguments, string, string> = async (
-	args: Arguments,
-	session: Session
-) => {
-	const frames = new Frames<Arguments, string, string>(session, args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, string>(args);
 
-	const { success } = frames.staging();
+	const { success, error } = staging.handlers(session.debug);
 
-	return Promise.resolve(success(`test`));
+	const test = false;
+
+	if (test) {
+		return Promise.reject(error('@error/asd', 'asd'));
+	}
+
+	return success('hello');
 };

@@ -1,10 +1,10 @@
-import * as path from 'path';
 import * as fs from 'fs';
+import * as path from 'path';
 
 import Session from '../src/Session';
 
 export const datadir: string = path.join(__dirname, 'assets');
-export const session: Session = new Session(datadir, 'EVMLC');
+export const session: Session = new Session(datadir, 'EVMLC', 'solo');
 
 export const pwdPath = path.join(datadir, 'pwd.txt');
 export const password = fs.readFileSync(pwdPath, 'utf8').trim();
