@@ -2,7 +2,7 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
-import Solo from 'evm-lite-solo';
+import { Solo } from 'evm-lite-consensus';
 
 import Globals from '../Globals';
 import Session from '../Session';

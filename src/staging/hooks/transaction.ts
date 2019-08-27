@@ -1,11 +1,8 @@
 import { Args } from 'vorpal';
 
-import { IAbstractConsensus } from 'evm-lite-solo';
-
-import Account from 'evm-lite-account';
-import Transaction from 'evm-lite-transaction';
-
 import { IReceipt } from 'evm-lite-client';
+import { IAbstractConsensus } from 'evm-lite-consensus';
+import { Account, Transaction } from 'evm-lite-core';
 
 import Session from '../../Session';
 import Staging, { IOptions } from '../Staging';

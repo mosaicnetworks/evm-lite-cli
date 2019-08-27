@@ -3,9 +3,9 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
-import Solo from 'evm-lite-solo';
 import utils from 'evm-lite-utils';
 
+import { Solo } from 'evm-lite-consensus';
 import { IMonikerBaseAccount } from 'evm-lite-keystore';
 
 import Session from '../Session';
@@ -303,13 +303,15 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 
 	debug('Attemping to send tranfer transaction...');
 	try {
-		await session.node.transfer(
+		const r = await session.node.transfer(
 			decrypted,
 			options.to,
 			options.value,
 			options.gas,
 			options.gasprice
 		);
+
+		debug(JSON.stringify(r));
 	} catch (e) {
 		return Promise.reject(error(EVM_LITE, e.text || e.toString()));
 	}

@@ -3,8 +3,9 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
-import Solo from 'evm-lite-solo';
 import utils from 'evm-lite-utils';
+
+import { Solo } from 'evm-lite-consensus';
 
 import Session from '../Session';
 import Staging, { execute, IOptions, IStagedOutput } from '../staging';

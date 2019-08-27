@@ -1,6 +1,6 @@
 import Vorpal, { Args, Command } from 'vorpal';
 
-import Solo from 'evm-lite-solo';
+import { Solo } from 'evm-lite-consensus';
 
 import Session from '../Session';
 import Staging, { execute, IOptions } from '../staging';

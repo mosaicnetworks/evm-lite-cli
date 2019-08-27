@@ -1,13 +1,13 @@
 import * as nodepath from 'path';
 
-import { IAbstractConsensus } from 'evm-lite-solo';
+import { IAbstractConsensus } from 'evm-lite-consensus';
 
 import Utils from 'evm-lite-utils';
 
 import DataDirectory from 'evm-lite-datadir';
 import Keystore from 'evm-lite-keystore';
 
-import Node from 'evm-lite-node';
+import Node from 'evm-lite-core';
 
 import { IContractABI } from 'evm-lite-client';
 

@@ -3,10 +3,10 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
-import Solo from 'evm-lite-solo';
 import utils from 'evm-lite-utils';
 
-import Transaction from 'evm-lite-transaction';
+import { Solo } from 'evm-lite-consensus';
+import { Transaction } from 'evm-lite-core';
 
 import Session from '../Session';
 import Staging, { execute, IOptions, IStagedOutput } from '../staging';

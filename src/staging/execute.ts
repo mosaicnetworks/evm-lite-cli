@@ -2,7 +2,7 @@ import ASCIITable from 'ascii-table';
 
 import { Args as VorpalArgs } from 'vorpal';
 
-import { IAbstractConsensus } from 'evm-lite-solo';
+import { IAbstractConsensus } from 'evm-lite-consensus';
 
 import Globals from '../Globals';
 import Session from '../Session';

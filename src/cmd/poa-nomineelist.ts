@@ -2,8 +2,9 @@ import ASCIITable from 'ascii-table';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
-import Solo from 'evm-lite-solo';
 import utils from 'evm-lite-utils';
+
+import { Solo } from 'evm-lite-consensus';
 
 import Session from '../Session';
 import Staging, { execute, IOptions } from '../staging';

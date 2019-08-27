@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { osdatadir } from 'evm-lite-datadir';
 
-import Solo from 'evm-lite-solo';
+import { Solo } from 'evm-lite-consensus';
 
 // Accounts
 import accountsCreate from './cmd/accounts-create';
@@ -24,8 +24,6 @@ import poaVote from './cmd/poa-vote';
 import poaWhitelist from './cmd/poa-whitelist';
 
 // Misc
-import clear from './cmd/clear';
-import debug from './cmd/debug';
 import info from './cmd/info';
 import test from './cmd/test';
 import transfer from './cmd/transfer';
@@ -65,8 +63,6 @@ const commands = [
 	info,
 	test,
 	version,
-	debug,
-	clear,
 	transfer
 ];
 

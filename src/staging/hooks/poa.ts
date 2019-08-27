@@ -1,9 +1,12 @@
 import { Args } from 'vorpal';
 
-import { IAbstractConsensus } from 'evm-lite-solo';
-
-import Contract, { IAbstractSchema } from 'evm-lite-contract';
-import Transaction, { ITransaction } from 'evm-lite-transaction';
+import { IAbstractConsensus } from 'evm-lite-consensus';
+import {
+	Contract,
+	IAbstractSchema,
+	ITransaction,
+	Transaction
+} from 'evm-lite-core';
 
 import Session from '../../Session';
 import Staging, { IOptions } from '../Staging';

@@ -5,9 +5,9 @@ import {
 	IMonikerKeystore,
 	IV3Keyfile
 } from 'evm-lite-keystore';
-import { IAbstractConsensus } from 'evm-lite-solo';
 
-import Account from 'evm-lite-account';
+import { IAbstractConsensus } from 'evm-lite-consensus';
+import { Account } from 'evm-lite-core';
 
 import Session from '../../Session';
 import Staging, { IOptions } from '../Staging';
@@ -57,9 +57,7 @@ const list = async <
 			return Promise.reject(
 				error(
 					KEYSTORE.EMPTY,
-					`No accounts found in keystore '${
-						session.datadir.keystorePath
-					}'`
+					`No accounts found in keystore '${session.datadir.keystorePath}'`
 				)
 			);
 		}
@@ -90,9 +88,7 @@ const get = async <
 		return Promise.reject(
 			error(
 				KEYSTORE.FETCH,
-				`Could not locate keystore for address '${moniker}' in '${
-					session.datadir.keystorePath
-				}'`
+				`Could not locate keystore for address '${moniker}' in '${session.datadir.keystorePath}'`
 			)
 		);
 	}

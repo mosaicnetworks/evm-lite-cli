@@ -1,7 +1,7 @@
 import * as figlet from 'figlet';
 import * as mkdir from 'mkdirp';
 
-import { IAbstractConsensus } from 'evm-lite-solo';
+import { IAbstractConsensus } from 'evm-lite-consensus';
 
 import Vorpal, { Command } from 'vorpal';
 
@@ -12,9 +12,9 @@ import Globals from './Globals';
 import Session from './Session';
 
 // default commands
-// import clear from './cmd/clear';
-// import debug from './cmd/debug';
-// import interactive from './cmd/interactive';
+import clear from './cmd/clear';
+import debug from './cmd/debug';
+import interactive from './cmd/interactive';
 
 export type CommandFunction<TConsensus extends IAbstractConsensus> = (
 	evmlc: Vorpal,
@@ -37,7 +37,7 @@ export default async function init<TConsensus extends IAbstractConsensus>(
 	consensus: new (host: string, port: number) => TConsensus,
 	commands: Array<CommandFunction<TConsensus>>
 ) {
-	// commands.push(interactive, debug, clear);
+	commands.push(interactive, debug, clear);
 
 	if (!Utils.exists(params.datadir)) {
 		mkdir.sync(params.datadir);
@@ -66,9 +66,7 @@ export default async function init<TConsensus extends IAbstractConsensus>(
 
 	if (!process.argv[2]) {
 		console.log(
-			`\n  Change datadir by: ${
-				params.delimiter
-			} --datadir [path] [command]`
+			`\n  Change datadir by: ${params.delimiter} --datadir [path] [command]`
 		);
 		console.log(`\n  Data Directory: ${session.datadir.path}`);
 

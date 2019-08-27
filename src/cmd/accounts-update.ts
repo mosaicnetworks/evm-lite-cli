@@ -3,9 +3,9 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
-import Solo from 'evm-lite-solo';
 import utils from 'evm-lite-utils';
 
+import { Solo } from 'evm-lite-consensus';
 import { IV3Keyfile } from 'evm-lite-keystore';
 
 import Session from '../Session';

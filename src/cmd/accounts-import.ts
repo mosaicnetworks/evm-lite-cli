@@ -4,9 +4,9 @@ import * as path from 'path';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
-import Solo from 'evm-lite-solo';
 import utils from 'evm-lite-utils';
 
+import { Solo } from 'evm-lite-consensus';
 import { IConfiguration } from 'evm-lite-datadir';
 import { IV3Keyfile } from 'evm-lite-keystore';
 

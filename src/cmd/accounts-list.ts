@@ -1,9 +1,9 @@
 import ASCIITable from 'ascii-table';
 import Vorpal, { Args, Command } from 'vorpal';
 
-import Solo from 'evm-lite-solo';
 import utils from 'evm-lite-utils';
 
+import { Solo } from 'evm-lite-consensus';
 import { IMonikerBaseAccount } from 'evm-lite-keystore';
 
 import Session from '../Session';

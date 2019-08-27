@@ -1,6 +1,6 @@
 import { Args } from 'vorpal';
 
-import { IAbstractConsensus } from 'evm-lite-solo';
+import { IAbstractConsensus } from 'evm-lite-consensus';
 
 import Session from '../../Session';
 import Staging, { IOptions } from '../Staging';
