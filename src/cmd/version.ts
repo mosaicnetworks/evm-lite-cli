@@ -13,10 +13,7 @@ interface Options extends IOptions {
 
 export interface Arguments extends Args<Options> {}
 
-export default function command(
-	evmlc: Vorpal,
-	session: Session<Solo>
-): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Display current version of cli';
 
 	return evmlc
@@ -28,7 +25,7 @@ export default function command(
 			string: []
 		})
 		.action((args: Arguments) => execute(stage, args, session));
-}
+};
 
 export const stage = async (args: Arguments, session: Session<Solo>) => {
 	const staging = new Staging<Arguments, string>(args);

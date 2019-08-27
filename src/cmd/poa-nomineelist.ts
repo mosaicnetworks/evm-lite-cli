@@ -25,10 +25,7 @@ interface NomineeEntry {
 	downVotes: number;
 }
 
-export default function command(
-	evmlc: Vorpal,
-	session: Session<Solo>
-): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'List nominees for a connected node';
 
 	return evmlc
@@ -45,7 +42,7 @@ export default function command(
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
 export const stage = async (args: Arguments, session: Session<Solo>) => {
 	const staging = new Staging<Arguments, ASCIITable, NomineeEntry[]>(args);

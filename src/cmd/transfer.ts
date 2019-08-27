@@ -32,10 +32,7 @@ export interface Arguments extends Args<Options> {
 	options: Options;
 }
 
-export default function command(
-	evmlc: Vorpal,
-	session: Session<Solo>
-): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Initiate a transfer of token(s) to an address';
 
 	return evmlc
@@ -58,7 +55,7 @@ export default function command(
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
 interface FirstAnswers {
 	from: string;

@@ -26,10 +26,7 @@ export interface Arguments extends Args<Options> {
 	address?: string;
 }
 
-export default function command(
-	monet: Vorpal,
-	session: Session<Solo>
-): Command {
+export default (monet: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Vote for an nominee currently in election';
 
 	return monet
@@ -49,7 +46,7 @@ export default function command(
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
 interface Answers {
 	from: string;
@@ -366,9 +363,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 
 	const vote = nomineeVoteCastEvent.args._accepted ? 'Yes' : 'No';
 
-	let message = `You (${
-		nomineeVoteCastEvent.args._voter
-	}) voted '${vote}' for '${nomineeVoteCastEvent.args._nominee}'. `;
+	let message = `You (${nomineeVoteCastEvent.args._voter}) voted '${vote}' for '${nomineeVoteCastEvent.args._nominee}'. `;
 
 	if (nomineeDecisionEvent) {
 		const accepted = nomineeDecisionEvent.args._accepted

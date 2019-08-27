@@ -24,10 +24,7 @@ export interface Arguments extends Args<Options> {
 	moniker?: string;
 }
 
-export default function command(
-	evmlc: Vorpal,
-	session: Session<Solo>
-): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Update passphrase for a local account';
 
 	return evmlc
@@ -44,7 +41,7 @@ export default function command(
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
 interface FirstAnswers {
 	moniker: string;

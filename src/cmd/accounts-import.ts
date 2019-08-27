@@ -26,10 +26,7 @@ export interface Arguments extends Args<Options> {
 	moniker?: string;
 }
 
-export default function command(
-	evmlc: Vorpal,
-	session: Session<Solo>
-): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Import an encrypted keyfile to the keystore';
 
 	return evmlc
@@ -47,7 +44,7 @@ export default function command(
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
 interface Answers {
 	moniker: string;

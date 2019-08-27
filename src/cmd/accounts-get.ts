@@ -26,10 +26,7 @@ export interface Arguments extends Args<Options> {
 	address?: string;
 }
 
-export default function command(
-	evmlc: Vorpal,
-	session: Session<Solo>
-): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Fetches account details from a connected node';
 
 	return evmlc
@@ -47,7 +44,7 @@ export default function command(
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
 interface Answers {
 	address: string;

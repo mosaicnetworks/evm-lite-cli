@@ -24,10 +24,7 @@ interface Options extends IOptions {
 
 export interface Arguments extends Args<Options> {}
 
-export default function command(
-	monet: Vorpal,
-	session: Session<Solo>
-): Command {
+export default (monet: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Initialize PoA contract';
 
 	return monet
@@ -45,7 +42,7 @@ export default function command(
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
 interface Answers {
 	from: string;

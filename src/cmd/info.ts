@@ -16,10 +16,7 @@ interface Options extends IOptions {
 
 export interface Arguments extends Args<Options> {}
 
-export default function command(
-	evmlc: Vorpal,
-	session: Session<Solo>
-): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	return evmlc
 		.command('info')
 		.description('Display information about node')
@@ -33,7 +30,7 @@ export default function command(
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
 export const stage = async (args: Arguments, session: Session<Solo>) => {
 	const staging = new Staging<Arguments, ASCIITable, any>(args);
