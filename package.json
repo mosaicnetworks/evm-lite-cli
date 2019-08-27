@@ -1,6 +1,6 @@
 {
 	"name": "evm-lite-cli",
-	"version": "1.0.0-alpha.24",
+	"version": "1.0.0-alpha.25-dev",
 	"main": "dist/index.js",
 	"typings": "dist/typings/index.d.ts",
 	"license": "MIT",
@@ -12,6 +12,7 @@
 		"build:watch": "npm run build --watch",
 		"test": "jest",
 		"dev": "yarn install --registry http://localhost:4873",
+		"publish:dev": "yarn publish --registry http://localhost:4873",
 		"add:dev": "yarn add --registry http://localhost:4873",
 		"i": "ts-node src/cli i --debug",
 		"e": "ts-node src/cli"
