@@ -1377,69 +1377,69 @@ ethjs-unit@^0.1.6:
     bn.js "4.11.6"
     number-to-bn "1.7.0"
 
-evm-lite-client@1.0.0-alpha.22, evm-lite-client@^1.0.0-alpha.21-dev:
-  version "1.0.0-alpha.21-dev"
-  resolved "http://localhost:4873/evm-lite-client/-/evm-lite-client-1.0.0-alpha.21-dev.tgz#6009348001b44bb40dc8b64e32281c3efe9fdedb"
-  integrity sha512-qhA+ANpSjUffRvmkak4pBw0u870VDfSRtHb6WP4W/qJBSU1bjGPG0awuohS8LoQYMVQNGKfW2e6OjnvDz1vU1A==
+evm-lite-client@1.0.0-alpha.21-dev.1, evm-lite-client@^1.0.0-alpha.21-dev.1:
+  version "1.0.0-alpha.21-dev.1"
+  resolved "http://192.168.1.12:4873/evm-lite-client/-/evm-lite-client-1.0.0-alpha.21-dev.1.tgz#30225d22195bb01a06fc6f87f241bb9ae03846a2"
+  integrity sha512-86FE4pUzgedhFbaDDfvbsnQ4dBvEw5wFDXUvgxzBS3QdSs2yN2CUUSx38AwKCRXNnyg3oi/goq+Kboc+bbeVZw==
   dependencies:
     json-bigint "^0.3.0"
 
-evm-lite-consensus@1.0.0-alpha.22, evm-lite-consensus@^1.0.0-alpha.21-dev:
-  version "1.0.0-alpha.21-dev"
-  resolved "http://localhost:4873/evm-lite-consensus/-/evm-lite-consensus-1.0.0-alpha.21-dev.tgz#1b384f3f2a59a7a97bee43d54d9f1a3da50c1442"
-  integrity sha512-Ve0aVMM1cWmAmFdCl33Dg0OHInh26U3d5Ir5oEok2YgQmnX2A9F9QvUZO13FavDP2sQxpaft8ID3geNBXGaRiw==
+evm-lite-consensus@1.0.0-alpha.21-dev.1, evm-lite-consensus@^1.0.0-alpha.21-dev.1:
+  version "1.0.0-alpha.21-dev.1"
+  resolved "http://192.168.1.12:4873/evm-lite-consensus/-/evm-lite-consensus-1.0.0-alpha.21-dev.1.tgz#6091e2efd2db1c307841f5cc642b5bf35e568024"
+  integrity sha512-ZucIRxl6SCP1NioLwt3CZnisb7dsU7QZRY6KDY7Xdt3dYzwpzd9pZoUApj/aPvBCFO4DND9w5+oQhshT61N20w==
   dependencies:
-    evm-lite-client "1.0.0-alpha.22"
+    evm-lite-client "1.0.0-alpha.21-dev.1"
     json-bigint "^0.3.0"
 
-evm-lite-core@1.0.0-alpha.22, evm-lite-core@^1.0.0-alpha.21-dev:
-  version "1.0.0-alpha.21-dev"
-  resolved "http://localhost:4873/evm-lite-core/-/evm-lite-core-1.0.0-alpha.21-dev.tgz#be9ebd2a68cd237d5370ee6e11cdea64841a8428"
-  integrity sha512-HDk8WPVTxweAjDc3IHxfkeu95fauPgvYFm7eO0gLeDf0Xd1SBjK2JdOM8q3H/skQtbOOQTewlllWTgjP4HmRMA==
+evm-lite-core@1.0.0-alpha.21-dev.1, evm-lite-core@^1.0.0-alpha.21-dev.1:
+  version "1.0.0-alpha.21-dev.1"
+  resolved "http://192.168.1.12:4873/evm-lite-core/-/evm-lite-core-1.0.0-alpha.21-dev.1.tgz#eb10669d3647e4df3b96856b082dccfa05eaea01"
+  integrity sha512-uSWMzoCHk7/GDYUJ85eIhbXf8BJenmov9090QwIUGjW78MvM8U7O/tyVij8ysSHipESAcFemVQ+U6XNTMIuvoQ==
   dependencies:
     eth-lib "0.2.8"
-    evm-lite-client "1.0.0-alpha.22"
-    evm-lite-consensus "1.0.0-alpha.22"
-    evm-lite-utils "1.0.0-alpha.21"
+    evm-lite-client "1.0.0-alpha.21-dev.1"
+    evm-lite-consensus "1.0.0-alpha.21-dev.1"
+    evm-lite-utils "1.0.0-alpha.21-dev.1"
     json-bigint "^0.3.0"
     web3 "0.20.6"
     web3-eth-iban "1.0.0-beta.46"
     web3-utils "1.0.0-beta.46"
 
-evm-lite-datadir@^1.0.0-alpha.21-dev:
-  version "1.0.0-alpha.21-dev"
-  resolved "http://localhost:4873/evm-lite-datadir/-/evm-lite-datadir-1.0.0-alpha.21-dev.tgz#25821b66a49fe7c5c091aa2316a48234ad483eb6"
-  integrity sha512-t4CdDakfjqIQgkD5ungV7shG8uJ7aHX6nHDaCXWmV65q3U0xQCjYNmRVFzjmSvBGuB9bSw3ltW69yyIMCVx/1w==
+evm-lite-datadir@^1.0.0-alpha.21-dev.1:
+  version "1.0.0-alpha.21-dev.1"
+  resolved "http://192.168.1.12:4873/evm-lite-datadir/-/evm-lite-datadir-1.0.0-alpha.21-dev.1.tgz#654bfcd1439312a721e4a7150b1292a4b7d969a3"
+  integrity sha512-WhBhSjKcTlKe7YWIR16KeBpEtPWkhX1zkQAgprJzb+Og6meR8x3u8V47Mh5YPo2qdJ+SxPpY6HdUaX3vG6XLtQ==
   dependencies:
-    evm-lite-keystore "1.0.0-alpha.22"
-    evm-lite-utils "1.0.0-alpha.21"
+    evm-lite-keystore "1.0.0-alpha.21-dev.1"
+    evm-lite-utils "1.0.0-alpha.21-dev.1"
     mkdirp "^0.5.1"
     toml "^3.0.0"
     tomlify-j0.4 "^3.0.0"
 
-evm-lite-keystore@1.0.0-alpha.22, evm-lite-keystore@^1.0.0-alpha.21-dev:
-  version "1.0.0-alpha.21-dev"
-  resolved "http://localhost:4873/evm-lite-keystore/-/evm-lite-keystore-1.0.0-alpha.21-dev.tgz#071f79a4da5979a8ea4ac63f8f80c40727200d64"
-  integrity sha512-7ezyfObhVK2vMoOYI9dZd6etgFlxamQfTwZ+baFQ7VAxtECbTx/IO/rGMt3D8DqLa1PomIoeLMdQALzeVhqkpw==
+evm-lite-keystore@1.0.0-alpha.21-dev.1, evm-lite-keystore@^1.0.0-alpha.21-dev.1:
+  version "1.0.0-alpha.21-dev.1"
+  resolved "http://192.168.1.12:4873/evm-lite-keystore/-/evm-lite-keystore-1.0.0-alpha.21-dev.1.tgz#f47f32ac3cc54764f507050b3a68f36a85ee946f"
+  integrity sha512-Fp6f7Y4eHg8H0NpAc6xAy4LiUVwU5M3+yeCwkkfBC0cg/Whl+uCp8Bqvgr9Y4KB5bxboQKcCYcKbqGF3unsrFQ==
   dependencies:
     browserify-cipher "^1.0.1"
     crypto-random-hex "^1.0.0"
     eth-lib "^0.2.8"
-    evm-lite-client "1.0.0-alpha.22"
-    evm-lite-core "1.0.0-alpha.22"
-    evm-lite-utils "1.0.0-alpha.21"
+    evm-lite-client "1.0.0-alpha.21-dev.1"
+    evm-lite-core "1.0.0-alpha.21-dev.1"
+    evm-lite-utils "1.0.0-alpha.21-dev.1"
     json-bigint "0.3.0"
     keccak256 "^1.0.0"
     mkdirp "^0.5.1"
     randombytes "^2.1.0"
     scrypt "6.0.3"
-    scryptsy "^2.0.0"
-    uuid "^3.3.2"
+    scryptsy "^2.1.0"
+    uuid "^3.3.3"
 
-evm-lite-utils@1.0.0-alpha.21, evm-lite-utils@^1.0.0-alpha.21-dev:
-  version "1.0.0-alpha.21-dev"
-  resolved "http://localhost:4873/evm-lite-utils/-/evm-lite-utils-1.0.0-alpha.21-dev.tgz#38965f15fcd77856952bab4440f532c4c62ffaf1"
-  integrity sha512-yhUVVk26qYOpx0TW5xEtudB+JwLzKk+uw+ucXmlU99jOTsy9qgNfQwrVgs2QFdtSEBaTH8x4lGdbLW0xj+3fMg==
+evm-lite-utils@1.0.0-alpha.21-dev.1, evm-lite-utils@^1.0.0-alpha.21-dev.1:
+  version "1.0.0-alpha.21-dev.1"
+  resolved "http://192.168.1.12:4873/evm-lite-utils/-/evm-lite-utils-1.0.0-alpha.21-dev.1.tgz#296262feb8b3ee87a1df5977cbba555256edfd07"
+  integrity sha512-fbyfDzjRyau4xhKxbk5Hss//7Wpwf7wLgp8uO5JuNCiwETF5GDso6CH2T/Q/A4aVDbuf4RguLbcIAjLQ4hrlRA==
   dependencies:
     mkdirp "^0.5.1"
 
@@ -3817,9 +3817,9 @@ scrypt@6.0.3:
   dependencies:
     nan "^2.0.8"
 
-scryptsy@^2.0.0:
+scryptsy@^2.1.0:
   version "2.1.0"
-  resolved "http://localhost:4873/scryptsy/-/scryptsy-2.1.0.tgz#8d1e8d0c025b58fdd25b6fa9a0dc905ee8faa790"
+  resolved "http://192.168.1.12:4873/scryptsy/-/scryptsy-2.1.0.tgz#8d1e8d0c025b58fdd25b6fa9a0dc905ee8faa790"
   integrity sha512-1CdSqHQowJBnMAFyPEBRfqag/YP9OF394FV+4YREIJX4ljD7OxvQRDayyoyyCk+senRjSkP6VnUNQmVQqB6g7w==
 
 "semver@2 || 3 || 4 || 5", semver@^5.3.0, semver@^5.4.1, semver@^5.5, semver@^5.5.0, semver@^5.6.0:
@@ -4491,6 +4491,11 @@ uuid@^3.3.2:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.3.2.tgz#1b4af4955eb3077c501c23872fc6513811587131"
   integrity sha512-yXJmeNaw3DnnKAOKJE51sL/ZaYfWJRl1pK9dr19YFCu0ObS231AB1/LbqTKRAQ5kw8A90rA6fr4riOUpTZvQZA==
+
+uuid@^3.3.3:
+  version "3.3.3"
+  resolved "http://192.168.1.12:4873/uuid/-/uuid-3.3.3.tgz#4568f0216e78760ee1dbf3a4d2cf53e224112866"
+  integrity sha512-pW0No1RGHgzlpHJO1nsVrHKpOEIxkGg1xB+v0ZmdNH5OAeAwzAVrCnI2/6Mtx+Uys6iaylxa+D3g4j63IKKjSQ==
 
 validate-npm-package-license@^3.0.1:
   version "3.0.4"
