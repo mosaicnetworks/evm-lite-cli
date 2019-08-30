@@ -34,7 +34,7 @@ import init, { ICLIConfig } from './init';
 const params: ICLIConfig = {
 	name: 'EVM-Lite CLI',
 	delimiter: 'evmlc',
-	datadir: osdatadir('evm-lite'),
+	datadir: osdatadir('evmlite'),
 	config: 'evmlc'
 };
 
