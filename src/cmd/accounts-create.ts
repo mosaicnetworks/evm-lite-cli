@@ -1,19 +1,15 @@
 import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import { V3Keyfile } from 'evm-lite-keystore';
+import { Solo } from 'evm-lite-consensus';
+import { IV3Keyfile } from 'evm-lite-keystore';
 
 import Session from '../Session';
-import Frames, {
-	execute,
-	IStagingFunction,
-	IOptions,
-	IStagedOutput
-} from '../frames';
+import Staging, { execute, IOptions, IStagedOutput } from '../staging';
 
 import { ACCOUNTS_CREATE } from '../errors/accounts';
 
@@ -29,7 +25,7 @@ export interface Arguments extends Args<Options> {
 	options: Options;
 }
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Creates an encrypted keypair locally';
 
 	return evmlc
@@ -44,7 +40,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 			string: ['_', 'pwd', 'out']
 		})
 		.action((args: Arguments) => execute(stage, args, session));
-}
+};
 
 interface Answers {
 	moniker: string;
@@ -53,21 +49,18 @@ interface Answers {
 	verifyPassphrase: string;
 }
 
-export type Output = IStagedOutput<Arguments, V3Keyfile, V3Keyfile>;
+export type Output = IStagedOutput<Arguments, IV3Keyfile>;
 
-export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
-	args: Arguments,
-	session: Session
-) => {
-	const frames = new Frames<Arguments, V3Keyfile, V3Keyfile>(session, args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, IV3Keyfile>(args);
 
 	// args
 	const { options } = args;
 
 	// decontruct
-	const { success, error, debug } = frames.staging();
+	const { success, error, debug } = staging.handlers(session.debug);
 
-	/** Command Execution */
+	// command execution
 	let passphrase: string = '';
 
 	const interactive = options.interactive || session.interactive;
@@ -81,7 +74,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 			message: 'Output Path: ',
 			name: 'outpath',
 			type: 'input',
-			default: session.keystore.path
+			default: session.datadir.keystorePath
 		},
 		{
 			message: 'Passphrase: ',
@@ -207,9 +200,9 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 
 	debug(`Attempting to create account...`);
 
-	let account: V3Keyfile;
+	let account: IV3Keyfile;
 	try {
-		account = await session.keystore.create(
+		account = await session.datadir.newKeyfile(
 			args.moniker,
 			passphrase,
 			options.out

@@ -1,23 +1,19 @@
 import * as fs from 'fs';
-import * as path from 'path';
 import * as inquirer from 'inquirer';
+import * as path from 'path';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import { V3Keyfile } from 'evm-lite-keystore';
+import { Solo } from 'evm-lite-consensus';
+import { IConfiguration } from 'evm-lite-datadir';
+import { IV3Keyfile } from 'evm-lite-keystore';
 
 import Session from '../Session';
-import Frames, {
-	execute,
-	IStagingFunction,
-	IOptions,
-	IStagedOutput
-} from '../frames';
+import Staging, { execute, IOptions, IStagedOutput } from '../staging';
 
 import { ACCOUNTS_IMPORT } from '../errors/accounts';
-import { ConfigurationSchema } from 'evm-lite-datadir';
 
 interface Options extends IOptions {
 	interactive?: boolean;
@@ -30,7 +26,7 @@ export interface Arguments extends Args<Options> {
 	moniker?: string;
 }
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Import an encrypted keyfile to the keystore';
 
 	return evmlc
@@ -48,7 +44,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
 interface Answers {
 	moniker: string;
@@ -56,19 +52,18 @@ interface Answers {
 	makeDefault: boolean;
 }
 
-export type Output = IStagedOutput<Arguments, V3Keyfile, V3Keyfile>;
+export type Output = IStagedOutput<Arguments, IV3Keyfile, IV3Keyfile>;
 
-export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
-	args: Arguments,
-	session: Session
-) => {
-	const frames = new Frames<Arguments, V3Keyfile, V3Keyfile>(session, args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, IV3Keyfile>(args);
 
 	// prepare
 	const { options } = args;
-	const { success, error, debug } = frames.staging();
 
-	/** Command Execution */
+	// handlers
+	const { success, error, debug } = staging.handlers(session.debug);
+
+	// command execution
 	const interactive = options.interactive || session.interactive;
 	const questions: inquirer.Questions<Answers> = [
 		{
@@ -142,9 +137,9 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 
 	debug(`Keyfile path verified: ${options.file}`);
 
-	let keyfile: V3Keyfile;
+	let keyfile: IV3Keyfile;
 
-	debug(`Keystore directory: ${session.keystore.path}`);
+	debug(`Keystore directory: ${session.datadir.keystorePath}`);
 	debug(`Attempting to import keyfile...`);
 
 	try {
@@ -155,7 +150,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 
 	// write file
 	try {
-		await session.keystore.import(args.moniker, keyfile);
+		await session.datadir.importKeyfile(args.moniker, keyfile);
 	} catch (e) {
 		return Promise.reject(e.toString());
 	}
@@ -163,15 +158,15 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 	debug(`Setting as default address...`);
 
 	if (options.default) {
-		const newConfig: ConfigurationSchema = {
-			...session.config.state,
+		const newConfig: IConfiguration = {
+			...session.datadir.config,
 			defaults: {
-				...session.config.state.defaults,
+				...session.datadir.config.defaults,
 				from: args.moniker
 			}
 		};
 
-		await session.config.save(newConfig);
+		await session.datadir.saveConfig(newConfig);
 	}
 
 	return Promise.resolve(success(keyfile));

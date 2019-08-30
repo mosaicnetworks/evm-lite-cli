@@ -1,6 +1,6 @@
-import { session, password, pwdPath, otherPwdPath } from './stage';
+import { otherPwdPath, password, session } from './stage';
 
-import { stage, Arguments, Output } from '../src/cmd/poa-nominate';
+import { Arguments, Output, stage } from '../src/cmd/poa-nominate';
 import { INVALID_CONNECTION, KEYSTORE } from '../src/errors/generals';
 import { POA_NOMINATE } from '../src/errors/poa';
 
@@ -54,7 +54,7 @@ describe('poa-nominate.ts', () => {
 		expect.assertions(1);
 
 		// create keystore
-		await session.keystore.create('danu', password);
+		await session.datadir.newKeyfile('danu', password);
 
 		const args: Arguments = {
 			options: {
@@ -78,7 +78,7 @@ describe('poa-nominate.ts', () => {
 		expect.assertions(1);
 
 		// create keystore
-		const keystore = await session.keystore.create('danu', password);
+		const keystore = await session.datadir.newKeyfile('danu', password);
 
 		const args: Arguments = {
 			address: keystore.address,
@@ -103,7 +103,7 @@ describe('poa-nominate.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		const keystore = await session.keystore.create('danu', password);
+		const keystore = await session.datadir.newKeyfile('danu', password);
 
 		const args: Arguments = {
 			address: keystore.address.slice(3),
@@ -134,7 +134,7 @@ describe('poa-nominate.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		const keystore = await session.keystore.create('danu', password);
+		const keystore = await session.datadir.newKeyfile('danu', password);
 
 		const args: Arguments = {
 			address: `${keystore.address}F`,
@@ -165,7 +165,7 @@ describe('poa-nominate.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		const keystore = await session.keystore.create('danu', password);
+		const keystore = await session.datadir.newKeyfile('danu', password);
 
 		const args: Arguments = {
 			address: keystore.address,
@@ -194,7 +194,7 @@ describe('poa-nominate.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		const keystore = await session.keystore.create('danu', password);
+		const keystore = await session.datadir.newKeyfile('danu', password);
 
 		const args: Arguments = {
 			address: keystore.address,
@@ -224,7 +224,7 @@ describe('poa-nominate.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		const keystore = await session.keystore.create('danu', password);
+		const keystore = await session.datadir.newKeyfile('danu', password);
 
 		const args: Arguments = {
 			address: keystore.address,
@@ -255,7 +255,7 @@ describe('poa-nominate.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		const keystore = await session.keystore.create('danu', password);
+		const keystore = await session.datadir.newKeyfile('danu', password);
 
 		const args: Arguments = {
 			address: keystore.address,
@@ -286,7 +286,7 @@ describe('poa-nominate.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		const keystore = await session.keystore.create('danu', password);
+		const keystore = await session.datadir.newKeyfile('danu', password);
 
 		const args: Arguments = {
 			address: keystore.address,

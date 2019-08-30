@@ -2,19 +2,22 @@ import ASCIITable from 'ascii-table';
 
 import { Args as VorpalArgs } from 'vorpal';
 
+import { IAbstractConsensus } from 'evm-lite-consensus';
+
 import Globals from '../Globals';
 import Session from '../Session';
 
-import { IOptions, IStagingFunction } from './Frames';
+import { IOptions, IStagingFunction } from './Staging';
 
 export const execute = <
+	TConsensus extends IAbstractConsensus,
 	TArguments extends VorpalArgs<IOptions>,
 	TFormatted,
 	TNormal
 >(
-	fn: IStagingFunction<TArguments, TFormatted, TNormal>,
+	fn: IStagingFunction<TConsensus, TArguments, TFormatted, TNormal>,
 	args: TArguments,
-	session: Session
+	session: Session<TConsensus>
 ): Promise<void> => {
 	return new Promise<void>(async resolve => {
 		try {

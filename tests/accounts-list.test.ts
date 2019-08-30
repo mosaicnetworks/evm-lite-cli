@@ -1,6 +1,6 @@
 import ASCIITable from 'ascii-table';
 
-import { BaseAccount } from 'evm-lite-core';
+import { IBaseAccount } from 'evm-lite-client';
 
 import { session } from './stage';
 
@@ -11,7 +11,7 @@ describe('accounts-list.ts', () => {
 		expect.assertions(4);
 
 		// create keystore
-		await session.keystore.create('danu', 'password');
+		await session.datadir.newKeyfile('danu', 'password');
 
 		const args: Arguments = {
 			options: {
@@ -21,7 +21,7 @@ describe('accounts-list.ts', () => {
 		};
 
 		const output = await stage(args, session);
-		const success = output.display! as BaseAccount[];
+		const success = output.display! as IBaseAccount[];
 
 		expect(output.args.options.host).toBe('127.0.0.1');
 		expect(output.args.options.port).toBe(8080);
@@ -34,7 +34,7 @@ describe('accounts-list.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		await session.keystore.create('danu2', 'password');
+		await session.datadir.newKeyfile('danu2', 'password');
 
 		const args: Arguments = {
 			options: {
@@ -45,7 +45,7 @@ describe('accounts-list.ts', () => {
 		};
 
 		const output = await stage(args, session);
-		const success = output.display! as BaseAccount[];
+		const success = output.display! as IBaseAccount[];
 
 		expect(output.args.options.host).toBe('127.0.0.1');
 		expect(output.args.options.port).toBe(8080);

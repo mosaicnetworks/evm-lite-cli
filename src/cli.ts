@@ -1,35 +1,37 @@
 #!/usr/bin/env node
 import { osdatadir } from 'evm-lite-datadir';
 
+import { Solo } from 'evm-lite-consensus';
+
 // Accounts
 import accountsCreate from './cmd/accounts-create';
 import accountsGet from './cmd/accounts-get';
+import accountsImport from './cmd/accounts-import';
 import accountsList from './cmd/accounts-list';
 import accountsUpdate from './cmd/accounts-update';
-import accountsImport from './cmd/accounts-import';
 
 // Config
-import configView from './cmd/config-view';
 import configSet from './cmd/config-set';
+import configView from './cmd/config-view';
 
 // poa
 import poaCheck from './cmd/poa-check';
 import poaInfo from './cmd/poa-info';
-import poaWhitelist from './cmd/poa-whitelist';
-import poaNomineelist from './cmd/poa-nomineelist';
-import poaNominate from './cmd/poa-nominate';
-import poaVote from './cmd/poa-vote';
 import poaInit from './cmd/poa-init';
+import poaNominate from './cmd/poa-nominate';
+import poaNomineelist from './cmd/poa-nomineelist';
+import poaVote from './cmd/poa-vote';
+import poaWhitelist from './cmd/poa-whitelist';
 
 // Misc
-import transfer from './cmd/transfer';
 import info from './cmd/info';
-import version from './cmd/version';
 import test from './cmd/test';
+import transfer from './cmd/transfer';
+import version from './cmd/version';
 
-import init, { IInit } from './init';
+import init, { ICLIConfig } from './init';
 
-const params: IInit = {
+const params: ICLIConfig = {
 	name: 'EVM-Lite CLI',
 	delimiter: 'evmlc',
 	datadir: osdatadir('evm-lite'),
@@ -64,4 +66,4 @@ const commands = [
 	transfer
 ];
 
-init(params, commands).catch(console.log);
+init(params, Solo, commands).catch(console.log);

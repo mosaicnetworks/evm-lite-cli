@@ -1,11 +1,11 @@
 import Utils from 'evm-lite-utils';
 
-import { session, password, pwdPath, otherPwdPath } from './stage';
+import { otherPwdPath, password, pwdPath, session } from './stage';
 
-import { Arguments, stage, Output } from '../src/cmd/accounts-update';
-import { KEYSTORE } from '../src/errors/generals';
+import { IV3Keyfile } from 'evm-lite-keystore';
+import { Arguments, Output, stage } from '../src/cmd/accounts-update';
 import { ACCOUNTS_UPDATE } from '../src/errors/accounts';
-import { V3Keyfile } from 'evm-lite-keystore';
+import { KEYSTORE } from '../src/errors/generals';
 
 describe('accounts-update.ts', () => {
 	it('should error as empty keystore', async () => {
@@ -30,7 +30,7 @@ describe('accounts-update.ts', () => {
 		expect.assertions(2);
 
 		// create keystore
-		await session.keystore.create('danu', pwdPath);
+		await session.datadir.newKeyfile('danu', pwdPath);
 
 		const args: Arguments = {
 			options: {}
@@ -53,7 +53,7 @@ describe('accounts-update.ts', () => {
 		expect.assertions(1);
 
 		// create keystore
-		await session.keystore.create('danu', pwdPath);
+		await session.datadir.newKeyfile('danu', pwdPath);
 
 		const args: Arguments = {
 			moniker: 'moniker-123!',
@@ -75,7 +75,7 @@ describe('accounts-update.ts', () => {
 		expect.assertions(2);
 
 		// create keystore
-		await session.keystore.create('danu', pwdPath);
+		await session.datadir.newKeyfile('danu', pwdPath);
 
 		const args: Arguments = {
 			moniker: 'danu',
@@ -99,7 +99,7 @@ describe('accounts-update.ts', () => {
 		expect.assertions(2);
 
 		// create keystore
-		await session.keystore.create('danu', pwdPath);
+		await session.datadir.newKeyfile('danu', pwdPath);
 
 		const args: Arguments = {
 			moniker: 'danu',
@@ -127,7 +127,7 @@ describe('accounts-update.ts', () => {
 		expect.assertions(2);
 
 		// create keystore
-		await session.keystore.create('danu', pwdPath);
+		await session.datadir.newKeyfile('danu', pwdPath);
 
 		const args: Arguments = {
 			moniker: 'danu',
@@ -153,7 +153,7 @@ describe('accounts-update.ts', () => {
 		expect.assertions(2);
 
 		// create keystore
-		const keystore = await session.keystore.create('danu', pwdPath);
+		const keystore = await session.datadir.newKeyfile('danu', pwdPath);
 
 		const args: Arguments = {
 			moniker: 'danu',
@@ -179,7 +179,7 @@ describe('accounts-update.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		await session.keystore.create('danu', password);
+		await session.datadir.newKeyfile('danu', password);
 
 		const args: Arguments = {
 			moniker: 'danu',
@@ -206,7 +206,7 @@ describe('accounts-update.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		await session.keystore.create('danu', password);
+		await session.datadir.newKeyfile('danu', password);
 
 		const args: Arguments = {
 			moniker: 'danu',
@@ -236,7 +236,7 @@ describe('accounts-update.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		await session.keystore.create('danu', password);
+		await session.datadir.newKeyfile('danu', password);
 
 		const args: Arguments = {
 			moniker: 'danu',
@@ -264,7 +264,7 @@ describe('accounts-update.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		await session.keystore.create('danu', password);
+		await session.datadir.newKeyfile('danu', password);
 
 		const args: Arguments = {
 			moniker: 'danu',
@@ -295,7 +295,7 @@ describe('accounts-update.ts', () => {
 		expect.assertions(3);
 
 		// create keystore
-		const keystore = await session.keystore.create('danu', password);
+		const keystore = await session.datadir.newKeyfile('danu', password);
 
 		const args: Arguments = {
 			moniker: 'danu',
@@ -306,7 +306,7 @@ describe('accounts-update.ts', () => {
 		};
 
 		const output = await stage(args, session);
-		const success = output.display! as V3Keyfile;
+		const success = output.display! as IV3Keyfile;
 
 		// implicit check that they are the same
 		expect(output.args.options.old).toBe(pwdPath);

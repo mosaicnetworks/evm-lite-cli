@@ -1,13 +1,15 @@
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
+
+import { Solo } from 'evm-lite-consensus';
 
 import Session from '../Session';
-import Frames, { execute, IStagingFunction, IOptions } from '../frames';
+import Staging, { execute, IOptions } from '../staging';
 
 interface Options extends IOptions {}
 
 export interface Arguments extends Args<Options> {}
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Output current configuration file';
 
 	return evmlc
@@ -18,19 +20,16 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
-export const stage: IStagingFunction<Arguments, string, string> = async (
-	args: Arguments,
-	session: Session
-) => {
-	const frames = new Frames<Arguments, string, string>(session, args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, string>(args);
 
 	// prepare
-	const { debug, success } = frames.staging();
+	const { debug, success } = staging.handlers(session.debug);
 
-	/** Command Execution */
-	debug(`Reading config file: ${session.config.path}`);
+	// command execution
+	debug(`Reading config file: ${session.datadir.configPath}`);
 
-	return Promise.resolve(success(session.config.toTOML()));
+	return Promise.resolve(success(session.datadir.configToml));
 };

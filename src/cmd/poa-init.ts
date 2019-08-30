@@ -1,22 +1,18 @@
 import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
+import { Solo } from 'evm-lite-consensus';
 import { Transaction } from 'evm-lite-core';
 
 import Session from '../Session';
-import Frames, {
-	execute,
-	IStagingFunction,
-	IOptions,
-	IStagedOutput
-} from '../frames';
+import Staging, { execute, IOptions, IStagedOutput } from '../staging';
 
-import { POA_INIT } from '../errors/poa';
 import { TRANSACTION } from '../errors/generals';
+import { POA_INIT } from '../errors/poa';
 
 interface Options extends IOptions {
 	interactive?: boolean;
@@ -28,7 +24,7 @@ interface Options extends IOptions {
 
 export interface Arguments extends Args<Options> {}
 
-export default function command(monet: Vorpal, session: Session): Command {
+export default (monet: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Initialize PoA contract';
 
 	return monet
@@ -46,7 +42,7 @@ export default function command(monet: Vorpal, session: Session): Command {
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
 interface Answers {
 	from: string;
@@ -55,31 +51,30 @@ interface Answers {
 
 export type Output = IStagedOutput<Arguments, string, string>;
 
-export const stage: IStagingFunction<Arguments, string, string> = async (
-	args: Arguments,
-	session: Session
-) => {
-	const frames = new Frames<Arguments, string, string>(session, args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, string>(args);
 
 	// deconstruct options
 	const { options } = args;
-	const { state } = session.config;
+
+	// config
+	const config = session.datadir.config;
 
 	// generate success, error, debug handlers
-	const { debug, success, error } = frames.staging();
+	const { debug, success, error } = staging.handlers(session.debug);
 
-	// generate frames
-	const { connect } = frames.generics();
-	const { send } = frames.transaction();
-	const { list, decrypt, get } = frames.keystore();
-	const { contract: getContract } = frames.POA();
+	// generate frhooksames
+	const { connect } = staging.genericHooks(session);
+	const { send } = staging.txHooks(session);
+	const { list, decrypt, get } = staging.keystoreHooks(session);
+	const { contract: getContract } = staging.poaHooks(session);
 
-	/** Begin Command Execution */
+	// command execution
 	const interactive = options.interactive || session.interactive;
 
 	await connect(
-		options.host || state.connection.host,
-		options.port || state.connection.port
+		options.host || config.connection.host,
+		options.port || config.connection.port
 	);
 
 	let passphrase: string = '';
@@ -102,18 +97,18 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	];
 
 	if (interactive) {
-		const { from, passphrase: p } = await inquirer.prompt<Answers>(
+		const { from: f, passphrase: p } = await inquirer.prompt<Answers>(
 			questions
 		);
 
-		options.from = from;
+		options.from = f;
 		passphrase = p;
 
-		debug(`From received: ${from}`);
+		debug(`From received: ${f}`);
 		debug(`Passphrase received: ${p}`);
 	}
 
-	const from = utils.trimHex(options.from || state.defaults.from);
+	const from = utils.trimHex(options.from || config.defaults.from);
 
 	if (!from) {
 		return Promise.reject(
@@ -171,14 +166,14 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	try {
 		transaction = contract.methods.init({
 			from: keyfile.address,
-			gas: state.defaults.gas,
-			gasPrice: state.defaults.gasPrice
+			gas: config.defaults.gas,
+			gasPrice: config.defaults.gasPrice
 		});
 	} catch (e) {
 		return Promise.reject(error(TRANSACTION.GENERATION, e.toString()));
 	}
 
-	let receipt = await send(transaction, decrypted);
+	const receipt = await send(transaction, decrypted);
 
 	if (!receipt.logs.length) {
 		return Promise.reject(

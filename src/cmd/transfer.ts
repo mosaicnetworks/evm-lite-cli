@@ -1,22 +1,18 @@
 import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import { MonikerBaseAccount } from 'evm-lite-keystore';
-import { Account } from 'evm-lite-core';
+import { Solo } from 'evm-lite-consensus';
+import { IMonikerBaseAccount } from 'evm-lite-keystore';
 
 import Session from '../Session';
-import Frames, {
-	execute,
-	IStagingFunction,
-	IOptions,
-	IStagedOutput
-} from '../frames';
+import Staging, { execute, IOptions, IStagedOutput } from '../staging';
 
 import { TRANSFER } from '../errors/accounts';
+import { EVM_LITE } from '../errors/generals';
 
 interface Options extends IOptions {
 	interactive?: boolean;
@@ -36,7 +32,7 @@ export interface Arguments extends Args<Options> {
 	options: Options;
 }
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Initiate a transfer of token(s) to an address';
 
 	return evmlc
@@ -59,7 +55,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
 interface FirstAnswers {
 	from: string;
@@ -82,26 +78,28 @@ interface FourthAnswers {
 
 export type Output = IStagedOutput<Arguments, string, string>;
 
-export const stage: IStagingFunction<Arguments, string, string> = async (
-	args: Arguments,
-	session: Session
-) => {
-	const frames = new Frames<Arguments, string, string>(session, args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, string>(args);
 
 	// prepare
 	const { options } = args;
-	const { state } = session.config;
 
-	const { success, error, debug } = frames.staging();
-	const { connect } = frames.generics();
-	const { send } = frames.transaction();
-	const { list, get, decrypt } = frames.keystore();
+	// config
+	const config = session.datadir.config;
 
-	/** Command Execution */
+	// handlers
+	const { success, error, debug } = staging.handlers(session.debug);
+
+	// hooks
+	const { connect } = staging.genericHooks(session);
+	const { send } = staging.txHooks(session);
+	const { list, get, decrypt } = staging.keystoreHooks(session);
+
+	// command execution
 	let passphrase: string = '';
 
-	const host = options.host || state.connection.host;
-	const port = options.port || state.connection.port;
+	const host = options.host || config.connection.host;
+	const port = options.port || config.connection.port;
 
 	const interactive = options.interactive || session.interactive;
 
@@ -111,7 +109,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	);
 
 	const keystore = await list();
-	const accounts: MonikerBaseAccount[] = await Promise.all(
+	const accounts: IMonikerBaseAccount[] = await Promise.all(
 		Object.keys(keystore).map(async moniker => {
 			const base = await session.node.getAccount(
 				keystore[moniker].address
@@ -163,13 +161,13 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 			type: 'number'
 		},
 		{
-			default: session.config.state.defaults.gas || 100000,
+			default: config.defaults.gas || 100000,
 			message: 'Gas: ',
 			name: 'gas',
 			type: 'number'
 		},
 		{
-			default: session.config.state.defaults.gasPrice || 0,
+			default: config.defaults.gasPrice || 0,
 			message: 'Gas Price: ',
 			name: 'gasPrice',
 			type: 'number'
@@ -185,14 +183,14 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	];
 
 	if (interactive) {
-		const { from } = await inquirer.prompt<FirstAnswers>(first);
+		const { from: f } = await inquirer.prompt<FirstAnswers>(first);
 
-		options.from = utils.trimHex(from.split(' ')[0]);
+		options.from = utils.trimHex(f.split(' ')[0]);
 
-		debug(`From address received: ${from}`);
+		debug(`From address received: ${f}`);
 	}
 
-	const from = options.from || state.defaults.from;
+	const from = options.from || config.defaults.from;
 
 	if (!from) {
 		return Promise.reject(
@@ -261,8 +259,8 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		debug(`Gas Price received: ${answers.gasPrice ? answers.gasPrice : 0}`);
 	}
 
-	options.gas = options.gas || state.defaults.gas;
-	options.gasprice = options.gasprice || state.defaults.gasPrice;
+	options.gas = options.gas || config.defaults.gas;
+	options.gasprice = options.gasprice || config.defaults.gasPrice;
 
 	if (!options.to || !options.value) {
 		return Promise.reject(
@@ -281,22 +279,12 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 
 	let confirm: boolean = true;
 
-	debug(`Attempting to generate transaction...`);
-
-	const transaction = Account.prepareTransfer(
-		keyfile.address,
-		options.to,
-		options.value,
-		options.gas,
-		options.gasprice
-	);
-
-	let tx = {
-		from: transaction.from,
-		to: transaction.to,
-		value: transaction.value,
-		gas: transaction.gas,
-		gasPrice: transaction.gasPrice ? transaction.gasPrice : 0
+	const tx = {
+		from: keyfile.address,
+		to: options.to,
+		value: options.value,
+		gas: options.gas,
+		gasPrice: options.gasprice ? options.gasprice : 0
 	};
 
 	if (interactive) {
@@ -313,7 +301,20 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 		return Promise.resolve(success('Transaction aborted.'));
 	}
 
-	await send(transaction, decrypted);
+	debug('Attemping to send tranfer transaction...');
+	try {
+		const r = await session.node.transfer(
+			decrypted,
+			options.to,
+			options.value,
+			options.gas,
+			options.gasprice
+		);
+
+		debug(JSON.stringify(r));
+	} catch (e) {
+		return Promise.reject(error(EVM_LITE, e.text || e.toString()));
+	}
 
 	return Promise.resolve(success('Transaction submitted successfully.'));
 };

@@ -1,7 +1,9 @@
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
+
+import { Solo } from 'evm-lite-consensus';
 
 import Session from '../Session';
-import Frames, { execute, IStagingFunction, IOptions } from '../frames';
+import Staging, { execute, IOptions } from '../staging';
 
 import { EVM_LITE } from '../errors/generals';
 
@@ -12,7 +14,7 @@ interface Options extends IOptions {
 
 export interface Arguments extends Args<Options> {}
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Display Proof of Authority information';
 
 	return evmlc
@@ -25,24 +27,26 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 			string: []
 		})
 		.action((args: Arguments) => execute(stage, args, session));
-}
+};
 
-export const stage: IStagingFunction<Arguments, string, string> = async (
-	args: Arguments,
-	session: Session
-) => {
-	const frames = new Frames<Arguments, string, string>(session, args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, string>(args);
 
 	// prepare
 	const { options } = args;
-	const { state } = session.config;
 
-	const { success, error, debug } = frames.staging();
-	const { connect } = frames.generics();
+	// handlers
+	const { success, error, debug } = staging.handlers(session.debug);
 
-	/** Command Execution */
-	const host = options.host || state.connection.host;
-	const port = options.port || state.connection.port;
+	// hooks
+	const { connect } = staging.genericHooks(session);
+
+	// config
+	const config = session.datadir.config;
+
+	// command execution
+	const host = options.host || config.connection.host;
+	const port = options.port || config.connection.port;
 
 	await connect(
 		host,
@@ -54,7 +58,7 @@ export const stage: IStagingFunction<Arguments, string, string> = async (
 	debug(`Attempting to fetch PoA data...`);
 
 	try {
-		poa = await session.getPOAContract();
+		poa = await session.POA();
 	} catch (e) {
 		return Promise.reject(error(EVM_LITE, e.toString()));
 	}

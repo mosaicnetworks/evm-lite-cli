@@ -1,19 +1,15 @@
 import * as fs from 'fs';
 import * as inquirer from 'inquirer';
 
-import Vorpal, { Command, Args } from 'vorpal';
+import Vorpal, { Args, Command } from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import { V3Keyfile } from 'evm-lite-keystore';
+import { Solo } from 'evm-lite-consensus';
+import { IV3Keyfile } from 'evm-lite-keystore';
 
 import Session from '../Session';
-import Frames, {
-	execute,
-	IStagingFunction,
-	IOptions,
-	IStagedOutput
-} from '../frames';
+import Staging, { execute, IOptions, IStagedOutput } from '../staging';
 
 import { ACCOUNTS_UPDATE } from '../errors/accounts';
 
@@ -28,7 +24,7 @@ export interface Arguments extends Args<Options> {
 	moniker?: string;
 }
 
-export default function command(evmlc: Vorpal, session: Session): Command {
+export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 	const description = 'Update passphrase for a local account';
 
 	return evmlc
@@ -45,7 +41,7 @@ export default function command(evmlc: Vorpal, session: Session): Command {
 		.action(
 			(args: Arguments): Promise<void> => execute(stage, args, session)
 		);
-}
+};
 
 interface FirstAnswers {
 	moniker: string;
@@ -60,24 +56,24 @@ interface ThirdAnswers {
 	verifyPassphrase: string;
 }
 
-export type Output = IStagedOutput<Arguments, V3Keyfile, V3Keyfile>;
+export type Output = IStagedOutput<Arguments, IV3Keyfile, IV3Keyfile>;
 
-export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
-	args: Arguments,
-	session: Session
-) => {
-	const frames = new Frames<Arguments, V3Keyfile, V3Keyfile>(session, args);
+export const stage = async (args: Arguments, session: Session<Solo>) => {
+	const staging = new Staging<Arguments, IV3Keyfile>(args);
 
 	// prepare
 	const { options } = args;
 
-	const { success, debug, error } = frames.staging();
-	const { list, decrypt, get } = frames.keystore();
+	// handlers
+	const { success, debug, error } = staging.handlers(session.debug);
 
-	/** Command Execution */
+	// hooks
+	const { list, decrypt, get } = staging.keystoreHooks(session);
+
+	// command exectuion
 	const interactive = options.interactive || session.interactive;
 
-	let keystore = await list();
+	const keystore = await list();
 
 	const first: inquirer.Questions<FirstAnswers> = [
 		{
@@ -134,7 +130,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 
 	debug(`Moniker validated: ${args.moniker}`);
 
-	let keyfile = await get(args.moniker);
+	const keyfile = await get(args.moniker);
 
 	let oldPassphrase: string = '';
 	let newPassphrase: string = '';
@@ -261,7 +257,7 @@ export const stage: IStagingFunction<Arguments, V3Keyfile, V3Keyfile> = async (
 
 	debug(`Attempting to update passphrase for address...`);
 
-	const newKeystore = await session.keystore.update(
+	const newKeystore = await session.datadir.updateKeyfile(
 		args.moniker,
 		oldPassphrase,
 		newPassphrase
