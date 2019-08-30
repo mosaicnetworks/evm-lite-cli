@@ -53,14 +53,16 @@ The first time `evmlc` runs, and if no options are specified, it creates a
 special directory in a default location, where it
 stores any relevant information.
 
--   Linux: `~/.evm-lite`
--   Mac OS: `~/Library/EVM-LITE`
--   Windows: `~/AppData/Roaming/EVM-LITE`
+-   Linux: `~/.evmlite`
+-   Mac OS: `~/Library/EVMLITE`
+-   Windows: `~/AppData/Roaming/EVMLITE`
 
 In particular, this directory contains the following items:
 
 -   **evmlc.toml**: where global options are specified
 -   **keystore**: where all encrypted account keys are stored
+
+** This directory is shared by `EVM-Lite`**
 
 ### `evmlc.toml`
 
