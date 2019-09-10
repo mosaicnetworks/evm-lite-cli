@@ -112,6 +112,7 @@ const decrypt = async <
 	try {
 		return AbstractKeystore.decrypt(keyfile, passphrase);
 	} catch (err) {
+		debug(err);
 		return Promise.reject(
 			error(
 				KEYSTORE.DECRYPTION,
