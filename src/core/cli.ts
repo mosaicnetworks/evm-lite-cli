@@ -8,18 +8,15 @@ import Vorpal, { Command } from 'vorpal';
 import chalk from 'chalk';
 import Utils from 'evm-lite-utils';
 
-import Globals from '../Globals';
-import Session from '../Session';
+import color from './color';
+import Session from './Session';
 
 // default commands
-import clear from '../commands/clear';
-import debug from '../commands/debug';
-import interactive from '../commands/interactive';
+// import clear from '../commands/clear';
+// import debug from '../commands/debug';
+// import interactive from '../commands/interactive';
 
-export type CommandFunction<TConsensus extends IAbstractConsensus> = (
-	evmlc: Vorpal,
-	session: Session<TConsensus>
-) => Command;
+export type CommandFunction = (evmlc: Vorpal, session: Session) => Command;
 
 export interface ICLIConfig {
 	name: string;
@@ -34,10 +31,9 @@ export interface ICLIConfig {
 
 export default async function init<TConsensus extends IAbstractConsensus>(
 	params: ICLIConfig,
-	consensus: new (host: string, port: number) => TConsensus,
 	commands: any
 ) {
-	commands.push(interactive, debug, clear);
+	// commands.push(interactive, debug, clear);
 
 	if (!Utils.exists(params.datadir)) {
 		mkdir.sync(params.datadir);
@@ -49,7 +45,7 @@ export default async function init<TConsensus extends IAbstractConsensus>(
 		dataDirPath = process.argv[3];
 
 		if (!Utils.exists(process.argv[3])) {
-			Globals.warning(
+			color.warning(
 				'Data directory path provided does ' +
 					'not exist and will created.'
 			);
@@ -58,11 +54,7 @@ export default async function init<TConsensus extends IAbstractConsensus>(
 		process.argv.splice(2, 2);
 	}
 
-	const session = new Session<TConsensus>(
-		dataDirPath,
-		params.config,
-		consensus
-	);
+	const session = new Session(dataDirPath, params.config);
 
 	if (!process.argv[2]) {
 		console.log(
@@ -75,7 +67,7 @@ export default async function init<TConsensus extends IAbstractConsensus>(
 
 	const cli = new Vorpal();
 
-	commands.forEach((command: CommandFunction<TConsensus>) => {
+	commands.forEach((command: CommandFunction) => {
 		command(cli, session);
 	});
 
@@ -90,13 +82,13 @@ export default async function init<TConsensus extends IAbstractConsensus>(
 
 		if (process.argv[3] === '-d' || process.argv[3] === '--debug') {
 			session.debug = true;
-			Globals.warning(` Debug:       True`);
+			color.warning(` Debug:       True`);
 		}
 
-		Globals.warning(` Mode:        Interactive`);
-		Globals.info(` Data Dir:    ${session.datadir.path}`);
-		Globals.purple(` Config File: ${session.datadir.configPath}`);
-		Globals.purple(` Keystore:    ${session.datadir.keystorePath}`);
+		color.warning(` Mode:        Interactive`);
+		color.info(` Data Dir:    ${session.datadir.path}`);
+		color.purple(` Config File: ${session.datadir.configPath}`);
+		color.purple(` Keystore:    ${session.datadir.keystorePath}`);
 
 		const cmdInteractive = cli.find('interactive');
 		if (cmdInteractive) {

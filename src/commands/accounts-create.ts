@@ -1,11 +1,4 @@
-import * as fs from 'fs';
-import * as inquirer from 'inquirer';
-
 import Vorpal from 'vorpal';
-
-import utils from 'evm-lite-utils';
-
-import { IV3Keyfile } from 'evm-lite-keystore';
 
 import Command, { TArgs, TOptions } from '../core/Command';
 import Session from '../core/Session';
