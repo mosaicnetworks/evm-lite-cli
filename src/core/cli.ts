@@ -8,13 +8,13 @@ import Vorpal, { Command } from 'vorpal';
 import chalk from 'chalk';
 import Utils from 'evm-lite-utils';
 
-import Globals from './Globals';
-import Session from './Session';
+import Globals from '../Globals';
+import Session from '../Session';
 
 // default commands
-import clear from './cmd/clear';
-import debug from './cmd/debug';
-import interactive from './cmd/interactive';
+import clear from '../commands/clear';
+import debug from '../commands/debug';
+import interactive from '../commands/interactive';
 
 export type CommandFunction<TConsensus extends IAbstractConsensus> = (
 	evmlc: Vorpal,
@@ -35,7 +35,7 @@ export interface ICLIConfig {
 export default async function init<TConsensus extends IAbstractConsensus>(
 	params: ICLIConfig,
 	consensus: new (host: string, port: number) => TConsensus,
-	commands: Array<CommandFunction<TConsensus>>
+	commands: any
 ) {
 	commands.push(interactive, debug, clear);
 
