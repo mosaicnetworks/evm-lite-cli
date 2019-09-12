@@ -3,7 +3,7 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
-import utils from 'evm-lite-utils';
+import utils, { Currency } from 'evm-lite-utils';
 
 import { Solo } from 'evm-lite-consensus';
 import { IMonikerBaseAccount } from 'evm-lite-keystore';
@@ -25,7 +25,7 @@ interface Options extends IOptions {
 	to?: string;
 	gas?: number;
 	gasprice?: number;
-	value?: number;
+	value?: string;
 }
 
 export interface Arguments extends Args<Options> {
@@ -67,7 +67,7 @@ interface SecondAnswers {
 
 interface ThirdAnswers {
 	to: string;
-	value: number;
+	value: string;
 	gas: number;
 	gasPrice: number;
 }
@@ -77,6 +77,10 @@ interface FourthAnswers {
 }
 
 export type Output = IStagedOutput<Arguments, string, string>;
+
+function isLetter(str: string) {
+	return str.length === 1 && str.match(/[a-z]/i);
+}
 
 export const stage = async (args: Arguments, session: Session<Solo>) => {
 	const staging = new Staging<Arguments, string>(args);
@@ -109,7 +113,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 	);
 
 	const keystore = await list();
-	const accounts: IMonikerBaseAccount[] = await Promise.all(
+	const accounts: any = await Promise.all(
 		Object.keys(keystore).map(async moniker => {
 			const base = await session.node.getAccount(
 				keystore[moniker].address
@@ -122,17 +126,10 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 		})
 	);
 
-	const parseBalance = (s: string | any) => {
-		if (typeof s === 'object') {
-			return s.toFormat(0);
-		} else {
-			return s;
-		}
-	};
 	const first: inquirer.Questions<FirstAnswers> = [
 		{
 			choices: accounts.map(
-				acc => `${acc.moniker} (${parseBalance(acc.balance)})`
+				(acc: any) => `${acc.moniker} (${acc.balance.format('T')})`
 			),
 			message: 'From: ',
 			name: 'from',
@@ -155,10 +152,10 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 			type: 'input'
 		},
 		{
-			default: 100,
+			default: '100',
 			message: 'Value: ',
 			name: 'value',
-			type: 'number'
+			type: 'input'
 		},
 		{
 			default: config.defaults.gas || 100000,
@@ -279,13 +276,27 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 
 	let confirm: boolean = true;
 
-	const tx = {
+	const tx: any = {
 		from: keyfile.address,
 		to: options.to,
 		value: options.value,
 		gas: options.gas,
 		gasPrice: options.gasprice ? options.gasprice : 0
 	};
+
+	// check value to see if unit appended else default to `T`
+	// convert from unit if specified to `a`
+	let unit = tx.value.toString().slice(-1);
+
+	debug(`Unit: ${unit}`);
+
+	if (!isLetter(unit)) {
+		unit = 'T';
+	} else {
+		tx.value = tx.value.slice(0, -1);
+	}
+
+	tx.value = new Currency(tx.value + unit);
 
 	if (interactive) {
 		console.log(JSON.stringify(tx, null, 2));
@@ -306,7 +317,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 		const r = await session.node.transfer(
 			decrypted,
 			options.to,
-			options.value,
+			tx.value,
 			options.gas,
 			options.gasprice
 		);

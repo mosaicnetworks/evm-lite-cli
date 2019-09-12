@@ -1,7 +1,7 @@
 import ASCIITable from 'ascii-table';
 import Vorpal, { Args, Command } from 'vorpal';
 
-import utils from 'evm-lite-utils';
+import utils, { Currency } from 'evm-lite-utils';
 
 import { Solo } from 'evm-lite-consensus';
 import { IMonikerBaseAccount } from 'evm-lite-keystore';
@@ -76,15 +76,13 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 	const port = options.port || config.connection.port;
 
 	const keystore = await list();
-	let accounts: IMonikerBaseAccount[] = Object.keys(keystore).map(
-		moniker => ({
-			moniker,
-			address: keystore[moniker].address,
-			balance: 0,
-			nonce: 0,
-			bytecode: ''
-		})
-	);
+	let accounts: any = Object.keys(keystore).map(moniker => ({
+		moniker,
+		address: keystore[moniker].address,
+		balance: 0,
+		nonce: 0,
+		bytecode: ''
+	}));
 
 	if (!accounts.length) {
 		return Promise.resolve(success([]));
@@ -95,7 +93,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 		debug(`Attempting to fetch accounts data...`);
 
 		try {
-			const promises = accounts.map(async acc => {
+			const promises = accounts.map(async (acc: any) => {
 				const base = await session.node.getAccount(acc.address);
 				return {
 					...base,
@@ -118,7 +116,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 	const table = new ASCIITable().setHeading(
 		'Moniker',
 		'Address',
-		'Balance',
+		'Balance (T)',
 		'Nonce'
 	);
 
@@ -126,7 +124,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 		table.addRow(
 			account.moniker,
 			utils.cleanAddress(account.address),
-			account.balance.toString(10),
+			account.balance.format('T'),
 			account.nonce
 		);
 	}
