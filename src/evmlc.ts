@@ -4,6 +4,7 @@ import { osdatadir } from 'evm-lite-datadir';
 
 // commands
 import accountsCreate from './commands/accounts-create';
+import accountsList from './commands/accounts-list';
 
 import init, { ICLIConfig } from './core/cli';
 
@@ -14,6 +15,6 @@ const params: ICLIConfig = {
 	config: 'evmlc'
 };
 
-const commands = [accountsCreate];
+const commands = [accountsCreate, accountsList];
 
 init(params, commands).catch(console.log);

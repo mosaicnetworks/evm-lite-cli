@@ -29,6 +29,8 @@ abstract class Command<T = TArgs<TOptions>> {
 					await this.interactive();
 				}
 
+				await this.check();
+
 				return await this.exec();
 			} catch (e) {
 				let err: Error = e;

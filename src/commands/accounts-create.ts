@@ -9,16 +9,15 @@ import Session from '../core/Session';
 
 import Command, { TArgs, TOptions } from '../core/Command';
 
-interface Options extends TOptions {
+interface Opts extends TOptions {
 	interactive?: boolean;
 	debug?: boolean;
 	pwd?: string;
 	out?: string;
 }
 
-interface Args extends TArgs<Options> {
+interface Args extends TArgs<Opts> {
 	moniker?: string;
-	options: Options;
 }
 
 interface Answers {
@@ -28,6 +27,25 @@ interface Answers {
 	verifyPassphrase: string;
 }
 
+/**
+ * Should construct a Vorpal.Command instance for the command `accounts create`
+ *
+ * @remarks
+ * Allows you to create and encrypt accounts locally. Created accounts will
+ * either be placed in the keystore folder provided by default config file
+ * (located at `~/datadir/config.toml`) or the config file located in the
+ * `--datadir, -d` flag.
+ *
+ * Usage: `accounts create [moniker] --out ~/datadir/keystore --pwd ~/pwd.txt`
+ *
+ * Here we have specified to create the account file in `~/datadir/keystore`,
+ * encrypt with the `~/pwd.txt` and once that is done, provide string json
+ * output of the created account.
+ *
+ * @param evmlc - The CLI instance.
+ * @param session - Controls the session of the CLI instance.
+ * @returns The Vorpal.Command instance of `accounts create`.
+ */
 const command = (evmlc: Vorpal, session: Session): Command => {
 	const description = 'Creates an encrypted keypair locally';
 
@@ -36,7 +54,6 @@ const command = (evmlc: Vorpal, session: Session): Command => {
 		.alias('a c')
 		.description(description)
 		.option('-i, --interactive', 'enter interactive mode')
-		.option('-d, --debug', 'show debug output')
 		.option('--pwd <file_path>', 'passphrase file path')
 		.option('--out <output_path>', 'write keystore to output path')
 		.types({
@@ -146,7 +163,7 @@ class AccountCreateCommand extends Command<Args> {
 			this.args.options.out
 		);
 
-		color.green(JSON.stringify(account));
+		return color.green(JSON.stringify(account));
 	}
 }
 
