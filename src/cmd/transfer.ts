@@ -3,7 +3,7 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
-import utils, { toAtto, toToken } from 'evm-lite-utils';
+import utils, { Currency } from 'evm-lite-utils';
 
 import { Solo } from 'evm-lite-consensus';
 import { IMonikerBaseAccount } from 'evm-lite-keystore';
@@ -113,7 +113,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 	);
 
 	const keystore = await list();
-	const accounts: IMonikerBaseAccount[] = await Promise.all(
+	const accounts: any = await Promise.all(
 		Object.keys(keystore).map(async moniker => {
 			const base = await session.node.getAccount(
 				keystore[moniker].address
@@ -126,17 +126,10 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 		})
 	);
 
-	const parseBalance = (s: string | any) => {
-		if (typeof s === 'object') {
-			return toToken(s.toString(10) + 'a');
-		} else {
-			return s;
-		}
-	};
 	const first: inquirer.Questions<FirstAnswers> = [
 		{
 			choices: accounts.map(
-				acc => `${acc.moniker} (${parseBalance(acc.balance)})`
+				(acc: any) => `${acc.moniker} (${acc.balance.format('T')})`
 			),
 			message: 'From: ',
 			name: 'from',
@@ -294,11 +287,16 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 	// check value to see if unit appended else default to `T`
 	// convert from unit if specified to `a`
 	let unit = tx.value.toString().slice(-1);
+
+	debug(`Unit: ${unit}`);
+
 	if (!isLetter(unit)) {
 		unit = 'T';
+	} else {
+		tx.value = tx.value.slice(0, -1);
 	}
 
-	tx.value = toAtto(tx.value.toString().slice(0, -1) + unit);
+	tx.value = new Currency(tx.value + unit);
 
 	if (interactive) {
 		console.log(JSON.stringify(tx, null, 2));

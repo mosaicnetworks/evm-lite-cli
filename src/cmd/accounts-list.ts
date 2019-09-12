@@ -1,7 +1,7 @@
 import ASCIITable from 'ascii-table';
 import Vorpal, { Args, Command } from 'vorpal';
 
-import utils, { toToken } from 'evm-lite-utils';
+import utils, { Currency } from 'evm-lite-utils';
 
 import { Solo } from 'evm-lite-consensus';
 import { IMonikerBaseAccount } from 'evm-lite-keystore';
@@ -121,12 +121,10 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 	);
 
 	for (const account of accounts) {
-		const val = toToken(account.balance.toString(10) + 'a');
-
 		table.addRow(
 			account.moniker,
 			utils.cleanAddress(account.address),
-			val,
+			account.balance.format('T'),
 			account.nonce
 		);
 	}

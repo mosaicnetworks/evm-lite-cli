@@ -113,7 +113,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 
 	debug(`Address validated: ${args.address}`);
 
-	let account: IBaseAccount;
+	let account: any;
 
 	debug(`Attempting to fetch account details...`);
 
@@ -138,7 +138,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 
 	table.addRow(
 		account.address,
-		account.balance.toString(10).replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+		account.balance.format('T'),
 		account.nonce,
 		account.bytecode
 	);
