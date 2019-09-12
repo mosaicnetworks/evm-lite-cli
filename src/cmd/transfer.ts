@@ -3,7 +3,7 @@ import * as inquirer from 'inquirer';
 
 import Vorpal, { Args, Command } from 'vorpal';
 
-import utils, { toAttoToken, toUnitToken } from 'evm-lite-utils';
+import utils, { toAtto, toToken } from 'evm-lite-utils';
 
 import { Solo } from 'evm-lite-consensus';
 import { IMonikerBaseAccount } from 'evm-lite-keystore';
@@ -128,7 +128,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 
 	const parseBalance = (s: string | any) => {
 		if (typeof s === 'object') {
-			return toUnitToken(s.toString(10) + 'a');
+			return toToken(s.toString(10) + 'a');
 		} else {
 			return s;
 		}
@@ -298,7 +298,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 		unit = 'T';
 	}
 
-	tx.value = toAttoToken(tx.value.toString().slice(0, -1) + unit);
+	tx.value = toAtto(tx.value.toString().slice(0, -1) + unit);
 
 	if (interactive) {
 		console.log(JSON.stringify(tx, null, 2));

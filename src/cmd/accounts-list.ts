@@ -1,7 +1,7 @@
 import ASCIITable from 'ascii-table';
 import Vorpal, { Args, Command } from 'vorpal';
 
-import utils, { toUnitToken } from 'evm-lite-utils';
+import utils, { toToken } from 'evm-lite-utils';
 
 import { Solo } from 'evm-lite-consensus';
 import { IMonikerBaseAccount } from 'evm-lite-keystore';
@@ -76,15 +76,13 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 	const port = options.port || config.connection.port;
 
 	const keystore = await list();
-	let accounts: IMonikerBaseAccount[] = Object.keys(keystore).map(
-		moniker => ({
-			moniker,
-			address: keystore[moniker].address,
-			balance: 0,
-			nonce: 0,
-			bytecode: ''
-		})
-	);
+	let accounts: any = Object.keys(keystore).map(moniker => ({
+		moniker,
+		address: keystore[moniker].address,
+		balance: 0,
+		nonce: 0,
+		bytecode: ''
+	}));
 
 	if (!accounts.length) {
 		return Promise.resolve(success([]));
@@ -95,7 +93,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 		debug(`Attempting to fetch accounts data...`);
 
 		try {
-			const promises = accounts.map(async acc => {
+			const promises = accounts.map(async (acc: any) => {
 				const base = await session.node.getAccount(acc.address);
 				return {
 					...base,
@@ -123,7 +121,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 	);
 
 	for (const account of accounts) {
-		const val = toUnitToken(account.balance.toString(10) + 'a');
+		const val = toToken(account.balance.toString(10) + 'a');
 
 		table.addRow(
 			account.moniker,
