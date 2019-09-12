@@ -17,6 +17,13 @@ abstract class Command<T = TArgs<TOptions>> {
 
 	constructor(protected readonly session: Session, public readonly args: T) {
 		this.config = this.session.datadir.config;
+
+		const style = {
+			bg: '',
+			bold: true
+		};
+
+		log.addLevel('debug', 5, style);
 	}
 
 	// runs the command
@@ -55,6 +62,10 @@ abstract class Command<T = TArgs<TOptions>> {
 
 	// parse arguments of command here
 	protected abstract async check(): Promise<void>;
+
+	protected debug(s: string) {
+		log.debug('debug', s);
+	}
 }
 
 export default Command;

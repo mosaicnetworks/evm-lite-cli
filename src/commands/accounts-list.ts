@@ -58,6 +58,7 @@ class AccountListCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
+		this.debug('Does this work');
 		const keystore = await this.session.datadir.listKeyfiles();
 
 		let accounts: any = Object.keys(keystore).map(moniker => ({

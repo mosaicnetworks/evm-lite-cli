@@ -7,7 +7,7 @@
 	"scripts": {
 		"lint": "tslint -p . -c ./tslint.json",
 		"prepublish": "yarn link && yarn build",
-		"clean": "rm -rf node_modules && rm -rf dist/ && rm -rf package-lock.json",
+		"clean": "rm -rf node_modules dist package-lock.json",
 		"build": "tsc -p tsconfig.json",
 		"build:watch": "npm run build --watch",
 		"test": "jest",
@@ -17,7 +17,6 @@
 		"i": "ts-node src/evmlc i --debug",
 		"e": "ts-node src/evmlc",
 		"linkalldev": "yarn link evm-lite-core evm-lite-consensus evm-lite-keystore evm-lite-datadir evm-lite-client evm-lite-utils",
-		"installalldev": "yarn add ../evm-lite-js/packages/core ../evm-lite-js/packages/consensus ../evm-lite-js/packages/keystore ../evm-lite-js/packages/datadir ../evm-lite-js/packages/client ../evm-lite-js/packages/utils",
 		"pkg": "yarn run build && pkg . --out-path ./bin"
 	},
 	"dependencies": {
