@@ -1,7 +1,13 @@
+import * as fs from 'fs';
+
+import utils from 'evm-lite-utils';
+import Inquirer from 'inquirer';
 import Vorpal from 'vorpal';
 
-import Command, { TArgs, TOptions } from '../core/Command';
+import color from '../core/color';
 import Session from '../core/Session';
+
+import Command, { TArgs, TOptions } from '../core/Command';
 
 interface Options extends TOptions {
 	interactive?: boolean;
@@ -13,6 +19,13 @@ interface Options extends TOptions {
 interface Args extends TArgs<Options> {
 	moniker?: string;
 	options: Options;
+}
+
+interface Answers {
+	moniker: string;
+	outpath: string;
+	passphrase: string;
+	verifyPassphrase: string;
 }
 
 const command = (evmlc: Vorpal, session: Session): Command => {
@@ -33,12 +46,107 @@ const command = (evmlc: Vorpal, session: Session): Command => {
 };
 
 class AccountCreateCommand extends Command<Args> {
-	public async init(): Promise<boolean> {
+	protected passphrase: string = '';
+
+	protected async init(): Promise<boolean> {
+		if (this.args.options.interactive) {
+			this.session.interactive = true;
+		}
+
+		this.args.moniker = this.args.moniker || this.config.defaults.from;
+		this.args.options.out =
+			this.args.options.out || this.session.datadir.keystorePath;
+
 		return true;
 	}
 
-	public async exec(): Promise<void> {
-		console.log(this.session.datadir.configToml);
+	protected async check(): Promise<void> {
+		if (!this.args.moniker) {
+			throw Error('Moniker cannot be empty');
+		}
+
+		if (!utils.validMoniker(this.args.moniker)) {
+			throw Error('Moniker contains illegal characters');
+		}
+
+		if (!this.passphrase) {
+			if (!this.args.options.pwd) {
+				throw Error('No passphrase file path provided');
+			}
+
+			if (!utils.exists(this.args.options.pwd)) {
+				throw Error('Passphrase file path provided does not exist.');
+			}
+
+			if (utils.isDirectory(this.args.options.pwd)) {
+				throw Error('Passphrase file path provided is a directory.');
+			}
+
+			this.passphrase = fs
+				.readFileSync(this.args.options.pwd, 'utf8')
+				.trim();
+		}
+
+		if (this.args.options.out) {
+			if (!utils.exists(this.args.options.out)) {
+				throw Error('Output path provided does not exist.');
+			}
+
+			if (!utils.isDirectory(this.args.options.out)) {
+				throw Error('Output path provided is a not a directory.');
+			}
+		}
+	}
+
+	protected async interactive(): Promise<void> {
+		const questions: Inquirer.QuestionCollection<Answers> = [
+			{
+				message: 'Moniker: ',
+				name: 'moniker',
+				type: 'input',
+				default: this.session.datadir.config.defaults.from
+			},
+			{
+				message: 'Output Path: ',
+				name: 'outpath',
+				type: 'input',
+				default: this.session.datadir.keystorePath
+			},
+			{
+				message: 'Passphrase: ',
+				name: 'passphrase',
+				type: 'password'
+			},
+			{
+				message: 'Re-enter passphrase: ',
+				name: 'verifyPassphrase',
+				type: 'password'
+			}
+		];
+
+		const answers = await Inquirer.prompt<Answers>(questions);
+
+		if (!(answers.passphrase && answers.verifyPassphrase)) {
+			throw Error('Fields cannot be blank');
+		}
+
+		if (answers.passphrase !== answers.verifyPassphrase) {
+			throw Error('Passphrases do not match');
+		}
+
+		this.args.moniker = answers.moniker;
+		this.args.options.out = answers.outpath;
+		this.passphrase = answers.passphrase.trim();
+	}
+
+	protected async exec(): Promise<void> {
+		const account = await this.session.datadir.newKeyfile(
+			this.args.moniker!,
+			this.passphrase,
+			this.args.options.out
+		);
+
+		color.green(JSON.stringify(account));
 	}
 }
 

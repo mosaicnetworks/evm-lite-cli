@@ -45,7 +45,7 @@ export default async function init<TConsensus extends IAbstractConsensus>(
 		dataDirPath = process.argv[3];
 
 		if (!Utils.exists(process.argv[3])) {
-			color.warning(
+			color.yellow(
 				'Data directory path provided does ' +
 					'not exist and will created.'
 			);
@@ -82,11 +82,11 @@ export default async function init<TConsensus extends IAbstractConsensus>(
 
 		if (process.argv[3] === '-d' || process.argv[3] === '--debug') {
 			session.debug = true;
-			color.warning(` Debug:       True`);
+			color.yellow(` Debug:       True`);
 		}
 
-		color.warning(` Mode:        Interactive`);
-		color.info(` Data Dir:    ${session.datadir.path}`);
+		color.yellow(` Mode:        Interactive`);
+		color.blue(` Data Dir:    ${session.datadir.path}`);
 		color.purple(` Config File: ${session.datadir.configPath}`);
 		color.purple(` Keystore:    ${session.datadir.keystorePath}`);
 
