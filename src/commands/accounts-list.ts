@@ -5,20 +5,20 @@ import Vorpal from 'vorpal';
 import color from '../core/color';
 import Session from '../core/Session';
 
-import Command, { TArgs, TOptions } from '../core/Command';
+import Command, { IArgs, IOptions } from '../core/Command';
 
-interface Opts extends TOptions {
+interface Opts extends IOptions {
 	formatted?: boolean;
 	remote?: boolean;
 	host?: string;
 	port?: number;
 }
 
-export interface Args extends TArgs<Opts> {
+export interface Args extends IArgs<Opts> {
 	options: Opts;
 }
 
-export default (evmlc: Vorpal, session: Session): Command => {
+export default (evmlc: Vorpal, session: Session) => {
 	const description = 'List all accounts in the local keystore directory';
 
 	return evmlc
@@ -31,10 +31,7 @@ export default (evmlc: Vorpal, session: Session): Command => {
 		.types({
 			string: ['h', 'host']
 		})
-		.action(
-			(args: Args): Promise<void> =>
-				new AccountListCommand(session, args).run()
-		);
+		.action((args: Args) => new AccountListCommand(session, args).run());
 };
 
 class AccountListCommand extends Command<Args> {
@@ -46,7 +43,7 @@ class AccountListCommand extends Command<Args> {
 
 		this.args.options.formatted = this.args.options.formatted || false;
 
-		return true;
+		return false;
 	}
 
 	protected async interactive(): Promise<void> {
@@ -73,10 +70,7 @@ class AccountListCommand extends Command<Args> {
 			color.green('[]');
 		}
 
-		const node: Node<undefined> = new Node(
-			this.args.options.host!,
-			this.args.options.port
-		);
+		const node = new Node(this.args.options.host!, this.args.options.port);
 
 		// check connection is valid
 		let status: boolean = false;
@@ -93,7 +87,6 @@ class AccountListCommand extends Command<Args> {
 
 				return {
 					...base,
-					balance: base.balance.format('T'),
 					moniker: acc.moniker
 				};
 			});
@@ -101,18 +94,24 @@ class AccountListCommand extends Command<Args> {
 			accounts = await Promise.all(promises);
 		}
 
-		if (!this.args.options.formatted) {
+		if (!this.args.options.formatted && !this.session.interactive) {
 			return color.green(JSON.stringify(accounts));
 		}
 
 		const table = new Table({
-			head: ['Moniker', 'Address', 'Balance', 'Bytecode']
+			head: ['Moniker', 'Address', 'Balance', 'Nonce', 'Bytecode']
 		});
 
 		for (const a of accounts) {
-			table.push([a.moniker, a.address, a.balance, a.bytecode]);
+			table.push([
+				a.moniker,
+				a.address,
+				a.balance.format('T'),
+				a.nonce,
+				a.bytecode
+			]);
 		}
 
-		return color.yellow(table.toString());
+		return color.green(table.toString());
 	}
 }

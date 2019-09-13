@@ -6,13 +6,13 @@ import { Args } from 'vorpal';
 import Session from './Session';
 
 // default options for all commands
-export type TOptions = {
+export interface IOptions {
 	debug?: boolean;
-};
+}
 
-export type TArgs<T> = Args<T>;
+export type IArgs<T> = Args<T>;
 
-abstract class Command<T = TArgs<TOptions>> {
+abstract class Command<T = IArgs<IOptions>> {
 	protected readonly config: IConfiguration;
 
 	constructor(protected readonly session: Session, public readonly args: T) {
@@ -28,26 +28,24 @@ abstract class Command<T = TArgs<TOptions>> {
 
 	// runs the command
 	public async run(): Promise<void> {
-		const proceed = await this.init();
+		const interactive = await this.init();
 
-		if (proceed) {
-			try {
-				if (this.session.interactive) {
-					await this.interactive();
-				}
-
-				await this.check();
-
-				return await this.exec();
-			} catch (e) {
-				let err: Error = e;
-
-				if (typeof e !== 'object') {
-					err = new Error(e);
-				}
-
-				log.error('evmlc', err.message);
+		try {
+			if (this.session.interactive || interactive) {
+				await this.interactive();
 			}
+
+			await this.check();
+
+			return await this.exec();
+		} catch (e) {
+			let err: Error = e;
+
+			if (typeof e !== 'object') {
+				err = new Error(e);
+			}
+
+			log.error('evmlc', err.message);
 		}
 	}
 
@@ -57,11 +55,11 @@ abstract class Command<T = TArgs<TOptions>> {
 	// do interactive command execution
 	protected abstract async interactive(): Promise<void>;
 
-	// execute command
-	protected abstract async exec(): Promise<void>;
-
 	// parse arguments of command here
 	protected abstract async check(): Promise<void>;
+
+	// execute command
+	protected abstract async exec(): Promise<void>;
 
 	protected debug(s: string) {
 		log.debug('debug', s);

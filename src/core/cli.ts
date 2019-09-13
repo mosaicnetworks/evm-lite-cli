@@ -90,6 +90,8 @@ export default async function init<TConsensus extends IAbstractConsensus>(
 		color.purple(` Config File: ${session.datadir.configPath}`);
 		color.purple(` Keystore:    ${session.datadir.keystorePath}`);
 
+		session.interactive = true;
+
 		const cmdInteractive = cli.find('interactive');
 		if (cmdInteractive) {
 			cmdInteractive.remove();
@@ -97,7 +99,6 @@ export default async function init<TConsensus extends IAbstractConsensus>(
 
 		await cli.exec('help');
 
-		session.interactive = true;
 		cli.delimiter(`${params.delimiter}$`).show();
 	} else {
 		const cmdClear = cli.find('clear');
