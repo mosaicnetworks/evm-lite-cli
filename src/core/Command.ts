@@ -6,9 +6,7 @@ import { Args } from 'vorpal';
 import Session from './Session';
 
 // default options for all commands
-export interface IOptions {
-	debug?: boolean;
-}
+export interface IOptions {}
 
 export type IArgs<T> = Args<T>;
 

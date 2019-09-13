@@ -12,9 +12,9 @@ import color from './color';
 import Session from './Session';
 
 // default commands
-// import clear from '../commands/clear';
 // import debug from '../commands/debug';
-// import interactive from '../commands/interactive';
+import clear from '../commands/clear';
+import interactive from '../commands/interactive';
 
 export type CommandFunction = (evmlc: Vorpal, session: Session) => Command;
 
@@ -33,7 +33,7 @@ export default async function init<TConsensus extends IAbstractConsensus>(
 	params: ICLIConfig,
 	commands: any
 ) {
-	// commands.push(interactive, debug, clear);
+	commands.push(interactive, clear);
 
 	if (!Utils.exists(params.datadir)) {
 		mkdir.sync(params.datadir);

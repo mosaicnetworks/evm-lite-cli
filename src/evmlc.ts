@@ -8,6 +8,9 @@ import accountsGet from './commands/accounts-get';
 import accountsList from './commands/accounts-list';
 import accountsUpdate from './commands/accounts-update';
 
+import configSet from './commands/config-set';
+import configView from './commands/config-view';
+
 import init, { ICLIConfig } from './core/cli';
 
 const params: ICLIConfig = {
@@ -17,6 +20,16 @@ const params: ICLIConfig = {
 	config: 'evmlc'
 };
 
-const commands = [accountsCreate, accountsList, accountsGet, accountsUpdate];
+const commands = [
+	// accounts
+	accountsCreate,
+	accountsList,
+	accountsGet,
+	accountsUpdate,
+
+	// config
+	configView,
+	configSet
+];
 
 init(params, commands).catch(console.log);
