@@ -45,6 +45,9 @@ class AccountListCommand extends Command<Args> {
 
 		this.args.options.formatted = this.args.options.formatted || false;
 
+		// set command level node
+		this.node = new Node(this.args.options.host!, this.args.options.port);
+
 		return false;
 	}
 
@@ -57,7 +60,6 @@ class AccountListCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
-		this.debug('Does this work');
 		const keystore = await this.session.datadir.listKeyfiles();
 
 		let accounts: any = Object.keys(keystore).map(moniker => ({
@@ -72,12 +74,10 @@ class AccountListCommand extends Command<Args> {
 			color.green('[]');
 		}
 
-		const node = new Node(this.args.options.host!, this.args.options.port);
-
 		// check connection is valid
 		let status: boolean = false;
 		try {
-			await node.getInfo();
+			await this.node!.getInfo();
 			status = true;
 		} catch (e) {
 			status = false;
@@ -85,7 +85,7 @@ class AccountListCommand extends Command<Args> {
 
 		if (status) {
 			const promises = accounts.map(async (acc: any) => {
-				const base = await node.getAccount(acc.address);
+				const base = await this.node!.getAccount(acc.address);
 
 				return {
 					...base,
@@ -105,15 +105,19 @@ class AccountListCommand extends Command<Args> {
 		});
 
 		for (const a of accounts) {
-			let balance = a.balance.format('T');
+			let balance = a.balance;
 
-			if (!this.args.options.exact) {
-				const l = balance.split('.');
-				if (l[1]) {
-					if (l[1].length > 4) {
-						l[1] = l[1].slice(0, 4);
+			if (status) {
+				balance = a.balance.format('T');
 
-						balance = '~' + l.join('.') + 'T';
+				if (!this.args.options.exact) {
+					const l = balance.split('.');
+					if (l[1]) {
+						if (l[1].length > 4) {
+							l[1] = l[1].slice(0, 4);
+
+							balance = '~' + l.join('.') + 'T';
+						}
 					}
 				}
 			}
