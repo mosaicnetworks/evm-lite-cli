@@ -235,11 +235,10 @@ class TransferCommand extends Command<Args> {
 			throw Error('Invalid `to` address');
 		}
 
-		const u = this.args.options.value.toString().slice(-1);
+		const u = this.args.options.value.toString().slice(-1) as IUnits;
 
-		if (!isLetter(u)) {
-			this.unit = 'T';
-		} else {
+		if (isLetter(u)) {
+			this.unit = u;
 			this.args.options.value = this.args.options.value.slice(0, -1);
 		}
 	}
