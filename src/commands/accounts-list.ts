@@ -12,6 +12,7 @@ interface Opts extends IOptions {
 	remote?: boolean;
 	host?: string;
 	port?: number;
+	exact?: boolean;
 }
 
 export interface Args extends IArgs<Opts> {
@@ -28,6 +29,7 @@ export default (evmlc: Vorpal, session: Session) => {
 		.option('-f, --formatted', 'format output')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
+		.option('-e, --exact', 'show exact balance')
 		.types({
 			string: ['h', 'host']
 		})
@@ -103,13 +105,20 @@ class AccountListCommand extends Command<Args> {
 		});
 
 		for (const a of accounts) {
-			table.push([
-				a.moniker,
-				a.address,
-				a.balance.format('T'),
-				a.nonce,
-				a.bytecode
-			]);
+			let balance = a.balance.format('T');
+
+			if (!this.args.options.exact) {
+				const l = balance.split('.');
+				if (l[1]) {
+					if (l[1].length > 4) {
+						l[1] = l[1].slice(0, 4);
+
+						balance = '~' + l.join('.') + 'T';
+					}
+				}
+			}
+
+			table.push([a.moniker, a.address, balance, a.nonce, a.bytecode]);
 		}
 
 		return color.green(table.toString());

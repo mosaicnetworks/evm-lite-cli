@@ -1,7 +1,6 @@
-import * as figlet from 'figlet';
 import * as mkdir from 'mkdirp';
 
-import { IAbstractConsensus } from 'evm-lite-consensus';
+import figlet from 'figlet';
 
 import Vorpal, { Command } from 'vorpal';
 
@@ -29,10 +28,7 @@ export interface ICLIConfig {
 	config: string;
 }
 
-export default async function init<TConsensus extends IAbstractConsensus>(
-	params: ICLIConfig,
-	commands: any
-) {
+export default async function init(params: ICLIConfig, commands: any) {
 	commands.push(interactive, clear);
 
 	if (!Utils.exists(params.datadir)) {
@@ -82,7 +78,7 @@ export default async function init<TConsensus extends IAbstractConsensus>(
 
 		if (process.argv[3] === '-d' || process.argv[3] === '--debug') {
 			session.debug = true;
-			color.yellow(` Debug:       True`);
+			// color.yellow(` Debug:       True`);
 		}
 
 		color.yellow(` Mode:        Interactive`);

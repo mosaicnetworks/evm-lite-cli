@@ -48,8 +48,6 @@ export default (evmlc: Vorpal, session: Session): Command => {
 
 class ConfigSetCommand extends Command<Args> {
 	protected async init(): Promise<boolean> {
-		log.info('config', this.session.datadir.configPath);
-
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 

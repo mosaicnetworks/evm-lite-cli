@@ -5,11 +5,14 @@ import { osdatadir } from 'evm-lite-datadir';
 // commands
 import accountsCreate from './commands/accounts-create';
 import accountsGet from './commands/accounts-get';
+import accountsImport from './commands/accounts-import';
 import accountsList from './commands/accounts-list';
 import accountsUpdate from './commands/accounts-update';
 
 import configSet from './commands/config-set';
 import configView from './commands/config-view';
+
+import info from './commands/info';
 
 import init, { ICLIConfig } from './core/cli';
 
@@ -26,10 +29,13 @@ const commands = [
 	accountsList,
 	accountsGet,
 	accountsUpdate,
+	accountsImport,
 
 	// config
 	configView,
-	configSet
+	configSet,
+
+	info
 ];
 
 init(params, commands).catch(console.log);

@@ -12,7 +12,6 @@ export default (evmlc: Vorpal, session: Session): Command => {
 	return evmlc
 		.command('config view')
 		.alias('c v')
-		.option('-d, --debug', 'show debug output')
 		.description(description)
 		.action((args: IArgs<{}>) =>
 			new ConfigViewCommand(session, args).run()
@@ -21,8 +20,6 @@ export default (evmlc: Vorpal, session: Session): Command => {
 
 class ConfigViewCommand extends Command {
 	public async init(): Promise<boolean> {
-		log.info('config', this.session.datadir.configPath);
-
 		return false;
 	}
 
