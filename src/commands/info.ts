@@ -36,6 +36,8 @@ class InfoCommand extends Command<Args> {
 		this.args.options.port =
 			this.args.options.port || this.config.connection.port;
 
+		this.node = new Node(this.args.options.host, this.args.options.port);
+
 		return false;
 	}
 
@@ -48,9 +50,7 @@ class InfoCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
-		const node = new Node(this.args.options.host, this.args.options.port);
-
-		const info = await node.getInfo();
+		const info = await this.node!.getInfo();
 		const table = new Table({
 			head: ['Key', 'Value']
 		});

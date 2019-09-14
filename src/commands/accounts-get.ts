@@ -54,6 +54,8 @@ class AccountGetCommand extends Command<Args> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
+		this.node = new Node(this.args.options.host!, this.args.options.port);
+
 		return this.args.options.interactive;
 	}
 
@@ -84,9 +86,7 @@ class AccountGetCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
-		const node = new Node(this.args.options.host!, this.args.options.port);
-
-		const a = await node.getAccount(this.args.address);
+		const a = await this.node!.getAccount(this.args.address);
 
 		if (!this.args.options.formatted && !this.args.options.interactive) {
 			return color.green(
