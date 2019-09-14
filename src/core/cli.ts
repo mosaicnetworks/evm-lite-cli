@@ -1,6 +1,7 @@
 import * as mkdir from 'mkdirp';
 
 import figlet from 'figlet';
+import log from 'npmlog';
 
 import Vorpal, { Command } from 'vorpal';
 

@@ -14,6 +14,7 @@ import configView from './commands/config-view';
 
 import info from './commands/info';
 import transfer from './commands/transfer';
+import version from './commands/version';
 
 import init, { ICLIConfig } from './core/cli';
 
@@ -37,7 +38,8 @@ const commands = [
 	configSet,
 
 	info,
-	transfer
+	transfer,
+	version
 ];
 
 init(params, commands).catch(console.log);
