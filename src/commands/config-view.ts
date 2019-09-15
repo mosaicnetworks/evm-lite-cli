@@ -32,7 +32,7 @@ class ConfigViewCommand extends Command {
 	}
 
 	protected async exec(): Promise<void> {
-		color.green(this.session.datadir.configToml);
+		color.green(this.datadir.configToml);
 	}
 }
 

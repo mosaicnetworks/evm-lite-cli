@@ -52,7 +52,7 @@ class AccountCreateCommand extends Command<Args> {
 
 		this.args.moniker = this.args.moniker || this.config.defaults.from;
 		this.args.options.out =
-			this.args.options.out || this.session.datadir.keystorePath;
+			this.args.options.out || this.datadir.keystorePath;
 
 		return this.args.options.interactive;
 	}
@@ -101,13 +101,13 @@ class AccountCreateCommand extends Command<Args> {
 				message: 'Moniker: ',
 				name: 'moniker',
 				type: 'input',
-				default: this.session.datadir.config.defaults.from
+				default: this.config.defaults.from
 			},
 			{
 				message: 'Output Path: ',
 				name: 'outpath',
 				type: 'input',
-				default: this.session.datadir.keystorePath
+				default: this.datadir.keystorePath
 			},
 			{
 				message: 'Passphrase: ',
@@ -138,7 +138,7 @@ class AccountCreateCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
-		const account = await this.session.datadir.newKeyfile(
+		const account = await this.datadir.newKeyfile(
 			this.args.moniker,
 			this.passphrase,
 			this.args.options.out

@@ -56,7 +56,7 @@ class AccountUpdateCommand extends Command<Args> {
 	}
 
 	protected async interactive(): Promise<void> {
-		const keystore = await this.session.datadir.listKeyfiles();
+		const keystore = await this.datadir.listKeyfiles();
 
 		const first: Inquirer.QuestionCollection<Answers> = [
 			{
@@ -157,7 +157,7 @@ class AccountUpdateCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
-		const keyfile = await this.session.datadir.updateKeyfile(
+		const keyfile = await this.datadir.updateKeyfile(
 			this.args.moniker,
 			this.oldPassphrase,
 			this.newPassphrase

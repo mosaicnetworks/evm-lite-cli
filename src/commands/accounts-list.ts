@@ -60,7 +60,7 @@ class AccountListCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
-		const keystore = await this.session.datadir.listKeyfiles();
+		const keystore = await this.datadir.listKeyfiles();
 
 		let accounts: any = Object.keys(keystore).map(moniker => ({
 			moniker,

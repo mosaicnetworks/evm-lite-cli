@@ -55,8 +55,8 @@ class ConfigSetCommand extends Command<Args> {
 	}
 
 	protected async interactive(): Promise<void> {
-		const config = this.session.datadir.config;
-		const keystore = await this.session.datadir.listKeyfiles();
+		const config = this.datadir.config;
+		const keystore = await this.datadir.listKeyfiles();
 
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
@@ -106,7 +106,7 @@ class ConfigSetCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
-		const config = this.session.datadir.config;
+		const config = this.datadir.config;
 
 		const newConfig = {
 			connection: {
@@ -128,9 +128,9 @@ class ConfigSetCommand extends Command<Args> {
 			}
 		};
 
-		await this.session.datadir.saveConfig(newConfig);
+		await this.datadir.saveConfig(newConfig);
 
-		color.green(this.session.datadir.configToml);
+		color.green(this.datadir.configToml);
 	}
 }
 

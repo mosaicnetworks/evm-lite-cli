@@ -108,18 +108,18 @@ class AccountImportCommand extends Command<Args> {
 		);
 
 		// import keyfile
-		await this.session.datadir.importKeyfile(this.args.moniker, keyfile);
+		await this.datadir.importKeyfile(this.args.moniker, keyfile);
 
 		if (this.args.options.default) {
 			const newConfig: IConfiguration = {
-				...this.session.datadir.config,
+				...this.datadir.config,
 				defaults: {
-					...this.session.datadir.config.defaults,
+					...this.datadir.config.defaults,
 					from: this.args.moniker
 				}
 			};
 
-			await this.session.datadir.saveConfig(newConfig);
+			await this.datadir.saveConfig(newConfig);
 		}
 
 		return color.green(JSON.stringify(keyfile));

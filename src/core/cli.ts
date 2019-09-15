@@ -52,24 +52,27 @@ export default async function init(params: ICLIConfig, commands: any) {
 	}
 
 	const session = new Session(dataDirPath, params.config);
+	const cli = new Vorpal();
 
 	if (!process.argv[2]) {
-		console.log(
+		cli.log(
 			`\n  Change datadir by: ${params.delimiter} --datadir [path] [command]`
 		);
-		console.log(`\n  Data Directory: ${session.datadir.path}`);
+		cli.log(`\n  Data Directory: ${session.datadir.path}`);
 
 		process.argv[2] = 'help';
 	}
 
-	const cli = new Vorpal();
-
 	commands.forEach((command: CommandFunction) => {
 		command(cli, session);
+
+		// global options - to be added
+		// .option('-i, --interactive', 'Enter interactive mode')
+		// .option('--log-level', 'Set logging level');
 	});
 
 	if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
-		console.log(
+		cli.log(
 			chalk.bold(
 				figlet.textSync(params.name, {
 					horizontalLayout: 'full'

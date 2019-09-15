@@ -64,7 +64,7 @@ In particular, this directory contains the following items:
 -   **evmlc.toml**: where global options are specified
 -   **keystore**: where all encrypted account keys are stored
 
-** This directory is shared by `EVM-Lite`**
+**This directory is shared by EVM-Lite**
 
 ### `evmlc.toml`
 
