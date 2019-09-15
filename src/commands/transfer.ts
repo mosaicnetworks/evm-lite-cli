@@ -86,19 +86,11 @@ class TransferCommand extends Command<Args> {
 			this.args.options.port || this.config.connection.port;
 
 		// check if gas, gasprice is negative or undefined/null
-		if (
-			this.args.options.gas < 0 ||
-			this.args.options.gas === undefined ||
-			this.args.options.gas === null
-		) {
+		if (!this.args.options.gas && this.args.options.gas !== 0) {
 			this.args.options.gas = this.config.defaults.gas;
 		}
 
-		if (
-			this.args.options.gasprice < 0 ||
-			this.args.options.gasprice === undefined ||
-			this.args.options.gasprice === null
-		) {
+		if (!this.args.options.gasprice && this.args.options.gasprice !== 0) {
 			this.args.options.gasprice = this.config.defaults.gasPrice;
 		}
 
@@ -205,6 +197,14 @@ class TransferCommand extends Command<Args> {
 	}
 
 	protected async check(): Promise<void> {
+		if (this.args.options.gas < 0) {
+			throw Error('Cannot use a gas value less than 0');
+		}
+
+		if (this.args.options.gasprice < 0) {
+			throw Error('Cannot use a gas price value less than 0');
+		}
+
 		if (!this.args.options.from) {
 			throw Error('No `from` moniker provided or set in config.');
 		}
