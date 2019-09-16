@@ -256,8 +256,16 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 		debug(`Gas Price received: ${answers.gasPrice ? answers.gasPrice : 0}`);
 	}
 
-	options.gas = options.gas || config.defaults.gas;
-	options.gasprice = options.gasprice || config.defaults.gasPrice;
+	if (!options.gas && options.gas !== 0) {
+		options.gas = config.defaults.gas;
+	}
+
+	if (!options.gasprice && options.gasprice !== 0) {
+		options.gasprice = config.defaults.gasPrice;
+	}
+
+	// options.gas = options.gas || config.defaults.gas;
+	// options.gasprice = options.gasprice || config.defaults.gasPrice;
 
 	if (!options.to || !options.value) {
 		return Promise.reject(
@@ -297,6 +305,15 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 	}
 
 	tx.value = new Currency(tx.value + unit);
+
+	if (tx.value.format('a').split('.').length > 1) {
+		return Promise.reject(
+			error(
+				TRANSFER.ADDRESS_INVALID_LENGTH,
+				'Value cannot be a fraction of an `atto` unit'
+			)
+		);
+	}
 
 	if (interactive) {
 		console.log(JSON.stringify(tx, null, 2));
