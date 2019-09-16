@@ -16,6 +16,7 @@ interface Options extends IOptions {
 	remote?: boolean;
 	host?: string;
 	port?: number;
+	exact?: boolean;
 }
 
 export interface Arguments extends Args<Options> {
@@ -33,6 +34,7 @@ export default (evmlc: Vorpal, session: Session<Solo>): Command => {
 		.option('-d, --debug', 'show debug output')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
+		.option('--exact', 'display exact balances')
 		.types({
 			string: ['h', 'host']
 		})
@@ -121,10 +123,27 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 	);
 
 	for (const account of accounts) {
+		let balance = account.balance;
+
+		if (status) {
+			balance = account.balance.format('T');
+
+			if (!options.exact) {
+				const l = balance.split('.');
+				if (l[1]) {
+					if (l[1].length > 4) {
+						l[1] = l[1].slice(0, 4);
+
+						balance = '~' + l.join('.') + 'T';
+					}
+				}
+			}
+		}
+
 		table.addRow(
 			account.moniker,
 			utils.cleanAddress(account.address),
-			account.balance.format('T'),
+			balance,
 			account.nonce
 		);
 	}

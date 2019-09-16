@@ -64,7 +64,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 	let passphrase: string = '';
 
 	const interactive = options.interactive || session.interactive;
-	const questions: inquirer.Questions<Answers> = [
+	const questions: inquirer.QuestionCollection<Answers> = [
 		{
 			message: 'Moniker: ',
 			name: 'moniker',

@@ -93,7 +93,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 
 	const keystore = await list();
 
-	const questions: inquirer.Questions<Answers> = [
+	const questions: inquirer.QuestionCollection<Answers> = [
 		{
 			choices: Object.keys(keystore).map(moniker => moniker),
 			message: 'From: ',

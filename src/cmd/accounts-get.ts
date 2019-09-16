@@ -78,7 +78,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 
 	const formatted = args.options.formatted || false;
 	const interactive = args.options.interactive || session.interactive;
-	const questions: inquirer.Questions<Answers> = [
+	const questions: inquirer.QuestionCollection<Answers> = [
 		{
 			message: 'Address: ',
 			name: 'address',
