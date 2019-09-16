@@ -12,6 +12,7 @@ import accountsUpdate from './commands/accounts-update';
 import configSet from './commands/config-set';
 import configView from './commands/config-view';
 
+import poaCheck from './commands/poa-check';
 import poaInit from './commands/poa-init';
 
 import info from './commands/info';
@@ -40,6 +41,7 @@ const commands = [
 	configSet,
 
 	poaInit,
+	poaCheck,
 
 	info,
 	transfer,

@@ -18,6 +18,8 @@ interface Opts extends IOptions {
 	pwd: string;
 	host: string;
 	port: number;
+	gas: number;
+	gasprice: number;
 }
 
 interface Args extends IArgs<Opts> {}
@@ -25,6 +27,8 @@ interface Args extends IArgs<Opts> {}
 interface Answers {
 	from: string;
 	passphrase: string;
+	gas: number;
+	gasPrice: number;
 }
 
 export default (monet: Vorpal, session: Session): Command => {
@@ -38,6 +42,8 @@ export default (monet: Vorpal, session: Session): Command => {
 		.option('--from <moniker>', 'from moniker')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
+		.option('-g, --gas <g>', 'override config gas value')
+		.option('-gp, --gasprice <gp>', 'override config gasprice value')
 		.types({
 			string: ['_', 'f', 'from', 'host', 'pwd']
 		})
@@ -58,6 +64,14 @@ class POAInitCommand extends Command<Args> {
 			this.args.options.host || this.config.connection.host;
 		this.args.options.port =
 			this.args.options.port || this.config.connection.port;
+
+		if (!this.args.options.gas && this.args.options.gas !== 0) {
+			this.args.options.gas = this.config.defaults.gas;
+		}
+
+		if (!this.args.options.gasprice && this.args.options.gasprice !== 0) {
+			this.args.options.gasprice = this.config.defaults.gasPrice;
+		}
 
 		this.args.options.from =
 			this.args.options.from || this.config.defaults.from;
@@ -81,6 +95,18 @@ class POAInitCommand extends Command<Args> {
 				message: 'Passphrase: ',
 				name: 'passphrase',
 				type: 'password'
+			},
+			{
+				default: this.args.options.gas || 100000,
+				message: 'Gas: ',
+				name: 'gas',
+				type: 'number'
+			},
+			{
+				default: this.args.options.gasprice || 0,
+				message: 'Gas Price: ',
+				name: 'gasPrice',
+				type: 'number'
 			}
 		];
 
@@ -89,6 +115,9 @@ class POAInitCommand extends Command<Args> {
 		this.passphrase = answers.passphrase;
 
 		this.args.options.from = answers.from;
+
+		this.args.options.gas = answers.gas;
+		this.args.options.gasprice = answers.gasPrice;
 	}
 
 	protected async check(): Promise<void> {

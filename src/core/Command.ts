@@ -50,7 +50,7 @@ abstract class Command<T = IArgs<IOptions>> {
 				err = new Error(e);
 			}
 
-			log.error('evmlc', err.message);
+			log.error('evmlc', err.message.replace(/(\r\n|\n|\r)/gm, ''));
 		}
 	}
 
