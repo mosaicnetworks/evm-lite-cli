@@ -151,4 +151,4 @@ class POANomineeListCommand extends Command<Args> {
 	}
 }
 
-export const POAWhitelist = POANomineeListCommand;
+export const POANomineeList = POANomineeListCommand;
