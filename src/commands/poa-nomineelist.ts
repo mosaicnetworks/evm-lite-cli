@@ -20,18 +20,21 @@ interface Opts extends IOptions {
 
 interface Args extends IArgs<Opts> {}
 
-interface WhitelistEntry {
+interface NomineeEntry {
 	address: string;
 	moniker: string;
+	upVotes: number;
+	downVotes: number;
 }
 
 export default (evmlc: Vorpal, session: Session): Command => {
-	const description = 'List whitelist entries for a connected node';
+	const description = 'List nominees for a connected node';
 
 	return evmlc
-		.command('poa whitelist')
-		.alias('p wl')
+		.command('poa nomineelist')
+		.alias('p nl')
 		.description(description)
+		.option('-d, --debug', 'show debug output')
 		.option('-f, --formatted', 'format output')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
@@ -40,13 +43,10 @@ export default (evmlc: Vorpal, session: Session): Command => {
 		.types({
 			string: ['host', 'h']
 		})
-		.action(
-			(args: Args): Promise<void> =>
-				new POAWhitelistCommand(session, args).run()
-		);
+		.action((args: Args) => new POANomineeListCommand(session, args).run());
 };
 
-class POAWhitelistCommand extends Command<Args> {
+class POANomineeListCommand extends Command<Args> {
 	protected async init(): Promise<boolean> {
 		this.args.options.host =
 			this.args.options.host || this.config.connection.host;
@@ -78,7 +78,7 @@ class POAWhitelistCommand extends Command<Args> {
 		const poa = await this.node!.getPOA();
 		const contract = Contract.load(JSON.parse(poa.abi), poa.address);
 
-		const transaction = contract.methods.getWhiteListCount({
+		const transaction = contract.methods.getNomineeCount({
 			gas: this.args.options.gas,
 			gasPrice: this.args.options.gasprice
 		});
@@ -91,18 +91,20 @@ class POAWhitelistCommand extends Command<Args> {
 		}
 
 		// entries
-		const entries: WhitelistEntry[] = [];
+		const entries: NomineeEntry[] = [];
 		const table = new Table({
-			head: ['Moniker', 'Address']
+			head: ['Moniker', 'Address', 'Up Votes', 'Down Votes']
 		});
 
 		for (const i of Array.from(Array(count).keys())) {
-			const entry: WhitelistEntry = {
+			const entry: NomineeEntry = {
 				address: '',
-				moniker: ''
+				moniker: '',
+				upVotes: 0,
+				downVotes: 0
 			};
 
-			const addressTx = contract.methods.getWhiteListAddressFromIdx(
+			const addressTx = contract.methods.getNomineeAddressFromIdx(
 				{
 					gas: this.args.options.gas,
 					gasPrice: this.args.options.gasprice
@@ -123,6 +125,19 @@ class POAWhitelistCommand extends Command<Args> {
 			const hex = await this.node!.callTx<string>(monikerTx);
 			entry.moniker = utils.hexToString(hex);
 
+			const votesTx = contract.methods.getCurrentNomineeVotes(
+				{
+					gas: this.args.options.gas,
+					gasPrice: this.args.options.gasprice
+				},
+				utils.cleanAddress(entry.address)
+			);
+
+			const votes = await this.node!.callTx<[string, string]>(votesTx);
+
+			entry.upVotes = parseInt(votes[0], 10);
+			entry.downVotes = parseInt(votes[1], 10);
+
 			entries.push(entry);
 
 			table.push([entry.moniker, entry.address]);
@@ -136,4 +151,4 @@ class POAWhitelistCommand extends Command<Args> {
 	}
 }
 
-export const POAWhitelist = POAWhitelistCommand;
+export const POAWhitelist = POANomineeListCommand;
