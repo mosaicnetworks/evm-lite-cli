@@ -126,7 +126,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 		})
 	);
 
-	const first: inquirer.Questions<FirstAnswers> = [
+	const first: inquirer.QuestionCollection<FirstAnswers> = [
 		{
 			choices: accounts.map(
 				(acc: any) => `${acc.moniker} (${acc.balance.format('T')})`
@@ -137,7 +137,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 		}
 	];
 
-	const second: inquirer.Questions<SecondAnswers> = [
+	const second: inquirer.QuestionCollection<SecondAnswers> = [
 		{
 			message: 'Enter password: ',
 			name: 'passphrase',
@@ -145,7 +145,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 		}
 	];
 
-	const third: inquirer.Questions<ThirdAnswers> = [
+	const third: inquirer.QuestionCollection<ThirdAnswers> = [
 		{
 			message: 'To',
 			name: 'to',
@@ -171,7 +171,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 		}
 	];
 
-	const fourth: inquirer.Questions<FourthAnswers> = [
+	const fourth: inquirer.QuestionCollection<FourthAnswers> = [
 		{
 			message: 'Submit transaction',
 			name: 'send',

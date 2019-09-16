@@ -67,7 +67,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 	const keystore = await list();
 
 	const interactive = options.interactive || session.interactive;
-	const questions: inquirer.Questions<Answers> = [
+	const questions: inquirer.QuestionCollection<Answers> = [
 		{
 			default: config.connection.host,
 			message: 'Host',

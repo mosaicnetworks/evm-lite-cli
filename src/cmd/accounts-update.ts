@@ -75,7 +75,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 
 	const keystore = await list();
 
-	const first: inquirer.Questions<FirstAnswers> = [
+	const first: inquirer.QuestionCollection<FirstAnswers> = [
 		{
 			choices: Object.keys(keystore).map(moniker => moniker),
 			message: 'Moniker: ',
@@ -84,7 +84,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 		}
 	];
 
-	const second: inquirer.Questions<SecondAnswers> = [
+	const second: inquirer.QuestionCollection<SecondAnswers> = [
 		{
 			message: 'Enter current passphrase: ',
 			name: 'passphrase',
@@ -92,7 +92,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 		}
 	];
 
-	const third: inquirer.Questions<SecondAnswers> = [
+	const third: inquirer.QuestionCollection<SecondAnswers> = [
 		{
 			message: 'New passphrase : ',
 			name: 'passphrase',

@@ -78,7 +78,7 @@ export const stage = async (args: Arguments, session: Session<Solo>) => {
 	);
 
 	const contract = await getContract();
-	const questions: inquirer.Questions<Answers> = [
+	const questions: inquirer.QuestionCollection<Answers> = [
 		{
 			message: 'Nominee address: ',
 			name: 'nominee',
