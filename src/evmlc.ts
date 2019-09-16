@@ -14,6 +14,7 @@ import configView from './commands/config-view';
 
 import poaCheck from './commands/poa-check';
 import poaInit from './commands/poa-init';
+import poaWhitelist from './commands/poa-whitelist';
 
 import info from './commands/info';
 import transfer from './commands/transfer';
@@ -42,6 +43,7 @@ const commands = [
 
 	poaInit,
 	poaCheck,
+	poaWhitelist,
 
 	info,
 	transfer,
