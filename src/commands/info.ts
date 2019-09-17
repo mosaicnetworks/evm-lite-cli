@@ -16,7 +16,7 @@ interface Opts extends IOptions {
 
 export interface Args extends IArgs<Opts> {}
 
-export default (evmlc: Vorpal, session: Session): Command => {
+export default (evmlc: Vorpal, session: Session) => {
 	return evmlc
 		.command('info')
 		.description('Display information about node')

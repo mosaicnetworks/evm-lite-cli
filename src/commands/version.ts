@@ -7,7 +7,7 @@ import Command, { IArgs, IOptions } from '../core/Command';
 
 const pkg = require('../../package.json');
 
-export default (evmlc: Vorpal, session: Session): Command => {
+export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Display current version of cli';
 
 	return evmlc

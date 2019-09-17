@@ -25,7 +25,7 @@ interface WhitelistEntry {
 	moniker: string;
 }
 
-export default (evmlc: Vorpal, session: Session): Command => {
+export default (evmlc: Vorpal, session: Session) => {
 	const description = 'List whitelist entries for a connected node';
 
 	return evmlc

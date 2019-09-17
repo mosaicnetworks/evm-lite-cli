@@ -48,7 +48,7 @@ function isLetter(str: string) {
 	return str.length === 1 && str.match(/[a-z]/i);
 }
 
-export default (evmlc: Vorpal, session: Session): Command => {
+export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Initiate a transfer of token(s) to an address';
 
 	return evmlc

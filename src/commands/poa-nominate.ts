@@ -36,7 +36,7 @@ interface Answers {
 	gasPrice: number;
 }
 
-export default (evmlc: Vorpal, session: Session): Command => {
+export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Nominate an address to proceed to election';
 
 	return evmlc

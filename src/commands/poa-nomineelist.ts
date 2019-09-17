@@ -27,7 +27,7 @@ export interface NomineeEntry {
 	downVotes: number;
 }
 
-export default (evmlc: Vorpal, session: Session): Command => {
+export default (evmlc: Vorpal, session: Session) => {
 	const description = 'List nominees for a connected node';
 
 	return evmlc

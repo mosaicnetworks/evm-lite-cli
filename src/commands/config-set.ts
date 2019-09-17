@@ -26,7 +26,7 @@ interface Answers {
 	gasPrice: number;
 }
 
-export default (evmlc: Vorpal, session: Session): Command => {
+export default (evmlc: Vorpal, session: Session) => {
 	const description =
 		'Set values of the configuration inside the data directory';
 

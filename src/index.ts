@@ -1,7 +1,7 @@
 // requirements
 export { default as init, ICLIConfig } from './core/cli';
 export { default as Session } from './core/Session';
-export { default as Command } from './core/Command';
+export { default as Command, IOptions, IArgs } from './core/Command';
 export { default as color } from './core/color';
 
 // accounts

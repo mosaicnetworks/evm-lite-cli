@@ -6,7 +6,7 @@ import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
 
-export default (evmlc: Vorpal, session: Session): Command => {
+export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Output current configuration file';
 
 	return evmlc

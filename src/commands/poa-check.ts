@@ -27,7 +27,7 @@ interface Answers {
 	gasPrice: number;
 }
 
-export default (evmlc: Vorpal, session: Session): Command => {
+export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Check whether an address is on the whitelist';
 
 	return evmlc
