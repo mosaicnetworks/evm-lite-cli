@@ -1,4 +1,5 @@
 import log from 'npmlog';
+import Vorpal from 'vorpal';
 
 import { Args } from 'vorpal';
 

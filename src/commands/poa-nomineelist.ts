@@ -20,7 +20,7 @@ interface Opts extends IOptions {
 
 interface Args extends IArgs<Opts> {}
 
-interface NomineeEntry {
+export interface NomineeEntry {
 	address: string;
 	moniker: string;
 	upVotes: number;
@@ -47,34 +47,7 @@ export default (evmlc: Vorpal, session: Session): Command => {
 };
 
 class POANomineeListCommand extends Command<Args> {
-	protected async init(): Promise<boolean> {
-		this.args.options.host =
-			this.args.options.host || this.config.connection.host;
-		this.args.options.port =
-			this.args.options.port || this.config.connection.port;
-
-		if (!this.args.options.gas && this.args.options.gas !== 0) {
-			this.args.options.gas = this.config.defaults.gas;
-		}
-
-		if (!this.args.options.gasprice && this.args.options.gasprice !== 0) {
-			this.args.options.gasprice = this.config.defaults.gasPrice;
-		}
-
-		this.node = new Node(this.args.options.host, this.args.options.port);
-
-		return false;
-	}
-
-	protected async interactive(): Promise<void> {
-		return;
-	}
-
-	protected async check(): Promise<void> {
-		return;
-	}
-
-	protected async exec(): Promise<void> {
+	public async getNomineeList() {
 		const poa = await this.node!.getPOA();
 		const contract = Contract.load(JSON.parse(poa.abi), poa.address);
 
@@ -86,15 +59,7 @@ class POANomineeListCommand extends Command<Args> {
 		const countRes: any = await this.node!.callTx(transaction);
 		const count = countRes.toNumber();
 
-		if (!count) {
-			return color.green('[]');
-		}
-
-		// entries
 		const entries: NomineeEntry[] = [];
-		const table = new Table({
-			head: ['Moniker', 'Address', 'Up Votes', 'Down Votes']
-		});
 
 		for (const i of Array.from(Array(count).keys())) {
 			const entry: NomineeEntry = {
@@ -139,12 +104,50 @@ class POANomineeListCommand extends Command<Args> {
 			entry.downVotes = parseInt(votes[1], 10);
 
 			entries.push(entry);
-
-			table.push([entry.moniker, entry.address]);
 		}
+
+		return entries;
+	}
+
+	public async init(): Promise<boolean> {
+		this.args.options.host =
+			this.args.options.host || this.config.connection.host;
+		this.args.options.port =
+			this.args.options.port || this.config.connection.port;
+
+		if (!this.args.options.gas && this.args.options.gas !== 0) {
+			this.args.options.gas = this.config.defaults.gas;
+		}
+
+		if (!this.args.options.gasprice && this.args.options.gasprice !== 0) {
+			this.args.options.gasprice = this.config.defaults.gasPrice;
+		}
+
+		this.node = new Node(this.args.options.host, this.args.options.port);
+
+		return false;
+	}
+
+	protected async interactive(): Promise<void> {
+		return;
+	}
+
+	protected async check(): Promise<void> {
+		return;
+	}
+
+	protected async exec(): Promise<void> {
+		const entries = await this.getNomineeList();
+		const table = new Table({
+			head: ['Moniker', 'Address', 'Up Votes', 'Down Votes']
+		});
 
 		if (!this.args.options.formatted && !this.session.interactive) {
 			return color.green(JSON.stringify(entries, null, 2));
+		}
+
+		for (const entry of entries) {
+			table.push([entry.moniker, entry.address]);
 		}
 
 		return color.green(table.toString());

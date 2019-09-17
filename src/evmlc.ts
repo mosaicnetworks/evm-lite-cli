@@ -16,6 +16,7 @@ import poaCheck from './commands/poa-check';
 import poaInit from './commands/poa-init';
 import poaNominate from './commands/poa-nominate';
 import poaNomineelist from './commands/poa-nomineelist';
+import poaVote from './commands/poa-vote';
 import poaWhitelist from './commands/poa-whitelist';
 
 import info from './commands/info';
@@ -25,7 +26,7 @@ import version from './commands/version';
 import init, { ICLIConfig } from './core/cli';
 
 const params: ICLIConfig = {
-	name: 'EVM-Lite CLI',
+	name: 'EVMLC',
 	delimiter: 'evmlc',
 	datadir: osdatadir('evmlite'),
 	config: 'evmlc'
@@ -48,6 +49,7 @@ const commands = [
 	poaWhitelist,
 	poaNomineelist,
 	poaNominate,
+	poaVote,
 
 	info,
 	transfer,

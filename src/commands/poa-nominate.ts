@@ -178,8 +178,6 @@ class POANominateCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
-		console.log(this.args);
-
 		const poa = await this.node!.getPOA();
 		const contract = Contract.load(JSON.parse(poa.abi), poa.address);
 
@@ -239,9 +237,6 @@ class POANominateCommand extends Command<Args> {
 				'No logs were returned matching the specified `moniker`.'
 			);
 		}
-
-		console.log(nomineeProposedEvent);
-		console.log(monikerAnnouceEvent);
 
 		return color.green(
 			`You (${

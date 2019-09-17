@@ -10,50 +10,63 @@ import utils from 'evm-lite-utils';
 import color from '../core/color';
 import Session from '../core/Session';
 
+import { NomineeEntry, POANomineeList } from './poa-nomineelist';
+
 import Command, { IArgs, IOptions } from '../core/Command';
 
 interface Opts extends IOptions {
 	interactive?: boolean;
+	pwd?: string;
+
+	verdict: boolean;
 	from: string;
-	pwd: string;
 	host: string;
 	port: number;
 	gas: number;
 	gasprice: number;
 }
 
-interface Args extends IArgs<Opts> {}
+interface Args extends IArgs<Opts> {
+	address: string;
+}
 
 interface Answers {
 	from: string;
+	address: string;
 	passphrase: string;
+	verdict: boolean;
 	gas: number;
 	gasPrice: number;
 }
 
-export default (evmlc: Vorpal, session: Session): Command => {
-	const description = 'Initialize PoA contract';
+export default (evmlc: Vorpal, session: Session) => {
+	const description = 'Vote for an nominee currently in election';
 
 	return evmlc
-		.command('poa init')
-		.hidden()
+		.command('poa vote [address]')
+		.alias('p v')
 		.description(description)
-		.option('--pwd <password>', 'passphase file path')
+		.option('-i, --interactive', 'interactive')
+		.option('-d, --debug', 'show debug output')
+		.option('--verdict <boolean>', 'verdict for given address')
+		.option('--pwd <password>', 'passphrase file path')
 		.option('--from <moniker>', 'from moniker')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.option('-g, --gas <g>', 'override config gas value')
 		.option('-gp, --gasprice <gp>', 'override config gasprice value')
 		.types({
-			string: ['_', 'f', 'from', 'host', 'pwd']
+			string: ['_', 'from', 'pwd', 'host', 'h']
 		})
 		.action(
 			(args: Args): Promise<void> =>
-				new POAInitCommand(session, args).run()
+				new POAVoteCommand(session, args).run()
 		);
 };
 
-class POAInitCommand extends Command<Args> {
+class POAVoteCommand extends Command<Args> {
+	protected nominees: NomineeEntry[] = [];
+
 	protected passphrase: string = '';
 
 	protected async init(): Promise<boolean> {
@@ -82,6 +95,13 @@ class POAInitCommand extends Command<Args> {
 	}
 
 	protected async interactive(): Promise<void> {
+		const cmd = new POANomineeList(this.session, this.args);
+
+		// initialize cmd execution
+		cmd.init();
+
+		this.nominees = await cmd.getNomineeList();
+
 		const keystore = await this.datadir.listKeyfiles();
 
 		const questions: Inquirer.QuestionCollection<Answers> = [
@@ -95,6 +115,19 @@ class POAInitCommand extends Command<Args> {
 				message: 'Passphrase: ',
 				name: 'passphrase',
 				type: 'password'
+			},
+			{
+				choices: this.nominees.map(
+					nominee => `${nominee.moniker} (${nominee.address})`
+				),
+				message: 'Nominee: ',
+				name: 'address',
+				type: 'list'
+			},
+			{
+				message: 'Verdict: ',
+				name: 'verdict',
+				type: 'confirm'
 			},
 			{
 				default: this.args.options.gas || 100000,
@@ -112,15 +145,30 @@ class POAInitCommand extends Command<Args> {
 
 		const answers = await Inquirer.prompt<Answers>(questions);
 
-		this.passphrase = answers.passphrase;
-
+		this.args.address = answers.address.split(' ')[1].slice(1, -1);
 		this.args.options.from = answers.from;
-
+		this.args.options.verdict = answers.verdict;
 		this.args.options.gas = answers.gas;
 		this.args.options.gasprice = answers.gasPrice;
+
+		this.passphrase = answers.passphrase;
+
+		return;
 	}
 
 	protected async check(): Promise<void> {
+		if (!this.args.address) {
+			throw Error('No nominee address provided.');
+		}
+
+		if (utils.trimHex(this.args.address).length !== 40) {
+			throw Error('Nominee address has an invalid length.');
+		}
+
+		if (!this.args.options.verdict) {
+			throw Error('No verdict provided for nominee.');
+		}
+
 		if (!this.args.options.from) {
 			throw Error('No `from` moniker provided or set in config.');
 		}
@@ -145,31 +193,27 @@ class POAInitCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
+		if (!this.nominees.length) {
+			return color.yellow('There are no nominees in election');
+		}
+
 		const poa = await this.node!.getPOA();
 		const contract = Contract.load(JSON.parse(poa.abi), poa.address);
 
 		const keyfile = await this.datadir.getKeyfile(this.args.options.from);
 		const account = Datadir.decrypt(keyfile, this.passphrase);
 
-		const tx = contract.methods.init({
-			from: keyfile.address,
-			gas: this.config.defaults.gas,
-			gasPrice: this.config.defaults.gasPrice
-		});
+		const tx = contract.methods.castNomineeVote(
+			{
+				from: keyfile.address,
+				gas: this.args.options.gas,
+				gasPrice: this.args.options.gasprice
+			},
+			utils.cleanAddress(this.args.address),
+			this.args.options.verdict
+		);
 
 		const receipt = await this.node!.sendTx(tx, account);
-		const r = {
-			...receipt
-		};
-
-		r.logs = receipt.logs
-			.filter(log => log.event === 'MonikerAnnounce')
-			.map(log => {
-				log.args._moniker = utils.hexToString(log.args._moniker);
-
-				return log;
-			});
-
 		if (!receipt.logs.length) {
 			throw Error(
 				'No logs were returned. ' +
@@ -177,8 +221,39 @@ class POAInitCommand extends Command<Args> {
 			);
 		}
 
-		return color.green(JSON.stringify(r, null, 2));
+		const nomineeVoteCastEvent = receipt.logs.filter(
+			log => log.event === 'NomineeVoteCast'
+		)[0];
+
+		let nomineeDecisionLogs: any[] = [];
+		let nomineeDecisionEvent;
+
+		if (receipt.logs.length > 1) {
+			nomineeDecisionLogs = receipt.logs.filter(
+				log => log.event === 'NomineeVoteCast'
+			);
+		}
+
+		if (nomineeDecisionLogs.length) {
+			nomineeDecisionEvent = nomineeDecisionLogs[0];
+		}
+
+		const vote = nomineeVoteCastEvent.args._accepted ? 'Yes' : 'No';
+
+		let message =
+			`You (${nomineeVoteCastEvent.args._voter}) voted '${vote}'` +
+			` for '${nomineeVoteCastEvent.args._nominee}'. `;
+
+		if (nomineeDecisionEvent) {
+			const accepted = nomineeDecisionEvent.args._accepted
+				? 'Accepted'
+				: 'Rejected';
+
+			message += `\nElection completed with the nominee being '${accepted}'.`;
+		}
+
+		return color.green(message);
 	}
 }
 
-export const POAInit = POAInitCommand;
+export const POAVote = POAVoteCommand;
