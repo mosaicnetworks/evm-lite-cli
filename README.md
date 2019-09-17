@@ -9,12 +9,9 @@ A Command Line Interface to interact with an [EVM-Lite](https://github.com/mosai
 ## Table of Contents
 
 1. [Installation](#installation)
-2. [Getting Started](#getting-started)
-3. [Commands](#commands)
+2. [Commands](#commands)
     - [Flags](#flags)
-4. [Data Directory](#data-directory)
-5. [Proof of Authority](#proof-of-authority)
-6. [Developers](#developers)
+3. [Data Directory](#data-directory)
 
 ## Installation
 
@@ -29,10 +26,6 @@ or with `yarn`
 ```bash
 yarn global add evm-lite-cli
 ```
-
-## Getting Started
-
-There is a [Getting Started Document](docs/getting-started.md) available.
 
 ## Commands
 
@@ -91,13 +84,3 @@ $ evmlc config set -i
 ? Gas: 1000000
 ? Gas Price: 0
 ```
-
-## Proof of Authority
-
-The Monet Hub uses Proof of Authority with EVM-Lite and Babble.
-
-A [Proof of Authority Document](docs/proof-of-authority.md) is available.
-
-## Developers
-
-Notes for developers are in a [developers document](docs/developer.md).
