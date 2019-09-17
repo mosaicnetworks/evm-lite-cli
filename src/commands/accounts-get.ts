@@ -86,10 +86,8 @@ class AccountGetCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
-		this.log.http(
-			'GET',
-			`${this.args.options.host}:${this.args.options.port}/account/${this.args.address}`
-		);
+		const { host, port } = this.args.options;
+		this.log.http('GET', `${host}:${port}/account/${this.args.address}`);
 
 		const a = await this.node!.getAccount(this.args.address);
 

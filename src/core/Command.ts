@@ -1,5 +1,6 @@
 import logger, { Logger } from 'npmlog';
 
+import { IAbstractConsensus, Solo } from 'evm-lite-consensus';
 import { Args } from 'vorpal';
 
 import Node from 'evm-lite-core';
@@ -13,8 +14,11 @@ export interface IOptions {
 
 export type IArgs<T> = Args<T>;
 
-abstract class Command<T extends IArgs<IOptions> = IArgs<IOptions>> {
-	protected node?: Node<any>;
+abstract class Command<
+	T extends IArgs<IOptions> = IArgs<IOptions>,
+	TConsensus extends IAbstractConsensus = Solo
+> {
+	protected node?: Node<TConsensus>;
 
 	// logger
 	protected log: Logger;
@@ -47,7 +51,7 @@ abstract class Command<T extends IArgs<IOptions> = IArgs<IOptions>> {
 			await this.check();
 			await this.exec();
 
-			// reset log level after execution
+			// reset log level
 			this.log.level = 'silly';
 
 			return;
