@@ -55,7 +55,7 @@ class AccountUpdateCommand extends Command<Args> {
 		return this.args.options.interactive;
 	}
 
-	protected async interactive(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		const keystore = await this.datadir.listKeyfiles();
 
 		const first: Inquirer.QuestionCollection<Answers> = [

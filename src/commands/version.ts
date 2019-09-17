@@ -28,7 +28,7 @@ class VersionCommand extends Command {
 		return false;
 	}
 
-	protected async interactive(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		return;
 	}
 

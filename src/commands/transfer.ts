@@ -108,7 +108,7 @@ class TransferCommand extends Command<Args> {
 		return this.args.options.interactive;
 	}
 
-	protected async interactive(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		const keystore = await this.datadir.listKeyfiles();
 
 		const accounts: any = await Promise.all(

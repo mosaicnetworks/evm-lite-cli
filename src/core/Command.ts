@@ -15,6 +15,8 @@ export type IArgs<T> = Args<T>;
 
 abstract class Command<T extends IArgs<IOptions> = IArgs<IOptions>> {
 	protected node?: Node<any>;
+
+	// logger
 	protected log: Logger;
 
 	constructor(protected readonly session: Session, public readonly args: T) {
@@ -39,12 +41,16 @@ abstract class Command<T extends IArgs<IOptions> = IArgs<IOptions>> {
 
 		try {
 			if (this.session.interactive || interactive) {
-				await this.interactive();
+				await this.prompt();
 			}
 
 			await this.check();
+			await this.exec();
 
-			return await this.execAndResetLogLevel();
+			// reset log level after execution
+			this.log.level = 'silly';
+
+			return;
 		} catch (e) {
 			let err: Error = e;
 
@@ -60,21 +66,13 @@ abstract class Command<T extends IArgs<IOptions> = IArgs<IOptions>> {
 	protected abstract async init(): Promise<boolean>;
 
 	// do interactive command execution
-	protected abstract async interactive(): Promise<void>;
+	protected abstract async prompt(): Promise<void>;
 
 	// parse arguments of command here
 	protected abstract async check(): Promise<void>;
 
 	// execute command
 	protected abstract async exec(): Promise<void>;
-
-	private async execAndResetLogLevel() {
-		await this.exec();
-
-		this.log.level = 'silly';
-
-		return;
-	}
 }
 
 export default Command;

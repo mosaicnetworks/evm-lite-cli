@@ -52,7 +52,7 @@ class AccountListCommand extends Command<Args> {
 		return false;
 	}
 
-	protected async interactive(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		return;
 	}
 

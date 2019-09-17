@@ -72,7 +72,7 @@ class POACheckCommand extends Command<Args> {
 		return this.args.options.interactive;
 	}
 
-	protected async interactive(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
 				message: 'Nominee address: ',

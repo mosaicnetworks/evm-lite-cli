@@ -94,7 +94,7 @@ class POAVoteCommand extends Command<Args> {
 		return this.args.options.interactive;
 	}
 
-	protected async interactive(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		const cmd = new POANomineeList(this.session, this.args);
 
 		// initialize cmd execution

@@ -54,7 +54,7 @@ class ConfigSetCommand extends Command<Args> {
 		return this.args.options.interactive;
 	}
 
-	protected async interactive(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		const config = this.datadir.config;
 		const keystore = await this.datadir.listKeyfiles();
 

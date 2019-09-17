@@ -95,7 +95,7 @@ class AccountCreateCommand extends Command<Args> {
 		}
 	}
 
-	protected async interactive(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
 				message: 'Moniker: ',

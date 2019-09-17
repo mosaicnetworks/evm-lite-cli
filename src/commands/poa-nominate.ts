@@ -88,7 +88,7 @@ class POANominateCommand extends Command<Args> {
 		return this.args.options.interactive;
 	}
 
-	protected async interactive(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		const keystore = await this.datadir.listKeyfiles();
 
 		const questions: Inquirer.QuestionCollection<Answers> = [
