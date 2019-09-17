@@ -1395,77 +1395,68 @@ ethjs-unit@^0.1.6:
     bn.js "4.11.6"
     number-to-bn "1.7.0"
 
-evm-lite-client@1.3.1, evm-lite-client@^1.3.0:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/evm-lite-client/-/evm-lite-client-1.3.1.tgz#102a40b28faad4930fc67f849cd33cab7d71507f"
-  integrity sha512-FHXtXmxIIE1To8PrdVVYNcPcqLe5WtIPwa0ckhHqlvesE2caJDfwSCy7NrHNMIExFwSGWhY6jHRDSTRTycveMA==
+evm-lite-client@^1.3.0, evm-lite-client@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/evm-lite-client/-/evm-lite-client-1.3.2.tgz#b28009576c07f1055aa8840fe54703e57b72c864"
+  integrity sha512-VHKGtEpghf83r626Wt5TQl74T76zwskuCQ4EikprcI7HGEDKZI5NCXAH0f7MtcJos5N1aGxpdPxqolnU4HNpTA==
   dependencies:
     bignumber.js "^9.0.0"
     json-bigint "^0.3.0"
 
-evm-lite-consensus@1.3.1, evm-lite-consensus@^1.3.0:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/evm-lite-consensus/-/evm-lite-consensus-1.3.1.tgz#6f92ec0f968893809fc6d9c87de6f7398cc16e89"
-  integrity sha512-K/2EOLi6nkWqtoIDhkihRCFqB6Q+9It+sxWbObZsO6p7Aytglq329ZHumBsJXb0l10cmXQyGkQRD87Y+FTzbvg==
+evm-lite-consensus@^1.3.0, evm-lite-consensus@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/evm-lite-consensus/-/evm-lite-consensus-1.3.2.tgz#2a4652fdab93b7c9d5b156c24fc197500b096761"
+  integrity sha512-NTI8VgWaaUKePsTTBkvSzJtRH10HlUtlEfUvHmZ66KIpU4yxPlgMhmdnSoHbBoodi2vi3TQrtRuL7/v+BLe12w==
   dependencies:
-    evm-lite-client "1.3.1"
+    evm-lite-client "^1.3.2"
     json-bigint "^0.3.0"
 
-evm-lite-core@1.3.1, evm-lite-core@^1.3.0:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/evm-lite-core/-/evm-lite-core-1.3.1.tgz#740ed60a2861792dab23ebfee4f18bb97acfea2b"
-  integrity sha512-WcGTwg/r5VSXBDd3C2wamTVH3/QwUl1zAIFlmPjWTCZv8/ER9XQRqycyj2GQP6Y2Fwtbb8LAN2KICmCM8rB/Ig==
+evm-lite-core@^1.3.0, evm-lite-core@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/evm-lite-core/-/evm-lite-core-1.3.2.tgz#89b85b8cf884243809b6402c4653069bd6794156"
+  integrity sha512-7LJSQQYQSh2LppHG7PLOxgFOqEyqfuEF7T7llBeVu+2rGsmQUzkSWdMqDzGGxRakBCgnfFwwcgRmcqS4JhVSHw==
   dependencies:
     eth-lib "0.2.8"
-    evm-lite-client "1.3.1"
-    evm-lite-consensus "1.3.1"
-    evm-lite-utils "1.3.1"
+    evm-lite-client "^1.3.2"
+    evm-lite-consensus "^1.3.2"
+    evm-lite-utils "^1.3.3"
     json-bigint "^0.3.0"
     web3 "0.20.6"
     web3-eth-iban "1.0.0-beta.46"
     web3-utils "1.0.0-beta.46"
 
 evm-lite-datadir@^1.3.0:
-  version "1.3.2"
-  resolved "https://registry.yarnpkg.com/evm-lite-datadir/-/evm-lite-datadir-1.3.2.tgz#8a6e25fca5db5c5777d66e7e18102559c42fda78"
-  integrity sha512-oz/EweywvRxV4Ru3Eke/Rf1PPCgv8ixvJ6kHg46lbBdHq8zKq7+lF6DypNFwkQg/pEVlsm1tWHX467NS6UUIOQ==
+  version "1.3.3"
+  resolved "https://registry.yarnpkg.com/evm-lite-datadir/-/evm-lite-datadir-1.3.3.tgz#46e0b8be9ddd174fda0ce0ff4b05e142704c1b7f"
+  integrity sha512-xXs+6LWHI34Dt1GQ/nLbReP38EirX80t+KkVIbq5gutP7L8ienpzYPvonbKEPlQUat8LuMFqJ4Z8jsnVCARctg==
   dependencies:
-    evm-lite-keystore "^1.3.1"
-    evm-lite-utils "^1.3.1"
+    evm-lite-keystore "^1.3.2"
+    evm-lite-utils "^1.3.3"
     mkdirp "^0.5.1"
     toml "^3.0.0"
     tomlify-j0.4 "^3.0.0"
 
-evm-lite-keystore@^1.3.0, evm-lite-keystore@^1.3.1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/evm-lite-keystore/-/evm-lite-keystore-1.3.1.tgz#6e31d24ba3bf8c1596385c89cd49f4751e95cc95"
-  integrity sha512-EI/CFh0WphqkqxENgUJN1m3EH6uYoyaVC0G3F7o552XY9hs5xGBcA2XAeVwg+CMQJCutO7ql9iLnjZR2lcT83g==
+evm-lite-keystore@^1.3.0, evm-lite-keystore@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/evm-lite-keystore/-/evm-lite-keystore-1.3.2.tgz#216a6f7742345d729499ef0839ff12444be4e2a8"
+  integrity sha512-wFYa9ry8DJa00fL1B0hs7C+Zi4aHz0aEQwjBYInX76fOvVeieLM6XiCXPHR+oRzu17dofPsp8Ap+/w+1MIY7Fg==
   dependencies:
     browserify-cipher "^1.0.1"
     crypto-random-hex "^1.0.0"
     eth-lib "^0.2.8"
-    evm-lite-client "1.3.1"
-    evm-lite-core "1.3.1"
-    evm-lite-utils "1.3.1"
+    evm-lite-client "^1.3.2"
+    evm-lite-core "^1.3.2"
+    evm-lite-utils "^1.3.3"
     json-bigint "0.3.0"
     keccak256 "^1.0.0"
     mkdirp "^0.5.1"
     randombytes "^2.1.0"
     uuid "^3.3.3"
 
-evm-lite-utils@1.3.1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/evm-lite-utils/-/evm-lite-utils-1.3.1.tgz#bc6202b3d757a3da4b928dad29d66e332e4656ff"
-  integrity sha512-MxiA/E2GSju8EbreKkhxUIRsYtuUyHfBlknGE37Hof1CB7gKHNQdbkRe8P51x2ux7tvvMRV/Dy7NzC5bghs+kQ==
-  dependencies:
-    bignumber.js "^9.0.0"
-    mkdirp "^0.5.1"
-    remove-trailing-zeros "^1.0.3"
-
-evm-lite-utils@^1.3.0, evm-lite-utils@^1.3.1:
-  version "1.3.2"
-  resolved "https://registry.yarnpkg.com/evm-lite-utils/-/evm-lite-utils-1.3.2.tgz#c369e3fde194ae4d114cd57197b8d8c78d3bc9f5"
-  integrity sha512-SzebNZeoOqk8I0uKewoggeYyjUrDTN4YaiCtNJSPhUVh19CC0ZfFmmYMN38PRXSAblLDN0vKnG0kL10jmVhDPA==
+evm-lite-utils@^1.3.0, evm-lite-utils@^1.3.3:
+  version "1.3.3"
+  resolved "https://registry.yarnpkg.com/evm-lite-utils/-/evm-lite-utils-1.3.3.tgz#27c142750d5aac5188b7c7dc286452050572c1de"
+  integrity sha512-t+RcZjRKPixUMpZ4kMcPsnjEs7h4TsXgrPFlBqm9xELkRaEvJobu62hG14wGc8Gx12DxSdhigAIVe/ysyk9uXA==
   dependencies:
     bignumber.js "^9.0.0"
     mkdirp "^0.5.1"
@@ -1688,11 +1679,11 @@ fragment-cache@^0.2.1:
     map-cache "^0.2.2"
 
 fs-minipass@^1.2.5:
-  version "1.2.6"
-  resolved "https://registry.yarnpkg.com/fs-minipass/-/fs-minipass-1.2.6.tgz#2c5cc30ded81282bfe8a0d7c7c1853ddeb102c07"
-  integrity sha512-crhvyXcMejjv3Z5d2Fa9sf5xLYVCF5O1c71QxbVnbLsmYMBEvDAftewesN/HhY03YRoA7zOMxjNGrF5svGaaeQ==
+  version "1.2.7"
+  resolved "https://registry.yarnpkg.com/fs-minipass/-/fs-minipass-1.2.7.tgz#ccff8570841e7fe4265693da88936c55aed7f7c7"
+  integrity sha512-GWSSJGFy4e9GUeCcbIkED+bgAoFyj7XF1mV8rma3QW4NIqX9Kyx79N/PF61H5udOV3aY1IaMLs6pGbH71nlCTA==
   dependencies:
-    minipass "^2.2.1"
+    minipass "^2.6.0"
 
 fs.realpath@^1.0.0:
   version "1.0.0"
@@ -2958,10 +2949,10 @@ minimist@~0.0.1:
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-0.0.10.tgz#de3f98543dbf96082be48ad1a0c7cda836301dcf"
   integrity sha1-3j+YVD2/lggr5IrRoMfNqDYwHc8=
 
-minipass@^2.2.1, minipass@^2.3.5:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/minipass/-/minipass-2.6.0.tgz#80a68c8a43257b7f744ce09733f6a9c6eef9f731"
-  integrity sha512-OuNZ0OHrrI+jswzmgivYBZ+fAAGHZA4293d5q0z631/I9QSw3yumKB92njxHIHiB1eAdGRsE+3CcOPkoEyV5FQ==
+minipass@^2.2.1, minipass@^2.3.5, minipass@^2.6.0:
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/minipass/-/minipass-2.6.2.tgz#c3075a22680b3b1479bae5915904cb1eba50f5c0"
+  integrity sha512-38Jwdc8AttUDaQAIRX8Iaw3QoCDWjAwKMGeGDF9JUi9QCPMjH5qAQg/hdO8o1nC7Nmh1/CqzMg5FQPEKuKwznQ==
   dependencies:
     safe-buffer "^5.1.2"
     yallist "^3.0.0"
