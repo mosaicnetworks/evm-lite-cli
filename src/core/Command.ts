@@ -44,7 +44,7 @@ abstract class Command<T extends IArgs<IOptions> = IArgs<IOptions>> {
 
 			await this.check();
 
-			return await this.exec();
+			return await this.execAndResetLogLevel();
 		} catch (e) {
 			let err: Error = e;
 
@@ -67,6 +67,14 @@ abstract class Command<T extends IArgs<IOptions> = IArgs<IOptions>> {
 
 	// execute command
 	protected abstract async exec(): Promise<void>;
+
+	private async execAndResetLogLevel() {
+		await this.exec();
+
+		this.log.level = 'silly';
+
+		return;
+	}
 }
 
 export default Command;
