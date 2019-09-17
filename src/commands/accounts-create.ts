@@ -13,7 +13,7 @@ interface Opts extends IOptions {
 	interactive?: boolean;
 	debug?: boolean;
 	pwd?: string;
-	out?: string;
+	out: string;
 }
 
 interface Args extends IArgs<Opts> {
@@ -100,14 +100,13 @@ class AccountCreateCommand extends Command<Args> {
 			{
 				message: 'Moniker: ',
 				name: 'moniker',
-				type: 'input',
-				default: this.config.defaults.from
+				type: 'input'
 			},
 			{
 				message: 'Output Path: ',
 				name: 'outpath',
 				type: 'input',
-				default: this.datadir.keystorePath
+				default: this.args.options.out
 			},
 			{
 				message: 'Passphrase: ',
