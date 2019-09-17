@@ -181,10 +181,15 @@ class TransferCommand extends Command<Args> {
 
 		this.passphrase = answers.passphrase.trim();
 
+		const u = this.args.options.value.toString().slice(-1) as IUnits;
+		if (!isLetter(u)) {
+			this.args.options.value = this.args.options.value + this.unit;
+		}
+
 		const tx = {
 			from: this.args.options.from,
 			to: this.args.options.to,
-			value: this.args.options.value,
+			value: new Currency(this.args.options.value).format('T'),
 			gas: this.args.options.gas,
 			gasPrice: this.args.options.gasprice
 		};

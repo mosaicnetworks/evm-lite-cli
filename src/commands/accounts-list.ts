@@ -74,7 +74,7 @@ class AccountListCommand extends Command<Args> {
 		}));
 
 		if (!accounts.length) {
-			color.green('[]');
+			return color.green('[]');
 		}
 
 		// check connection is valid
@@ -109,7 +109,7 @@ class AccountListCommand extends Command<Args> {
 		}
 
 		const table = new Table({
-			head: ['Moniker', 'Address', 'Balance', 'Nonce', 'Bytecode']
+			head: ['Moniker', 'Address', 'Balance', 'Nonce']
 		});
 
 		for (const a of accounts) {
@@ -130,7 +130,7 @@ class AccountListCommand extends Command<Args> {
 				}
 			}
 
-			table.push([a.moniker, a.address, balance, a.nonce, a.bytecode]);
+			table.push([a.moniker, a.address, balance, a.nonce]);
 		}
 
 		return color.green(table.toString());

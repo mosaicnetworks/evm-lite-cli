@@ -13,4 +13,4 @@ tests/assets/evmlc.toml
 tests/assets/config.toml
 yarn-error.log
 ./scripts
-bin/
+bin
