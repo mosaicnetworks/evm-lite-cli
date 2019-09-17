@@ -249,6 +249,10 @@ class TransferCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
+		if (!this.send) {
+			return color.yellow('Transaction aborted');
+		}
+
 		const keyfile = await this.datadir.getKeyfile(this.args.options.from);
 		const account = AbstractKeystore.decrypt(keyfile, this.passphrase);
 
