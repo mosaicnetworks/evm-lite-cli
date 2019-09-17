@@ -157,6 +157,8 @@ class AccountUpdateCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
+		this.log.info('keystore', this.datadir.keystorePath);
+
 		const keyfile = await this.datadir.updateKeyfile(
 			this.args.moniker,
 			this.oldPassphrase,

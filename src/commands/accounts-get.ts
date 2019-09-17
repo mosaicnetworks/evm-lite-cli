@@ -13,8 +13,8 @@ import Command, { IArgs, IOptions } from '../core/Command';
 interface Opts extends IOptions {
 	formatted?: boolean;
 	interactive?: boolean;
-	host?: string;
-	port?: number;
+	host: string;
+	port: number;
 }
 
 interface Args extends IArgs<Opts> {
@@ -54,7 +54,7 @@ class AccountGetCommand extends Command<Args> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
-		this.node = new Node(this.args.options.host!, this.args.options.port);
+		this.node = new Node(this.args.options.host, this.args.options.port);
 
 		return this.args.options.interactive;
 	}
@@ -86,6 +86,11 @@ class AccountGetCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
+		this.log.http(
+			'GET',
+			`${this.args.options.host}:${this.args.options.port}/account/${this.args.address}`
+		);
+
 		const a = await this.node!.getAccount(this.args.address);
 
 		if (!this.args.options.formatted && !this.args.options.interactive) {

@@ -48,7 +48,15 @@ export default (evmlc: Vorpal, session: Session): Command => {
 
 class POANomineeListCommand extends Command<Args> {
 	public async getNomineeList() {
+		this.log.http(
+			'GET',
+			`${this.args.options.host}:${this.args.options.port}/poa`
+		);
+
 		const poa = await this.node!.getPOA();
+
+		this.log.info('POA', poa.address);
+
 		const contract = Contract.load(JSON.parse(poa.abi), poa.address);
 
 		const transaction = contract.methods.getNomineeCount({

@@ -1,5 +1,4 @@
-import log from 'npmlog';
-import Vorpal from 'vorpal';
+import logger, { Logger } from 'npmlog';
 
 import { Args } from 'vorpal';
 
@@ -8,20 +7,22 @@ import Node from 'evm-lite-core';
 import Session from './Session';
 
 // default options for all commands
-export interface IOptions {}
+export interface IOptions {
+	silent: boolean;
+}
 
 export type IArgs<T> = Args<T>;
 
-abstract class Command<T = IArgs<IOptions>> {
+abstract class Command<T extends IArgs<IOptions> = IArgs<IOptions>> {
 	protected node?: Node<any>;
+	protected log: Logger;
 
 	constructor(protected readonly session: Session, public readonly args: T) {
-		const style = {
-			bg: '',
-			bold: true
-		};
+		this.log = logger;
 
-		log.addLevel('debug', 5, style);
+		if (this.args.options.silent) {
+			this.log.level = 'silent';
+		}
 	}
 
 	public get config() {
@@ -51,7 +52,7 @@ abstract class Command<T = IArgs<IOptions>> {
 				err = new Error(e);
 			}
 
-			log.error('evmlc', err.message.replace(/(\r\n|\n|\r)/gm, ''));
+			this.log.error('evmlc', err.message.replace(/(\r\n|\n|\r)/gm, ''));
 		}
 	}
 
@@ -66,10 +67,6 @@ abstract class Command<T = IArgs<IOptions>> {
 
 	// execute command
 	protected abstract async exec(): Promise<void>;
-
-	protected debug(s: string) {
-		log.debug('debug', s);
-	}
 }
 
 export default Command;

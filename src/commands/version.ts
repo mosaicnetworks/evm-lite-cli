@@ -3,7 +3,7 @@ import Vorpal from 'vorpal';
 import color from '../core/color';
 import Session from '../core/Session';
 
-import Command, { IArgs } from '../core/Command';
+import Command, { IArgs, IOptions } from '../core/Command';
 
 const pkg = require('../../package.json');
 
@@ -18,7 +18,9 @@ export default (evmlc: Vorpal, session: Session): Command => {
 		.types({
 			string: []
 		})
-		.action((args: IArgs<{}>) => new VersionCommand(session, args).run());
+		.action((args: IArgs<IOptions>) =>
+			new VersionCommand(session, args).run()
+		);
 };
 
 class VersionCommand extends Command {
@@ -35,15 +37,20 @@ class VersionCommand extends Command {
 	}
 
 	protected async exec(): Promise<void> {
-		color.green(`evm-lite-core: ${pkg.dependencies[`evm-lite-core`]}`);
-		color.green(
-			`evm-lite-keystore: ${pkg.dependencies[`evm-lite-keystore`]}`
+		this.log.info('evm-lite-core', pkg.dependencies[`evm-lite-core`]);
+		this.log.info(
+			'evm-lite-keystore',
+			pkg.dependencies[`evm-lite-keystore`]
 		);
-		color.green(
-			`evm-lite-datadir: ${pkg.dependencies[`evm-lite-datadir`]}`
+		this.log.info('evm-lite-datadir', pkg.dependencies[`evm-lite-datadir`]);
+		this.log.info('evm-lite-utils', pkg.dependencies[`evm-lite-utils`]);
+		this.log.info('evm-lite-client', pkg.dependencies[`evm-lite-client`]);
+		this.log.info(
+			'evm-lite-consensus',
+			pkg.dependencies[`evm-lite-consensus`]
 		);
 
-		color.green(`evm-lite-cli: ${pkg.version}`);
+		color.green(`v${pkg.version}`);
 	}
 }
 

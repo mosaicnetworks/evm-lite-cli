@@ -1,5 +1,6 @@
 import Table from 'cli-table';
 import Node from 'evm-lite-core';
+import log from 'npmlog';
 import Vorpal from 'vorpal';
 
 import color from '../core/color';
@@ -60,6 +61,8 @@ class AccountListCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
+		this.log.info('keystore', this.datadir.keystorePath);
+
 		const keystore = await this.datadir.listKeyfiles();
 
 		let accounts: any = Object.keys(keystore).map(moniker => ({
@@ -84,6 +87,11 @@ class AccountListCommand extends Command<Args> {
 		}
 
 		if (status) {
+			this.log.info(
+				'node',
+				`${this.args.options.host}:${this.args.options.port}`
+			);
+
 			const promises = accounts.map(async (acc: any) => {
 				const base = await this.node!.getAccount(acc.address);
 

@@ -178,7 +178,15 @@ class POANominateCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
+		this.log.http(
+			'GET',
+			`${this.args.options.host}:${this.args.options.port}/poa`
+		);
+
 		const poa = await this.node!.getPOA();
+
+		this.log.info('POA', poa.address);
+
 		const contract = Contract.load(JSON.parse(poa.abi), poa.address);
 
 		const keyfile = await this.datadir.getKeyfile(this.args.options.from);

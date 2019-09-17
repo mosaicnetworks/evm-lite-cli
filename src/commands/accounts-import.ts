@@ -103,6 +103,8 @@ class AccountImportCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
+		this.log.info('keystore', this.datadir.keystorePath);
+
 		const keyfile = JSON.parse(
 			fs.readFileSync(path.join(this.args.options.file), 'utf8')
 		);

@@ -106,6 +106,8 @@ class ConfigSetCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
+		this.log.info('config', this.datadir.configPath);
+
 		const config = this.datadir.config;
 
 		const newConfig = {

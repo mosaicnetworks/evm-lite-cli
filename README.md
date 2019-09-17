@@ -11,7 +11,6 @@ A Command Line Interface to interact with an [EVM-Lite](https://github.com/mosai
 1. [Installation](#installation)
 2. [Getting Started](#getting-started)
 3. [Commands](#commands)
-    - [Documentation](#documentation)
     - [Flags](#flags)
 4. [Data Directory](#data-directory)
 5. [Proof of Authority](#proof-of-authority)
@@ -36,10 +35,6 @@ yarn global add evm-lite-cli
 There is a [Getting Started Document](docs/getting-started.md) available.
 
 ## Commands
-
-### Documentation
-
-A list of all supported commands along with documentation can be found [here](docs/README.md).
 
 ### Flags
 

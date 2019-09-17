@@ -2,7 +2,7 @@ import Vorpal from 'vorpal';
 
 import Session from '../core/Session';
 
-import Command, { IArgs } from '../core/Command';
+import Command, { IArgs, IOptions } from '../core/Command';
 
 export default (evmlc: Vorpal, session: Session): Command => {
 	const description = 'Enter interactive mode';
@@ -14,7 +14,7 @@ export default (evmlc: Vorpal, session: Session): Command => {
 		.types({
 			string: []
 		})
-		.action((args: IArgs<{}>) =>
+		.action((args: IArgs<IOptions>) =>
 			new InteractiveCommand(session, args).run()
 		);
 };

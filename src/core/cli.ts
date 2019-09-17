@@ -64,11 +64,7 @@ export default async function init(params: ICLIConfig, commands: any) {
 	}
 
 	commands.forEach((command: CommandFunction) => {
-		command(cli, session);
-
-		// global options - to be added
-		// .option('-i, --interactive', 'Enter interactive mode')
-		// .option('--log-level', 'Set logging level');
+		command(cli, session).option('--silent', 'silence all logging output');
 	});
 
 	if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {

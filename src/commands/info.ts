@@ -50,6 +50,11 @@ class InfoCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
+		this.log.http(
+			'GET',
+			`${this.args.options.host}:${this.args.options.port}/info`
+		);
+
 		const info = await this.node!.getInfo();
 		const table = new Table({
 			head: ['Key', 'Value']

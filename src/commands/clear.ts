@@ -2,7 +2,7 @@ import Vorpal from 'vorpal';
 
 import Session from '../core/Session';
 
-import Command, { IArgs } from '../core/Command';
+import Command, { IArgs, IOptions } from '../core/Command';
 
 export default (evmlc: Vorpal, session: Session): Command => {
 	const description = 'Clear output on screen';
@@ -13,7 +13,9 @@ export default (evmlc: Vorpal, session: Session): Command => {
 		.types({
 			string: []
 		})
-		.action((args: IArgs<{}>) => new ClearCommand(session, args).run());
+		.action((args: IArgs<IOptions>) =>
+			new ClearCommand(session, args).run()
+		);
 };
 
 class ClearCommand extends Command {

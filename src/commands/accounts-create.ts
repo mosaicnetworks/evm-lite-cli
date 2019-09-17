@@ -137,6 +137,8 @@ class AccountCreateCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<void> {
+		this.log.info('keystore', this.datadir.keystorePath);
+
 		const account = await this.datadir.newKeyfile(
 			this.args.moniker,
 			this.passphrase,
