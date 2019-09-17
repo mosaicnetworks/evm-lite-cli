@@ -38,6 +38,7 @@ export default (evmlc: Vorpal, session: Session): Command => {
 		.command('poa init')
 		.hidden()
 		.description(description)
+		.option('-i, --interactive', 'enter interactive mode')
 		.option('--pwd <password>', 'passphase file path')
 		.option('--from <moniker>', 'from moniker')
 		.option('-h, --host <ip>', 'override config host value')

@@ -17,7 +17,7 @@
 		"i": "ts-node src/evmlc i --debug",
 		"e": "ts-node src/evmlc",
 		"linkalldev": "yarn link evm-lite-core evm-lite-consensus evm-lite-keystore evm-lite-datadir evm-lite-client evm-lite-utils",
-		"pkg": "yarn run build && pkg . --out-path ./bin"
+		"pkg": "yarn run build && rm -rf bin && pkg . --out-path ./bin"
 	},
 	"dependencies": {
 		"chalk": "^2.4.2",
@@ -50,5 +50,11 @@
 	},
 	"bin": {
 		"evmlc": "./dist/evmlc.js"
+	},
+	"pkg": {
+		"assets": [
+			"./node_modules/figlet/fonts/Standard.flf"
+		],
+		"out-path": "./bin"
 	}
 }

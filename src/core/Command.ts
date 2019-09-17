@@ -21,7 +21,7 @@ abstract class Command<T extends IArgs<IOptions> = IArgs<IOptions>> {
 		this.log = logger;
 
 		if (this.args.options.silent) {
-			this.log.level = 'silent';
+			this.log.level = 'error';
 		}
 	}
 
