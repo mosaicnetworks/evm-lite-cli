@@ -44,8 +44,6 @@ const command = (evmlc: Vorpal, session: Session) => {
 };
 
 class AccountCreateCommand extends Command<Args> {
-	protected passphrase: string = '';
-
 	protected async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
@@ -141,7 +139,7 @@ class AccountCreateCommand extends Command<Args> {
 
 		const account = await this.datadir.newKeyfile(
 			this.args.moniker,
-			this.passphrase,
+			this.passphrase!,
 			this.args.options.out
 		);
 

@@ -65,8 +65,6 @@ export default (evmlc: Vorpal, session: Session) => {
 class POAVoteCommand extends Command<Args> {
 	protected nominees: NomineeEntry[] = [];
 
-	protected passphrase: string = '';
-
 	protected async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
