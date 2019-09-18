@@ -1,4 +1,3 @@
-import Table from 'cli-table';
 import Vorpal from 'vorpal';
 
 import Node, { Contract } from 'evm-lite-core';
@@ -6,6 +5,7 @@ import utils from 'evm-lite-utils';
 
 import color from '../core/color';
 import Session from '../core/Session';
+import Table from '../core/Table';
 
 import Command, { IArgs, IOptions } from '../core/Command';
 
@@ -146,9 +146,12 @@ class POANomineeListCommand extends Command<Args> {
 
 	protected async exec(): Promise<void> {
 		const entries = await this.getNomineeList();
-		const table = new Table({
-			head: ['Moniker', 'Address', 'Up Votes', 'Down Votes']
-		});
+		const table = new Table([
+			'Moniker',
+			'Address',
+			'Up Votes',
+			'Down Votes'
+		]);
 
 		if (!this.args.options.formatted && !this.session.interactive) {
 			return color.green(JSON.stringify(entries, null, 2));

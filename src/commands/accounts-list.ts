@@ -1,10 +1,9 @@
-import Table from 'cli-table';
 import Node from 'evm-lite-core';
-import log from 'npmlog';
 import Vorpal from 'vorpal';
 
 import color from '../core/color';
 import Session from '../core/Session';
+import Table from '../core/Table';
 
 import Command, { IArgs, IOptions } from '../core/Command';
 
@@ -108,9 +107,7 @@ class AccountListCommand extends Command<Args> {
 			return color.green(JSON.stringify(accounts));
 		}
 
-		const table = new Table({
-			head: ['Moniker', 'Address', 'Balance', 'Nonce']
-		});
+		const table = new Table(['Moniker', 'Address', 'Balance', 'Nonce']);
 
 		for (const a of accounts) {
 			let balance = a.balance;

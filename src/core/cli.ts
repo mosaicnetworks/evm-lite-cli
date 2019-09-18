@@ -76,11 +76,6 @@ export default async function init(params: ICLIConfig, commands: any) {
 			)
 		);
 
-		if (process.argv[3] === '-d' || process.argv[3] === '--debug') {
-			session.debug = true;
-			// color.yellow(` Debug:       True`);
-		}
-
 		color.yellow(` Mode:        Interactive`);
 		color.blue(` Data Dir:    ${session.datadir.path}`);
 		color.purple(` Config File: ${session.datadir.configPath}`);

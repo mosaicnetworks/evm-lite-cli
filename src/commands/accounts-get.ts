@@ -1,4 +1,3 @@
-import Table from 'cli-table';
 import Inquirer from 'inquirer';
 import Vorpal from 'vorpal';
 
@@ -7,6 +6,7 @@ import utils from 'evm-lite-utils';
 
 import color from '../core/color';
 import Session from '../core/Session';
+import Table from '../core/Table';
 
 import Command, { IArgs, IOptions } from '../core/Command';
 
@@ -100,9 +100,7 @@ class AccountGetCommand extends Command<Args> {
 			);
 		}
 
-		const table = new Table({
-			head: ['Address', 'Balance', 'Nonce', 'Bytecode']
-		});
+		const table = new Table(['Address', 'Balance', 'Nonce', 'Bytecode']);
 
 		table.push([a.address, a.balance.format('T'), a.nonce, a.bytecode]);
 
