@@ -97,11 +97,7 @@ abstract class Command<
 		}
 
 		// check connection
-		try {
-			await this.node.getInfo();
-		} catch {
-			throw Error('Connection to node not valid');
-		}
+		await this.node.getInfo();
 
 		// fetch account balances
 		const accounts: any = await Promise.all(

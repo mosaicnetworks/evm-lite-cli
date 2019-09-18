@@ -144,7 +144,7 @@ class AccountCreateCommand extends Command<Args> {
 			this.args.options.out
 		);
 
-		return color.green(JSON.stringify(account));
+		return color.green(JSON.stringify(account, null, 2));
 	}
 }
 
