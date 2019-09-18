@@ -31,9 +31,7 @@ interface Args extends IArgs<Opts> {
 }
 
 interface Answers {
-	from: string;
 	address: string;
-	passphrase: string;
 	verdict: boolean;
 	gas: number;
 	gasPrice: number;
@@ -95,6 +93,8 @@ class POAVoteCommand extends Command<Args> {
 	}
 
 	protected async prompt(): Promise<void> {
+		await this.decryptPrompt();
+
 		const cmd = new POANomineeList(this.session, this.args);
 
 		// initialize cmd execution
@@ -102,20 +102,7 @@ class POAVoteCommand extends Command<Args> {
 
 		this.nominees = await cmd.getNomineeList();
 
-		const keystore = await this.datadir.listKeyfiles();
-
 		const questions: Inquirer.QuestionCollection<Answers> = [
-			{
-				choices: Object.keys(keystore).map(moniker => moniker),
-				message: 'From: ',
-				name: 'from',
-				type: 'list'
-			},
-			{
-				message: 'Passphrase: ',
-				name: 'passphrase',
-				type: 'password'
-			},
 			{
 				choices: this.nominees.map(
 					nominee => `${nominee.moniker} (${nominee.address})`
@@ -146,12 +133,9 @@ class POAVoteCommand extends Command<Args> {
 		const answers = await Inquirer.prompt<Answers>(questions);
 
 		this.args.address = answers.address.split(' ')[1].slice(1, -1);
-		this.args.options.from = answers.from;
 		this.args.options.verdict = answers.verdict;
 		this.args.options.gas = answers.gas;
 		this.args.options.gasprice = answers.gasPrice;
-
-		this.passphrase = answers.passphrase;
 
 		return;
 	}
@@ -165,30 +149,36 @@ class POAVoteCommand extends Command<Args> {
 			throw Error('Nominee address has an invalid length.');
 		}
 
-		if (!this.args.options.verdict) {
+		if (!this.args.options.verdict && this.args.options.verdict !== false) {
 			throw Error('No verdict provided for nominee.');
 		}
 
-		if (!this.args.options.from) {
-			throw Error('No `from` moniker provided or set in config.');
-		}
-
-		if (!this.passphrase) {
-			if (!this.args.options.pwd) {
-				throw Error('Passphrase file path not provided.');
+		if (!this.account) {
+			if (!this.args.options.from) {
+				throw Error('No `from` moniker provided or set in config.');
 			}
 
-			if (!utils.exists(this.args.options.pwd)) {
-				throw Error('Passphrase file path provided does not exist.');
-			}
+			if (!this.passphrase) {
+				if (!this.args.options.pwd) {
+					throw Error('Passphrase file path not provided.');
+				}
 
-			if (utils.isDirectory(this.args.options.pwd)) {
-				throw Error('Passphrase file path provided is a directory.');
-			}
+				if (!utils.exists(this.args.options.pwd)) {
+					throw Error(
+						'Passphrase file path provided does not exist.'
+					);
+				}
 
-			this.passphrase = fs
-				.readFileSync(this.args.options.pwd, 'utf8')
-				.trim();
+				if (utils.isDirectory(this.args.options.pwd)) {
+					throw Error(
+						'Passphrase file path provided is a directory.'
+					);
+				}
+
+				this.passphrase = fs
+					.readFileSync(this.args.options.pwd, 'utf8')
+					.trim();
+			}
 		}
 	}
 
@@ -200,12 +190,18 @@ class POAVoteCommand extends Command<Args> {
 		const poa = await this.node!.getPOA();
 		const contract = Contract.load(JSON.parse(poa.abi), poa.address);
 
-		const keyfile = await this.datadir.getKeyfile(this.args.options.from);
-		const account = Datadir.decrypt(keyfile, this.passphrase);
+		// sanity check
+		if (!this.account) {
+			const keyfile = await this.datadir.getKeyfile(
+				this.args.options.from
+			);
+
+			this.account = Datadir.decrypt(keyfile, this.passphrase!);
+		}
 
 		const tx = contract.methods.castNomineeVote(
 			{
-				from: keyfile.address,
+				from: this.account.address,
 				gas: this.args.options.gas,
 				gasPrice: this.args.options.gasprice
 			},
@@ -213,7 +209,7 @@ class POAVoteCommand extends Command<Args> {
 			this.args.options.verdict
 		);
 
-		const receipt = await this.node!.sendTx(tx, account);
+		const receipt = await this.node!.sendTx(tx, this.account);
 		if (!receipt.logs.length) {
 			throw Error(
 				'No logs were returned. ' +

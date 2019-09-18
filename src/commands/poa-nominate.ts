@@ -28,9 +28,7 @@ interface Args extends IArgs<Opts> {
 }
 
 interface Answers {
-	from: string;
 	address: string;
-	passphrase: string;
 	nomineeMoniker: string;
 	gas: number;
 	gasPrice: number;
@@ -89,20 +87,10 @@ class POANominateCommand extends Command<Args> {
 	}
 
 	protected async prompt(): Promise<void> {
-		const keystore = await this.datadir.listKeyfiles();
+		await this.decryptPrompt();
 
+		const keystore = await this.datadir.listKeyfiles();
 		const questions: Inquirer.QuestionCollection<Answers> = [
-			{
-				choices: Object.keys(keystore).map(moniker => moniker),
-				message: 'From: ',
-				name: 'from',
-				type: 'list'
-			},
-			{
-				message: 'Passphrase: ',
-				name: 'passphrase',
-				type: 'password'
-			},
 			{
 				default: keystore[this.args.options.from].address || '',
 				message: 'Nominee: ',
@@ -133,12 +121,9 @@ class POANominateCommand extends Command<Args> {
 
 		this.args.address = utils.trimHex(answers.address);
 
-		this.args.options.from = answers.from;
 		this.args.options.moniker = answers.nomineeMoniker;
 		this.args.options.gas = answers.gas;
 		this.args.options.gasprice = answers.gasPrice;
-
-		this.passphrase = answers.passphrase;
 	}
 
 	protected async check(): Promise<void> {
@@ -154,26 +139,32 @@ class POANominateCommand extends Command<Args> {
 			throw Error('No moniker provided for nominee.');
 		}
 
-		if (!this.args.options.from) {
-			throw Error('No `from` moniker provided or set in config.');
-		}
-
-		if (!this.passphrase) {
-			if (!this.args.options.pwd) {
-				throw Error('Passphrase file path not provided.');
+		if (!this.account) {
+			if (!this.args.options.from) {
+				throw Error('No `from` moniker provided or set in config.');
 			}
 
-			if (!utils.exists(this.args.options.pwd)) {
-				throw Error('Passphrase file path provided does not exist.');
-			}
+			if (!this.passphrase) {
+				if (!this.args.options.pwd) {
+					throw Error('Passphrase file path not provided.');
+				}
 
-			if (utils.isDirectory(this.args.options.pwd)) {
-				throw Error('Passphrase file path provided is a directory.');
-			}
+				if (!utils.exists(this.args.options.pwd)) {
+					throw Error(
+						'Passphrase file path provided does not exist.'
+					);
+				}
 
-			this.passphrase = fs
-				.readFileSync(this.args.options.pwd, 'utf8')
-				.trim();
+				if (utils.isDirectory(this.args.options.pwd)) {
+					throw Error(
+						'Passphrase file path provided is a directory.'
+					);
+				}
+
+				this.passphrase = fs
+					.readFileSync(this.args.options.pwd, 'utf8')
+					.trim();
+			}
 		}
 	}
 
@@ -189,12 +180,18 @@ class POANominateCommand extends Command<Args> {
 
 		const contract = Contract.load(JSON.parse(poa.abi), poa.address);
 
-		const keyfile = await this.datadir.getKeyfile(this.args.options.from);
-		const account = Datadir.decrypt(keyfile, this.passphrase);
+		// sanity check
+		if (!this.account) {
+			const keyfile = await this.datadir.getKeyfile(
+				this.args.options.from
+			);
+
+			this.account = Datadir.decrypt(keyfile, this.passphrase!);
+		}
 
 		const tx = contract.methods.submitNominee(
 			{
-				from: keyfile.address,
+				from: this.account.address,
 				gas: this.args.options.gas,
 				gasPrice: this.args.options.gasprice
 			},
@@ -202,7 +199,7 @@ class POANominateCommand extends Command<Args> {
 			this.args.options.moniker
 		);
 
-		const receipt = await this.node!.sendTx(tx, account);
+		const receipt = await this.node!.sendTx(tx, this.account);
 
 		if (!receipt.logs.length) {
 			throw Error(
