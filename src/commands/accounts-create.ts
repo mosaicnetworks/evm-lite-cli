@@ -60,11 +60,11 @@ class AccountCreateCommand extends Command<Args> {
 			}
 
 			if (!utils.exists(this.args.options.pwd)) {
-				throw Error('Passphrase file path provided does not exist.');
+				throw Error('Passphrase file path provided does not exist');
 			}
 
 			if (utils.isDirectory(this.args.options.pwd)) {
-				throw Error('Passphrase file path provided is a directory.');
+				throw Error('Passphrase file path provided is a directory');
 			}
 
 			this.passphrase = fs
@@ -74,11 +74,11 @@ class AccountCreateCommand extends Command<Args> {
 
 		if (this.args.options.out) {
 			if (!utils.exists(this.args.options.out)) {
-				throw Error('Output path provided does not exist.');
+				throw Error('Output path provided does not exist');
 			}
 
 			if (!utils.isDirectory(this.args.options.out)) {
-				throw Error('Output path provided is a not a directory.');
+				throw Error('Output path provided is a not a directory');
 			}
 		}
 	}
