@@ -1,5 +1,3 @@
-<img width="75px" height="75px" float="right" align="right" alt="JS Logo" src="https://cdn0.iconfinder.com/data/icons/development-2/24/terminal-512.png" title="Javascript Modules"/>
-
 # EVM-Lite CLI
 
 [![npm version](https://badge.fury.io/js/evm-lite-cli.svg)](https://badge.fury.io/js/evm-lite-cli)
