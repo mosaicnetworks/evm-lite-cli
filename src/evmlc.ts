@@ -20,6 +20,7 @@ import poaVote from './commands/poa-vote';
 import poaWhitelist from './commands/poa-whitelist';
 
 import info from './commands/info';
+import test from './commands/test';
 import transfer from './commands/transfer';
 import version from './commands/version';
 
@@ -53,7 +54,8 @@ const commands = [
 
 	info,
 	transfer,
-	version
+	version,
+	test
 ];
 
 init(params, commands).catch(console.log);
