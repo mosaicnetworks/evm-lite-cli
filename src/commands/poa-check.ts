@@ -50,7 +50,7 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class POACheckCommand extends Command<Args> {
-	protected async init(): Promise<boolean> {
+	public async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
@@ -72,7 +72,7 @@ class POACheckCommand extends Command<Args> {
 		return this.args.options.interactive;
 	}
 
-	protected async prompt(): Promise<void> {
+	public async prompt(): Promise<void> {
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
 				message: 'Nominee address: ',
@@ -101,13 +101,13 @@ class POACheckCommand extends Command<Args> {
 		this.args.options.gasprice = answers.gasPrice;
 	}
 
-	protected async check(): Promise<void> {
+	public async check(): Promise<void> {
 		if (utils.trimHex(this.args.address).length !== 40) {
 			throw Error('Nominee address has an invalid length.');
 		}
 	}
 
-	protected async exec(): Promise<void> {
+	public async exec(): Promise<void> {
 		this.log.http(
 			'GET',
 			`${this.args.options.host}:${this.args.options.port}/poa`

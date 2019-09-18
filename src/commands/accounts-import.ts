@@ -47,14 +47,14 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class AccountImportCommand extends Command<Args> {
-	protected async init(): Promise<boolean> {
+	public async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
 		return this.args.options.interactive;
 	}
 
-	protected async prompt(): Promise<void> {
+	public async prompt(): Promise<void> {
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
 				message: 'Moniker: ',
@@ -80,7 +80,7 @@ class AccountImportCommand extends Command<Args> {
 		this.args.options.default = answers.makeDefault || false;
 	}
 
-	protected async check(): Promise<void> {
+	public async check(): Promise<void> {
 		if (!this.args.moniker) {
 			throw Error('Moniker cannot be empty');
 		}
@@ -102,7 +102,7 @@ class AccountImportCommand extends Command<Args> {
 		}
 	}
 
-	protected async exec(): Promise<void> {
+	public async exec(): Promise<void> {
 		this.log.info('keystore', this.datadir.keystorePath);
 
 		const keyfile = JSON.parse(

@@ -53,7 +53,7 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class POAInitCommand extends Command<Args> {
-	protected async init(): Promise<boolean> {
+	public async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
@@ -78,7 +78,7 @@ class POAInitCommand extends Command<Args> {
 		return this.args.options.interactive;
 	}
 
-	protected async prompt(): Promise<void> {
+	public async prompt(): Promise<void> {
 		await this.decryptPrompt();
 
 		const questions: Inquirer.QuestionCollection<Answers> = [
@@ -102,7 +102,7 @@ class POAInitCommand extends Command<Args> {
 		this.args.options.gasprice = answers.gasPrice;
 	}
 
-	protected async check(): Promise<void> {
+	public async check(): Promise<void> {
 		if (!this.account) {
 			if (!this.args.options.from) {
 				throw Error('No `from` moniker provided or set in config.');
@@ -132,7 +132,7 @@ class POAInitCommand extends Command<Args> {
 		}
 	}
 
-	protected async exec(): Promise<void> {
+	public async exec(): Promise<void> {
 		this.log.http(
 			'GET',
 			`${this.args.options.host}:${this.args.options.port}/poa`

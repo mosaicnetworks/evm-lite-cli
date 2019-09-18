@@ -43,7 +43,7 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class AccountGetCommand extends Command<Args> {
-	protected async init(): Promise<boolean> {
+	public async init(): Promise<boolean> {
 		this.args.options.host =
 			this.args.options.host || this.config.connection.host;
 		this.args.options.port =
@@ -59,7 +59,7 @@ class AccountGetCommand extends Command<Args> {
 		return this.args.options.interactive;
 	}
 
-	protected async prompt(): Promise<void> {
+	public async prompt(): Promise<void> {
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
 				message: 'Address: ',
@@ -73,7 +73,7 @@ class AccountGetCommand extends Command<Args> {
 		this.args.address = address;
 	}
 
-	protected async check(): Promise<void> {
+	public async check(): Promise<void> {
 		if (!this.args.address) {
 			throw Error('No address provided');
 		}
@@ -85,7 +85,7 @@ class AccountGetCommand extends Command<Args> {
 		}
 	}
 
-	protected async exec(): Promise<void> {
+	public async exec(): Promise<void> {
 		const { host, port } = this.args.options;
 		this.log.http('GET', `${host}:${port}/account/${this.args.address}`);
 

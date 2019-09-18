@@ -22,15 +22,15 @@ class ConfigViewCommand extends Command {
 		return false;
 	}
 
-	protected async prompt(): Promise<void> {
+	public async prompt(): Promise<void> {
 		return;
 	}
 
-	protected async check(): Promise<void> {
+	public async check(): Promise<void> {
 		return;
 	}
 
-	protected async exec(): Promise<void> {
+	public async exec(): Promise<void> {
 		this.log.info('config', this.datadir.configPath);
 
 		color.green(this.datadir.configToml);

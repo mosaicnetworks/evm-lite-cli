@@ -46,14 +46,14 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class ConfigSetCommand extends Command<Args> {
-	protected async init(): Promise<boolean> {
+	public async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
 		return this.args.options.interactive;
 	}
 
-	protected async prompt(): Promise<void> {
+	public async prompt(): Promise<void> {
 		const config = this.datadir.config;
 		const keystore = await this.datadir.listKeyfiles();
 
@@ -100,11 +100,11 @@ class ConfigSetCommand extends Command<Args> {
 		this.args.options.from = answers.from;
 	}
 
-	protected async check(): Promise<void> {
+	public async check(): Promise<void> {
 		return;
 	}
 
-	protected async exec(): Promise<void> {
+	public async exec(): Promise<void> {
 		this.log.info('config', this.datadir.configPath);
 
 		const config = this.datadir.config;

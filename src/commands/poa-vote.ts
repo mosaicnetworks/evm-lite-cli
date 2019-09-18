@@ -63,9 +63,9 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class POAVoteCommand extends Command<Args> {
-	protected nominees: NomineeEntry[] = [];
+	public nominees: NomineeEntry[] = [];
 
-	protected async init(): Promise<boolean> {
+	public async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
@@ -90,7 +90,7 @@ class POAVoteCommand extends Command<Args> {
 		return this.args.options.interactive;
 	}
 
-	protected async prompt(): Promise<void> {
+	public async prompt(): Promise<void> {
 		await this.decryptPrompt();
 
 		const cmd = new POANomineeList(this.session, this.args);
@@ -138,7 +138,7 @@ class POAVoteCommand extends Command<Args> {
 		return;
 	}
 
-	protected async check(): Promise<void> {
+	public async check(): Promise<void> {
 		if (!this.args.address) {
 			throw Error('No nominee address provided.');
 		}
@@ -180,7 +180,7 @@ class POAVoteCommand extends Command<Args> {
 		}
 	}
 
-	protected async exec(): Promise<void> {
+	public async exec(): Promise<void> {
 		if (!this.nominees.length) {
 			return color.yellow('There are no nominees in election');
 		}

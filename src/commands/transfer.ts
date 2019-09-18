@@ -69,10 +69,10 @@ export default (evmlc: Vorpal, session: Session) => {
 
 class TransferCommand extends Command<Args> {
 	// command level variable
-	protected send: boolean = false;
-	protected unit: IUnits = 'T';
+	public send: boolean = false;
+	public unit: IUnits = 'T';
 
-	protected async init(): Promise<boolean> {
+	public async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
@@ -104,7 +104,7 @@ class TransferCommand extends Command<Args> {
 		return this.args.options.interactive;
 	}
 
-	protected async prompt(): Promise<void> {
+	public async prompt(): Promise<void> {
 		await this.decryptPrompt();
 
 		const first: Inquirer.QuestionCollection<FirstAnswers> = [
@@ -168,7 +168,7 @@ class TransferCommand extends Command<Args> {
 		this.send = send;
 	}
 
-	protected async check(): Promise<void> {
+	public async check(): Promise<void> {
 		// check from and passphrase path if account not already decrypted
 		// mostly likely to occur in only non interactive mode
 		if (!this.account) {
@@ -219,7 +219,7 @@ class TransferCommand extends Command<Args> {
 		}
 	}
 
-	protected async exec(): Promise<void> {
+	public async exec(): Promise<void> {
 		if (!this.send) {
 			return color.yellow('Transaction aborted');
 		}

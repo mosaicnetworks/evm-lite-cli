@@ -17,6 +17,7 @@ interface Opts extends IOptions {
 }
 
 interface Args extends IArgs<Opts> {
+	options: Opts;
 	moniker: string;
 }
 
@@ -44,18 +45,7 @@ const command = (evmlc: Vorpal, session: Session) => {
 };
 
 class AccountCreateCommand extends Command<Args> {
-	protected async init(): Promise<boolean> {
-		this.args.options.interactive =
-			this.args.options.interactive || this.session.interactive;
-
-		this.args.moniker = this.args.moniker || this.config.defaults.from;
-		this.args.options.out =
-			this.args.options.out || this.datadir.keystorePath;
-
-		return this.args.options.interactive;
-	}
-
-	protected async check(): Promise<void> {
+	public async check(): Promise<void> {
 		if (!this.args.moniker) {
 			throw Error('Moniker cannot be empty');
 		}
@@ -93,7 +83,18 @@ class AccountCreateCommand extends Command<Args> {
 		}
 	}
 
-	protected async prompt(): Promise<void> {
+	public async init(): Promise<boolean> {
+		this.args.options.interactive =
+			this.args.options.interactive || this.session.interactive;
+
+		this.args.moniker = this.args.moniker || this.config.defaults.from;
+		this.args.options.out =
+			this.args.options.out || this.datadir.keystorePath;
+
+		return this.args.options.interactive;
+	}
+
+	public async prompt(): Promise<void> {
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
 				message: 'Moniker: ',
@@ -134,7 +135,7 @@ class AccountCreateCommand extends Command<Args> {
 		this.passphrase = answers.passphrase.trim();
 	}
 
-	protected async exec(): Promise<void> {
+	public async exec(): Promise<void> {
 		this.log.info('keystore', this.datadir.keystorePath);
 
 		const account = await this.datadir.newKeyfile(

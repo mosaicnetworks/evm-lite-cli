@@ -31,7 +31,7 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class TestCommand extends Command<Args> {
-	protected async init(): Promise<boolean> {
+	public async init(): Promise<boolean> {
 		this.args.options.host =
 			this.args.options.host || this.config.connection.host;
 		this.args.options.port =
@@ -42,17 +42,17 @@ class TestCommand extends Command<Args> {
 		return false;
 	}
 
-	protected async prompt(): Promise<void> {
+	public async prompt(): Promise<void> {
 		await this.decryptPrompt();
 
 		return;
 	}
 
-	protected async check(): Promise<void> {
+	public async check(): Promise<void> {
 		return;
 	}
 
-	protected async exec(): Promise<void> {
+	public async exec(): Promise<void> {
 		console.log(this.account);
 	}
 }

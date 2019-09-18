@@ -27,14 +27,14 @@ abstract class Command<
 	TConsensus extends IAbstractConsensus = Solo
 > {
 	// potential optional values
-	protected node?: Node<TConsensus>;
-	protected account?: Account;
-	protected passphrase?: string;
+	public node?: Node<TConsensus>;
+	public account?: Account;
+	public passphrase?: string;
 
 	// logger
-	protected log: Logger;
+	public log: Logger;
 
-	constructor(protected readonly session: Session, public readonly args: T) {
+	constructor(public readonly session: Session, public readonly args: T) {
 		this.log = logger;
 
 		if (this.args.options.silent) {
@@ -78,18 +78,18 @@ abstract class Command<
 	}
 
 	// prepare command execution
-	protected abstract async init(): Promise<boolean>;
+	public abstract async init(): Promise<boolean>;
 
 	// do interactive command execution
-	protected abstract async prompt(): Promise<void>;
+	public abstract async prompt(): Promise<void>;
 
 	// parse arguments of command here
-	protected abstract async check(): Promise<void>;
+	public abstract async check(): Promise<void>;
 
 	// execute command
-	protected abstract async exec(): Promise<void>;
+	public abstract async exec(): Promise<void>;
 
-	protected async decryptPrompt() {
+	public async decryptPrompt() {
 		const keystore = await this.datadir.listKeyfiles();
 
 		if (!this.node) {

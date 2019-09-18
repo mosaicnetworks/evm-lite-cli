@@ -24,19 +24,19 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class VersionCommand extends Command {
-	protected async init(): Promise<boolean> {
+	public async init(): Promise<boolean> {
 		return false;
 	}
 
-	protected async prompt(): Promise<void> {
+	public async prompt(): Promise<void> {
 		return;
 	}
 
-	protected async check(): Promise<void> {
+	public async check(): Promise<void> {
 		return;
 	}
 
-	protected async exec(): Promise<void> {
+	public async exec(): Promise<void> {
 		this.log.info('evm-lite-core', pkg.dependencies[`evm-lite-core`]);
 		this.log.info(
 			'evm-lite-keystore',
