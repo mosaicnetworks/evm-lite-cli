@@ -5,6 +5,7 @@
 	"typings": "dist/typings/index.d.ts",
 	"license": "MIT",
 	"scripts": {
+		"changelog": "yarn auto-changelog ",
 		"lint": "tslint -p . -c ./tslint.json",
 		"prepublish": "yarn link && yarn build",
 		"clean": "rm -rf node_modules dist package-lock.json bin",
@@ -42,6 +43,7 @@
 		"@types/mkdirp": "^0.5.2",
 		"@types/node": "^12.7.5",
 		"@types/npmlog": "^4.1.2",
+		"auto-changelog": "^1.16.1",
 		"jest": "^24.9.0",
 		"ts-jest": "^24.1.0",
 		"ts-node": "^8.4.1",
