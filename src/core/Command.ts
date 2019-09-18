@@ -26,9 +26,13 @@ abstract class Command<
 	T extends IArgs<IOptions> = IArgs<IOptions>,
 	TConsensus extends IAbstractConsensus = Solo
 > {
-	// potential optional values
+	// node will be set here if the command requires it
 	public node?: Node<TConsensus>;
+
+	// command that requires an account to sign transaction
 	public account?: Account;
+
+	// the passphrase used as an of the account
 	public passphrase?: string;
 
 	// logger
@@ -60,6 +64,11 @@ abstract class Command<
 			}
 
 			await this.check();
+
+			// should this fn return a string and then be formatted in the function
+			// rather than logging in the function this allows for better testing
+			// as we can actually read the return of the function rather than reading
+			// frmo stdio
 			await this.exec();
 
 			// reset log level
