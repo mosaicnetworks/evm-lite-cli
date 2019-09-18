@@ -1,5 +1,4 @@
 import Inquirer from 'inquirer';
-import log from 'npmlog';
 import Vorpal from 'vorpal';
 
 import color from '../core/color';

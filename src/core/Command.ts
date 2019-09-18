@@ -1,5 +1,3 @@
-import * as net from 'net';
-
 import Inquirer from 'inquirer';
 
 import logger, { Logger } from 'npmlog';

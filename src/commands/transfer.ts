@@ -7,8 +7,6 @@ import Node from 'evm-lite-core';
 import Datadir from 'evm-lite-datadir';
 import utils, { Currency, IUnits } from 'evm-lite-utils';
 
-import { AbstractKeystore } from 'evm-lite-keystore';
-
 import color from '../core/color';
 import Session from '../core/Session';
 
