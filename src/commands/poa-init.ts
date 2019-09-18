@@ -25,8 +25,6 @@ interface Opts extends IOptions {
 interface Args extends IArgs<Opts> {}
 
 interface Answers {
-	from: string;
-	passphrase: string;
 	gas: number;
 	gasPrice: number;
 }
@@ -83,20 +81,9 @@ class POAInitCommand extends Command<Args> {
 	}
 
 	protected async prompt(): Promise<void> {
-		const keystore = await this.datadir.listKeyfiles();
+		await this.decryptPrompt();
 
 		const questions: Inquirer.QuestionCollection<Answers> = [
-			{
-				choices: Object.keys(keystore).map(moniker => moniker),
-				message: 'From: ',
-				name: 'from',
-				type: 'list'
-			},
-			{
-				message: 'Passphrase: ',
-				name: 'passphrase',
-				type: 'password'
-			},
 			{
 				default: this.args.options.gas || 100000,
 				message: 'Gas: ',
@@ -113,35 +100,37 @@ class POAInitCommand extends Command<Args> {
 
 		const answers = await Inquirer.prompt<Answers>(questions);
 
-		this.passphrase = answers.passphrase;
-
-		this.args.options.from = answers.from;
-
 		this.args.options.gas = answers.gas;
 		this.args.options.gasprice = answers.gasPrice;
 	}
 
 	protected async check(): Promise<void> {
-		if (!this.args.options.from) {
-			throw Error('No `from` moniker provided or set in config.');
-		}
-
-		if (!this.passphrase) {
-			if (!this.args.options.pwd) {
-				throw Error('Passphrase file path not provided.');
+		if (!this.account) {
+			if (!this.args.options.from) {
+				throw Error('No `from` moniker provided or set in config.');
 			}
 
-			if (!utils.exists(this.args.options.pwd)) {
-				throw Error('Passphrase file path provided does not exist.');
-			}
+			if (!this.passphrase) {
+				if (!this.args.options.pwd) {
+					throw Error('Passphrase file path not provided.');
+				}
 
-			if (utils.isDirectory(this.args.options.pwd)) {
-				throw Error('Passphrase file path provided is a directory.');
-			}
+				if (!utils.exists(this.args.options.pwd)) {
+					throw Error(
+						'Passphrase file path provided does not exist.'
+					);
+				}
 
-			this.passphrase = fs
-				.readFileSync(this.args.options.pwd, 'utf8')
-				.trim();
+				if (utils.isDirectory(this.args.options.pwd)) {
+					throw Error(
+						'Passphrase file path provided is a directory.'
+					);
+				}
+
+				this.passphrase = fs
+					.readFileSync(this.args.options.pwd, 'utf8')
+					.trim();
+			}
 		}
 	}
 
@@ -157,16 +146,22 @@ class POAInitCommand extends Command<Args> {
 
 		const contract = Contract.load(JSON.parse(poa.abi), poa.address);
 
-		const keyfile = await this.datadir.getKeyfile(this.args.options.from);
-		const account = Datadir.decrypt(keyfile, this.passphrase);
+		// sanity check
+		if (!this.account) {
+			const keyfile = await this.datadir.getKeyfile(
+				this.args.options.from
+			);
+
+			this.account = Datadir.decrypt(keyfile, this.passphrase!);
+		}
 
 		const tx = contract.methods.init({
-			from: keyfile.address,
+			from: this.account.address,
 			gas: this.config.defaults.gas,
 			gasPrice: this.config.defaults.gasPrice
 		});
 
-		const receipt = await this.node!.sendTx(tx, account);
+		const receipt = await this.node!.sendTx(tx, this.account);
 		const r = {
 			...receipt
 		};
