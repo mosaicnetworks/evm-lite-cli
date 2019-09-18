@@ -1,3 +1,5 @@
+<img width="75px" height="75px" float="right" align="right" alt="JS Logo" src="https://cdn0.iconfinder.com/data/icons/development-2/24/terminal-512.png" title="Javascript Modules"/>
+
 # EVM-Lite CLI
 
 [![npm version](https://badge.fury.io/js/evm-lite-cli.svg)](https://badge.fury.io/js/evm-lite-cli)
@@ -7,13 +9,9 @@ A Command Line Interface to interact with an [EVM-Lite](https://github.com/mosai
 ## Table of Contents
 
 1. [Installation](#installation)
-2. [Getting Started](#getting-started)
-3. [Commands](#commands)
-    - [Documentation](#documentation)
+2. [Commands](#commands)
     - [Flags](#flags)
-4. [Data Directory](#data-directory)
-5. [Proof of Authority](#proof-of-authority)
-6. [Developers](#developers)
+3. [Data Directory](#data-directory)
 
 ## Installation
 
@@ -29,15 +27,7 @@ or with `yarn`
 yarn global add evm-lite-cli
 ```
 
-## Getting Started
-
-There is a [Getting Started Document](docs/getting-started.md) available.
-
 ## Commands
-
-### Documentation
-
-A list of all supported commands along with documentation can be found [here](docs/README.md).
 
 ### Flags
 
@@ -62,7 +52,7 @@ In particular, this directory contains the following items:
 -   **evmlc.toml**: where global options are specified
 -   **keystore**: where all encrypted account keys are stored
 
-** This directory is shared by `EVM-Lite`**
+**This directory is shared by [EVM-Lite](https://github.com/mosaicnetworks/evm-lite#readme)**
 
 ### `evmlc.toml`
 
@@ -94,13 +84,3 @@ $ evmlc config set -i
 ? Gas: 1000000
 ? Gas Price: 0
 ```
-
-## Proof of Authority
-
-The Monet Hub uses Proof of Authority with EVM-Lite and Babble.
-
-A [Proof of Authority Document](docs/proof-of-authority.md) is available.
-
-## Developers
-
-Notes for developers are in a [developers document](docs/developer.md).
