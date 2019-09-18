@@ -4,6 +4,7 @@ import Inquirer from 'inquirer';
 import Vorpal from 'vorpal';
 
 import Node from 'evm-lite-core';
+import Datadir from 'evm-lite-datadir';
 import utils, { Currency, IUnits } from 'evm-lite-utils';
 
 import { AbstractKeystore } from 'evm-lite-keystore';
@@ -32,8 +33,6 @@ interface Opts extends IOptions {
 interface Args extends IArgs<Opts> {}
 
 interface FirstAnswers {
-	from: string;
-	passphrase: string;
 	to: string;
 	value: string;
 	gas: number;
@@ -72,7 +71,6 @@ export default (evmlc: Vorpal, session: Session) => {
 
 class TransferCommand extends Command<Args> {
 	// command level variable
-	protected passphrase: string = '';
 	protected send: boolean = false;
 	protected unit: IUnits = 'T';
 
@@ -109,35 +107,9 @@ class TransferCommand extends Command<Args> {
 	}
 
 	protected async prompt(): Promise<void> {
-		const keystore = await this.datadir.listKeyfiles();
-
-		const accounts: any = await Promise.all(
-			Object.keys(keystore).map(async moniker => {
-				const base = await this.node!.getAccount(
-					keystore[moniker].address
-				);
-
-				return {
-					...base,
-					moniker
-				};
-			})
-		);
+		await this.decryptPrompt();
 
 		const first: Inquirer.QuestionCollection<FirstAnswers> = [
-			{
-				choices: accounts.map(
-					(acc: any) => `${acc.moniker} (${acc.balance.format('T')})`
-				),
-				message: 'From: ',
-				name: 'from',
-				type: 'list'
-			},
-			{
-				message: 'Enter password: ',
-				name: 'passphrase',
-				type: 'password'
-			},
 			{
 				message: 'To',
 				name: 'to',
@@ -173,13 +145,10 @@ class TransferCommand extends Command<Args> {
 
 		const answers = await Inquirer.prompt<FirstAnswers>(first);
 
-		this.args.options.from = utils.trimHex(answers.from.split(' ')[0]);
 		this.args.options.to = answers.to;
 		this.args.options.value = answers.value;
 		this.args.options.gas = answers.gas;
 		this.args.options.gasprice = answers.gasPrice;
-
-		this.passphrase = answers.passphrase.trim();
 
 		const u = this.args.options.value.toString().slice(-1) as IUnits;
 		if (!isLetter(u)) {
@@ -202,34 +171,38 @@ class TransferCommand extends Command<Args> {
 	}
 
 	protected async check(): Promise<void> {
+		// check from and passphrase path if account not already decrypted
+		// mostly likely to occur in only non interactive mode
+		if (!this.account) {
+			if (!this.args.options.from) {
+				throw Error('No `from` moniker provided or set in config.');
+			}
+
+			if (!this.passphrase) {
+				if (!this.args.options.pwd) {
+					throw Error('--pwd file path not provided.');
+				}
+
+				if (!utils.exists(this.args.options.pwd)) {
+					throw Error('--pwd file path provided does not exist.');
+				}
+
+				if (utils.isDirectory(this.args.options.pwd)) {
+					throw Error('--pwd file path provided is a directory.');
+				}
+
+				this.passphrase = fs
+					.readFileSync(this.args.options.pwd, 'utf8')
+					.trim();
+			}
+		}
+
 		if (this.args.options.gas < 0) {
 			throw Error('Cannot use a gas value less than 0');
 		}
 
 		if (this.args.options.gasprice < 0) {
 			throw Error('Cannot use a gas price value less than 0');
-		}
-
-		if (!this.args.options.from) {
-			throw Error('No `from` moniker provided or set in config.');
-		}
-
-		if (!this.passphrase) {
-			if (!this.args.options.pwd) {
-				throw Error('--pwd file path not provided.');
-			}
-
-			if (!utils.exists(this.args.options.pwd)) {
-				throw Error('--pwd file path provided does not exist.');
-			}
-
-			if (utils.isDirectory(this.args.options.pwd)) {
-				throw Error('--pwd file path provided is a directory.');
-			}
-
-			this.passphrase = fs
-				.readFileSync(this.args.options.pwd, 'utf8')
-				.trim();
 		}
 
 		if (!this.args.options.to || !this.args.options.value) {
@@ -253,15 +226,21 @@ class TransferCommand extends Command<Args> {
 			return color.yellow('Transaction aborted');
 		}
 
-		const keyfile = await this.datadir.getKeyfile(this.args.options.from);
-		const account = AbstractKeystore.decrypt(keyfile, this.passphrase);
+		// sanity check
+		if (!this.account) {
+			const keyfile = await this.datadir.getKeyfile(
+				this.args.options.from
+			);
+
+			this.account = Datadir.decrypt(keyfile, this.passphrase!);
+		}
 
 		const value = new Currency(this.args.options.value + this.unit).format(
 			'a'
 		);
 
 		const receipt = await this.node!.transfer(
-			account,
+			this.account!,
 			this.args.options.to,
 			value.slice(0, -1),
 			this.args.options.gas,
