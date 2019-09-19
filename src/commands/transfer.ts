@@ -1,8 +1,10 @@
 import * as fs from 'fs';
 
 import Inquirer from 'inquirer';
-import Listr from 'listr';
+import ora from 'ora';
 import Vorpal from 'vorpal';
+
+import { IReceipt } from 'evm-lite-client';
 
 import Node from 'evm-lite-core';
 import Datadir from 'evm-lite-datadir';
@@ -11,7 +13,6 @@ import utils, { Currency, IUnits } from 'evm-lite-utils';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
-import { IReceipt } from 'evm-lite-client';
 
 interface Opts extends IOptions {
 	interactive?: boolean;
@@ -238,37 +239,21 @@ class TransferCommand extends Command<Args> {
 			'a'
 		);
 
-		let receipt: IReceipt = {} as IReceipt;
+		const spinner = ora('Sending transaction');
 		if (this.args.options.interactive) {
-			const tasks = new Listr([
-				{
-					title: 'Sending transaction',
-					task: () =>
-						this.node!.transfer(
-							this.account!,
-							this.args.options.to,
-							value.slice(0, -1),
-							this.args.options.gas,
-							this.args.options.gasprice
-						)
-							.then(r => {
-								receipt = r;
-							})
-							.catch(e => {
-								throw Error(e);
-							})
-				}
-			]);
+			spinner.start();
+		}
 
-			await tasks.run();
-		} else {
-			receipt = await this.node!.transfer(
-				this.account!,
-				this.args.options.to,
-				value.slice(0, -1),
-				this.args.options.gas,
-				this.args.options.gasprice
-			);
+		const receipt = await this.node!.transfer(
+			this.account!,
+			this.args.options.to,
+			value.slice(0, -1),
+			this.args.options.gas,
+			this.args.options.gasprice
+		);
+
+		if (this.args.options.interactive) {
+			spinner.stop();
 		}
 
 		return JSON.stringify(receipt, null, 2);
