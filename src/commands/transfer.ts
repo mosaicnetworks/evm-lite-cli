@@ -1,10 +1,7 @@
 import * as fs from 'fs';
 
 import Inquirer from 'inquirer';
-import ora from 'ora';
 import Vorpal from 'vorpal';
-
-import { IReceipt } from 'evm-lite-client';
 
 import Node from 'evm-lite-core';
 import Datadir from 'evm-lite-datadir';
@@ -239,10 +236,7 @@ class TransferCommand extends Command<Args> {
 			'a'
 		);
 
-		const spinner = ora('Sending transaction');
-		if (this.args.options.interactive) {
-			spinner.start();
-		}
+		this.startSpinner('Sending Transaction');
 
 		const receipt = await this.node!.transfer(
 			this.account!,
@@ -252,9 +246,7 @@ class TransferCommand extends Command<Args> {
 			this.args.options.gasprice
 		);
 
-		if (this.args.options.interactive) {
-			spinner.stop();
-		}
+		this.stopSpinner();
 
 		return JSON.stringify(receipt, null, 2);
 	}

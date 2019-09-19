@@ -7,6 +7,7 @@ import { Args } from 'vorpal';
 
 import Node, { Account } from 'evm-lite-core';
 import Datadir from 'evm-lite-datadir';
+import ora from 'ora';
 
 import color from './color';
 import Session from './Session';
@@ -14,6 +15,7 @@ import Session from './Session';
 // default options for all commands
 export interface IOptions {
 	silent?: boolean;
+	interactive?: boolean;
 }
 
 export type IArgs<T> = Args<T>;
@@ -38,6 +40,9 @@ abstract class Command<
 
 	// command level logger
 	protected log: Logger;
+
+	// command level
+	private spinner = ora('');
 
 	constructor(public readonly session: Session, public readonly args: T) {
 		this.log = logger;
@@ -95,6 +100,17 @@ abstract class Command<
 
 	protected get datadir() {
 		return this.session.datadir;
+	}
+
+	protected startSpinner(text: string) {
+		if (this.args.options.interactive) {
+			this.spinner.text = text;
+			this.spinner.start();
+		}
+	}
+
+	protected stopSpinner() {
+		this.spinner.stop();
 	}
 
 	// prepare command execution
@@ -167,6 +183,8 @@ abstract class Command<
 
 		const answers = await Inquirer.prompt<IDecryptPrompt>(questions);
 
+		this.startSpinner('Decrypting...');
+
 		const from = answers.from.split(' ')[0];
 		if (!from) {
 			throw Error('`from` moniker not provided.');
@@ -179,6 +197,8 @@ abstract class Command<
 		const keyfile = await this.datadir.getKeyfile(from);
 
 		this.account = Datadir.decrypt(keyfile, answers.passphrase.trim());
+
+		this.stopSpinner();
 	}
 }
 

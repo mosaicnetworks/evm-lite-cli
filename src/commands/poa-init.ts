@@ -158,6 +158,8 @@ class POAInitCommand extends Command<Args> {
 			gasPrice: this.config.defaults.gasPrice
 		});
 
+		this.startSpinner('Sending Transaction');
+
 		const receipt = await this.node!.sendTx(tx, this.account);
 		const r = {
 			...receipt
@@ -177,6 +179,8 @@ class POAInitCommand extends Command<Args> {
 					'Possibly due to lack of `gas` or may not be whitelisted.'
 			);
 		}
+
+		this.stopSpinner();
 
 		return JSON.stringify(r, null, 2);
 	}

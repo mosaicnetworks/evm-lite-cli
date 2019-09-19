@@ -196,6 +196,8 @@ class POANominateCommand extends Command<Args> {
 			this.args.options.moniker
 		);
 
+		this.startSpinner('Sending Transaction');
+
 		const receipt = await this.node!.sendTx(tx, this.account);
 
 		if (!receipt.logs.length) {
@@ -239,6 +241,8 @@ class POANominateCommand extends Command<Args> {
 				'No logs were returned matching the specified `moniker`.'
 			);
 		}
+
+		this.stopSpinner();
 
 		return `You (${
 			nomineeProposedEvent.args._proposer

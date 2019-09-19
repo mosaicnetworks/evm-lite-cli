@@ -206,6 +206,8 @@ class POAVoteCommand extends Command<Args> {
 			this.args.options.verdict
 		);
 
+		this.startSpinner('Sending Transaction');
+
 		const receipt = await this.node!.sendTx(tx, this.account);
 		if (!receipt.logs.length) {
 			throw Error(
@@ -244,6 +246,8 @@ class POAVoteCommand extends Command<Args> {
 
 			message += `\nElection completed with the nominee being '${accepted}'.`;
 		}
+
+		this.stopSpinner();
 
 		return message;
 	}
