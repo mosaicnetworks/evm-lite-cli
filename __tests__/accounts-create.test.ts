@@ -13,7 +13,7 @@ describe('accounts create', () => {
 		});
 
 		try {
-			await cmd.run(true);
+			await cmd.test();
 		} catch (e) {
 			expect(e.message).toBe('Moniker cannot be empty');
 		}
@@ -29,7 +29,7 @@ describe('accounts create', () => {
 		});
 
 		try {
-			await cmd.run(true);
+			await cmd.test();
 		} catch (e) {
 			expect(e.message).toBe('Moniker contains illegal characters');
 		}
@@ -45,7 +45,7 @@ describe('accounts create', () => {
 		});
 
 		try {
-			await cmd.run(true);
+			await cmd.test();
 		} catch (e) {
 			expect(e.message).toBe('No passphrase file path provided');
 		}
@@ -62,7 +62,7 @@ describe('accounts create', () => {
 		});
 
 		try {
-			await cmd.run(true);
+			await cmd.test();
 		} catch (e) {
 			expect(e.message).toBe(
 				'Passphrase file path provided does not exist'
@@ -81,7 +81,7 @@ describe('accounts create', () => {
 		});
 
 		try {
-			await cmd.run(true);
+			await cmd.test();
 		} catch (e) {
 			expect(e.message).toBe(
 				'Passphrase file path provided is a directory'
@@ -100,7 +100,7 @@ describe('accounts create', () => {
 		});
 
 		try {
-			await cmd.run(true);
+			await cmd.test();
 		} catch (e) {
 			expect(e.message).toBe('Output path provided does not exist');
 		}
@@ -117,7 +117,7 @@ describe('accounts create', () => {
 		});
 
 		try {
-			await cmd.run(true);
+			await cmd.test();
 		} catch (e) {
 			expect(e.message).toBe('Output path provided is a not a directory');
 		}
