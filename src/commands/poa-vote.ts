@@ -7,7 +7,6 @@ import Node, { Contract } from 'evm-lite-core';
 import Datadir from 'evm-lite-datadir';
 import utils from 'evm-lite-utils';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import { NomineeEntry, POANomineeList } from './poa-nomineelist';
@@ -180,9 +179,9 @@ class POAVoteCommand extends Command<Args> {
 		}
 	}
 
-	protected async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		if (!this.nominees.length) {
-			return color.yellow('There are no nominees in election');
+			return 'There are no nominees in election';
 		}
 
 		const poa = await this.node!.getPOA();
@@ -206,6 +205,8 @@ class POAVoteCommand extends Command<Args> {
 			utils.cleanAddress(this.args.address),
 			this.args.options.verdict
 		);
+
+		this.startSpinner('Sending Transaction');
 
 		const receipt = await this.node!.sendTx(tx, this.account);
 		if (!receipt.logs.length) {
@@ -246,7 +247,9 @@ class POAVoteCommand extends Command<Args> {
 			message += `\nElection completed with the nominee being '${accepted}'.`;
 		}
 
-		return color.green(message);
+		this.stopSpinner();
+
+		return message;
 	}
 }
 

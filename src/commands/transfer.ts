@@ -7,9 +7,6 @@ import Node from 'evm-lite-core';
 import Datadir from 'evm-lite-datadir';
 import utils, { Currency, IUnits } from 'evm-lite-utils';
 
-import { AbstractKeystore } from 'evm-lite-keystore';
-
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
@@ -163,7 +160,7 @@ class TransferCommand extends Command<Args> {
 			gasPrice: this.args.options.gasprice
 		};
 
-		color.blue(JSON.stringify(tx, null, 2));
+		console.log(JSON.stringify(tx, null, 2));
 
 		const { send } = await Inquirer.prompt<SecondAnswers>(second);
 
@@ -221,9 +218,9 @@ class TransferCommand extends Command<Args> {
 		}
 	}
 
-	protected async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		if (!this.send) {
-			return color.yellow('Transaction aborted');
+			return 'Aborted';
 		}
 
 		// sanity check
@@ -239,6 +236,8 @@ class TransferCommand extends Command<Args> {
 			'a'
 		);
 
+		this.startSpinner('Sending Transaction');
+
 		const receipt = await this.node!.transfer(
 			this.account!,
 			this.args.options.to,
@@ -247,7 +246,9 @@ class TransferCommand extends Command<Args> {
 			this.args.options.gasprice
 		);
 
-		return color.green(JSON.stringify(receipt, null, 2));
+		this.stopSpinner();
+
+		return JSON.stringify(receipt, null, 2);
 	}
 }
 

@@ -31,8 +31,9 @@ class ClearCommand extends Command {
 		return;
 	}
 
-	protected async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		process.stdout.write('\u001B[2J\u001B[0;0f');
+		return '';
 	}
 }
 

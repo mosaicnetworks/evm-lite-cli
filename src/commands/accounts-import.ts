@@ -8,7 +8,6 @@ import utils from 'evm-lite-utils';
 
 import { IConfiguration } from 'evm-lite-datadir';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
@@ -102,7 +101,7 @@ class AccountImportCommand extends Command<Args> {
 		}
 	}
 
-	protected async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.info('keystore', this.datadir.keystorePath);
 
 		const keyfile = JSON.parse(
@@ -124,7 +123,7 @@ class AccountImportCommand extends Command<Args> {
 			await this.datadir.saveConfig(newConfig);
 		}
 
-		return color.green(JSON.stringify(keyfile));
+		return JSON.stringify(keyfile);
 	}
 }
 

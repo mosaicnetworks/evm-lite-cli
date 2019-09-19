@@ -1,12 +1,11 @@
-import Table from 'cli-table';
 import Inquirer from 'inquirer';
 import Vorpal from 'vorpal';
 
 import Node from 'evm-lite-core';
 import utils from 'evm-lite-utils';
 
-import color from '../core/color';
 import Session from '../core/Session';
+import Table from '../core/Table';
 
 import Command, { IArgs, IOptions } from '../core/Command';
 
@@ -85,28 +84,23 @@ class AccountGetCommand extends Command<Args> {
 		}
 	}
 
-	protected async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		const { host, port } = this.args.options;
 		this.log.http('GET', `${host}:${port}/account/${this.args.address}`);
 
 		const a = await this.node!.getAccount(this.args.address);
 
 		if (!this.args.options.formatted && !this.args.options.interactive) {
-			return color.green(
-				JSON.stringify({
-					...a,
-					balance: a.balance.format('T')
-				})
-			);
+			return JSON.stringify({
+				...a,
+				balance: a.balance.format('T')
+			});
 		}
 
-		const table = new Table({
-			head: ['Address', 'Balance', 'Nonce', 'Bytecode']
-		});
-
+		const table = new Table(['Address', 'Balance', 'Nonce', 'Bytecode']);
 		table.push([a.address, a.balance.format('T'), a.nonce, a.bytecode]);
 
-		return color.green(table.toString());
+		return table.toString();
 	}
 }
 

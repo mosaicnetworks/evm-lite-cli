@@ -1,8 +1,6 @@
 import Inquirer from 'inquirer';
-import log from 'npmlog';
 import Vorpal from 'vorpal';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
@@ -105,7 +103,7 @@ class ConfigSetCommand extends Command<Args> {
 		return;
 	}
 
-	protected async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.info('config', this.datadir.configPath);
 
 		const config = this.datadir.config;
@@ -132,7 +130,7 @@ class ConfigSetCommand extends Command<Args> {
 
 		await this.datadir.saveConfig(newConfig);
 
-		color.green(this.datadir.configToml);
+		return this.datadir.configToml;
 	}
 }
 

@@ -7,7 +7,6 @@ import Node, { Contract } from 'evm-lite-core';
 import Datadir from 'evm-lite-datadir';
 import utils from 'evm-lite-utils';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
@@ -132,7 +131,7 @@ class POAInitCommand extends Command<Args> {
 		}
 	}
 
-	protected async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.http(
 			'GET',
 			`${this.args.options.host}:${this.args.options.port}/poa`
@@ -159,6 +158,8 @@ class POAInitCommand extends Command<Args> {
 			gasPrice: this.config.defaults.gasPrice
 		});
 
+		this.startSpinner('Sending Transaction');
+
 		const receipt = await this.node!.sendTx(tx, this.account);
 		const r = {
 			...receipt
@@ -179,7 +180,9 @@ class POAInitCommand extends Command<Args> {
 			);
 		}
 
-		return color.green(JSON.stringify(r, null, 2));
+		this.stopSpinner();
+
+		return JSON.stringify(r, null, 2);
 	}
 }
 

@@ -1,18 +1,10 @@
-import Table from 'cli-table';
 import Vorpal from 'vorpal';
 
-import Node from 'evm-lite-core';
-
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
 
-interface Opts extends IOptions {
-	formatted?: boolean;
-	host: string;
-	port: number;
-}
+interface Opts extends IOptions {}
 
 export interface Args extends IArgs<Opts> {}
 
@@ -20,25 +12,12 @@ export default (evmlc: Vorpal, session: Session) => {
 	return evmlc
 		.command('test')
 		.hidden()
-		.description('Display information about node')
-		.option('-f, --formatted', 'format output')
-		.option('-h, --host <ip>', 'override config parameter host')
-		.option('-p, --port <port>', 'override config parameter port')
-		.types({
-			string: ['h', 'host']
-		})
+		.description('Test command')
 		.action((args: Args) => new TestCommand(session, args).run());
 };
 
 class TestCommand extends Command<Args> {
 	protected async init(): Promise<boolean> {
-		this.args.options.host =
-			this.args.options.host || this.config.connection.host;
-		this.args.options.port =
-			this.args.options.port || this.config.connection.port;
-
-		this.node = new Node(this.args.options.host, this.args.options.port);
-
 		return false;
 	}
 
@@ -52,8 +31,8 @@ class TestCommand extends Command<Args> {
 		return;
 	}
 
-	protected async exec(): Promise<void> {
-		console.log(this.account);
+	protected async exec(): Promise<string> {
+		return JSON.stringify(this.account);
 	}
 }
 

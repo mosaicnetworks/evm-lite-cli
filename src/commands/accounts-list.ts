@@ -1,10 +1,8 @@
-import Table from 'cli-table';
 import Node from 'evm-lite-core';
-import log from 'npmlog';
 import Vorpal from 'vorpal';
 
-import color from '../core/color';
 import Session from '../core/Session';
+import Table from '../core/Table';
 
 import Command, { IArgs, IOptions } from '../core/Command';
 
@@ -60,7 +58,7 @@ class AccountListCommand extends Command<Args> {
 		return;
 	}
 
-	protected async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.info('keystore', this.datadir.keystorePath);
 
 		const keystore = await this.datadir.listKeyfiles();
@@ -74,7 +72,7 @@ class AccountListCommand extends Command<Args> {
 		}));
 
 		if (!accounts.length) {
-			return color.green('[]');
+			return 'No accounts';
 		}
 
 		// check connection is valid
@@ -105,12 +103,10 @@ class AccountListCommand extends Command<Args> {
 		}
 
 		if (!this.args.options.formatted && !this.session.interactive) {
-			return color.green(JSON.stringify(accounts));
+			return JSON.stringify(accounts);
 		}
 
-		const table = new Table({
-			head: ['Moniker', 'Address', 'Balance', 'Nonce']
-		});
+		const table = new Table(['Moniker', 'Address', 'Balance', 'Nonce']);
 
 		for (const a of accounts) {
 			let balance = a.balance;
@@ -133,6 +129,6 @@ class AccountListCommand extends Command<Args> {
 			table.push([a.moniker, a.address, balance, a.nonce]);
 		}
 
-		return color.green(table.toString());
+		return table.toString();
 	}
 }

@@ -32,8 +32,8 @@ class InteractiveCommand extends Command {
 		return;
 	}
 
-	protected async exec(): Promise<void> {
-		return;
+	protected async exec(): Promise<string> {
+		return '';
 	}
 }
 

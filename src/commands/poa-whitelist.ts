@@ -1,11 +1,10 @@
-import Table from 'cli-table';
 import Vorpal from 'vorpal';
 
 import Node, { Contract } from 'evm-lite-core';
 import utils from 'evm-lite-utils';
 
-import color from '../core/color';
 import Session from '../core/Session';
+import Table from '../core/Table';
 
 import Command, { IArgs, IOptions } from '../core/Command';
 
@@ -74,7 +73,7 @@ class POAWhitelistCommand extends Command<Args> {
 		return;
 	}
 
-	protected async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.http(
 			'GET',
 			`${this.args.options.host}:${this.args.options.port}/poa`
@@ -95,14 +94,12 @@ class POAWhitelistCommand extends Command<Args> {
 		const count = countRes.toNumber();
 
 		if (!count) {
-			return color.green('[]');
+			return 'No whitelist entries found';
 		}
 
 		// entries
 		const entries: WhitelistEntry[] = [];
-		const table = new Table({
-			head: ['Moniker', 'Address']
-		});
+		const table = new Table(['Moniker', 'Address']);
 
 		for (const i of Array.from(Array(count).keys())) {
 			const entry: WhitelistEntry = {
@@ -137,10 +134,10 @@ class POAWhitelistCommand extends Command<Args> {
 		}
 
 		if (!this.args.options.formatted && !this.session.interactive) {
-			return color.green(JSON.stringify(entries, null, 2));
+			return JSON.stringify(entries, null, 2);
 		}
 
-		return color.green(table.toString());
+		return table.toString();
 	}
 }
 

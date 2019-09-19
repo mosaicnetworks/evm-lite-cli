@@ -4,7 +4,6 @@ import utils from 'evm-lite-utils';
 import Inquirer from 'inquirer';
 import Vorpal from 'vorpal';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
@@ -17,6 +16,7 @@ interface Opts extends IOptions {
 }
 
 interface Args extends IArgs<Opts> {
+	options: Opts;
 	moniker: string;
 }
 
@@ -53,44 +53,6 @@ class AccountCreateCommand extends Command<Args> {
 			this.args.options.out || this.datadir.keystorePath;
 
 		return this.args.options.interactive;
-	}
-
-	protected async check(): Promise<void> {
-		if (!this.args.moniker) {
-			throw Error('Moniker cannot be empty');
-		}
-
-		if (!utils.validMoniker(this.args.moniker)) {
-			throw Error('Moniker contains illegal characters');
-		}
-
-		if (!this.passphrase) {
-			if (!this.args.options.pwd) {
-				throw Error('No passphrase file path provided');
-			}
-
-			if (!utils.exists(this.args.options.pwd)) {
-				throw Error('Passphrase file path provided does not exist.');
-			}
-
-			if (utils.isDirectory(this.args.options.pwd)) {
-				throw Error('Passphrase file path provided is a directory.');
-			}
-
-			this.passphrase = fs
-				.readFileSync(this.args.options.pwd, 'utf8')
-				.trim();
-		}
-
-		if (this.args.options.out) {
-			if (!utils.exists(this.args.options.out)) {
-				throw Error('Output path provided does not exist.');
-			}
-
-			if (!utils.isDirectory(this.args.options.out)) {
-				throw Error('Output path provided is a not a directory.');
-			}
-		}
 	}
 
 	protected async prompt(): Promise<void> {
@@ -134,7 +96,45 @@ class AccountCreateCommand extends Command<Args> {
 		this.passphrase = answers.passphrase.trim();
 	}
 
-	protected async exec(): Promise<void> {
+	protected async check(): Promise<void> {
+		if (!this.args.moniker) {
+			throw Error('Moniker cannot be empty');
+		}
+
+		if (!utils.validMoniker(this.args.moniker)) {
+			throw Error('Moniker contains illegal characters');
+		}
+
+		if (!this.passphrase) {
+			if (!this.args.options.pwd) {
+				throw Error('No passphrase file path provided');
+			}
+
+			if (!utils.exists(this.args.options.pwd)) {
+				throw Error('Passphrase file path provided does not exist');
+			}
+
+			if (utils.isDirectory(this.args.options.pwd)) {
+				throw Error('Passphrase file path provided is a directory');
+			}
+
+			this.passphrase = fs
+				.readFileSync(this.args.options.pwd, 'utf8')
+				.trim();
+		}
+
+		if (this.args.options.out) {
+			if (!utils.exists(this.args.options.out)) {
+				throw Error('Output path provided does not exist');
+			}
+
+			if (!utils.isDirectory(this.args.options.out)) {
+				throw Error('Output path provided is a not a directory');
+			}
+		}
+	}
+
+	protected async exec(): Promise<string> {
 		this.log.info('keystore', this.datadir.keystorePath);
 
 		const account = await this.datadir.newKeyfile(
@@ -143,7 +143,7 @@ class AccountCreateCommand extends Command<Args> {
 			this.args.options.out
 		);
 
-		return color.green(JSON.stringify(account));
+		return JSON.stringify(account, null, 2);
 	}
 }
 

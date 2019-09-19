@@ -1,10 +1,9 @@
-import Table from 'cli-table';
 import Vorpal from 'vorpal';
 
 import Node from 'evm-lite-core';
 
-import color from '../core/color';
 import Session from '../core/Session';
+import Table from '../core/Table';
 
 import Command, { IArgs, IOptions } from '../core/Command';
 
@@ -49,16 +48,14 @@ class InfoCommand extends Command<Args> {
 		return;
 	}
 
-	protected async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.http(
 			'GET',
 			`${this.args.options.host}:${this.args.options.port}/info`
 		);
 
 		const info = await this.node!.getInfo();
-		const table = new Table({
-			head: ['Key', 'Value']
-		});
+		const table = new Table([], true, 'green');
 
 		for (const key of Object.keys(info)) {
 			table.push({
@@ -68,10 +65,10 @@ class InfoCommand extends Command<Args> {
 		}
 
 		if (!this.args.options.formatted && !this.session.interactive) {
-			return color.green(JSON.stringify(info));
+			return JSON.stringify(info);
 		}
 
-		return color.green(table.toString());
+		return table.toString();
 	}
 }
 

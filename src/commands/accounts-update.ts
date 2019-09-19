@@ -5,7 +5,6 @@ import Vorpal from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
@@ -156,7 +155,7 @@ class AccountUpdateCommand extends Command<Args> {
 		}
 	}
 
-	protected async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.info('keystore', this.datadir.keystorePath);
 
 		const keyfile = await this.datadir.updateKeyfile(
@@ -165,6 +164,6 @@ class AccountUpdateCommand extends Command<Args> {
 			this.newPassphrase
 		);
 
-		return color.green(JSON.stringify(keyfile));
+		return JSON.stringify(keyfile);
 	}
 }

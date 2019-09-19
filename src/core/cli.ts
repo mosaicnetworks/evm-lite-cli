@@ -1,7 +1,6 @@
 import * as mkdir from 'mkdirp';
 
 import figlet from 'figlet';
-import log from 'npmlog';
 
 import Vorpal, { Command } from 'vorpal';
 
@@ -75,11 +74,6 @@ export default async function init(params: ICLIConfig, commands: any) {
 				})
 			)
 		);
-
-		if (process.argv[3] === '-d' || process.argv[3] === '--debug') {
-			session.debug = true;
-			// color.yellow(` Debug:       True`);
-		}
 
 		color.yellow(` Mode:        Interactive`);
 		color.blue(` Data Dir:    ${session.datadir.path}`);

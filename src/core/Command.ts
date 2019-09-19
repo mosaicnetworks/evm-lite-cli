@@ -1,5 +1,3 @@
-import * as net from 'net';
-
 import Inquirer from 'inquirer';
 
 import logger, { Logger } from 'npmlog';
@@ -9,12 +7,15 @@ import { Args } from 'vorpal';
 
 import Node, { Account } from 'evm-lite-core';
 import Datadir from 'evm-lite-datadir';
+import ora from 'ora';
 
+import color from './color';
 import Session from './Session';
 
 // default options for all commands
 export interface IOptions {
-	silent: boolean;
+	silent?: boolean;
+	interactive?: boolean;
 }
 
 export type IArgs<T> = Args<T>;
@@ -28,28 +29,27 @@ abstract class Command<
 	T extends IArgs<IOptions> = IArgs<IOptions>,
 	TConsensus extends IAbstractConsensus = Solo
 > {
-	// potential optional values
+	// node will be set here if the command requires it
 	protected node?: Node<TConsensus>;
+
+	// command that requires an account to sign transaction
 	protected account?: Account;
+
+	// the passphrase used to decrypt the account
 	protected passphrase?: string;
 
-	// logger
+	// command level logger
 	protected log: Logger;
 
-	constructor(protected readonly session: Session, public readonly args: T) {
+	// command level
+	private spinner = ora('');
+
+	constructor(public readonly session: Session, public readonly args: T) {
 		this.log = logger;
 
 		if (this.args.options.silent) {
 			this.log.level = 'error';
 		}
-	}
-
-	public get config() {
-		return this.session.datadir.config;
-	}
-
-	public get datadir() {
-		return this.session.datadir;
 	}
 
 	// runs the command
@@ -61,8 +61,12 @@ abstract class Command<
 				await this.prompt();
 			}
 
+			// check if arguments are valid
 			await this.check();
-			await this.exec();
+
+			// get out from command
+			const o = await this.exec();
+			color.green(o);
 
 			// reset log level
 			this.log.level = 'silly';
@@ -79,6 +83,36 @@ abstract class Command<
 		}
 	}
 
+	// for testing
+	public async test(): Promise<string> {
+		// set log level to show only errors
+		this.log.level = 'silent';
+
+		await this.init();
+		await this.check();
+
+		return await this.exec();
+	}
+
+	protected get config() {
+		return this.session.datadir.config;
+	}
+
+	protected get datadir() {
+		return this.session.datadir;
+	}
+
+	protected startSpinner(text: string) {
+		if (this.args.options.interactive) {
+			this.spinner.text = text;
+			this.spinner.start();
+		}
+	}
+
+	protected stopSpinner() {
+		this.spinner.stop();
+	}
+
 	// prepare command execution
 	protected abstract async init(): Promise<boolean>;
 
@@ -89,7 +123,7 @@ abstract class Command<
 	protected abstract async check(): Promise<void>;
 
 	// execute command
-	protected abstract async exec(): Promise<void>;
+	protected abstract async exec(): Promise<string>;
 
 	protected async decryptPrompt() {
 		const keystore = await this.datadir.listKeyfiles();
@@ -99,11 +133,7 @@ abstract class Command<
 		}
 
 		// check connection
-		try {
-			await this.node.getInfo();
-		} catch {
-			throw Error('Connection to node not valid');
-		}
+		await this.node.getInfo();
 
 		// fetch account balances
 		const accounts: any = await Promise.all(
@@ -144,12 +174,16 @@ abstract class Command<
 
 		if (defaultAccount) {
 			// @ts-ignore
-			questions[0].default = `${
+			const fromQ: any = questions[0];
+
+			fromQ.default = `${
 				defaultAccount.moniker
 			} (${defaultAccount.balance.format('T')})`;
 		}
 
 		const answers = await Inquirer.prompt<IDecryptPrompt>(questions);
+
+		this.startSpinner('Decrypting...');
 
 		const from = answers.from.split(' ')[0];
 		if (!from) {
@@ -161,7 +195,10 @@ abstract class Command<
 		}
 
 		const keyfile = await this.datadir.getKeyfile(from);
+
 		this.account = Datadir.decrypt(keyfile, answers.passphrase.trim());
+
+		this.stopSpinner();
 	}
 }
 

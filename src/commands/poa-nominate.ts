@@ -7,7 +7,6 @@ import Node, { Contract } from 'evm-lite-core';
 import Datadir from 'evm-lite-datadir';
 import utils from 'evm-lite-utils';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
@@ -166,7 +165,7 @@ class POANominateCommand extends Command<Args> {
 		}
 	}
 
-	protected async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.http(
 			'GET',
 			`${this.args.options.host}:${this.args.options.port}/poa`
@@ -196,6 +195,8 @@ class POANominateCommand extends Command<Args> {
 			utils.cleanAddress(this.args.address),
 			this.args.options.moniker
 		);
+
+		this.startSpinner('Sending Transaction');
 
 		const receipt = await this.node!.sendTx(tx, this.account);
 
@@ -241,13 +242,13 @@ class POANominateCommand extends Command<Args> {
 			);
 		}
 
-		return color.green(
-			`You (${
-				nomineeProposedEvent.args._proposer
-			}) nominated '${utils.hexToString(
-				monikerAnnouceEvent.args._moniker
-			)}' (${nomineeProposedEvent.args._nominee})`
-		);
+		this.stopSpinner();
+
+		return `You (${
+			nomineeProposedEvent.args._proposer
+		}) nominated '${utils.hexToString(
+			monikerAnnouceEvent.args._moniker
+		)}' (${nomineeProposedEvent.args._nominee})`;
 	}
 }
 

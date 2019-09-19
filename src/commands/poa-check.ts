@@ -4,7 +4,6 @@ import Vorpal from 'vorpal';
 import Node, { Contract } from 'evm-lite-core';
 import utils from 'evm-lite-utils';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
@@ -107,7 +106,7 @@ class POACheckCommand extends Command<Args> {
 		}
 	}
 
-	protected async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.http(
 			'GET',
 			`${this.args.options.host}:${this.args.options.port}/poa`
@@ -129,7 +128,7 @@ class POACheckCommand extends Command<Args> {
 
 		const response = await this.node!.callTx<boolean>(tx);
 
-		return color.green(response);
+		return response.toString();
 	}
 }
 
