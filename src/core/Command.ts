@@ -48,7 +48,7 @@ abstract class Command<
 	}
 
 	// runs the command
-	public async run(): Promise<void> {
+	public async run(test?: boolean): Promise<void> {
 		const interactive = await this.init();
 
 		try {
@@ -61,7 +61,10 @@ abstract class Command<
 
 			// get out from command
 			const o = await this.exec();
-			color.green(o);
+
+			if (!test) {
+				color.green(o);
+			}
 
 			// reset log level
 			this.log.level = 'silly';
@@ -74,7 +77,12 @@ abstract class Command<
 				err = new Error(e);
 			}
 
-			this.log.error('evmlc', err.message.replace(/(\r\n|\n|\r)/gm, ''));
+			if (!test) {
+				this.log.error(
+					'evmlc',
+					err.message.replace(/(\r\n|\n|\r)/gm, '')
+				);
+			}
 		}
 	}
 
