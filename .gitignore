@@ -14,3 +14,5 @@ tests/assets/config.toml
 yarn-error.log
 ./scripts
 bin
+
+__tests__/datadir

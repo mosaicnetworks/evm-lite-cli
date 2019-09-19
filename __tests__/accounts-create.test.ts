@@ -7,8 +7,7 @@ describe('accounts create', () => {
 		const cmd = new AccountCreate(session, {
 			moniker: '',
 			options: {
-				out: session.datadir.keystorePath,
-				silent: false
+				out: session.datadir.keystorePath
 			}
 		});
 
@@ -23,8 +22,7 @@ describe('accounts create', () => {
 		const cmd = new AccountCreate(session, {
 			moniker: 'asd-123',
 			options: {
-				out: session.datadir.keystorePath,
-				silent: false
+				out: session.datadir.keystorePath
 			}
 		});
 
@@ -39,8 +37,7 @@ describe('accounts create', () => {
 		const cmd = new AccountCreate(session, {
 			moniker: 'test',
 			options: {
-				out: session.datadir.keystorePath,
-				silent: false
+				out: session.datadir.keystorePath
 			}
 		});
 
@@ -56,8 +53,7 @@ describe('accounts create', () => {
 			moniker: 'test',
 			options: {
 				pwd: '/does_not_exist/',
-				out: session.datadir.keystorePath,
-				silent: false
+				out: session.datadir.keystorePath
 			}
 		});
 
@@ -75,8 +71,7 @@ describe('accounts create', () => {
 			moniker: 'test',
 			options: {
 				pwd: '/',
-				out: session.datadir.keystorePath,
-				silent: false
+				out: session.datadir.keystorePath
 			}
 		});
 
@@ -94,8 +89,7 @@ describe('accounts create', () => {
 			moniker: 'test',
 			options: {
 				pwd: './__tests__/resources/pwd.txt',
-				out: '/path_does_not/exist/',
-				silent: false
+				out: '/path_does_not/exist/'
 			}
 		});
 
@@ -111,8 +105,7 @@ describe('accounts create', () => {
 			moniker: 'test',
 			options: {
 				pwd: './__tests__/resources/pwd.txt',
-				out: './__tests__/resources/pwd.txt',
-				silent: false
+				out: './__tests__/resources/pwd.txt'
 			}
 		});
 
@@ -121,5 +114,20 @@ describe('accounts create', () => {
 		} catch (e) {
 			expect(e.message).toBe('Output path provided is a not a directory');
 		}
+	});
+
+	it('should create an account and encrypt with password', async () => {
+		const cmd = new AccountCreate(session, {
+			moniker: 'test',
+			options: {
+				pwd: './__tests__/resources/pwd.txt',
+				out: session.datadir.keystorePath
+			}
+		});
+
+		const o = await cmd.test();
+		const j = JSON.parse(o);
+
+		expect(Object.keys(j).length > 0).toBe(true);
 	});
 });

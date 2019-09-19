@@ -13,7 +13,7 @@ import Session from './Session';
 
 // default options for all commands
 export interface IOptions {
-	silent: boolean;
+	silent?: boolean;
 }
 
 export type IArgs<T> = Args<T>;
@@ -80,6 +80,9 @@ abstract class Command<
 
 	// for testing
 	public async test(): Promise<string> {
+		// set log level to show only errors
+		this.log.level = 'silent';
+
 		await this.init();
 		await this.check();
 
