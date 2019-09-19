@@ -7,6 +7,7 @@ import Node from 'evm-lite-core';
 import Datadir from 'evm-lite-datadir';
 import utils, { Currency, IUnits } from 'evm-lite-utils';
 
+import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
@@ -22,8 +23,6 @@ interface Opts extends IOptions {
 	// tx
 	from: string;
 	to: string;
-	gas: number;
-	gasprice: number;
 	value: string;
 }
 
@@ -32,8 +31,6 @@ interface Args extends IArgs<Opts> {}
 interface FirstAnswers {
 	to: string;
 	value: string;
-	gas: number;
-	gasPrice: number;
 }
 
 interface SecondAnswers {
@@ -53,8 +50,6 @@ export default (evmlc: Vorpal, session: Session) => {
 		.description(description)
 		.option('-i, --interactive', 'enter interactive mode')
 		.option('-v, --value <value>', 'value to send')
-		.option('-g, --gas <value>', 'gas')
-		.option('-gp, --gasprice <value>', 'gas price')
 		.option('-t, --to <address>', 'send to address')
 		.option('-f, --from <moniker>', 'moniker of sender')
 		.option('--pwd <password>', 'passphrase file path')
@@ -80,15 +75,6 @@ class TransferCommand extends Command<Args> {
 		this.args.options.port =
 			this.args.options.port || this.config.connection.port;
 
-		// check if gas, gasprice is negative or undefined/null
-		if (!this.args.options.gas && this.args.options.gas !== 0) {
-			this.args.options.gas = this.config.defaults.gas;
-		}
-
-		if (!this.args.options.gasprice && this.args.options.gasprice !== 0) {
-			this.args.options.gasprice = this.config.defaults.gasPrice;
-		}
-
 		this.args.options.from =
 			this.args.options.from || this.config.defaults.from;
 
@@ -113,22 +99,9 @@ class TransferCommand extends Command<Args> {
 				type: 'input'
 			},
 			{
-				default: '100',
 				message: 'Value: ',
 				name: 'value',
 				type: 'input'
-			},
-			{
-				default: this.config.defaults.gas || 100000,
-				message: 'Gas: ',
-				name: 'gas',
-				type: 'number'
-			},
-			{
-				default: this.config.defaults.gasPrice || 0,
-				message: 'Gas Price: ',
-				name: 'gasPrice',
-				type: 'number'
 			}
 		];
 
@@ -144,23 +117,23 @@ class TransferCommand extends Command<Args> {
 
 		this.args.options.to = answers.to;
 		this.args.options.value = answers.value;
-		this.args.options.gas = answers.gas;
-		this.args.options.gasprice = answers.gasPrice;
 
 		const u = this.args.options.value.toString().slice(-1) as IUnits;
 		if (!isLetter(u)) {
 			this.args.options.value = this.args.options.value + this.unit;
 		}
 
+		const minGasPrice = await this.getMinGasPrice();
 		const tx = {
-			from: this.args.options.from,
+			from: this.account!.address,
 			to: this.args.options.to,
-			value: new Currency(this.args.options.value).format('T'),
-			gas: this.args.options.gas,
-			gasPrice: this.args.options.gasprice
+			value: new Currency(this.args.options.value).format('T')
 		};
 
-		console.log(JSON.stringify(tx, null, 2));
+		color.yellow(JSON.stringify(tx, null, 2));
+		color.yellow(
+			`You will pay a total of ${minGasPrice.times(21000).format('T')}`
+		);
 
 		const { send } = await Inquirer.prompt<SecondAnswers>(second);
 
@@ -192,14 +165,6 @@ class TransferCommand extends Command<Args> {
 					.readFileSync(this.args.options.pwd, 'utf8')
 					.trim();
 			}
-		}
-
-		if (this.args.options.gas < 0) {
-			throw Error('Cannot use a gas value less than 0');
-		}
-
-		if (this.args.options.gasprice < 0) {
-			throw Error('Cannot use a gas price value less than 0');
 		}
 
 		if (!this.args.options.to || !this.args.options.value) {
@@ -242,8 +207,9 @@ class TransferCommand extends Command<Args> {
 			this.account!,
 			this.args.options.to,
 			value.slice(0, -1),
-			this.args.options.gas,
-			this.args.options.gasprice
+			21000,
+			// @ts-ignore
+			(await this.getMinGasPrice()).format('a').slice(0, -1)
 		);
 
 		this.stopSpinner();

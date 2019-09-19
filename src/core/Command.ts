@@ -3,6 +3,7 @@ import Inquirer from 'inquirer';
 import logger, { Logger } from 'npmlog';
 
 import { IAbstractConsensus, Solo } from 'evm-lite-consensus';
+import { Currency } from 'evm-lite-utils';
 import { Args } from 'vorpal';
 
 import Node, { Account } from 'evm-lite-core';
@@ -73,6 +74,9 @@ abstract class Command<
 
 			return;
 		} catch (e) {
+			// stop spinner
+			this.stopSpinner();
+
 			let err: Error = e;
 
 			if (typeof e !== 'object') {
@@ -102,17 +106,6 @@ abstract class Command<
 		return this.session.datadir;
 	}
 
-	protected startSpinner(text: string) {
-		if (this.args.options.interactive) {
-			this.spinner.text = text;
-			this.spinner.start();
-		}
-	}
-
-	protected stopSpinner() {
-		this.spinner.stop();
-	}
-
 	// prepare command execution
 	protected abstract async init(): Promise<boolean>;
 
@@ -124,6 +117,27 @@ abstract class Command<
 
 	// execute command
 	protected abstract async exec(): Promise<string>;
+
+	protected startSpinner(text: string) {
+		if (this.args.options.interactive) {
+			this.spinner.text = text;
+			this.spinner.start();
+		}
+	}
+
+	protected stopSpinner() {
+		this.spinner.stop();
+	}
+
+	protected async getMinGasPrice() {
+		if (!this.node) {
+			throw Error('No node assigned');
+		}
+
+		const info = await this.node.getInfo<any>();
+
+		return new Currency(parseInt(info.min_gas_price, 10));
+	}
 
 	protected async decryptPrompt() {
 		const keystore = await this.datadir.listKeyfiles();
