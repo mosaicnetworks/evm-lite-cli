@@ -20,20 +20,20 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class InteractiveCommand extends Command {
-	public async init(): Promise<boolean> {
+	protected async init(): Promise<boolean> {
 		return false;
 	}
 
-	public async prompt(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		return;
 	}
 
-	public async check(): Promise<void> {
+	protected async check(): Promise<void> {
 		return;
 	}
 
-	public async exec(): Promise<void> {
-		return;
+	protected async exec(): Promise<string> {
+		return '';
 	}
 }
 

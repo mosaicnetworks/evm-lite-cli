@@ -19,20 +19,21 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class ClearCommand extends Command {
-	public async init(): Promise<boolean> {
+	protected async init(): Promise<boolean> {
 		return false;
 	}
 
-	public async prompt(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		return;
 	}
 
-	public async check(): Promise<void> {
+	protected async check(): Promise<void> {
 		return;
 	}
 
-	public async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		process.stdout.write('\u001B[2J\u001B[0;0f');
+		return '';
 	}
 }
 

@@ -7,7 +7,6 @@ import Node, { Contract } from 'evm-lite-core';
 import Datadir from 'evm-lite-datadir';
 import utils from 'evm-lite-utils';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
@@ -53,7 +52,7 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class POAInitCommand extends Command<Args> {
-	public async init(): Promise<boolean> {
+	protected async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
@@ -78,7 +77,7 @@ class POAInitCommand extends Command<Args> {
 		return this.args.options.interactive;
 	}
 
-	public async prompt(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		await this.decryptPrompt();
 
 		const questions: Inquirer.QuestionCollection<Answers> = [
@@ -102,7 +101,7 @@ class POAInitCommand extends Command<Args> {
 		this.args.options.gasprice = answers.gasPrice;
 	}
 
-	public async check(): Promise<void> {
+	protected async check(): Promise<void> {
 		if (!this.account) {
 			if (!this.args.options.from) {
 				throw Error('No `from` moniker provided or set in config.');
@@ -132,7 +131,7 @@ class POAInitCommand extends Command<Args> {
 		}
 	}
 
-	public async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.http(
 			'GET',
 			`${this.args.options.host}:${this.args.options.port}/poa`
@@ -179,7 +178,7 @@ class POAInitCommand extends Command<Args> {
 			);
 		}
 
-		return color.green(JSON.stringify(r, null, 2));
+		return JSON.stringify(r, null, 2);
 	}
 }
 

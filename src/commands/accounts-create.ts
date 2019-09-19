@@ -4,7 +4,6 @@ import utils from 'evm-lite-utils';
 import Inquirer from 'inquirer';
 import Vorpal from 'vorpal';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
@@ -45,45 +44,7 @@ const command = (evmlc: Vorpal, session: Session) => {
 };
 
 class AccountCreateCommand extends Command<Args> {
-	public async check(): Promise<void> {
-		if (!this.args.moniker) {
-			throw Error('Moniker cannot be empty');
-		}
-
-		if (!utils.validMoniker(this.args.moniker)) {
-			throw Error('Moniker contains illegal characters');
-		}
-
-		if (!this.passphrase) {
-			if (!this.args.options.pwd) {
-				throw Error('No passphrase file path provided');
-			}
-
-			if (!utils.exists(this.args.options.pwd)) {
-				throw Error('Passphrase file path provided does not exist');
-			}
-
-			if (utils.isDirectory(this.args.options.pwd)) {
-				throw Error('Passphrase file path provided is a directory');
-			}
-
-			this.passphrase = fs
-				.readFileSync(this.args.options.pwd, 'utf8')
-				.trim();
-		}
-
-		if (this.args.options.out) {
-			if (!utils.exists(this.args.options.out)) {
-				throw Error('Output path provided does not exist');
-			}
-
-			if (!utils.isDirectory(this.args.options.out)) {
-				throw Error('Output path provided is a not a directory');
-			}
-		}
-	}
-
-	public async init(): Promise<boolean> {
+	protected async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
@@ -94,7 +55,7 @@ class AccountCreateCommand extends Command<Args> {
 		return this.args.options.interactive;
 	}
 
-	public async prompt(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
 				message: 'Moniker: ',
@@ -135,7 +96,45 @@ class AccountCreateCommand extends Command<Args> {
 		this.passphrase = answers.passphrase.trim();
 	}
 
-	public async exec(): Promise<void> {
+	protected async check(): Promise<void> {
+		if (!this.args.moniker) {
+			throw Error('Moniker cannot be empty');
+		}
+
+		if (!utils.validMoniker(this.args.moniker)) {
+			throw Error('Moniker contains illegal characters');
+		}
+
+		if (!this.passphrase) {
+			if (!this.args.options.pwd) {
+				throw Error('No passphrase file path provided');
+			}
+
+			if (!utils.exists(this.args.options.pwd)) {
+				throw Error('Passphrase file path provided does not exist');
+			}
+
+			if (utils.isDirectory(this.args.options.pwd)) {
+				throw Error('Passphrase file path provided is a directory');
+			}
+
+			this.passphrase = fs
+				.readFileSync(this.args.options.pwd, 'utf8')
+				.trim();
+		}
+
+		if (this.args.options.out) {
+			if (!utils.exists(this.args.options.out)) {
+				throw Error('Output path provided does not exist');
+			}
+
+			if (!utils.isDirectory(this.args.options.out)) {
+				throw Error('Output path provided is a not a directory');
+			}
+		}
+	}
+
+	protected async exec(): Promise<string> {
 		this.log.info('keystore', this.datadir.keystorePath);
 
 		const account = await this.datadir.newKeyfile(
@@ -144,7 +143,7 @@ class AccountCreateCommand extends Command<Args> {
 			this.args.options.out
 		);
 
-		return color.green(JSON.stringify(account, null, 2));
+		return JSON.stringify(account, null, 2);
 	}
 }
 

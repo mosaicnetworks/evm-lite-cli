@@ -1,7 +1,6 @@
 import Node from 'evm-lite-core';
 import Vorpal from 'vorpal';
 
-import color from '../core/color';
 import Session from '../core/Session';
 import Table from '../core/Table';
 
@@ -37,7 +36,7 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class AccountListCommand extends Command<Args> {
-	public async init(): Promise<boolean> {
+	protected async init(): Promise<boolean> {
 		this.args.options.host =
 			this.args.options.host || this.config.connection.host;
 		this.args.options.port =
@@ -51,15 +50,15 @@ class AccountListCommand extends Command<Args> {
 		return false;
 	}
 
-	public async prompt(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		return;
 	}
 
-	public async check(): Promise<void> {
+	protected async check(): Promise<void> {
 		return;
 	}
 
-	public async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.info('keystore', this.datadir.keystorePath);
 
 		const keystore = await this.datadir.listKeyfiles();
@@ -73,7 +72,7 @@ class AccountListCommand extends Command<Args> {
 		}));
 
 		if (!accounts.length) {
-			return color.green('[]');
+			return 'No accounts';
 		}
 
 		// check connection is valid
@@ -104,7 +103,7 @@ class AccountListCommand extends Command<Args> {
 		}
 
 		if (!this.args.options.formatted && !this.session.interactive) {
-			return color.green(JSON.stringify(accounts));
+			return JSON.stringify(accounts);
 		}
 
 		const table = new Table(['Moniker', 'Address', 'Balance', 'Nonce']);
@@ -130,6 +129,6 @@ class AccountListCommand extends Command<Args> {
 			table.push([a.moniker, a.address, balance, a.nonce]);
 		}
 
-		return color.green(table.toString());
+		return table.toString();
 	}
 }

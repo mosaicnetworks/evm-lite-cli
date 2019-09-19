@@ -3,7 +3,6 @@ import Vorpal from 'vorpal';
 import Node, { Contract } from 'evm-lite-core';
 import utils from 'evm-lite-utils';
 
-import color from '../core/color';
 import Session from '../core/Session';
 import Table from '../core/Table';
 
@@ -47,7 +46,7 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class POAWhitelistCommand extends Command<Args> {
-	public async init(): Promise<boolean> {
+	protected async init(): Promise<boolean> {
 		this.args.options.host =
 			this.args.options.host || this.config.connection.host;
 		this.args.options.port =
@@ -66,15 +65,15 @@ class POAWhitelistCommand extends Command<Args> {
 		return false;
 	}
 
-	public async prompt(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		return;
 	}
 
-	public async check(): Promise<void> {
+	protected async check(): Promise<void> {
 		return;
 	}
 
-	public async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.http(
 			'GET',
 			`${this.args.options.host}:${this.args.options.port}/poa`
@@ -95,7 +94,7 @@ class POAWhitelistCommand extends Command<Args> {
 		const count = countRes.toNumber();
 
 		if (!count) {
-			return color.green('[]');
+			return 'No whitelist entries found';
 		}
 
 		// entries
@@ -135,10 +134,10 @@ class POAWhitelistCommand extends Command<Args> {
 		}
 
 		if (!this.args.options.formatted && !this.session.interactive) {
-			return color.green(JSON.stringify(entries, null, 2));
+			return JSON.stringify(entries, null, 2);
 		}
 
-		return color.green(table.toString());
+		return table.toString();
 	}
 }
 

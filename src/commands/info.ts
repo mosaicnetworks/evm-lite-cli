@@ -2,7 +2,6 @@ import Vorpal from 'vorpal';
 
 import Node from 'evm-lite-core';
 
-import color from '../core/color';
 import Session from '../core/Session';
 import Table from '../core/Table';
 
@@ -30,7 +29,7 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class InfoCommand extends Command<Args> {
-	public async init(): Promise<boolean> {
+	protected async init(): Promise<boolean> {
 		this.args.options.host =
 			this.args.options.host || this.config.connection.host;
 		this.args.options.port =
@@ -41,15 +40,15 @@ class InfoCommand extends Command<Args> {
 		return false;
 	}
 
-	public async prompt(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		return;
 	}
 
-	public async check(): Promise<void> {
+	protected async check(): Promise<void> {
 		return;
 	}
 
-	public async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.http(
 			'GET',
 			`${this.args.options.host}:${this.args.options.port}/info`
@@ -66,10 +65,10 @@ class InfoCommand extends Command<Args> {
 		}
 
 		if (!this.args.options.formatted && !this.session.interactive) {
-			return color.green(JSON.stringify(info));
+			return JSON.stringify(info);
 		}
 
-		return color.green(table.toString());
+		return table.toString();
 	}
 }
 

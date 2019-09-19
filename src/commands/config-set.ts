@@ -1,7 +1,6 @@
 import Inquirer from 'inquirer';
 import Vorpal from 'vorpal';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
@@ -46,14 +45,14 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class ConfigSetCommand extends Command<Args> {
-	public async init(): Promise<boolean> {
+	protected async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
 		return this.args.options.interactive;
 	}
 
-	public async prompt(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		const config = this.datadir.config;
 		const keystore = await this.datadir.listKeyfiles();
 
@@ -100,11 +99,11 @@ class ConfigSetCommand extends Command<Args> {
 		this.args.options.from = answers.from;
 	}
 
-	public async check(): Promise<void> {
+	protected async check(): Promise<void> {
 		return;
 	}
 
-	public async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.info('config', this.datadir.configPath);
 
 		const config = this.datadir.config;
@@ -131,7 +130,7 @@ class ConfigSetCommand extends Command<Args> {
 
 		await this.datadir.saveConfig(newConfig);
 
-		color.green(this.datadir.configToml);
+		return this.datadir.configToml;
 	}
 }
 

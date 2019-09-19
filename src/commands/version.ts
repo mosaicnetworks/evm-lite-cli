@@ -1,6 +1,5 @@
 import Vorpal from 'vorpal';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
@@ -24,19 +23,19 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class VersionCommand extends Command {
-	public async init(): Promise<boolean> {
+	protected async init(): Promise<boolean> {
 		return false;
 	}
 
-	public async prompt(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		return;
 	}
 
-	public async check(): Promise<void> {
+	protected async check(): Promise<void> {
 		return;
 	}
 
-	public async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.info('evm-lite-core', pkg.dependencies[`evm-lite-core`]);
 		this.log.info(
 			'evm-lite-keystore',
@@ -50,7 +49,7 @@ class VersionCommand extends Command {
 			pkg.dependencies[`evm-lite-consensus`]
 		);
 
-		color.green(`v${pkg.version}`);
+		return `v${pkg.version}`;
 	}
 }
 

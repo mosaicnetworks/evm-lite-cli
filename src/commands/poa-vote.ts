@@ -7,7 +7,6 @@ import Node, { Contract } from 'evm-lite-core';
 import Datadir from 'evm-lite-datadir';
 import utils from 'evm-lite-utils';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import { NomineeEntry, POANomineeList } from './poa-nomineelist';
@@ -63,9 +62,9 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class POAVoteCommand extends Command<Args> {
-	public nominees: NomineeEntry[] = [];
+	protected nominees: NomineeEntry[] = [];
 
-	public async init(): Promise<boolean> {
+	protected async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
@@ -90,7 +89,7 @@ class POAVoteCommand extends Command<Args> {
 		return this.args.options.interactive;
 	}
 
-	public async prompt(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		await this.decryptPrompt();
 
 		const cmd = new POANomineeList(this.session, this.args);
@@ -138,7 +137,7 @@ class POAVoteCommand extends Command<Args> {
 		return;
 	}
 
-	public async check(): Promise<void> {
+	protected async check(): Promise<void> {
 		if (!this.args.address) {
 			throw Error('No nominee address provided.');
 		}
@@ -180,9 +179,9 @@ class POAVoteCommand extends Command<Args> {
 		}
 	}
 
-	public async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		if (!this.nominees.length) {
-			return color.yellow('There are no nominees in election');
+			return 'There are no nominees in election';
 		}
 
 		const poa = await this.node!.getPOA();
@@ -246,7 +245,7 @@ class POAVoteCommand extends Command<Args> {
 			message += `\nElection completed with the nominee being '${accepted}'.`;
 		}
 
-		return color.green(message);
+		return message;
 	}
 }
 

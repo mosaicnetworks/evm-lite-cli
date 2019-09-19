@@ -8,6 +8,7 @@ import { Args } from 'vorpal';
 import Node, { Account } from 'evm-lite-core';
 import Datadir from 'evm-lite-datadir';
 
+import color from './color';
 import Session from './Session';
 
 // default options for all commands
@@ -27,16 +28,16 @@ abstract class Command<
 	TConsensus extends IAbstractConsensus = Solo
 > {
 	// node will be set here if the command requires it
-	public node?: Node<TConsensus>;
+	protected node?: Node<TConsensus>;
 
 	// command that requires an account to sign transaction
-	public account?: Account;
+	protected account?: Account;
 
-	// the passphrase used as an of the account
-	public passphrase?: string;
+	// the passphrase used to decrypt the account
+	protected passphrase?: string;
 
-	// logger
-	public log: Logger;
+	// command level logger
+	protected log: Logger;
 
 	constructor(public readonly session: Session, public readonly args: T) {
 		this.log = logger;
@@ -44,14 +45,6 @@ abstract class Command<
 		if (this.args.options.silent) {
 			this.log.level = 'error';
 		}
-	}
-
-	public get config() {
-		return this.session.datadir.config;
-	}
-
-	public get datadir() {
-		return this.session.datadir;
 	}
 
 	// runs the command
@@ -63,13 +56,12 @@ abstract class Command<
 				await this.prompt();
 			}
 
+			// check if arguments are valid
 			await this.check();
 
-			// should this fn return a string and then be formatted in the function
-			// rather than logging in the function this allows for better testing
-			// as we can actually read the return of the function rather than reading
-			// frmo stdio
-			await this.exec();
+			// get out from command
+			const o = await this.exec();
+			color.green(o);
 
 			// reset log level
 			this.log.level = 'silly';
@@ -86,19 +78,27 @@ abstract class Command<
 		}
 	}
 
+	protected get config() {
+		return this.session.datadir.config;
+	}
+
+	protected get datadir() {
+		return this.session.datadir;
+	}
+
 	// prepare command execution
-	public abstract async init(): Promise<boolean>;
+	protected abstract async init(): Promise<boolean>;
 
 	// do interactive command execution
-	public abstract async prompt(): Promise<void>;
+	protected abstract async prompt(): Promise<void>;
 
 	// parse arguments of command here
-	public abstract async check(): Promise<void>;
+	protected abstract async check(): Promise<void>;
 
 	// execute command
-	public abstract async exec(): Promise<void>;
+	protected abstract async exec(): Promise<string>;
 
-	public async decryptPrompt() {
+	protected async decryptPrompt() {
 		const keystore = await this.datadir.listKeyfiles();
 
 		if (!this.node) {
@@ -147,7 +147,9 @@ abstract class Command<
 
 		if (defaultAccount) {
 			// @ts-ignore
-			questions[0].default = `${
+			const fromQ: any = questions[0];
+
+			fromQ.default = `${
 				defaultAccount.moniker
 			} (${defaultAccount.balance.format('T')})`;
 		}
@@ -164,6 +166,7 @@ abstract class Command<
 		}
 
 		const keyfile = await this.datadir.getKeyfile(from);
+
 		this.account = Datadir.decrypt(keyfile, answers.passphrase.trim());
 	}
 }

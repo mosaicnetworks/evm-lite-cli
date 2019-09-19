@@ -1,16 +1,17 @@
 import * as fs from 'fs';
 
 import Inquirer from 'inquirer';
+import Listr from 'listr';
 import Vorpal from 'vorpal';
 
 import Node from 'evm-lite-core';
 import Datadir from 'evm-lite-datadir';
 import utils, { Currency, IUnits } from 'evm-lite-utils';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
+import { IReceipt } from 'evm-lite-client';
 
 interface Opts extends IOptions {
 	interactive?: boolean;
@@ -69,10 +70,10 @@ export default (evmlc: Vorpal, session: Session) => {
 
 class TransferCommand extends Command<Args> {
 	// command level variable
-	public send: boolean = false;
-	public unit: IUnits = 'T';
+	protected send: boolean = false;
+	protected unit: IUnits = 'T';
 
-	public async init(): Promise<boolean> {
+	protected async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
@@ -104,7 +105,7 @@ class TransferCommand extends Command<Args> {
 		return this.args.options.interactive;
 	}
 
-	public async prompt(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		await this.decryptPrompt();
 
 		const first: Inquirer.QuestionCollection<FirstAnswers> = [
@@ -161,14 +162,14 @@ class TransferCommand extends Command<Args> {
 			gasPrice: this.args.options.gasprice
 		};
 
-		color.blue(JSON.stringify(tx, null, 2));
+		console.log(JSON.stringify(tx, null, 2));
 
 		const { send } = await Inquirer.prompt<SecondAnswers>(second);
 
 		this.send = send;
 	}
 
-	public async check(): Promise<void> {
+	protected async check(): Promise<void> {
 		// check from and passphrase path if account not already decrypted
 		// mostly likely to occur in only non interactive mode
 		if (!this.account) {
@@ -219,9 +220,9 @@ class TransferCommand extends Command<Args> {
 		}
 	}
 
-	public async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		if (!this.send) {
-			return color.yellow('Transaction aborted');
+			return 'Aborted';
 		}
 
 		// sanity check
@@ -237,15 +238,40 @@ class TransferCommand extends Command<Args> {
 			'a'
 		);
 
-		const receipt = await this.node!.transfer(
-			this.account!,
-			this.args.options.to,
-			value.slice(0, -1),
-			this.args.options.gas,
-			this.args.options.gasprice
-		);
+		let receipt: IReceipt = {} as IReceipt;
+		if (this.args.options.interactive) {
+			const tasks = new Listr([
+				{
+					title: 'Sending transaction',
+					task: () =>
+						this.node!.transfer(
+							this.account!,
+							this.args.options.to,
+							value.slice(0, -1),
+							this.args.options.gas,
+							this.args.options.gasprice
+						)
+							.then(r => {
+								receipt = r;
+							})
+							.catch(e => {
+								throw Error(e);
+							})
+				}
+			]);
 
-		return color.green(JSON.stringify(receipt, null, 2));
+			await tasks.run();
+		} else {
+			receipt = await this.node!.transfer(
+				this.account!,
+				this.args.options.to,
+				value.slice(0, -1),
+				this.args.options.gas,
+				this.args.options.gasprice
+			);
+		}
+
+		return JSON.stringify(receipt, null, 2);
 	}
 }
 

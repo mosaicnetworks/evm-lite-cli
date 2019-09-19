@@ -4,7 +4,6 @@ import Vorpal from 'vorpal';
 import Node from 'evm-lite-core';
 import utils from 'evm-lite-utils';
 
-import color from '../core/color';
 import Session from '../core/Session';
 import Table from '../core/Table';
 
@@ -43,7 +42,7 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class AccountGetCommand extends Command<Args> {
-	public async init(): Promise<boolean> {
+	protected async init(): Promise<boolean> {
 		this.args.options.host =
 			this.args.options.host || this.config.connection.host;
 		this.args.options.port =
@@ -59,7 +58,7 @@ class AccountGetCommand extends Command<Args> {
 		return this.args.options.interactive;
 	}
 
-	public async prompt(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
 				message: 'Address: ',
@@ -73,7 +72,7 @@ class AccountGetCommand extends Command<Args> {
 		this.args.address = address;
 	}
 
-	public async check(): Promise<void> {
+	protected async check(): Promise<void> {
 		if (!this.args.address) {
 			throw Error('No address provided');
 		}
@@ -85,26 +84,23 @@ class AccountGetCommand extends Command<Args> {
 		}
 	}
 
-	public async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		const { host, port } = this.args.options;
 		this.log.http('GET', `${host}:${port}/account/${this.args.address}`);
 
 		const a = await this.node!.getAccount(this.args.address);
 
 		if (!this.args.options.formatted && !this.args.options.interactive) {
-			return color.green(
-				JSON.stringify({
-					...a,
-					balance: a.balance.format('T')
-				})
-			);
+			return JSON.stringify({
+				...a,
+				balance: a.balance.format('T')
+			});
 		}
 
 		const table = new Table(['Address', 'Balance', 'Nonce', 'Bytecode']);
-
 		table.push([a.address, a.balance.format('T'), a.nonce, a.bytecode]);
 
-		return color.green(table.toString());
+		return table.toString();
 	}
 }
 

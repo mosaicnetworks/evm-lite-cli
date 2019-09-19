@@ -4,7 +4,6 @@ import Vorpal from 'vorpal';
 import Node, { Contract } from 'evm-lite-core';
 import utils from 'evm-lite-utils';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
@@ -50,7 +49,7 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class POACheckCommand extends Command<Args> {
-	public async init(): Promise<boolean> {
+	protected async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
@@ -72,7 +71,7 @@ class POACheckCommand extends Command<Args> {
 		return this.args.options.interactive;
 	}
 
-	public async prompt(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
 				message: 'Nominee address: ',
@@ -101,13 +100,13 @@ class POACheckCommand extends Command<Args> {
 		this.args.options.gasprice = answers.gasPrice;
 	}
 
-	public async check(): Promise<void> {
+	protected async check(): Promise<void> {
 		if (utils.trimHex(this.args.address).length !== 40) {
 			throw Error('Nominee address has an invalid length.');
 		}
 	}
 
-	public async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.http(
 			'GET',
 			`${this.args.options.host}:${this.args.options.port}/poa`
@@ -129,7 +128,7 @@ class POACheckCommand extends Command<Args> {
 
 		const response = await this.node!.callTx<boolean>(tx);
 
-		return color.green(response);
+		return response.toString();
 	}
 }
 

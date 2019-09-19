@@ -5,7 +5,6 @@ import Vorpal from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
@@ -45,17 +44,17 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class AccountUpdateCommand extends Command<Args> {
-	public oldPassphrase: string = '';
-	public newPassphrase: string = '';
+	protected oldPassphrase: string = '';
+	protected newPassphrase: string = '';
 
-	public async init(): Promise<boolean> {
+	protected async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
 		return this.args.options.interactive;
 	}
 
-	public async prompt(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		const keystore = await this.datadir.listKeyfiles();
 
 		const first: Inquirer.QuestionCollection<Answers> = [
@@ -98,7 +97,7 @@ class AccountUpdateCommand extends Command<Args> {
 		this.newPassphrase = answers.newPass.trim();
 	}
 
-	public async check(): Promise<void> {
+	protected async check(): Promise<void> {
 		if (!this.args.moniker) {
 			throw Error('No moniker provided.');
 		}
@@ -156,7 +155,7 @@ class AccountUpdateCommand extends Command<Args> {
 		}
 	}
 
-	public async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.info('keystore', this.datadir.keystorePath);
 
 		const keyfile = await this.datadir.updateKeyfile(
@@ -165,6 +164,6 @@ class AccountUpdateCommand extends Command<Args> {
 			this.newPassphrase
 		);
 
-		return color.green(JSON.stringify(keyfile));
+		return JSON.stringify(keyfile);
 	}
 }

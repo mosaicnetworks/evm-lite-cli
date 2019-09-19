@@ -8,7 +8,6 @@ import utils from 'evm-lite-utils';
 
 import { IConfiguration } from 'evm-lite-datadir';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
@@ -47,14 +46,14 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class AccountImportCommand extends Command<Args> {
-	public async init(): Promise<boolean> {
+	protected async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
 		return this.args.options.interactive;
 	}
 
-	public async prompt(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
 				message: 'Moniker: ',
@@ -80,7 +79,7 @@ class AccountImportCommand extends Command<Args> {
 		this.args.options.default = answers.makeDefault || false;
 	}
 
-	public async check(): Promise<void> {
+	protected async check(): Promise<void> {
 		if (!this.args.moniker) {
 			throw Error('Moniker cannot be empty');
 		}
@@ -102,7 +101,7 @@ class AccountImportCommand extends Command<Args> {
 		}
 	}
 
-	public async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.info('keystore', this.datadir.keystorePath);
 
 		const keyfile = JSON.parse(
@@ -124,7 +123,7 @@ class AccountImportCommand extends Command<Args> {
 			await this.datadir.saveConfig(newConfig);
 		}
 
-		return color.green(JSON.stringify(keyfile));
+		return JSON.stringify(keyfile);
 	}
 }
 

@@ -1,6 +1,5 @@
 import Vorpal from 'vorpal';
 
-import color from '../core/color';
 import Session from '../core/Session';
 
 import Command, { IArgs, IOptions } from '../core/Command';
@@ -18,22 +17,22 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class ConfigViewCommand extends Command {
-	public async init(): Promise<boolean> {
+	protected async init(): Promise<boolean> {
 		return false;
 	}
 
-	public async prompt(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		return;
 	}
 
-	public async check(): Promise<void> {
+	protected async check(): Promise<void> {
 		return;
 	}
 
-	public async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		this.log.info('config', this.datadir.configPath);
 
-		color.green(this.datadir.configToml);
+		return this.datadir.configToml;
 	}
 }
 

@@ -3,7 +3,6 @@ import Vorpal from 'vorpal';
 import Node, { Contract } from 'evm-lite-core';
 import utils from 'evm-lite-utils';
 
-import color from '../core/color';
 import Session from '../core/Session';
 import Table from '../core/Table';
 
@@ -136,15 +135,15 @@ class POANomineeListCommand extends Command<Args> {
 		return false;
 	}
 
-	public async prompt(): Promise<void> {
+	protected async prompt(): Promise<void> {
 		return;
 	}
 
-	public async check(): Promise<void> {
+	protected async check(): Promise<void> {
 		return;
 	}
 
-	public async exec(): Promise<void> {
+	protected async exec(): Promise<string> {
 		const entries = await this.getNomineeList();
 		const table = new Table([
 			'Moniker',
@@ -154,14 +153,14 @@ class POANomineeListCommand extends Command<Args> {
 		]);
 
 		if (!this.args.options.formatted && !this.session.interactive) {
-			return color.green(JSON.stringify(entries, null, 2));
+			return JSON.stringify(entries, null, 2);
 		}
 
 		for (const entry of entries) {
 			table.push([entry.moniker, entry.address]);
 		}
 
-		return color.green(table.toString());
+		return table.toString();
 	}
 }
 
