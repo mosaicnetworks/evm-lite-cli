@@ -6,14 +6,13 @@ import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { IArgs, ITxOptions } from '../core/TxCommand';
 
-interface Opts extends IOptions {
+interface Opts extends ITxOptions {
 	interactive?: boolean;
 	host: string;
 	port: number;
 	gas: number;
-	gasprice: number;
 }
 
 interface Args extends IArgs<Opts> {
@@ -22,8 +21,6 @@ interface Args extends IArgs<Opts> {
 
 interface Answers {
 	address: string;
-	gas: number;
-	gasPrice: number;
 }
 
 export default (evmlc: Vorpal, session: Session) => {
@@ -36,7 +33,6 @@ export default (evmlc: Vorpal, session: Session) => {
 		.option('-i, --interactive', 'enter interactive')
 		.option('-d, --debug', 'show debug output')
 		.option('-g, --gas <g>', 'override config gas value')
-		.option('-gp, --gasprice <gp>', 'override config gasprice value')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.types({
@@ -50,6 +46,8 @@ export default (evmlc: Vorpal, session: Session) => {
 
 class POACheckCommand extends Command<Args> {
 	protected async init(): Promise<boolean> {
+		this.constant = true;
+
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
@@ -60,10 +58,6 @@ class POACheckCommand extends Command<Args> {
 
 		if (!this.args.options.gas && this.args.options.gas !== 0) {
 			this.args.options.gas = this.config.defaults.gas;
-		}
-
-		if (!this.args.options.gasprice && this.args.options.gasprice !== 0) {
-			this.args.options.gasprice = this.config.defaults.gasPrice;
 		}
 
 		this.node = new Node(this.args.options.host, this.args.options.port);
@@ -77,27 +71,12 @@ class POACheckCommand extends Command<Args> {
 				message: 'Nominee address: ',
 				name: 'address',
 				type: 'input'
-			},
-			{
-				default: this.args.options.gas || 100000,
-				message: 'Gas: ',
-				name: 'gas',
-				type: 'number'
-			},
-			{
-				default: this.args.options.gasprice || 0,
-				message: 'Gas Price: ',
-				name: 'gasPrice',
-				type: 'number'
 			}
 		];
 
 		const answers = await Inquirer.prompt<Answers>(questions);
 
 		this.args.address = answers.address;
-
-		this.args.options.gas = answers.gas;
-		this.args.options.gasprice = answers.gasPrice;
 	}
 
 	protected async check(): Promise<void> {
@@ -121,7 +100,7 @@ class POACheckCommand extends Command<Args> {
 		const tx = contract.methods.checkAuthorised(
 			{
 				gas: this.args.options.gas,
-				gasPrice: this.args.options.gasprice
+				gasPrice: Number(this.args.options.gasPrice)
 			},
 			utils.cleanAddress(this.args.address)
 		);

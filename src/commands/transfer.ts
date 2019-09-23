@@ -10,9 +10,9 @@ import utils, { Currency, IUnits } from 'evm-lite-utils';
 import color from '../core/color';
 import Session from '../core/Session';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { IArgs, ITxOptions } from '../core/TxCommand';
 
-interface Opts extends IOptions {
+interface Opts extends ITxOptions {
 	interactive?: boolean;
 
 	host: string;
@@ -64,9 +64,11 @@ export default (evmlc: Vorpal, session: Session) => {
 class TransferCommand extends Command<Args> {
 	// command level variable
 	protected send: boolean = false;
-	protected unit: IUnits = 'T';
 
 	protected async init(): Promise<boolean> {
+		this.payable = true;
+		this.transfer = true;
+
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
@@ -90,8 +92,6 @@ class TransferCommand extends Command<Args> {
 	}
 
 	protected async prompt(): Promise<void> {
-		await this.decryptPrompt();
-
 		const first: Inquirer.QuestionCollection<FirstAnswers> = [
 			{
 				message: 'To',
@@ -105,14 +105,6 @@ class TransferCommand extends Command<Args> {
 			}
 		];
 
-		const second: Inquirer.QuestionCollection<SecondAnswers> = [
-			{
-				message: 'Submit transaction',
-				name: 'send',
-				type: 'confirm'
-			}
-		];
-
 		const answers = await Inquirer.prompt<FirstAnswers>(first);
 
 		this.args.options.to = answers.to;
@@ -120,24 +112,8 @@ class TransferCommand extends Command<Args> {
 
 		const u = this.args.options.value.toString().slice(-1) as IUnits;
 		if (!isLetter(u)) {
-			this.args.options.value = this.args.options.value + this.unit;
+			this.args.options.value = this.args.options.value + 'T';
 		}
-
-		const minGasPrice = await this.getMinGasPrice();
-		const tx = {
-			from: this.account!.address,
-			to: this.args.options.to,
-			value: new Currency(this.args.options.value).format('T')
-		};
-
-		color.yellow(JSON.stringify(tx, null, 2));
-		color.yellow(
-			`You will pay a total of ${minGasPrice.times(21000).format('T')}`
-		);
-
-		const { send } = await Inquirer.prompt<SecondAnswers>(second);
-
-		this.send = send;
 	}
 
 	protected async check(): Promise<void> {
@@ -174,20 +150,9 @@ class TransferCommand extends Command<Args> {
 		if (utils.trimHex(this.args.options.to).length !== 40) {
 			throw Error('Invalid `to` address');
 		}
-
-		const u = this.args.options.value.toString().slice(-1) as IUnits;
-
-		if (isLetter(u)) {
-			this.unit = u;
-			this.args.options.value = this.args.options.value.slice(0, -1);
-		}
 	}
 
 	protected async exec(): Promise<string> {
-		if (!this.send) {
-			return 'Aborted';
-		}
-
 		// sanity check
 		if (!this.account) {
 			const keyfile = await this.datadir.getKeyfile(
@@ -197,19 +162,52 @@ class TransferCommand extends Command<Args> {
 			this.account = Datadir.decrypt(keyfile, this.passphrase!);
 		}
 
-		const value = new Currency(this.args.options.value + this.unit).format(
-			'a'
-		);
+		if (this.args.options.interactive) {
+			const second: Inquirer.QuestionCollection<SecondAnswers> = [
+				{
+					message: 'Submit transaction',
+					name: 'send',
+					type: 'confirm'
+				}
+			];
+
+			const gp = new Currency(
+				this.args.options.gasPrice === '0'
+					? 0
+					: this.args.options.gasPrice + 'a'
+			);
+			const tx = {
+				from: this.account!.address,
+				to: this.args.options.to,
+				value: new Currency(this.args.options.value).format('T'),
+				gas: this.args.options.gas,
+				gasPrice: gp.format('T')
+			};
+
+			color.yellow(JSON.stringify(tx, null, 2));
+			color.yellow(
+				`Transaction fee: ${gp
+					.times(this.args.options.gas || 21000)
+					.format('T')}`
+			);
+
+			const { send } = await Inquirer.prompt<SecondAnswers>(second);
+
+			this.send = send;
+		}
+
+		if (!this.send) {
+			return 'Aborted';
+		}
 
 		this.startSpinner('Sending Transaction');
 
 		const receipt = await this.node!.transfer(
 			this.account!,
 			this.args.options.to,
-			value.slice(0, -1),
+			new Currency(this.args.options.value).format('a').slice(0, -1),
 			21000,
-			// @ts-ignore
-			(await this.getMinGasPrice()).format('a').slice(0, -1)
+			Number(this.args.options.gasPrice)
 		);
 
 		this.stopSpinner();
