@@ -6,15 +6,14 @@ import utils from 'evm-lite-utils';
 import Session from '../core/Session';
 import Table from '../core/Table';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { IArgs, ITxOptions } from '../core/TxCommand';
 
-interface Opts extends IOptions {
+interface Opts extends ITxOptions {
 	formatted?: boolean;
 
 	host: string;
 	port: number;
 	gas: number;
-	gasprice: number;
 }
 
 interface Args extends IArgs<Opts> {}
@@ -38,7 +37,6 @@ export default (evmlc: Vorpal, session: Session) => {
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.option('--gas <g>', 'override config gas value')
-		.option('--gasprice <gp>', 'override config gasprice value')
 		.types({
 			string: ['host', 'h']
 		})
@@ -60,7 +58,7 @@ class POANomineeListCommand extends Command<Args> {
 
 		const transaction = contract.methods.getNomineeCount({
 			gas: this.args.options.gas,
-			gasPrice: this.args.options.gasprice
+			gasPrice: Number(this.args.options.gasPrice)
 		});
 
 		const countRes: any = await this.node!.callTx(transaction);
@@ -79,7 +77,7 @@ class POANomineeListCommand extends Command<Args> {
 			const addressTx = contract.methods.getNomineeAddressFromIdx(
 				{
 					gas: this.args.options.gas,
-					gasPrice: this.args.options.gasprice
+					gasPrice: Number(this.args.options.gasPrice)
 				},
 				i
 			);
@@ -89,7 +87,7 @@ class POANomineeListCommand extends Command<Args> {
 			const monikerTx = contract.methods.getMoniker(
 				{
 					gas: this.args.options.gas,
-					gasPrice: this.args.options.gasprice
+					gasPrice: Number(this.args.options.gasPrice)
 				},
 				entry.address
 			);
@@ -100,7 +98,7 @@ class POANomineeListCommand extends Command<Args> {
 			const votesTx = contract.methods.getCurrentNomineeVotes(
 				{
 					gas: this.args.options.gas,
-					gasPrice: this.args.options.gasprice
+					gasPrice: Number(this.args.options.gasPrice)
 				},
 				utils.cleanAddress(entry.address)
 			);
@@ -117,6 +115,8 @@ class POANomineeListCommand extends Command<Args> {
 	}
 
 	public async init(): Promise<boolean> {
+		this.constant = true;
+
 		this.args.options.host =
 			this.args.options.host || this.config.connection.host;
 		this.args.options.port =
@@ -124,10 +124,6 @@ class POANomineeListCommand extends Command<Args> {
 
 		if (!this.args.options.gas && this.args.options.gas !== 0) {
 			this.args.options.gas = this.config.defaults.gas;
-		}
-
-		if (!this.args.options.gasprice && this.args.options.gasprice !== 0) {
-			this.args.options.gasprice = this.config.defaults.gasPrice;
 		}
 
 		this.node = new Node(this.args.options.host, this.args.options.port);

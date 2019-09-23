@@ -1,12 +1,9 @@
-import Inquirer from 'inquirer';
-
 import logger, { Logger } from 'npmlog';
 
 import { IAbstractConsensus, Solo } from 'evm-lite-consensus';
 import { Args } from 'vorpal';
 
 import Node, { Account } from 'evm-lite-core';
-import Datadir from 'evm-lite-datadir';
 import ora from 'ora';
 
 import color from './color';
@@ -20,15 +17,18 @@ export interface IOptions {
 
 export type IArgs<T> = Args<T>;
 
-interface IDecryptPrompt {
-	from: string;
-	passphrase: string;
-}
-
 abstract class Command<
 	T extends IArgs<IOptions> = IArgs<IOptions>,
 	TConsensus extends IAbstractConsensus = Solo
 > {
+	protected get config() {
+		return this.session.datadir.config;
+	}
+
+	protected get datadir() {
+		return this.session.datadir;
+	}
+
 	// node will be set here if the command requires it
 	protected node?: Node<TConsensus>;
 
@@ -58,7 +58,7 @@ abstract class Command<
 
 		try {
 			if (this.session.interactive || interactive) {
-				await this.prompt();
+				await this.promptQueue();
 			}
 
 			// check if arguments are valid
@@ -70,9 +70,13 @@ abstract class Command<
 
 			// reset log level
 			this.log.level = 'silly';
+			this.stopSpinner();
 
 			return;
 		} catch (e) {
+			// stop spinner
+			this.stopSpinner();
+
 			let err: Error = e;
 
 			if (typeof e !== 'object') {
@@ -94,23 +98,8 @@ abstract class Command<
 		return await this.exec();
 	}
 
-	protected get config() {
-		return this.session.datadir.config;
-	}
-
-	protected get datadir() {
-		return this.session.datadir;
-	}
-
-	protected startSpinner(text: string) {
-		if (this.args.options.interactive) {
-			this.spinner.text = text;
-			this.spinner.start();
-		}
-	}
-
-	protected stopSpinner() {
-		this.spinner.stop();
+	protected async promptQueue(): Promise<void> {
+		await this.prompt();
 	}
 
 	// prepare command execution
@@ -125,80 +114,15 @@ abstract class Command<
 	// execute command
 	protected abstract async exec(): Promise<string>;
 
-	protected async decryptPrompt() {
-		const keystore = await this.datadir.listKeyfiles();
-
-		if (!this.node) {
-			throw Error('No node assigned to command');
+	protected startSpinner(text: string) {
+		if (this.args.options.interactive) {
+			this.spinner.text = text;
+			this.spinner.start();
 		}
+	}
 
-		// check connection
-		await this.node.getInfo();
-
-		// fetch account balances
-		const accounts: any = await Promise.all(
-			Object.keys(keystore).map(async moniker => {
-				const base = await this.node!.getAccount(
-					keystore[moniker].address
-				);
-
-				return {
-					...base,
-					moniker
-				};
-			})
-		);
-
-		const defaultAccount =
-			accounts.filter(
-				(a: any) =>
-					a.moniker.toLowerCase() ===
-					this.config.defaults.from.toLowerCase()
-			)[0] || undefined;
-
-		const questions: Inquirer.QuestionCollection<IDecryptPrompt> = [
-			{
-				choices: accounts.map(
-					(acc: any) => `${acc.moniker} (${acc.balance.format('T')})`
-				),
-				message: 'From: ',
-				name: 'from',
-				type: 'list'
-			},
-			{
-				message: 'Passphrase: ',
-				name: 'passphrase',
-				type: 'password'
-			}
-		];
-
-		if (defaultAccount) {
-			// @ts-ignore
-			const fromQ: any = questions[0];
-
-			fromQ.default = `${
-				defaultAccount.moniker
-			} (${defaultAccount.balance.format('T')})`;
-		}
-
-		const answers = await Inquirer.prompt<IDecryptPrompt>(questions);
-
-		this.startSpinner('Decrypting...');
-
-		const from = answers.from.split(' ')[0];
-		if (!from) {
-			throw Error('`from` moniker not provided.');
-		}
-
-		if (!answers.passphrase) {
-			throw Error('Passphrase not provided.');
-		}
-
-		const keyfile = await this.datadir.getKeyfile(from);
-
-		this.account = Datadir.decrypt(keyfile, answers.passphrase.trim());
-
-		this.stopSpinner();
+	protected stopSpinner() {
+		this.spinner.stop();
 	}
 }
 

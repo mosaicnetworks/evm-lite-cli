@@ -9,9 +9,9 @@ import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { IArgs, ITxOptions } from '../core/TxCommand';
 
-interface Opts extends IOptions {
+interface Opts extends ITxOptions {
 	interactive?: boolean;
 	moniker: string;
 	from: string;
@@ -19,7 +19,6 @@ interface Opts extends IOptions {
 	host: string;
 	port: number;
 	gas: number;
-	gasprice: number;
 }
 
 interface Args extends IArgs<Opts> {
@@ -29,8 +28,6 @@ interface Args extends IArgs<Opts> {
 interface Answers {
 	address: string;
 	nomineeMoniker: string;
-	gas: number;
-	gasPrice: number;
 }
 
 export default (evmlc: Vorpal, session: Session) => {
@@ -47,7 +44,6 @@ export default (evmlc: Vorpal, session: Session) => {
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.option('-g, --gas <g>', 'override config gas value')
-		.option('-gp, --gasprice <gp>', 'override config gasprice value')
 		.types({
 			string: ['_', 'pwd', 'moniker', 'from', 'h', 'host']
 		})
@@ -59,6 +55,8 @@ export default (evmlc: Vorpal, session: Session) => {
 
 class POANominateCommand extends Command<Args> {
 	protected async init(): Promise<boolean> {
+		this.payable = true;
+
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
@@ -71,10 +69,6 @@ class POANominateCommand extends Command<Args> {
 			this.args.options.gas = this.config.defaults.gas;
 		}
 
-		if (!this.args.options.gasprice && this.args.options.gasprice !== 0) {
-			this.args.options.gasprice = this.config.defaults.gasPrice;
-		}
-
 		this.args.options.from =
 			this.args.options.from || this.config.defaults.from;
 
@@ -84,12 +78,13 @@ class POANominateCommand extends Command<Args> {
 	}
 
 	protected async prompt(): Promise<void> {
-		await this.decryptPrompt();
-
 		const keystore = await this.datadir.listKeyfiles();
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
-				default: keystore[this.args.options.from].address || '',
+				default:
+					(this.args.options.from &&
+						keystore[this.args.options.from].address) ||
+					'',
 				message: 'Nominee: ',
 				name: 'address',
 				type: 'input'
@@ -99,18 +94,6 @@ class POANominateCommand extends Command<Args> {
 				message: 'Nominee Moniker: ',
 				name: 'nomineeMoniker',
 				type: 'input'
-			},
-			{
-				default: this.args.options.gas || 100000,
-				message: 'Gas: ',
-				name: 'gas',
-				type: 'number'
-			},
-			{
-				default: this.args.options.gasprice || 0,
-				message: 'Gas Price: ',
-				name: 'gasPrice',
-				type: 'number'
 			}
 		];
 
@@ -119,8 +102,6 @@ class POANominateCommand extends Command<Args> {
 		this.args.address = utils.trimHex(answers.address);
 
 		this.args.options.moniker = answers.nomineeMoniker;
-		this.args.options.gas = answers.gas;
-		this.args.options.gasprice = answers.gasPrice;
 	}
 
 	protected async check(): Promise<void> {
@@ -172,7 +153,6 @@ class POANominateCommand extends Command<Args> {
 		);
 
 		const poa = await this.node!.getPOA();
-
 		this.log.info('POA', poa.address);
 
 		const contract = Contract.load(JSON.parse(poa.abi), poa.address);
@@ -190,7 +170,7 @@ class POANominateCommand extends Command<Args> {
 			{
 				from: this.account.address,
 				gas: this.args.options.gas,
-				gasPrice: this.args.options.gasprice
+				gasPrice: Number(this.args.options.gasPrice)
 			},
 			utils.cleanAddress(this.args.address),
 			this.args.options.moniker

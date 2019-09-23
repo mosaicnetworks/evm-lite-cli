@@ -22,7 +22,7 @@ class TestCommand extends Command<Args> {
 	}
 
 	protected async prompt(): Promise<void> {
-		await this.decryptPrompt();
+		// await this.decryptPrompt();
 
 		return;
 	}

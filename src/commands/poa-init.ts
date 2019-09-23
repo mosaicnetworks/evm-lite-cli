@@ -9,24 +9,18 @@ import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { IArgs, ITxOptions } from '../core/TxCommand';
 
-interface Opts extends IOptions {
+interface Opts extends ITxOptions {
 	interactive?: boolean;
 	from: string;
 	pwd: string;
 	host: string;
 	port: number;
 	gas: number;
-	gasprice: number;
 }
 
 interface Args extends IArgs<Opts> {}
-
-interface Answers {
-	gas: number;
-	gasPrice: number;
-}
 
 export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Initialize PoA contract';
@@ -41,7 +35,6 @@ export default (evmlc: Vorpal, session: Session) => {
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.option('-g, --gas <g>', 'override config gas value')
-		.option('-gp, --gasprice <gp>', 'override config gasprice value')
 		.types({
 			string: ['_', 'f', 'from', 'host', 'pwd']
 		})
@@ -53,6 +46,8 @@ export default (evmlc: Vorpal, session: Session) => {
 
 class POAInitCommand extends Command<Args> {
 	protected async init(): Promise<boolean> {
+		this.payable = true;
+
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
@@ -65,10 +60,6 @@ class POAInitCommand extends Command<Args> {
 			this.args.options.gas = this.config.defaults.gas;
 		}
 
-		if (!this.args.options.gasprice && this.args.options.gasprice !== 0) {
-			this.args.options.gasprice = this.config.defaults.gasPrice;
-		}
-
 		this.args.options.from =
 			this.args.options.from || this.config.defaults.from;
 
@@ -78,27 +69,7 @@ class POAInitCommand extends Command<Args> {
 	}
 
 	protected async prompt(): Promise<void> {
-		await this.decryptPrompt();
-
-		const questions: Inquirer.QuestionCollection<Answers> = [
-			{
-				default: this.args.options.gas || 100000,
-				message: 'Gas: ',
-				name: 'gas',
-				type: 'number'
-			},
-			{
-				default: this.args.options.gasprice || 0,
-				message: 'Gas Price: ',
-				name: 'gasPrice',
-				type: 'number'
-			}
-		];
-
-		const answers = await Inquirer.prompt<Answers>(questions);
-
-		this.args.options.gas = answers.gas;
-		this.args.options.gasprice = answers.gasPrice;
+		return;
 	}
 
 	protected async check(): Promise<void> {
@@ -154,8 +125,8 @@ class POAInitCommand extends Command<Args> {
 
 		const tx = contract.methods.init({
 			from: this.account.address,
-			gas: this.config.defaults.gas,
-			gasPrice: this.config.defaults.gasPrice
+			gas: this.args.options.gas,
+			gasPrice: Number(this.args.options.gasPrice)
 		});
 
 		this.startSpinner('Sending Transaction');

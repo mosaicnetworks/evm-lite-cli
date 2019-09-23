@@ -7,11 +7,12 @@ import Node from 'evm-lite-core';
 import Datadir from 'evm-lite-datadir';
 import utils, { Currency, IUnits } from 'evm-lite-utils';
 
+import color from '../core/color';
 import Session from '../core/Session';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { IArgs, ITxOptions } from '../core/TxCommand';
 
-interface Opts extends IOptions {
+interface Opts extends ITxOptions {
 	interactive?: boolean;
 
 	host: string;
@@ -22,8 +23,6 @@ interface Opts extends IOptions {
 	// tx
 	from: string;
 	to: string;
-	gas: number;
-	gasprice: number;
 	value: string;
 }
 
@@ -32,8 +31,6 @@ interface Args extends IArgs<Opts> {}
 interface FirstAnswers {
 	to: string;
 	value: string;
-	gas: number;
-	gasPrice: number;
 }
 
 interface SecondAnswers {
@@ -53,8 +50,6 @@ export default (evmlc: Vorpal, session: Session) => {
 		.description(description)
 		.option('-i, --interactive', 'enter interactive mode')
 		.option('-v, --value <value>', 'value to send')
-		.option('-g, --gas <value>', 'gas')
-		.option('-gp, --gasprice <value>', 'gas price')
 		.option('-t, --to <address>', 'send to address')
 		.option('-f, --from <moniker>', 'moniker of sender')
 		.option('--pwd <password>', 'passphrase file path')
@@ -69,9 +64,11 @@ export default (evmlc: Vorpal, session: Session) => {
 class TransferCommand extends Command<Args> {
 	// command level variable
 	protected send: boolean = false;
-	protected unit: IUnits = 'T';
 
 	protected async init(): Promise<boolean> {
+		this.payable = true;
+		this.transfer = true;
+
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
@@ -79,15 +76,6 @@ class TransferCommand extends Command<Args> {
 			this.args.options.host || this.config.connection.host;
 		this.args.options.port =
 			this.args.options.port || this.config.connection.port;
-
-		// check if gas, gasprice is negative or undefined/null
-		if (!this.args.options.gas && this.args.options.gas !== 0) {
-			this.args.options.gas = this.config.defaults.gas;
-		}
-
-		if (!this.args.options.gasprice && this.args.options.gasprice !== 0) {
-			this.args.options.gasprice = this.config.defaults.gasPrice;
-		}
 
 		this.args.options.from =
 			this.args.options.from || this.config.defaults.from;
@@ -104,8 +92,6 @@ class TransferCommand extends Command<Args> {
 	}
 
 	protected async prompt(): Promise<void> {
-		await this.decryptPrompt();
-
 		const first: Inquirer.QuestionCollection<FirstAnswers> = [
 			{
 				message: 'To',
@@ -113,30 +99,9 @@ class TransferCommand extends Command<Args> {
 				type: 'input'
 			},
 			{
-				default: '100',
 				message: 'Value: ',
 				name: 'value',
 				type: 'input'
-			},
-			{
-				default: this.config.defaults.gas || 100000,
-				message: 'Gas: ',
-				name: 'gas',
-				type: 'number'
-			},
-			{
-				default: this.config.defaults.gasPrice || 0,
-				message: 'Gas Price: ',
-				name: 'gasPrice',
-				type: 'number'
-			}
-		];
-
-		const second: Inquirer.QuestionCollection<SecondAnswers> = [
-			{
-				message: 'Submit transaction',
-				name: 'send',
-				type: 'confirm'
 			}
 		];
 
@@ -144,27 +109,11 @@ class TransferCommand extends Command<Args> {
 
 		this.args.options.to = answers.to;
 		this.args.options.value = answers.value;
-		this.args.options.gas = answers.gas;
-		this.args.options.gasprice = answers.gasPrice;
 
 		const u = this.args.options.value.toString().slice(-1) as IUnits;
 		if (!isLetter(u)) {
-			this.args.options.value = this.args.options.value + this.unit;
+			this.args.options.value = this.args.options.value + 'T';
 		}
-
-		const tx = {
-			from: this.args.options.from,
-			to: this.args.options.to,
-			value: new Currency(this.args.options.value).format('T'),
-			gas: this.args.options.gas,
-			gasPrice: this.args.options.gasprice
-		};
-
-		console.log(JSON.stringify(tx, null, 2));
-
-		const { send } = await Inquirer.prompt<SecondAnswers>(second);
-
-		this.send = send;
 	}
 
 	protected async check(): Promise<void> {
@@ -194,14 +143,6 @@ class TransferCommand extends Command<Args> {
 			}
 		}
 
-		if (this.args.options.gas < 0) {
-			throw Error('Cannot use a gas value less than 0');
-		}
-
-		if (this.args.options.gasprice < 0) {
-			throw Error('Cannot use a gas price value less than 0');
-		}
-
 		if (!this.args.options.to || !this.args.options.value) {
 			throw Error('Provide `to` address and `value` to send');
 		}
@@ -209,20 +150,9 @@ class TransferCommand extends Command<Args> {
 		if (utils.trimHex(this.args.options.to).length !== 40) {
 			throw Error('Invalid `to` address');
 		}
-
-		const u = this.args.options.value.toString().slice(-1) as IUnits;
-
-		if (isLetter(u)) {
-			this.unit = u;
-			this.args.options.value = this.args.options.value.slice(0, -1);
-		}
 	}
 
 	protected async exec(): Promise<string> {
-		if (!this.send) {
-			return 'Aborted';
-		}
-
 		// sanity check
 		if (!this.account) {
 			const keyfile = await this.datadir.getKeyfile(
@@ -232,18 +162,52 @@ class TransferCommand extends Command<Args> {
 			this.account = Datadir.decrypt(keyfile, this.passphrase!);
 		}
 
-		const value = new Currency(this.args.options.value + this.unit).format(
-			'a'
-		);
+		if (this.args.options.interactive) {
+			const second: Inquirer.QuestionCollection<SecondAnswers> = [
+				{
+					message: 'Submit transaction',
+					name: 'send',
+					type: 'confirm'
+				}
+			];
+
+			const gp = new Currency(
+				this.args.options.gasPrice === '0'
+					? 0
+					: this.args.options.gasPrice + 'a'
+			);
+			const tx = {
+				from: this.account!.address,
+				to: this.args.options.to,
+				value: new Currency(this.args.options.value).format('T'),
+				gas: this.args.options.gas,
+				gasPrice: gp.format('T')
+			};
+
+			color.yellow(JSON.stringify(tx, null, 2));
+			color.yellow(
+				`Transaction fee: ${gp
+					.times(this.args.options.gas || 21000)
+					.format('T')}`
+			);
+
+			const { send } = await Inquirer.prompt<SecondAnswers>(second);
+
+			this.send = send;
+		}
+
+		if (!this.send) {
+			return 'Aborted';
+		}
 
 		this.startSpinner('Sending Transaction');
 
 		const receipt = await this.node!.transfer(
 			this.account!,
 			this.args.options.to,
-			value.slice(0, -1),
-			this.args.options.gas,
-			this.args.options.gasprice
+			new Currency(this.args.options.value).format('a').slice(0, -1),
+			21000,
+			Number(this.args.options.gasPrice)
 		);
 
 		this.stopSpinner();
