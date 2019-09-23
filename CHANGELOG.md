@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.2.0
+
+### Added
+
+-   `TxCommand` class hold transactional command abstractions
+
+### Changed
+
+-   All transaction commands now use `TxCommand` class
+-   `gasPrice` has been removed from all commands due to it being redundant
+
 ## v1.1.1
 
 -   core: `Command` class now has `.startSprinner(text: string)` and `.stopSpinner`
