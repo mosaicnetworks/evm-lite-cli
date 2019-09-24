@@ -11,9 +11,9 @@ import Session from '../core/Session';
 
 import { NomineeEntry, POANomineeList } from './poa-nomineelist';
 
-import Command, { IArgs, ITxOptions } from '../core/TxCommand';
+import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
-interface Opts extends ITxOptions {
+type Opts = TxOptions & {
 	interactive?: boolean;
 	pwd?: string;
 
@@ -22,16 +22,16 @@ interface Opts extends ITxOptions {
 	host: string;
 	port: number;
 	gas: number;
-}
+};
 
-interface Args extends IArgs<Opts> {
+type Args = Arguments<Opts> & {
 	address: string;
-}
+};
 
-interface Answers {
+type Answers = {
 	address: string;
 	verdict: boolean;
-}
+};
 
 export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Vote for an nominee currently in election';

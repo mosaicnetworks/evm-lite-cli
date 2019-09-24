@@ -7,24 +7,24 @@ import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { Arguments, Options } from '../core/Command';
 
-interface Opts extends IOptions {
+type Opts = Options & {
 	interactive?: boolean;
 	old: string;
 	new: string;
-}
+};
 
-interface Args extends IArgs<Opts> {
+type Args = Arguments<Opts> & {
 	moniker: string;
-}
+};
 
-interface Answers {
+type Answers = {
 	moniker: string;
 	oldPass: string;
 	newPass: string;
 	verifyNewPass: string;
-}
+};
 
 export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Update passphrase for a local account';

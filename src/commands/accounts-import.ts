@@ -10,23 +10,23 @@ import { IConfiguration } from 'evm-lite-datadir';
 
 import Session from '../core/Session';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { Arguments, Options } from '../core/Command';
 
-interface Opts extends IOptions {
+type Opts = Options & {
 	interactive?: boolean;
 	default?: boolean;
 	file: string;
-}
+};
 
-interface Args extends IArgs<Opts> {
+type Args = Arguments<Opts> & {
 	moniker: string;
-}
+};
 
-interface Answers {
+type Answers = {
 	moniker: string;
 	file: string;
 	makeDefault: boolean;
-}
+};
 
 export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Import an encrypted keyfile to the keystore';

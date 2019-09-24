@@ -9,18 +9,18 @@ import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
 
-import Command, { IArgs, ITxOptions } from '../core/TxCommand';
+import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
-interface Opts extends ITxOptions {
+type Opts = TxOptions & {
 	interactive?: boolean;
 	from: string;
 	pwd: string;
 	host: string;
 	port: number;
 	gas: number;
-}
+};
 
-interface Args extends IArgs<Opts> {}
+type Args = Arguments<Opts> & {};
 
 export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Initialize PoA contract';

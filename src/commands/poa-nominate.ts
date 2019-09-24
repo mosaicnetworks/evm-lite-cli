@@ -9,9 +9,9 @@ import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
 
-import Command, { IArgs, ITxOptions } from '../core/TxCommand';
+import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
-interface Opts extends ITxOptions {
+type Opts = TxOptions & {
 	interactive?: boolean;
 	moniker: string;
 	from: string;
@@ -19,16 +19,16 @@ interface Opts extends ITxOptions {
 	host: string;
 	port: number;
 	gas: number;
-}
+};
 
-interface Args extends IArgs<Opts> {
+type Args = Arguments<Opts> & {
 	address: string;
-}
+};
 
-interface Answers {
+type Answers = {
 	address: string;
 	nomineeMoniker: string;
-}
+};
 
 export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Nominate an address to proceed to election';

@@ -7,22 +7,22 @@ import utils from 'evm-lite-utils';
 import Session from '../core/Session';
 import Table from '../core/Table';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { Arguments, Options } from '../core/Command';
 
-interface Opts extends IOptions {
+type Opts = Options & {
 	formatted?: boolean;
 	interactive?: boolean;
 	host: string;
 	port: number;
-}
+};
 
-interface Args extends IArgs<Opts> {
+type Args = Arguments<Opts> & {
 	address: string;
-}
+};
 
-interface Answers {
+type Answers = {
 	address: string;
-}
+};
 
 export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Fetches account details from a connected node';

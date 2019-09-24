@@ -6,29 +6,29 @@ import { Args } from 'vorpal';
 
 import Datadir from 'evm-lite-datadir';
 
-import Command, { IOptions } from './Command';
+import Command, { Arguments, Options } from './Command';
 import Session from './Session';
 
+export { Arguments } from './Command';
+
 // default options for all commands
-export interface ITxOptions extends IOptions {
+export type TxOptions = Options & {
 	gas: number;
 	gasPrice: string;
-}
+};
 
-export type IArgs<T> = Args<T>;
-
-interface IDecryptPrompt {
+type DecryptPrompt = {
 	from: string;
 	passphrase: string;
-}
+};
 
-interface IGasPrompt {
+type GasPrompt = {
 	gas: number;
 	gasPrice: string;
-}
+};
 
 abstract class TxCommand<
-	T extends IArgs<ITxOptions> = IArgs<ITxOptions>,
+	T extends Arguments<TxOptions> = Arguments<TxOptions>,
 	TConsensus extends IAbstractConsensus = Solo
 > extends Command<T, TConsensus> {
 	protected transfer?: boolean;
@@ -71,7 +71,7 @@ abstract class TxCommand<
 			return;
 		}
 
-		const questions: Inquirer.QuestionCollection<IGasPrompt> = [
+		const questions: Inquirer.QuestionCollection<GasPrompt> = [
 			{
 				message: 'Gas: ',
 				name: 'gas',
@@ -80,7 +80,7 @@ abstract class TxCommand<
 			}
 		];
 
-		const answers = await Inquirer.prompt<IGasPrompt>(questions);
+		const answers = await Inquirer.prompt<GasPrompt>(questions);
 
 		this.args.options.gas = answers.gas;
 		return;
@@ -117,7 +117,7 @@ abstract class TxCommand<
 					this.config.defaults.from.toLowerCase()
 			)[0] || undefined;
 
-		const questions: Inquirer.QuestionCollection<IDecryptPrompt> = [
+		const questions: Inquirer.QuestionCollection<DecryptPrompt> = [
 			{
 				choices: accounts.map(
 					(acc: any) => `${acc.moniker} (${acc.balance.format('T')})`
@@ -142,7 +142,7 @@ abstract class TxCommand<
 			} (${defaultAccount.balance.format('T')})`;
 		}
 
-		const answers = await Inquirer.prompt<IDecryptPrompt>(questions);
+		const answers = await Inquirer.prompt<DecryptPrompt>(questions);
 
 		this.startSpinner('Decrypting...');
 

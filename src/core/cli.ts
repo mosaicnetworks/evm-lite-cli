@@ -11,13 +11,12 @@ import color from './color';
 import Session from './Session';
 
 // default commands
-// import debug from '../commands/debug';
 import clear from '../commands/clear';
 import interactive from '../commands/interactive';
 
 export type CommandFunction = (evmlc: Vorpal, session: Session) => Command;
 
-export interface ICLIConfig {
+export type CLIOptions = {
 	name: string;
 	delimiter: string;
 
@@ -26,16 +25,16 @@ export interface ICLIConfig {
 
 	// config file name (usually application name)
 	config: string;
-}
+};
 
-export default async function init(params: ICLIConfig, commands: any) {
+export default async function init(opts: CLIOptions, commands: any) {
 	commands.push(interactive, clear);
 
-	if (!Utils.exists(params.datadir)) {
-		mkdir.sync(params.datadir);
+	if (!Utils.exists(opts.datadir)) {
+		mkdir.sync(opts.datadir);
 	}
 
-	let dataDirPath = params.datadir;
+	let dataDirPath = opts.datadir;
 
 	if (process.argv[2] === '--datadir' || process.argv[2] === '-d') {
 		dataDirPath = process.argv[3];
@@ -50,12 +49,12 @@ export default async function init(params: ICLIConfig, commands: any) {
 		process.argv.splice(2, 2);
 	}
 
-	const session = new Session(dataDirPath, params.config);
+	const session = new Session(dataDirPath, opts.config);
 	const cli = new Vorpal();
 
 	if (!process.argv[2]) {
 		cli.log(
-			`\n  Change datadir by: ${params.delimiter} --datadir [path] [command]`
+			`\n  Change datadir by: ${opts.delimiter} --datadir [path] [command]`
 		);
 		cli.log(`\n  Data Directory: ${session.datadir.path}`);
 
@@ -69,7 +68,7 @@ export default async function init(params: ICLIConfig, commands: any) {
 	if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {
 		cli.log(
 			chalk.bold(
-				figlet.textSync(params.name, {
+				figlet.textSync(opts.name, {
 					horizontalLayout: 'full'
 				})
 			)
@@ -89,7 +88,7 @@ export default async function init(params: ICLIConfig, commands: any) {
 
 		await cli.exec('help');
 
-		cli.delimiter(`${params.delimiter}$`).show();
+		cli.delimiter(`${opts.delimiter}$`).show();
 	} else {
 		const cmdClear = cli.find('clear');
 		const cmdDebug = cli.find('debug');

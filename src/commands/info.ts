@@ -5,15 +5,15 @@ import Node from 'evm-lite-core';
 import Session from '../core/Session';
 import Table from '../core/Table';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { Arguments, Options } from '../core/Command';
 
-interface Opts extends IOptions {
+type Opts = Options & {
 	formatted?: boolean;
 	host: string;
 	port: number;
-}
+};
 
-export interface Args extends IArgs<Opts> {}
+export type Args = Arguments<Opts> & {};
 
 export default (evmlc: Vorpal, session: Session) => {
 	return evmlc

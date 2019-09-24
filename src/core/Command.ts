@@ -10,15 +10,15 @@ import color from './color';
 import Session from './Session';
 
 // default options for all commands
-export interface IOptions {
+export type Options = {
 	silent?: boolean;
 	interactive?: boolean;
-}
+};
 
-export type IArgs<T> = Args<T>;
+export type Arguments<T> = Args<T>;
 
 abstract class Command<
-	T extends IArgs<IOptions> = IArgs<IOptions>,
+	T extends Arguments<Options> = Arguments<Options>,
 	TConsensus extends IAbstractConsensus = Solo
 > {
 	protected get config() {

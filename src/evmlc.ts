@@ -24,9 +24,9 @@ import test from './commands/test';
 import transfer from './commands/transfer';
 import version from './commands/version';
 
-import init, { ICLIConfig } from './core/cli';
+import init, { CLIOptions } from './core/cli';
 
-const params: ICLIConfig = {
+const options: CLIOptions = {
 	name: 'EVMLC',
 	delimiter: 'evmlc',
 	datadir: osdatadir('evmlite'),
@@ -58,4 +58,4 @@ const commands = [
 	test
 ];
 
-init(params, commands).catch(console.log);
+init(options, commands).catch(console.log);

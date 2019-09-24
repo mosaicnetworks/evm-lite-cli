@@ -6,26 +6,26 @@ import Vorpal from 'vorpal';
 
 import Session from '../core/Session';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { Arguments, Options } from '../core/Command';
 
-interface Opts extends IOptions {
+type Opts = Options & {
 	interactive?: boolean;
 	debug?: boolean;
 	pwd?: string;
 	out: string;
-}
+};
 
-interface Args extends IArgs<Opts> {
+type Args = Arguments<Opts> & {
 	options: Opts;
 	moniker: string;
-}
+};
 
-interface Answers {
+type Answers = {
 	moniker: string;
 	outpath: string;
 	passphrase: string;
 	verifyPassphrase: string;
-}
+};
 
 const command = (evmlc: Vorpal, session: Session) => {
 	const description = 'Creates an encrypted keypair locally';
