@@ -88,7 +88,7 @@ abstract class Command<
 	}
 
 	// for testing
-	public async test(): Promise<string> {
+	public async execute(): Promise<string> {
 		// set log level to show only errors
 		this.log.level = 'silent';
 
