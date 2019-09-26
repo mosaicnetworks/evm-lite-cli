@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 
-import Inquirer from 'inquirer';
 import Vorpal from 'vorpal';
 
 import Node, { Contract } from 'evm-lite-core';
@@ -144,14 +143,14 @@ class POAInitCommand extends Command<Args> {
 				return log;
 			});
 
+		this.stopSpinner();
+
 		if (!receipt.logs.length) {
 			throw Error(
 				'No logs were returned. ' +
 					'Possibly due to lack of `gas` or may not be whitelisted.'
 			);
 		}
-
-		this.stopSpinner();
 
 		return JSON.stringify(r, null, 2);
 	}
