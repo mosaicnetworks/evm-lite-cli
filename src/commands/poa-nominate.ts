@@ -85,7 +85,7 @@ class POANominateCommand extends Command<Args> {
 					(this.args.options.from &&
 						keystore[this.args.options.from].address) ||
 					'',
-				message: 'Nominee: ',
+				message: 'Nominee Address: ',
 				name: 'address',
 				type: 'input'
 			},

@@ -109,7 +109,9 @@ class POANomineeListCommand extends Command<Args> {
 			entry.upVotes = parseInt(votes[0], 10);
 			entry.downVotes = parseInt(votes[1], 10);
 
-			this.debug(`Adding nominee -> ${entry.moniker} (${entry.address})`);
+			this.debug(
+				`Adding nominee -> ${entry.moniker} (${entry.address}) [${entry.upVotes}, ${entry.downVotes}]`
+			);
 			entries.push(entry);
 		}
 

@@ -91,6 +91,10 @@ class POAVoteCommand extends Command<Args> {
 
 		this.nominees = await cmd.getNomineeList();
 
+		if (this.nominees.length === 0) {
+			throw Error('No nominees in election');
+		}
+
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
 				choices: this.nominees.map(
