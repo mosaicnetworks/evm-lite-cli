@@ -45,6 +45,8 @@ const command = (evmlc: Vorpal, session: Session) => {
 
 class AccountCreateCommand extends Command<Args> {
 	protected async init(): Promise<boolean> {
+		this.log.debug('init', 'Initializing command');
+
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
 
@@ -56,6 +58,8 @@ class AccountCreateCommand extends Command<Args> {
 	}
 
 	protected async prompt(): Promise<void> {
+		this.log.debug('prompt', 'Entering interactive mode');
+
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
 				message: 'Moniker: ',
@@ -97,6 +101,8 @@ class AccountCreateCommand extends Command<Args> {
 	}
 
 	protected async check(): Promise<void> {
+		this.log.debug('check', 'Parsing arguments');
+
 		if (!this.args.moniker) {
 			throw Error('Moniker cannot be empty');
 		}
@@ -136,6 +142,11 @@ class AccountCreateCommand extends Command<Args> {
 
 	protected async exec(): Promise<string> {
 		this.log.info('keystore', this.datadir.keystorePath);
+
+		this.log.debug('exec', 'Attemping to create keyfile with: ');
+		this.log.debug('exec', `Moniker -> ${this.args.moniker}`);
+		this.log.debug('exec', `Passphrase -> ${this.passphrase}`);
+		this.log.debug('exec', `Outpath -> ${this.args.options.out}`);
 
 		const account = await this.datadir.newKeyfile(
 			this.args.moniker,

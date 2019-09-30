@@ -12,10 +12,23 @@ import Session from './Session';
 // default options for all commands
 export type Options = {
 	silent?: boolean;
+	debug?: boolean;
 	interactive?: boolean;
 };
 
 export type Arguments<T> = Args<T>;
+
+// global logger styles
+logger.headingStyle = { fg: 'white', bg: 'black' };
+logger.addLevel(
+	'debug',
+	1001,
+	{
+		fg: 'yellow',
+		bg: 'black'
+	},
+	'debug'
+);
 
 abstract class Command<
 	T extends Arguments<Options> = Arguments<Options>,
@@ -46,35 +59,33 @@ abstract class Command<
 
 	constructor(public readonly session: Session, public readonly args: T) {
 		this.log = logger;
+		this.log.level = 'info';
+
+		this.log.heading = session.name;
 
 		if (this.args.options.silent) {
 			this.log.level = 'error';
+		}
+
+		if (this.args.options.debug) {
+			this.log.level = 'debug';
 		}
 	}
 
 	// runs the command
 	public async run(): Promise<void> {
 		const interactive = await this.init();
-
 		try {
 			if (this.session.interactive || interactive) {
 				await this.promptQueue();
 			}
 
-			// check if arguments are valid
 			await this.check();
 
 			// get out from command
 			const o = await this.exec();
 			color.green(o);
-
-			// reset log level
-			this.log.level = 'silly';
-			this.stopSpinner();
-
-			return;
 		} catch (e) {
-			// stop spinner
 			this.stopSpinner();
 
 			let err: Error = e;
@@ -83,8 +94,15 @@ abstract class Command<
 				err = new Error(e);
 			}
 
-			this.log.error('evmlc', err.message.replace(/(\r\n|\n|\r)/gm, ''));
+			this.log.error('', err.message.replace(/(\r\n|\n|\r)/gm, ''));
+			return;
 		}
+
+		// reset log level
+		this.log.level = 'silly';
+		this.stopSpinner();
+
+		return;
 	}
 
 	// for testing
