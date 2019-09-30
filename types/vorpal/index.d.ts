@@ -6,6 +6,8 @@
 
 module 'vorpal' {
 	export default class Vorpal {
+		commands: Command[];
+		_commandHelp: (s: string) => string;
 		parse(argv: ReadonlyArray<string>): this;
 		delimiter(value: string): this;
 		show(): this;
@@ -20,7 +22,7 @@ module 'vorpal' {
 		pipe(value: (stdout: string) => string): this;
 		use(extension: Vorpal.Extension): this;
 		catch(command: string, description?: string): Vorpal.Catch;
-		command(command: string, description?: string): Vorpal.Command;
+		command(command: string, description?: string): Command;
 		version(version: string): this;
 		sigint(value: () => void): this;
 		ui: Vorpal.UI;
@@ -38,6 +40,10 @@ module 'vorpal' {
 		_name: string;
 		_fn: Action;
 		_cancel: Cancel | undefined;
+		_parent: Vorpal;
+		_hidden: boolean;
+		_help: any;
+		helpInformation: () => string;
 		alias(command: string): this;
 		parse(value: (command: string, args: Args) => string): this;
 		option(

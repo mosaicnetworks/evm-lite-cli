@@ -12,6 +12,7 @@ import Session from './Session';
 
 // default commands
 import clear from '../commands/clear';
+import help from '../commands/help';
 import interactive from '../commands/interactive';
 
 export type CommandFunction = (evmlc: Vorpal, session: Session) => Command;
@@ -52,12 +53,20 @@ export default async function init(opts: CLIOptions, commands: any) {
 	const session = new Session(dataDirPath, opts.config);
 	const cli = new Vorpal();
 
-	if (!process.argv[2]) {
-		cli.log(
-			`\n  Change datadir by: ${opts.delimiter} --datadir [path] [command]`
-		);
-		cli.log(`\n  Data Directory: ${session.datadir.path}`);
+	// custom overrides
+	const exit = cli.find('exit');
+	if (exit) {
+		exit.description(`Exit ${opts.name}`);
+	}
+	const helpCMD = cli.find('help');
+	if (helpCMD) {
+		helpCMD.remove();
+	}
 
+	// add custom help command
+	help(cli, session);
+
+	if (!process.argv[2]) {
 		process.argv[2] = 'help';
 	}
 
