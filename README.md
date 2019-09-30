@@ -16,13 +16,13 @@ A Command Line Interface to interact with an [EVM-Lite](https://github.com/mosai
 You can easily install `evmlc` with NPM
 
 ```bash
-npm install -g evm-lite-cli
+$ npm install -g evm-lite-cli
 ```
 
 or with `yarn`
 
 ```bash
-yarn global add evm-lite-cli
+$ yarn global add evm-lite-cli
 ```
 
 ## Commands
@@ -32,7 +32,7 @@ yarn global add evm-lite-cli
 The global flag `-d, --datadir` specifies the directory where `keystore` and `evmlc.toml` are stored unless overwritten by specific flags.
 
 ```bash
-evmlc --datadir [path] interactive
+$ evmlc --datadir <path> <command>
 ```
 
 ## Data Directory
@@ -50,7 +50,7 @@ In particular, this directory contains the following items:
 -   **evmlc.toml**: where global options are specified
 -   **keystore**: where all encrypted account keys are stored
 
-**This directory is shared by [EVM-Lite](https://github.com/mosaicnetworks/evm-lite#readme)**
+**This directory is shared by [EVM-Lite](https://github.com/mosaicnetworks/evm-lite#readme).**
 
 ### `evmlc.toml`
 
