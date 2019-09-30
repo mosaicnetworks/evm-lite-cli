@@ -9,7 +9,7 @@ export default (evmlc: Vorpal, session: Session) => {
 		.description('Provides help for a given command.')
 		.action((args: any, cb: any) => {
 			color.yellow(
-				`\n  Change datadir by: $${session.name} --datadir [path] [command]`
+				`\n  Change datadir by: $ ${session.name} --datadir [path] [command]`
 			);
 
 			if (args.command) {

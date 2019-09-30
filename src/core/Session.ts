@@ -8,13 +8,17 @@ export default class Session {
 	public interactive: boolean = false;
 	public debug: boolean = false;
 
-	public readonly datadir: Datadir<Keystore>;
+	public datadir: Datadir<Keystore>;
 
-	constructor(datadir: string, config: string) {
-		const k = new Keystore(p.join(datadir, 'keystore'));
-
+	constructor(datadir: string, public readonly config: string) {
 		this.name = config;
 
-		this.datadir = new Datadir(datadir, config, k);
+		const k = new Keystore(p.join(datadir, 'keystore'));
+		this.datadir = new Datadir(datadir, this.config, k);
+	}
+
+	public setDatadir(path: string) {
+		const k = new Keystore(p.join(path, 'keystore'));
+		this.datadir = new Datadir(path, this.config, k);
 	}
 }
