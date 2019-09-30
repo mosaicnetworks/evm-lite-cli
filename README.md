@@ -36,10 +36,10 @@ List commands:
  | |___    \ V /   | |  | | | |___  | |___
  |_____|    \_/    |_|  |_| |_____|  \____|
 
- Mode:        Interactive
- Data Dir:    /Users/danu/Library/MONET
- Config File: /Users/danu/Library/MONET/evmlc.toml
- Keystore:    /Users/danu/Library/MONET/keystore
+ Mode:         Interactive
+ Data Dir:     [...]/MONET
+ Config File:  [...]/MONET/evmlc.toml
+ Keystore:     [...]/MONET/keystore
 
   Change datadir by: $evmlc --datadir [path] [command]
 
