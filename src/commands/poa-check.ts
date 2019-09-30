@@ -9,10 +9,8 @@ import Session from '../core/Session';
 import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
 type Opts = TxOptions & {
-	interactive?: boolean;
 	host: string;
 	port: number;
-	gas: number;
 };
 
 type Args = Arguments<Opts> & {
@@ -97,6 +95,7 @@ class POACheckCommand extends Command<Args> {
 
 		const contract = Contract.load(JSON.parse(poa.abi), poa.address);
 
+		this.debug('Generating checkAuthorised transaction');
 		const tx = contract.methods.checkAuthorised(
 			{
 				gas: this.args.options.gas,
@@ -105,6 +104,7 @@ class POACheckCommand extends Command<Args> {
 			utils.cleanAddress(this.args.address)
 		);
 
+		this.debug('Sending transaction');
 		const response = await this.node!.callTx<boolean>(tx);
 
 		return response.toString();

@@ -63,6 +63,7 @@ class POANomineeListCommand extends Command<Args> {
 
 		const countRes: any = await this.node!.callTx(transaction);
 		const count = countRes.toNumber();
+		this.debug(`Nominee count -> ${count}`);
 
 		const entries: NomineeEntry[] = [];
 
@@ -108,6 +109,7 @@ class POANomineeListCommand extends Command<Args> {
 			entry.upVotes = parseInt(votes[0], 10);
 			entry.downVotes = parseInt(votes[1], 10);
 
+			this.debug(`Adding nominee -> ${entry.moniker} (${entry.address})`);
 			entries.push(entry);
 		}
 

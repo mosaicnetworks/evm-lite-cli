@@ -11,12 +11,10 @@ import Session from '../core/Session';
 import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
 type Opts = TxOptions & {
-	interactive?: boolean;
 	from: string;
 	pwd: string;
 	host: string;
 	port: number;
-	gas: number;
 };
 
 type Args = Arguments<Opts> & {};
@@ -122,6 +120,7 @@ class POAInitCommand extends Command<Args> {
 			this.account = Datadir.decrypt(keyfile, this.passphrase!);
 		}
 
+		this.debug('Generating init transaction');
 		const tx = contract.methods.init({
 			from: this.account.address,
 			gas: this.args.options.gas,
@@ -130,11 +129,13 @@ class POAInitCommand extends Command<Args> {
 
 		this.startSpinner('Sending Transaction');
 
+		this.debug('Sending init transaction');
 		const receipt = await this.node!.sendTx(tx, this.account);
 		const r = {
 			...receipt
 		};
 
+		this.debug('Parsing logs from receipt');
 		r.logs = receipt.logs
 			.filter(log => log.event === 'MonikerAnnounce')
 			.map(log => {

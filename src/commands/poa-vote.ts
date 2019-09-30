@@ -174,6 +174,7 @@ class POAVoteCommand extends Command<Args> {
 			this.account = Datadir.decrypt(keyfile, this.passphrase!);
 		}
 
+		this.debug('Generating vote transaction');
 		const tx = contract.methods.castNomineeVote(
 			{
 				from: this.account.address,
@@ -186,6 +187,7 @@ class POAVoteCommand extends Command<Args> {
 
 		this.startSpinner('Sending Transaction');
 
+		this.debug('Sending vote transaction');
 		const receipt = await this.node!.sendTx(tx, this.account);
 		if (!receipt.logs.length) {
 			throw Error(
@@ -193,6 +195,8 @@ class POAVoteCommand extends Command<Args> {
 					'Possibly due to lack of `gas` or may not be whitelisted.'
 			);
 		}
+
+		this.debug('Parsing logs from transaction');
 
 		const nomineeVoteCastEvent = receipt.logs.filter(
 			log => log.event === 'NomineeVoteCast'

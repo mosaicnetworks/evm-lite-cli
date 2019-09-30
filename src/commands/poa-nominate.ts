@@ -166,6 +166,7 @@ class POANominateCommand extends Command<Args> {
 			this.account = Datadir.decrypt(keyfile, this.passphrase!);
 		}
 
+		this.debug('Generating nominate transaction');
 		const tx = contract.methods.submitNominee(
 			{
 				from: this.account.address,
@@ -178,6 +179,7 @@ class POANominateCommand extends Command<Args> {
 
 		this.startSpinner('Sending Transaction');
 
+		this.debug('Sending nominate transaction');
 		const receipt = await this.node!.sendTx(tx, this.account);
 
 		if (!receipt.logs.length) {
@@ -186,6 +188,8 @@ class POANominateCommand extends Command<Args> {
 					'Possibly due to lack of `gas` or may not be whitelisted.'
 			);
 		}
+
+		this.debug('Parsing logs from receipt');
 
 		let monikerAnnouceEvent;
 		const monikerAnnouceEvents = receipt.logs.filter(

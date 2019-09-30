@@ -6,7 +6,6 @@ import Session from '../core/Session';
 import Command, { Arguments, Options } from '../core/Command';
 
 type Opts = Options & {
-	interactive?: boolean;
 	host?: string;
 	port?: number;
 	from?: string;

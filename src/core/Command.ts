@@ -87,7 +87,7 @@ abstract class Command<
 
 		try {
 			if (this.session.interactive || interactive) {
-				this.log.debug('prompt', 'Showing interactive prompts');
+				// this.log.debug('prompt', 'Showing interactive prompts');
 				await this.promptQueue();
 			}
 
