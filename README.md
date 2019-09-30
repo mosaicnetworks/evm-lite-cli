@@ -27,6 +27,44 @@ $ yarn global add evm-lite-cli
 
 ## Commands
 
+List commands:
+
+```console
+  _____  __     __  __  __   _        ____
+ | ____| \ \   / / |  \/  | | |      / ___|
+ |  _|    \ \ / /  | |\/| | | |     | |
+ | |___    \ V /   | |  | | | |___  | |___
+ |_____|    \_/    |_|  |_| |_____|  \____|
+
+ Mode:        Interactive
+ Data Dir:    /Users/danu/Library/MONET
+ Config File: /Users/danu/Library/MONET/evmlc.toml
+ Keystore:    /Users/danu/Library/MONET/keystore
+
+  Change datadir by: $evmlc --datadir [path] [command]
+
+  Commands:
+
+    exit                                 Exit EVMLC
+    help [command...]                    Provides help for a given command.
+    accounts create [options] [moniker]  Creates an encrypted keypair locally
+    accounts list [options]              List all accounts in the local keystore directory
+    accounts get [options] [address]     Fetches account details from a connected node
+    accounts update [options] [moniker]  Update passphrase for a local account
+    accounts import [options] [moniker]  Import an encrypted keyfile to the keystore
+    config view [options]                Output current configuration file
+    config set [options]                 Set values of the configuration inside the data directory
+    poa check [options] [address]        Check whether an address is on the whitelist
+    poa whitelist [options]              List whitelist entries for a connected node
+    poa nomineelist [options]            List nominees for a connected node
+    poa nominate [options] [address]     Nominate an address to proceed to election
+    poa vote [options] [address]         Vote for an nominee currently in election
+    info [options]                       Display information about node
+    transfer [options]                   Initiate a transfer of token(s) to an address
+    version [options]                    Display current version of cli
+    clear [options]                      Clear output on screen
+```
+
 ### Flags
 
 The global flag `-d, --datadir` specifies the directory where `keystore` and `evmlc.toml` are stored unless overwritten by specific flags.
