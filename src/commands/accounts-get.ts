@@ -11,7 +11,6 @@ import Command, { Arguments, Options } from '../core/Command';
 
 type Opts = Options & {
 	formatted?: boolean;
-	interactive?: boolean;
 	host: string;
 	port: number;
 };
@@ -85,6 +84,8 @@ class AccountGetCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<string> {
+		this.debug(`Attempting to fetch -> ${this.args.address}`);
+
 		const { host, port } = this.args.options;
 		this.log.http('GET', `${host}:${port}/account/${this.args.address}`);
 

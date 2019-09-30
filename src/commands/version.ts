@@ -12,7 +12,6 @@ export default (evmlc: Vorpal, session: Session) => {
 	return evmlc
 		.command('version')
 		.alias('v')
-		.option('-d, --debug', 'show debug output')
 		.description(description)
 		.types({
 			string: []

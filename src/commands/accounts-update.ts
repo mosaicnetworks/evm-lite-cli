@@ -10,7 +10,6 @@ import Session from '../core/Session';
 import Command, { Arguments, Options } from '../core/Command';
 
 type Opts = Options & {
-	interactive?: boolean;
 	old: string;
 	new: string;
 };
@@ -158,12 +157,16 @@ class AccountUpdateCommand extends Command<Args> {
 	protected async exec(): Promise<string> {
 		this.log.info('keystore', this.datadir.keystorePath);
 
+		this.debug('Attemping to update keyfile with: ');
+		this.debug(`Moniker -> ${this.args.moniker}`);
+		this.debug(`New Passphrase -> ${this.newPassphrase}`);
+
 		const keyfile = await this.datadir.updateKeyfile(
 			this.args.moniker,
 			this.oldPassphrase,
 			this.newPassphrase
 		);
 
-		return JSON.stringify(keyfile);
+		return JSON.stringify(keyfile, null, 2);
 	}
 }

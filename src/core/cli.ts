@@ -72,8 +72,9 @@ export default async function init(opts: CLIOptions, commands: any) {
 
 	commands.forEach((command: CommandFunction) => {
 		command(cli, session)
-			.option('--silent', 'silence all logging output')
-			.option('--debug', 'display debugging logs');
+			.option('--debug', 'set logging level to debug')
+			.option('--error', 'set logging level to error')
+			.option('--silent', 'silence all logging');
 	});
 
 	if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {

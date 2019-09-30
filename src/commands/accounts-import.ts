@@ -13,7 +13,6 @@ import Session from '../core/Session';
 import Command, { Arguments, Options } from '../core/Command';
 
 type Opts = Options & {
-	interactive?: boolean;
 	default?: boolean;
 	file: string;
 };
@@ -104,14 +103,19 @@ class AccountImportCommand extends Command<Args> {
 	protected async exec(): Promise<string> {
 		this.log.info('keystore', this.datadir.keystorePath);
 
+		this.debug(`Attempting to read -> ${this.args.options.file}`);
 		const keyfile = JSON.parse(
 			fs.readFileSync(path.join(this.args.options.file), 'utf8')
 		);
 
 		// import keyfile
+		this.debug(`Attempting to import keyfile`);
 		await this.datadir.importKeyfile(this.args.moniker, keyfile);
 
 		if (this.args.options.default) {
+			this.debug(
+				`Setting default 'from' moniker to ${this.args.moniker}`
+			);
 			const newConfig: IConfiguration = {
 				...this.datadir.config,
 				defaults: {

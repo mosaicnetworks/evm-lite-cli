@@ -11,9 +11,12 @@ import Session from './Session';
 
 // default options for all commands
 export type Options = {
-	silent?: boolean;
-	debug?: boolean;
 	interactive?: boolean;
+
+	// logging optiosn
+	silent?: boolean;
+	error?: boolean;
+	debug?: boolean;
 };
 
 export type Arguments<T> = Args<T>;
@@ -53,41 +56,48 @@ abstract class Command<
 
 	// command level logger
 	protected log: Logger;
+	protected defaultLogLevel: 'info' | 'debug' = 'info';
 
 	// command level
 	private spinner = ora('');
 
 	constructor(public readonly session: Session, public readonly args: T) {
 		this.log = logger;
-		this.log.level = 'info';
+		this.log.level = this.defaultLogLevel;
 
 		this.log.heading = session.name;
 
-		if (this.args.options.silent) {
+		if (this.args.options.debug) {
+			this.log.level = 'debug';
+		}
+
+		if (this.args.options.error) {
 			this.log.level = 'error';
 		}
 
-		if (this.args.options.debug) {
-			this.log.level = 'debug';
+		if (this.args.options.silent) {
+			this.log.level = 'silent';
 		}
 	}
 
 	// runs the command
 	public async run(): Promise<void> {
+		this.log.debug('init', 'Initializing command');
 		const interactive = await this.init();
+
 		try {
 			if (this.session.interactive || interactive) {
+				this.log.debug('prompt', 'Showing interactive prompts');
 				await this.promptQueue();
 			}
 
+			this.log.debug('check', 'Parsing arguments');
 			await this.check();
 
 			// get out from command
 			const o = await this.exec();
 			color.green(o);
 		} catch (e) {
-			this.stopSpinner();
-
 			let err: Error = e;
 
 			if (typeof e !== 'object') {
@@ -95,11 +105,10 @@ abstract class Command<
 			}
 
 			this.log.error('', err.message.replace(/(\r\n|\n|\r)/gm, ''));
-			return;
 		}
 
 		// reset log level
-		this.log.level = 'silly';
+		this.log.level = this.defaultLogLevel;
 		this.stopSpinner();
 
 		return;
@@ -108,7 +117,7 @@ abstract class Command<
 	// for testing
 	public async execute(): Promise<string> {
 		// set log level to show only errors
-		this.log.level = 'silent';
+		this.log.level = 'error';
 
 		await this.init();
 		await this.check();
@@ -118,6 +127,10 @@ abstract class Command<
 
 	protected async promptQueue(): Promise<void> {
 		await this.prompt();
+	}
+
+	protected debug(message: string, title: string = 'exec') {
+		this.log.debug(title, message);
 	}
 
 	// prepare command execution
