@@ -2,7 +2,7 @@ import Vorpal from 'vorpal';
 
 import Session from '../core/Session';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { Arguments, Options } from '../core/Command';
 
 export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Output current configuration file';
@@ -11,7 +11,7 @@ export default (evmlc: Vorpal, session: Session) => {
 		.command('config view')
 		.alias('c v')
 		.description(description)
-		.action((args: IArgs<IOptions>) =>
+		.action((args: Arguments<Options>) =>
 			new ConfigViewCommand(session, args).run()
 		);
 };

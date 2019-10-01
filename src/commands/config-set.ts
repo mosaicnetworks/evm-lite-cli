@@ -3,26 +3,25 @@ import Vorpal from 'vorpal';
 
 import Session from '../core/Session';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { Arguments, Options } from '../core/Command';
 
-interface Opts extends IOptions {
-	interactive?: boolean;
+type Opts = Options & {
 	host?: string;
 	port?: number;
 	from?: string;
 	gas?: number;
 	gasprice?: number;
-}
+};
 
-interface Args extends IArgs<Opts> {}
+type Args = Arguments<Opts> & {};
 
-interface Answers {
+type Answers = {
 	host: string;
 	port: number;
 	from: string;
 	gas: number;
 	gasPrice: number;
-}
+};
 
 export default (evmlc: Vorpal, session: Session) => {
 	const description =

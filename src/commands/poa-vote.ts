@@ -11,9 +11,9 @@ import Session from '../core/Session';
 
 import { NomineeEntry, POANomineeList } from './poa-nomineelist';
 
-import Command, { IArgs, ITxOptions } from '../core/TxCommand';
+import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
-interface Opts extends ITxOptions {
+type Opts = TxOptions & {
 	interactive?: boolean;
 	pwd?: string;
 
@@ -22,16 +22,16 @@ interface Opts extends ITxOptions {
 	host: string;
 	port: number;
 	gas: number;
-}
+};
 
-interface Args extends IArgs<Opts> {
+type Args = Arguments<Opts> & {
 	address: string;
-}
+};
 
-interface Answers {
+type Answers = {
 	address: string;
 	verdict: boolean;
-}
+};
 
 export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Vote for an nominee currently in election';
@@ -90,6 +90,10 @@ class POAVoteCommand extends Command<Args> {
 		cmd.init();
 
 		this.nominees = await cmd.getNomineeList();
+
+		if (this.nominees.length === 0) {
+			throw Error('No nominees in election');
+		}
 
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
@@ -174,6 +178,7 @@ class POAVoteCommand extends Command<Args> {
 			this.account = Datadir.decrypt(keyfile, this.passphrase!);
 		}
 
+		this.debug('Generating vote transaction');
 		const tx = contract.methods.castNomineeVote(
 			{
 				from: this.account.address,
@@ -186,6 +191,7 @@ class POAVoteCommand extends Command<Args> {
 
 		this.startSpinner('Sending Transaction');
 
+		this.debug('Sending vote transaction');
 		const receipt = await this.node!.sendTx(tx, this.account);
 		if (!receipt.logs.length) {
 			throw Error(
@@ -193,6 +199,8 @@ class POAVoteCommand extends Command<Args> {
 					'Possibly due to lack of `gas` or may not be whitelisted.'
 			);
 		}
+
+		this.debug('Parsing logs from transaction');
 
 		const nomineeVoteCastEvent = receipt.logs.filter(
 			log => log.event === 'NomineeVoteCast'

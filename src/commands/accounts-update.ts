@@ -7,24 +7,23 @@ import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { Arguments, Options } from '../core/Command';
 
-interface Opts extends IOptions {
-	interactive?: boolean;
+type Opts = Options & {
 	old: string;
 	new: string;
-}
+};
 
-interface Args extends IArgs<Opts> {
+type Args = Arguments<Opts> & {
 	moniker: string;
-}
+};
 
-interface Answers {
+type Answers = {
 	moniker: string;
 	oldPass: string;
 	newPass: string;
 	verifyNewPass: string;
-}
+};
 
 export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Update passphrase for a local account';
@@ -158,12 +157,16 @@ class AccountUpdateCommand extends Command<Args> {
 	protected async exec(): Promise<string> {
 		this.log.info('keystore', this.datadir.keystorePath);
 
+		this.debug('Attemping to update keyfile with: ');
+		this.debug(`Moniker -> ${this.args.moniker}`);
+		this.debug(`New Passphrase -> ${this.newPassphrase}`);
+
 		const keyfile = await this.datadir.updateKeyfile(
 			this.args.moniker,
 			this.oldPassphrase,
 			this.newPassphrase
 		);
 
-		return JSON.stringify(keyfile);
+		return JSON.stringify(keyfile, null, 2);
 	}
 }

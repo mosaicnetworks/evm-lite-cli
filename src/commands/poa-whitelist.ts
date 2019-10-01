@@ -6,22 +6,22 @@ import utils from 'evm-lite-utils';
 import Session from '../core/Session';
 import Table from '../core/Table';
 
-import Command, { IArgs, ITxOptions } from '../core/TxCommand';
+import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
-interface Opts extends ITxOptions {
+type Opts = TxOptions & {
 	formatted?: boolean;
 
 	host: string;
 	port: number;
 	gas: number;
-}
+};
 
-interface Args extends IArgs<Opts> {}
+type Args = Arguments<Opts> & {};
 
-interface WhitelistEntry {
+type WhitelistEntry = {
 	address: string;
 	moniker: string;
-}
+};
 
 export default (evmlc: Vorpal, session: Session) => {
 	const description = 'List whitelist entries for a connected node';
@@ -88,6 +88,7 @@ class POAWhitelistCommand extends Command<Args> {
 
 		const countRes: any = await this.node!.callTx(transaction);
 		const count = countRes.toNumber();
+		this.debug(`Whitelist count -> ${count}`);
 
 		if (!count) {
 			return 'No whitelist entries found';
@@ -124,6 +125,9 @@ class POAWhitelistCommand extends Command<Args> {
 			const hex = await this.node!.callTx<string>(monikerTx);
 			entry.moniker = utils.hexToString(hex);
 
+			this.debug(
+				`Adding whitelist entry -> ${entry.moniker} (${entry.address})`
+			);
 			entries.push(entry);
 
 			table.push([entry.moniker, entry.address]);

@@ -6,24 +6,24 @@ import utils from 'evm-lite-utils';
 import Session from '../core/Session';
 import Table from '../core/Table';
 
-import Command, { IArgs, ITxOptions } from '../core/TxCommand';
+import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
-interface Opts extends ITxOptions {
+type Opts = TxOptions & {
 	formatted?: boolean;
 
 	host: string;
 	port: number;
 	gas: number;
-}
+};
 
-interface Args extends IArgs<Opts> {}
+type Args = Arguments<Opts> & {};
 
-export interface NomineeEntry {
+export type NomineeEntry = {
 	address: string;
 	moniker: string;
 	upVotes: number;
 	downVotes: number;
-}
+};
 
 export default (evmlc: Vorpal, session: Session) => {
 	const description = 'List nominees for a connected node';
@@ -63,6 +63,7 @@ class POANomineeListCommand extends Command<Args> {
 
 		const countRes: any = await this.node!.callTx(transaction);
 		const count = countRes.toNumber();
+		this.debug(`Nominee count -> ${count}`);
 
 		const entries: NomineeEntry[] = [];
 
@@ -108,6 +109,9 @@ class POANomineeListCommand extends Command<Args> {
 			entry.upVotes = parseInt(votes[0], 10);
 			entry.downVotes = parseInt(votes[1], 10);
 
+			this.debug(
+				`Adding nominee -> ${entry.moniker} (${entry.address}) [${entry.upVotes}, ${entry.downVotes}]`
+			);
 			entries.push(entry);
 		}
 

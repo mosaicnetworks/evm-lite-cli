@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 
-import Inquirer from 'inquirer';
 import Vorpal from 'vorpal';
 
 import Node, { Contract } from 'evm-lite-core';
@@ -9,18 +8,16 @@ import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
 
-import Command, { IArgs, ITxOptions } from '../core/TxCommand';
+import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
-interface Opts extends ITxOptions {
-	interactive?: boolean;
+type Opts = TxOptions & {
 	from: string;
 	pwd: string;
 	host: string;
 	port: number;
-	gas: number;
-}
+};
 
-interface Args extends IArgs<Opts> {}
+type Args = Arguments<Opts> & {};
 
 export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Initialize PoA contract';
@@ -123,6 +120,7 @@ class POAInitCommand extends Command<Args> {
 			this.account = Datadir.decrypt(keyfile, this.passphrase!);
 		}
 
+		this.debug('Generating init transaction');
 		const tx = contract.methods.init({
 			from: this.account.address,
 			gas: this.args.options.gas,
@@ -131,11 +129,13 @@ class POAInitCommand extends Command<Args> {
 
 		this.startSpinner('Sending Transaction');
 
+		this.debug('Sending init transaction');
 		const receipt = await this.node!.sendTx(tx, this.account);
 		const r = {
 			...receipt
 		};
 
+		this.debug('Parsing logs from receipt');
 		r.logs = receipt.logs
 			.filter(log => log.event === 'MonikerAnnounce')
 			.map(log => {
@@ -144,14 +144,14 @@ class POAInitCommand extends Command<Args> {
 				return log;
 			});
 
+		this.stopSpinner();
+
 		if (!receipt.logs.length) {
 			throw Error(
 				'No logs were returned. ' +
 					'Possibly due to lack of `gas` or may not be whitelisted.'
 			);
 		}
-
-		this.stopSpinner();
 
 		return JSON.stringify(r, null, 2);
 	}

@@ -10,9 +10,9 @@ import utils, { Currency, IUnits } from 'evm-lite-utils';
 import color from '../core/color';
 import Session from '../core/Session';
 
-import Command, { IArgs, ITxOptions } from '../core/TxCommand';
+import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
-interface Opts extends ITxOptions {
+type Opts = TxOptions & {
 	interactive?: boolean;
 
 	host: string;
@@ -24,18 +24,18 @@ interface Opts extends ITxOptions {
 	from: string;
 	to: string;
 	value: string;
-}
+};
 
-interface Args extends IArgs<Opts> {}
+type Args = Arguments<Opts> & {};
 
-interface FirstAnswers {
+type FirstAnswers = {
 	to: string;
 	value: string;
-}
+};
 
-interface SecondAnswers {
+type SecondAnswers = {
 	send: boolean;
-}
+};
 
 function isLetter(str: string) {
 	return str.length === 1 && str.match(/[a-z]/i);
@@ -202,6 +202,7 @@ class TransferCommand extends Command<Args> {
 
 		this.startSpinner('Sending Transaction');
 
+		console.log(Number(this.args.options.gasPrice));
 		const receipt = await this.node!.transfer(
 			this.account!,
 			this.args.options.to,

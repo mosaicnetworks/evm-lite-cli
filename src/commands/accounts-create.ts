@@ -6,26 +6,24 @@ import Vorpal from 'vorpal';
 
 import Session from '../core/Session';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { Arguments, Options } from '../core/Command';
 
-interface Opts extends IOptions {
-	interactive?: boolean;
-	debug?: boolean;
+type Opts = Options & {
 	pwd?: string;
 	out: string;
-}
+};
 
-interface Args extends IArgs<Opts> {
+type Args = Arguments<Opts> & {
 	options: Opts;
 	moniker: string;
-}
+};
 
-interface Answers {
+type Answers = {
 	moniker: string;
 	outpath: string;
 	passphrase: string;
 	verifyPassphrase: string;
-}
+};
 
 const command = (evmlc: Vorpal, session: Session) => {
 	const description = 'Creates an encrypted keypair locally';
@@ -136,6 +134,11 @@ class AccountCreateCommand extends Command<Args> {
 
 	protected async exec(): Promise<string> {
 		this.log.info('keystore', this.datadir.keystorePath);
+
+		this.debug('Attemping to create keyfile with: ');
+		this.debug(`Moniker -> ${this.args.moniker}`);
+		this.debug(`Passphrase -> ${this.passphrase}`);
+		this.debug(`Outpath -> ${this.args.options.out}`);
 
 		const account = await this.datadir.newKeyfile(
 			this.args.moniker,

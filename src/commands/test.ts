@@ -2,11 +2,11 @@ import Vorpal from 'vorpal';
 
 import Session from '../core/Session';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { Arguments, Options } from '../core/Command';
 
-interface Opts extends IOptions {}
+type Opts = Options & {};
 
-export interface Args extends IArgs<Opts> {}
+export type Args = Arguments<Opts> & {};
 
 export default (evmlc: Vorpal, session: Session) => {
 	return evmlc

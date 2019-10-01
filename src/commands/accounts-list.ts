@@ -4,19 +4,19 @@ import Vorpal from 'vorpal';
 import Session from '../core/Session';
 import Table from '../core/Table';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { Arguments, Options } from '../core/Command';
 
-interface Opts extends IOptions {
+type Opts = Options & {
 	formatted?: boolean;
 	remote?: boolean;
 	host?: string;
 	port?: number;
 	exact?: boolean;
-}
+};
 
-export interface Args extends IArgs<Opts> {
+export type Args = Arguments<Opts> & {
 	options: Opts;
-}
+};
 
 export default (evmlc: Vorpal, session: Session) => {
 	const description = 'List all accounts in the local keystore directory';
@@ -61,6 +61,7 @@ class AccountListCommand extends Command<Args> {
 	protected async exec(): Promise<string> {
 		this.log.info('keystore', this.datadir.keystorePath);
 
+		this.debug(`Reading keystore -> ${this.datadir.keystorePath}`);
 		const keystore = await this.datadir.listKeyfiles();
 
 		let accounts: any = Object.keys(keystore).map(moniker => ({
@@ -85,6 +86,7 @@ class AccountListCommand extends Command<Args> {
 		}
 
 		if (status) {
+			this.debug(`Fetching account details from node`);
 			this.log.info(
 				'node',
 				`${this.args.options.host}:${this.args.options.port}`

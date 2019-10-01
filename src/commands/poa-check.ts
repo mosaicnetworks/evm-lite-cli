@@ -6,22 +6,20 @@ import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
 
-import Command, { IArgs, ITxOptions } from '../core/TxCommand';
+import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
-interface Opts extends ITxOptions {
-	interactive?: boolean;
+type Opts = TxOptions & {
 	host: string;
 	port: number;
-	gas: number;
-}
+};
 
-interface Args extends IArgs<Opts> {
+type Args = Arguments<Opts> & {
 	address: string;
-}
+};
 
-interface Answers {
+type Answers = {
 	address: string;
-}
+};
 
 export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Check whether an address is on the whitelist';
@@ -97,6 +95,7 @@ class POACheckCommand extends Command<Args> {
 
 		const contract = Contract.load(JSON.parse(poa.abi), poa.address);
 
+		this.debug('Generating checkAuthorised transaction');
 		const tx = contract.methods.checkAuthorised(
 			{
 				gas: this.args.options.gas,
@@ -105,6 +104,7 @@ class POACheckCommand extends Command<Args> {
 			utils.cleanAddress(this.args.address)
 		);
 
+		this.debug('Sending transaction');
 		const response = await this.node!.callTx<boolean>(tx);
 
 		return response.toString();

@@ -4,14 +4,21 @@ import Datadir from 'evm-lite-datadir';
 import Keystore from 'evm-lite-keystore';
 
 export default class Session {
+	public name: string = 'evmlc';
 	public interactive: boolean = false;
 	public debug: boolean = false;
 
-	public readonly datadir: Datadir<Keystore>;
+	public datadir: Datadir<Keystore>;
 
-	constructor(datadir: string, config: string) {
+	constructor(datadir: string, public readonly config: string) {
+		this.name = config;
+
 		const k = new Keystore(p.join(datadir, 'keystore'));
+		this.datadir = new Datadir(datadir, this.config, k);
+	}
 
-		this.datadir = new Datadir(datadir, config, k);
+	public setDatadir(path: string) {
+		const k = new Keystore(p.join(path, 'keystore'));
+		this.datadir = new Datadir(path, this.config, k);
 	}
 }

@@ -2,7 +2,7 @@ import Vorpal from 'vorpal';
 
 import Session from '../core/Session';
 
-import Command, { IArgs, IOptions } from '../core/Command';
+import Command, { Arguments, Options } from '../core/Command';
 
 const pkg = require('../../package.json');
 
@@ -12,12 +12,11 @@ export default (evmlc: Vorpal, session: Session) => {
 	return evmlc
 		.command('version')
 		.alias('v')
-		.option('-d, --debug', 'show debug output')
 		.description(description)
 		.types({
 			string: []
 		})
-		.action((args: IArgs<IOptions>) =>
+		.action((args: Arguments<Options>) =>
 			new VersionCommand(session, args).run()
 		);
 };
