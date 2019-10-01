@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.2.1
+
+### Changed
+
+-   `--silent` now silences all logging including error, `--error` sets logging level to error and `--debug` shows debugging logs
+-   Cleaned up prompts for POA commands to be more coherent
+-   `--datadir, -d` added to `help` to showcase how to change data directory
+
 ## v1.2.0
 
 ### Added
