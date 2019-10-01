@@ -83,7 +83,7 @@ abstract class Command<
 	// runs the command
 	public async run(): Promise<void> {
 		this.log.debug('init', 'Initializing command');
-		const interactive = await this.init();
+		const interactive = await this.initQueue();
 
 		try {
 			if (this.session.interactive || interactive) {
@@ -127,6 +127,12 @@ abstract class Command<
 
 	protected async promptQueue(): Promise<void> {
 		await this.prompt();
+	}
+
+	protected async initQueue(): Promise<boolean> {
+		const init = await this.init();
+
+		return init;
 	}
 
 	protected debug(message: string, title: string = 'exec') {
