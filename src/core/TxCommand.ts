@@ -39,6 +39,21 @@ abstract class TxCommand<
 		super(session, args);
 	}
 
+	protected async initQueue(): Promise<boolean> {
+		const init = await this.init();
+
+		if (!this.node) {
+			throw Error('No node assigned');
+		}
+
+		const info = await this.node.getInfo<any>();
+		const curr = new Currency(parseInt(info.min_gas_price, 10));
+
+		this.args.options.gasPrice = curr.format('a').slice(0, -1);
+
+		return init;
+	}
+
 	protected async promptQueue(): Promise<void> {
 		if (this.payable) {
 			await this.decryptPrompt();
@@ -52,15 +67,6 @@ abstract class TxCommand<
 	}
 
 	protected async gasPrompt() {
-		if (!this.node) {
-			throw Error('No node assigned');
-		}
-
-		const info = await this.node.getInfo<any>();
-		const curr = new Currency(parseInt(info.min_gas_price, 10));
-
-		this.args.options.gasPrice = curr.format('a').slice(0, -1);
-
 		if (this.transfer) {
 			this.args.options.gas = 21000;
 			return;

@@ -202,7 +202,6 @@ class TransferCommand extends Command<Args> {
 
 		this.startSpinner('Sending Transaction');
 
-		console.log(Number(this.args.options.gasPrice));
 		const receipt = await this.node!.transfer(
 			this.account!,
 			this.args.options.to,
