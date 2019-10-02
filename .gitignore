@@ -15,3 +15,5 @@ yarn-error.log
 bin
 
 __tests__/datadir
+test.ts
+wordlist.json

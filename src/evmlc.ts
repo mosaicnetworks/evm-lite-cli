@@ -7,8 +7,8 @@ import accountsCreate from './commands/accounts-create';
 import accountsGet from './commands/accounts-get';
 import accountsImport from './commands/accounts-import';
 import accountsList from './commands/accounts-list';
-import accountsUpdate from './commands/accounts-update';
 import accountsPrivateKey from './commands/accounts-privatekey';
+import accountsUpdate from './commands/accounts-update';
 
 import configSet from './commands/config-set';
 import configView from './commands/config-view';

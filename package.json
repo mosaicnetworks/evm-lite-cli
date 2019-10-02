@@ -5,6 +5,7 @@
 	"typings": "dist/typings/index.d.ts",
 	"license": "MIT",
 	"scripts": {
+		"danu": "ts-node src/test",
 		"lint": "tslint -p . -c ./tslint.json",
 		"prepublish": "yarn link && yarn build",
 		"clean": "rm -rf node_modules dist package-lock.json bin",
