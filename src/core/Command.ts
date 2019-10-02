@@ -82,16 +82,16 @@ abstract class Command<
 
 	// runs the command
 	public async run(): Promise<void> {
-		this.log.debug('init', 'Initializing command');
-		const interactive = await this.initQueue();
-
 		try {
+			// this.log.debug('init', 'Initializing command');
+			const interactive = await this.initQueue();
+
 			if (this.session.interactive || interactive) {
 				// this.log.debug('prompt', 'Showing interactive prompts');
 				await this.promptQueue();
 			}
 
-			this.log.debug('check', 'Parsing arguments');
+			// this.log.debug('check', 'Parsing arguments');
 			await this.check();
 
 			// get out from command
@@ -130,9 +130,7 @@ abstract class Command<
 	}
 
 	protected async initQueue(): Promise<boolean> {
-		const init = await this.init();
-
-		return init;
+		return await this.init();
 	}
 
 	protected debug(message: string, title: string = 'exec') {

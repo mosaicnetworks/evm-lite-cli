@@ -8,6 +8,7 @@ import accountsGet from './commands/accounts-get';
 import accountsImport from './commands/accounts-import';
 import accountsList from './commands/accounts-list';
 import accountsUpdate from './commands/accounts-update';
+import accountsPrivateKey from './commands/accounts-privatekey';
 
 import configSet from './commands/config-set';
 import configView from './commands/config-view';
@@ -40,6 +41,7 @@ const commands = [
 	accountsGet,
 	accountsUpdate,
 	accountsImport,
+	accountsPrivateKey,
 
 	// config
 	configView,
