@@ -14,6 +14,9 @@ import configSet from './commands/config-set';
 import configView from './commands/config-view';
 
 import poaCheck from './commands/poa-check';
+import poaEvict from './commands/poa-evict';
+import poaEvicteeList from './commands/poa-evicteelist';
+import poaEvictVote from './commands/poa-evictvote';
 import poaInit from './commands/poa-init';
 import poaNominate from './commands/poa-nominate';
 import poaNomineelist from './commands/poa-nomineelist';
@@ -53,6 +56,9 @@ const commands = [
 	poaNomineelist,
 	poaNominate,
 	poaVote,
+	poaEvict,
+	poaEvicteeList,
+	poaEvictVote,
 
 	info,
 	transfer,

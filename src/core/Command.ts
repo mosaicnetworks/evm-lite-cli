@@ -96,6 +96,8 @@ abstract class Command<
 
 			// get out from command
 			const o = await this.exec();
+			this.stopSpinner();
+
 			color.green(o);
 		} catch (e) {
 			let err: Error = e;
@@ -104,12 +106,13 @@ abstract class Command<
 				err = new Error(e);
 			}
 
+			this.stopSpinner();
+
 			this.log.error('', err.message.replace(/(\r\n|\n|\r)/gm, ''));
 		}
 
 		// reset log level
 		this.log.level = this.defaultLogLevel;
-		this.stopSpinner();
 
 		return;
 	}

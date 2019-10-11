@@ -18,7 +18,10 @@
 		"i": "ts-node src/evmlc --datadir ~/Library/MONET i",
 		"e": "ts-node src/evmlc --datadir ~/Library/MONET",
 		"linkalldev": "yarn link evm-lite-core evm-lite-consensus evm-lite-keystore evm-lite-datadir evm-lite-client evm-lite-utils",
-		"pkg": "yarn run build && rm -rf bin && pkg . --out-path ./bin"
+		"pkg": "yarn run build && rm -rf bin && pkg . --out-path ./bin",
+		"e2e": "ts-node e2e/index.ts",
+		"e2e:build": "monetd --datadir ./e2e/datadir config build e2e",
+		"e2e:monetd": "monetd --datadir ./e2e/datadir run"
 	},
 	"dependencies": {
 		"chalk": "^2.4.2",
@@ -44,6 +47,7 @@
 		"@types/mkdirp": "^0.5.2",
 		"@types/node": "^12.7.5",
 		"@types/npmlog": "^4.1.2",
+		"execa": "^2.1.0",
 		"jest": "^24.9.0",
 		"ts-jest": "^24.1.0",
 		"ts-node": "^8.4.1",

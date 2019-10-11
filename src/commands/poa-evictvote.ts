@@ -9,7 +9,7 @@ import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
 
-import { NomineeEntry, POANomineeList } from './poa-nomineelist';
+import { EvicteeEntry, POAEvicteeList } from './poa-evicteelist';
 
 import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
@@ -34,11 +34,11 @@ type Answers = {
 };
 
 export default (evmlc: Vorpal, session: Session) => {
-	const description = 'Vote for an nominee currently in election';
+	const description = 'Vote for an evictee in election';
 
 	return evmlc
-		.command('poa vote [address]')
-		.alias('p v')
+		.command('poa evictvote [address]')
+		.alias('p ev')
 		.description(description)
 		.option('-i, --interactive', 'interactive')
 		.option('-d, --debug', 'show debug output')
@@ -53,12 +53,12 @@ export default (evmlc: Vorpal, session: Session) => {
 		})
 		.action(
 			(args: Args): Promise<void> =>
-				new POAVoteCommand(session, args).run()
+				new POAEvictionVoteCommand(session, args).run()
 		);
 };
 
-class POAVoteCommand extends Command<Args> {
-	protected nominees: NomineeEntry[] = [];
+class POAEvictionVoteCommand extends Command<Args> {
+	protected evictees: EvicteeEntry[] = [];
 
 	protected async init(): Promise<boolean> {
 		this.payable = true;
@@ -84,23 +84,21 @@ class POAVoteCommand extends Command<Args> {
 	}
 
 	protected async prompt(): Promise<void> {
-		const cmd = new POANomineeList(this.session, this.args);
+		const cmd = new POAEvicteeList(this.session, this.args);
 
 		// initialize cmd execution
 		cmd.init();
 
-		this.nominees = await cmd.getNomineeList();
+		this.evictees = await cmd.getEvicteelist();
 
-		if (this.nominees.length === 0) {
+		if (this.evictees.length === 0) {
 			throw Error('No nominees in election');
 		}
 
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
-				choices: this.nominees.map(
-					nominee => `${nominee.moniker} (${nominee.address})`
-				),
-				message: 'Nominee: ',
+				choices: this.evictees.map(e => `${e.moniker} (${e.address})`),
+				message: 'Evictee: ',
 				name: 'address',
 				type: 'list'
 			},
@@ -162,8 +160,8 @@ class POAVoteCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<string> {
-		if (this.args.options.interactive && !this.nominees.length) {
-			return 'There are no nominees in election';
+		if (this.args.options.interactive && !this.evictees.length) {
+			return 'There are no evitees in election';
 		}
 
 		const poa = await this.node!.getPOA();
@@ -179,7 +177,7 @@ class POAVoteCommand extends Command<Args> {
 		}
 
 		this.debug('Generating vote transaction');
-		const tx = contract.methods.castNomineeVote(
+		const tx = contract.methods.castEvictionVote(
 			{
 				from: this.account.address,
 				gas: this.args.options.gas,
@@ -203,7 +201,7 @@ class POAVoteCommand extends Command<Args> {
 		this.debug('Parsing logs from transaction');
 
 		const nomineeVoteCastEvent = receipt.logs.filter(
-			log => log.event === 'NomineeVoteCast'
+			log => log.event === 'EvictionVoteCast'
 		)[0];
 
 		let nomineeDecisionLogs: any[] = [];
@@ -211,7 +209,7 @@ class POAVoteCommand extends Command<Args> {
 
 		if (receipt.logs.length > 1) {
 			nomineeDecisionLogs = receipt.logs.filter(
-				log => log.event === 'NomineeDecision'
+				log => log.event === 'EvictionDecision'
 			);
 		}
 
@@ -227,10 +225,10 @@ class POAVoteCommand extends Command<Args> {
 
 		if (nomineeDecisionEvent) {
 			const accepted = nomineeDecisionEvent.args._accepted
-				? 'Accepted'
-				: 'Rejected';
+				? 'being removed'
+				: 'not being removed';
 
-			message += `\nElection completed with the nominee being '${accepted}'.`;
+			message += `\nEviction ended with the evictee ${accepted}.`;
 		}
 
 		this.stopSpinner();
@@ -239,4 +237,4 @@ class POAVoteCommand extends Command<Args> {
 	}
 }
 
-export const POAVote = POAVoteCommand;
+export const POAEvictVote = POAEvictionVoteCommand;
