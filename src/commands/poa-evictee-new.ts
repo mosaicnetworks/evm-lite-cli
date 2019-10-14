@@ -91,8 +91,6 @@ class POAEvictCommand extends Command<Args> {
 			throw Error('No nominees in election');
 		}
 
-		const keystore = await this.datadir.listKeyfiles();
-
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
 				choices: this.whitelist.map(n => `${n.moniker} (${n.address})`),
@@ -104,7 +102,9 @@ class POAEvictCommand extends Command<Args> {
 
 		const answers = await Inquirer.prompt<Answers>(questions);
 
-		this.args.address = utils.trimHex(answers.address);
+		this.args.address = utils.trimHex(
+			answers.address.split(' ')[1].slice(1, -1)
+		);
 	}
 
 	protected async check(): Promise<void> {

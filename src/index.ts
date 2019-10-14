@@ -12,6 +12,7 @@ export { default as accountsGet } from './commands/accounts-get';
 export { default as accountsList } from './commands/accounts-list';
 export { default as accountsUpdate } from './commands/accounts-update';
 export { default as accountsImport } from './commands/accounts-import';
+export { default as accountsPrivateKey } from './commands/accounts-privatekey';
 
 // config
 export { default as configView } from './commands/config-view';
