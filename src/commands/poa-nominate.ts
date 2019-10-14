@@ -34,8 +34,8 @@ export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Nominate an address to proceed to election';
 
 	return evmlc
-		.command('poa nominate [address]')
-		.alias('p n')
+		.command('poa nominees new [address]')
+		.alias('p n n')
 		.description(description)
 		.option('-i, --interactive', 'interactive')
 		.option('--pwd <password>', 'passphase file path')

@@ -33,8 +33,8 @@ export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Nominate an address to proceed to an eviction vote';
 
 	return evmlc
-		.command('poa evict [address]')
-		.alias('p e')
+		.command('poa evictee new [address]')
+		.alias('p e n')
 		.description(description)
 		.option('-i, --interactive', 'interactive')
 		.option('--pwd <password>', 'passphase file path')

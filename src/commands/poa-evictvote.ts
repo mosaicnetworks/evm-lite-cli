@@ -37,8 +37,8 @@ export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Vote for an evictee in election';
 
 	return evmlc
-		.command('poa evictvote [address]')
-		.alias('p ev')
+		.command('poa evictee vote [address]')
+		.alias('p e v')
 		.description(description)
 		.option('-i, --interactive', 'interactive')
 		.option('-d, --debug', 'show debug output')

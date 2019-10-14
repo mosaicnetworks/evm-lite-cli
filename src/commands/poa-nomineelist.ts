@@ -29,8 +29,8 @@ export default (evmlc: Vorpal, session: Session) => {
 	const description = 'List nominees for a connected node';
 
 	return evmlc
-		.command('poa nomineelist')
-		.alias('p nl')
+		.command('poa nominees list')
+		.alias('p n l')
 		.description(description)
 		.option('-d, --debug', 'show debug output')
 		.option('-f, --formatted', 'format output')
