@@ -29,7 +29,7 @@ export default (evmlc: Vorpal, session: Session) => {
 	const description = 'List eviction nominees for a connected node';
 
 	return evmlc
-		.command('poa evictee list')
+		.command('poa evictees list')
 		.alias('p e l')
 		.description(description)
 		.option('-d, --debug', 'show debug output')

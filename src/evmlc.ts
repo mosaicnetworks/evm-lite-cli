@@ -14,13 +14,13 @@ import configSet from './commands/config-set';
 import configView from './commands/config-view';
 
 import poaCheck from './commands/poa-check';
-import poaEvict from './commands/poa-evict';
-import poaEvicteeList from './commands/poa-evicteelist';
-import poaEvictVote from './commands/poa-evictvote';
+import poaEvicteesList from './commands/poa-evictees-list';
+import poaEvicteesNew from './commands/poa-evictees-new';
+import poaEvicteesVote from './commands/poa-evictees-vote';
 import poaInit from './commands/poa-init';
-import poaNominate from './commands/poa-nominate';
-import poaNomineelist from './commands/poa-nomineelist';
-import poaVote from './commands/poa-vote';
+import poaNomineesList from './commands/poa-nominees-list';
+import poaNomineesNew from './commands/poa-nominees-new';
+import poaNomineesVote from './commands/poa-nominees-vote';
 import poaWhitelist from './commands/poa-whitelist';
 
 import info from './commands/info';
@@ -38,32 +38,32 @@ const options: CLIOptions = {
 };
 
 const commands = [
-	// accounts
-	accountsCreate,
+	info,
+
+	configSet,
+	configView,
+
 	accountsList,
 	accountsGet,
+	accountsCreate,
 	accountsUpdate,
 	accountsImport,
-	accountsPrivateKey,
 
-	// config
-	configView,
-	configSet,
+	transfer,
 
 	poaInit,
-	poaCheck,
 	poaWhitelist,
-	poaNomineelist,
-	poaNominate,
-	poaVote,
-	poaEvict,
-	poaEvicteeList,
-	poaEvictVote,
+	poaCheck,
 
-	info,
-	transfer,
-	version,
-	test
+	poaNomineesList,
+	poaNomineesNew,
+	poaNomineesVote,
+
+	poaEvicteesList,
+	poaEvicteesNew,
+	poaEvicteesVote,
+
+	version
 ];
 
 init(options, commands).catch(console.log);

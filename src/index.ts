@@ -20,10 +20,13 @@ export { default as configSet } from './commands/config-set';
 // poa
 export { default as poaCheck } from './commands/poa-check';
 export { default as poaWhitelist } from './commands/poa-whitelist';
-export { default as poaNomineelist } from './commands/poa-nomineelist';
-export { default as poaNominate } from './commands/poa-nominate';
-export { default as poaVote } from './commands/poa-vote';
+export { default as poaNomineeList } from './commands/poa-nominees-list';
+export { default as poaNominateNew } from './commands/poa-nominees-new';
+export { default as poaNomineesVote } from './commands/poa-nominees-vote';
 export { default as poaInit } from './commands/poa-init';
+export { default as poaEvicteesList } from './commands/poa-evictees-list';
+export { default as poaEvicteesNew } from './commands/poa-evictees-new';
+export { default as poaEvicteesVote } from './commands/poa-evictees-vote';
 
 // other
 export { default as transfer } from './commands/transfer';

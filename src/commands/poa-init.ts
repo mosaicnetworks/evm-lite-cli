@@ -24,7 +24,6 @@ export default (evmlc: Vorpal, session: Session) => {
 
 	return evmlc
 		.command('poa init')
-		.hidden()
 		.description(description)
 		.option('-i, --interactive', 'enter interactive mode')
 		.option('--pwd <password>', 'passphase file path')

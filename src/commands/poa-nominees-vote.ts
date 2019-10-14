@@ -9,7 +9,7 @@ import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
 
-import { NomineeEntry, POANomineeList } from './poa-nomineelist';
+import { NomineeEntry, POANomineeList } from './poa-nominees-list';
 
 import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
