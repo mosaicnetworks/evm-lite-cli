@@ -9,16 +9,13 @@ import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
 
-import { NomineeEntry, POANomineeList } from './poa-nominees-list';
-
 import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
 type Opts = TxOptions & {
 	interactive?: boolean;
-	pwd?: string;
-
-	verdict: boolean;
+	moniker: string;
 	from: string;
+	pwd?: string;
 	host: string;
 	port: number;
 	gas: number;
@@ -30,36 +27,33 @@ type Args = Arguments<Opts> & {
 
 type Answers = {
 	address: string;
-	verdict: boolean;
+	nomineeMoniker: string;
 };
 
 export default (evmlc: Vorpal, session: Session) => {
-	const description = 'Vote for an nominee currently in election';
+	const description = 'Nominate an address to proceed to election';
 
 	return evmlc
-		.command('poa nominees vote [address]')
-		.alias('p n v')
+		.command('poa nominee new [address]')
+		.alias('p n n')
 		.description(description)
 		.option('-i, --interactive', 'interactive')
-		.option('-d, --debug', 'show debug output')
-		.option('--verdict <boolean>', 'verdict for given address')
-		.option('--pwd <password>', 'passphrase file path')
+		.option('--pwd <password>', 'passphase file path')
+		.option('--moniker <moniker>', 'moniker of the nominee')
 		.option('--from <moniker>', 'from moniker')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.option('-g, --gas <g>', 'override config gas value')
 		.types({
-			string: ['_', 'from', 'pwd', 'host', 'h']
+			string: ['_', 'pwd', 'moniker', 'from', 'h', 'host']
 		})
 		.action(
 			(args: Args): Promise<void> =>
-				new POAVoteCommand(session, args).run()
+				new POANominateCommand(session, args).run()
 		);
 };
 
-class POAVoteCommand extends Command<Args> {
-	protected nominees: NomineeEntry[] = [];
-
+class POANominateCommand extends Command<Args> {
 	protected async init(): Promise<boolean> {
 		this.payable = true;
 
@@ -84,39 +78,30 @@ class POAVoteCommand extends Command<Args> {
 	}
 
 	protected async prompt(): Promise<void> {
-		const cmd = new POANomineeList(this.session, this.args);
-
-		// initialize cmd execution
-		cmd.init();
-
-		this.nominees = await cmd.getNomineeList();
-
-		if (this.nominees.length === 0) {
-			throw Error('No nominees in election');
-		}
-
+		const keystore = await this.datadir.listKeyfiles();
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
-				choices: this.nominees.map(
-					nominee => `${nominee.moniker} (${nominee.address})`
-				),
-				message: 'Nominee: ',
+				default:
+					(this.args.options.from &&
+						keystore[this.args.options.from].address) ||
+					'',
+				message: 'Nominee Address: ',
 				name: 'address',
-				type: 'list'
+				type: 'input'
 			},
 			{
-				message: 'Verdict: ',
-				name: 'verdict',
-				type: 'confirm'
+				default: this.args.options.from || '',
+				message: 'Nominee Moniker: ',
+				name: 'nomineeMoniker',
+				type: 'input'
 			}
 		];
 
 		const answers = await Inquirer.prompt<Answers>(questions);
 
-		this.args.address = answers.address.split(' ')[1].slice(1, -1);
-		this.args.options.verdict = answers.verdict;
+		this.args.address = utils.trimHex(answers.address);
 
-		return;
+		this.args.options.moniker = answers.nomineeMoniker;
 	}
 
 	protected async check(): Promise<void> {
@@ -128,8 +113,8 @@ class POAVoteCommand extends Command<Args> {
 			throw Error('Nominee address has an invalid length.');
 		}
 
-		if (!this.args.options.verdict && this.args.options.verdict !== false) {
-			throw Error('No verdict provided for nominee.');
+		if (!this.args.options.moniker) {
+			throw Error('No moniker provided for nominee.');
 		}
 
 		if (!this.account) {
@@ -162,11 +147,14 @@ class POAVoteCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<string> {
-		if (this.args.options.interactive && !this.nominees.length) {
-			return 'There are no nominees in election';
-		}
+		this.log.http(
+			'GET',
+			`${this.args.options.host}:${this.args.options.port}/poa`
+		);
 
 		const poa = await this.node!.getPOA();
+		this.log.info('POA', poa.address);
+
 		const contract = Contract.load(JSON.parse(poa.abi), poa.address);
 
 		// sanity check
@@ -178,39 +166,47 @@ class POAVoteCommand extends Command<Args> {
 			this.account = Datadir.decrypt(keyfile, this.passphrase!);
 		}
 
-		this.debug('Generating vote transaction');
-		const tx = contract.methods.castNomineeVote(
+		this.debug('Generating nominate transaction');
+		const tx = contract.methods.submitNominee(
 			{
 				from: this.account.address,
 				gas: this.args.options.gas,
 				gasPrice: Number(this.args.options.gasPrice)
 			},
 			utils.cleanAddress(this.args.address),
-			this.args.options.verdict
+			this.args.options.moniker
+		);
+
+		const voteTx = contract.methods.castNomineeVote(
+			{
+				from: this.account.address,
+				gas: this.args.options.gas,
+				gasPrice: Number(this.args.options.gasPrice)
+			},
+			utils.cleanAddress(this.args.address),
+			true
 		);
 
 		this.startSpinner('Sending Transaction');
 
-		this.debug('Sending vote transaction');
+		this.debug('Sending nominate transaction');
 		const receipt = await this.node!.sendTx(tx, this.account);
-		if (!receipt.logs.length) {
-			throw Error(
-				'No logs were returned. ' +
-					'Possibly due to lack of `gas` or may not be whitelisted.'
-			);
-		}
 
-		this.debug('Parsing logs from transaction');
-
-		const nomineeVoteCastEvent = receipt.logs.filter(
-			log => log.event === 'NomineeVoteCast'
-		)[0];
+		this.debug('Sending vote transaction');
+		const voteRcpt = await this.node!.sendTx(voteTx, this.account);
 
 		let nomineeDecisionLogs: any[] = [];
 		let nomineeDecisionEvent;
 
-		if (receipt.logs.length > 1) {
-			nomineeDecisionLogs = receipt.logs.filter(
+		if (!voteRcpt.logs.length) {
+			throw Error(
+				'No logs returned while voting. \n' +
+					'Possibly due to lack of `gas` or may not be whitelisted.'
+			);
+		}
+
+		if (voteRcpt.logs.length > 1) {
+			nomineeDecisionLogs = voteRcpt.logs.filter(
 				log => log.event === 'NomineeDecision'
 			);
 		}
@@ -219,12 +215,7 @@ class POAVoteCommand extends Command<Args> {
 			nomineeDecisionEvent = nomineeDecisionLogs[0];
 		}
 
-		const vote = nomineeVoteCastEvent.args._accepted ? 'Yes' : 'No';
-
-		let message =
-			`You (${nomineeVoteCastEvent.args._voter}) voted '${vote}'` +
-			` for '${nomineeVoteCastEvent.args._nominee}'. `;
-
+		let message = '';
 		if (nomineeDecisionEvent) {
 			const accepted = nomineeDecisionEvent.args._accepted
 				? 'Accepted'
@@ -233,10 +224,60 @@ class POAVoteCommand extends Command<Args> {
 			message += `\nElection completed with the nominee being '${accepted}'.`;
 		}
 
+		if (!receipt.logs.length) {
+			throw Error(
+				'No logs were returned while nominating. \n' +
+					'Possibly due to lack of `gas` or may not be whitelisted.'
+			);
+		}
+
+		this.debug('Parsing logs from receipt');
+
+		let monikerAnnouceEvent;
+		const monikerAnnouceEvents = receipt.logs.filter(
+			log => log.event === 'MonikerAnnounce'
+		);
+
+		const nomineeProposedEvent = receipt.logs.filter(
+			log => log.event === 'NomineeProposed'
+		)[0];
+
+		if (monikerAnnouceEvents.length > 1) {
+			try {
+				monikerAnnouceEvent = monikerAnnouceEvents.filter(event => {
+					const moniker = utils
+						.hexToString(event.args._moniker)
+						.toLowerCase();
+
+					if (moniker.trim() === this.args.options.moniker.trim()) {
+						return event;
+					}
+				})[0];
+			} catch (e) {
+				throw Error(
+					'No logs were returned matching the specified `moniker`.'
+				);
+			}
+		} else {
+			monikerAnnouceEvent = monikerAnnouceEvents[0];
+		}
+
+		if (!monikerAnnouceEvent) {
+			throw Error(
+				'No logs were returned matching the specified `moniker`.'
+			);
+		}
+
 		this.stopSpinner();
 
-		return message;
+		return (
+			`You (${
+				nomineeProposedEvent.args._proposer
+			}) nominated '${utils.hexToString(
+				monikerAnnouceEvent.args._moniker
+			)}' (${nomineeProposedEvent.args._nominee}).` + message
+		);
 	}
 }
 
-export const POAVote = POAVoteCommand;
+export const POANominate = POANominateCommand;

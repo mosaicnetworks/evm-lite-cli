@@ -18,7 +18,7 @@ type Opts = TxOptions & {
 
 type Args = Arguments<Opts> & {};
 
-type WhitelistEntry = {
+export type WhitelistEntry = {
 	address: string;
 	moniker: string;
 };
@@ -44,37 +44,7 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class POAWhitelistCommand extends Command<Args> {
-	protected async init(): Promise<boolean> {
-		this.constant = true;
-
-		this.args.options.host =
-			this.args.options.host || this.config.connection.host;
-		this.args.options.port =
-			this.args.options.port || this.config.connection.port;
-
-		if (!this.args.options.gas && this.args.options.gas !== 0) {
-			this.args.options.gas = this.config.defaults.gas;
-		}
-
-		this.node = new Node(this.args.options.host, this.args.options.port);
-
-		return false;
-	}
-
-	protected async prompt(): Promise<void> {
-		return;
-	}
-
-	protected async check(): Promise<void> {
-		return;
-	}
-
-	protected async exec(): Promise<string> {
-		this.log.http(
-			'GET',
-			`${this.args.options.host}:${this.args.options.port}/poa`
-		);
-
+	public async getWhitelist() {
 		const poa = await this.node!.getPOA();
 
 		this.log.info('POA', poa.address);
@@ -91,12 +61,11 @@ class POAWhitelistCommand extends Command<Args> {
 		this.debug(`Whitelist count -> ${count}`);
 
 		if (!count) {
-			return 'No whitelist entries found';
+			return [];
 		}
 
 		// entries
 		const entries: WhitelistEntry[] = [];
-		const table = new Table(['Moniker', 'Address']);
 
 		for (const i of Array.from(Array(count).keys())) {
 			const entry: WhitelistEntry = {
@@ -128,13 +97,57 @@ class POAWhitelistCommand extends Command<Args> {
 			this.debug(
 				`Adding whitelist entry -> ${entry.moniker} (${entry.address})`
 			);
-			entries.push(entry);
 
-			table.push([entry.moniker, entry.address]);
+			entries.push(entry);
+		}
+
+		return entries;
+	}
+
+	public async init(): Promise<boolean> {
+		this.constant = true;
+
+		this.args.options.host =
+			this.args.options.host || this.config.connection.host;
+		this.args.options.port =
+			this.args.options.port || this.config.connection.port;
+
+		if (!this.args.options.gas && this.args.options.gas !== 0) {
+			this.args.options.gas = this.config.defaults.gas;
+		}
+
+		this.node = new Node(this.args.options.host, this.args.options.port);
+
+		return false;
+	}
+
+	protected async prompt(): Promise<void> {
+		return;
+	}
+
+	protected async check(): Promise<void> {
+		return;
+	}
+
+	protected async exec(): Promise<string> {
+		this.log.http(
+			'GET',
+			`${this.args.options.host}:${this.args.options.port}/poa`
+		);
+
+		const entries = (await this.getWhitelist()) as WhitelistEntry[];
+		const table = new Table(['Moniker', 'Address']);
+
+		if (!entries.length) {
+			return 'No whitelist entries found';
 		}
 
 		if (!this.args.options.formatted && !this.session.interactive) {
 			return JSON.stringify(entries, null, 2);
+		}
+
+		for (const entry of entries) {
+			table.push([entry.moniker, entry.address]);
 		}
 
 		return table.toString();

@@ -14,17 +14,16 @@ import configSet from './commands/config-set';
 import configView from './commands/config-view';
 
 import poaCheck from './commands/poa-check';
-import poaEvicteesList from './commands/poa-evictees-list';
-import poaEvicteesNew from './commands/poa-evictees-new';
-import poaEvicteesVote from './commands/poa-evictees-vote';
+import poaEvicteeList from './commands/poa-evictee-list';
+import poaEvicteeNew from './commands/poa-evictee-new';
+import poaEvicteeVote from './commands/poa-evictee-vote';
 import poaInit from './commands/poa-init';
-import poaNomineesList from './commands/poa-nominees-list';
-import poaNomineesNew from './commands/poa-nominees-new';
-import poaNomineesVote from './commands/poa-nominees-vote';
+import poaNomineeList from './commands/poa-nominee-list';
+import poaNomineeNew from './commands/poa-nominee-new';
+import poaNomineeVote from './commands/poa-nominee-vote';
 import poaWhitelist from './commands/poa-whitelist';
 
 import info from './commands/info';
-import test from './commands/test';
 import transfer from './commands/transfer';
 import version from './commands/version';
 
@@ -48,6 +47,7 @@ const commands = [
 	accountsCreate,
 	accountsUpdate,
 	accountsImport,
+	accountsPrivateKey,
 
 	transfer,
 
@@ -55,13 +55,13 @@ const commands = [
 	poaWhitelist,
 	poaCheck,
 
-	poaNomineesList,
-	poaNomineesNew,
-	poaNomineesVote,
+	poaNomineeList,
+	poaNomineeNew,
+	poaNomineeVote,
 
-	poaEvicteesList,
-	poaEvicteesNew,
-	poaEvicteesVote,
+	poaEvicteeList,
+	poaEvicteeNew,
+	poaEvicteeVote,
 
 	version
 ];

@@ -29,7 +29,7 @@ export default (evmlc: Vorpal, session: Session) => {
 	const description = 'List nominees for a connected node';
 
 	return evmlc
-		.command('poa nominees list')
+		.command('poa nominee list')
 		.alias('p n l')
 		.description(description)
 		.option('-d, --debug', 'show debug output')
@@ -157,7 +157,12 @@ class POANomineeListCommand extends Command<Args> {
 		}
 
 		for (const entry of entries) {
-			table.push([entry.moniker, entry.address]);
+			table.push([
+				entry.moniker,
+				entry.address,
+				entry.upVotes,
+				entry.downVotes
+			]);
 		}
 
 		return table.toString();
