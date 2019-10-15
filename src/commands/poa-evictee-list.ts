@@ -157,7 +157,12 @@ class POAEvicteeListCommand extends Command<Args> {
 		}
 
 		for (const entry of entries) {
-			table.push([entry.moniker, entry.address]);
+			table.push([
+				entry.moniker,
+				entry.address,
+				entry.upVotes,
+				entry.downVotes
+			]);
 		}
 
 		return table.toString();

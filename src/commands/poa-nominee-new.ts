@@ -225,10 +225,7 @@ class POANominateCommand extends Command<Args> {
 		}
 
 		if (!receipt.logs.length) {
-			throw Error(
-				'No logs were returned while nominating. \n' +
-					'Possibly due to lack of `gas` or may not be whitelisted.'
-			);
+			this.debug('Not voted - Gas or not whitelisted');
 		}
 
 		this.debug('Parsing logs from receipt');
