@@ -5,4 +5,3 @@ port = 8080
 [defaults]
 from = "e2e"
 gas = 10000000
-gasPrice = 0

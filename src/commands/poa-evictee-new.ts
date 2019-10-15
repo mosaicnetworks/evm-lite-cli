@@ -5,7 +5,7 @@ import Vorpal from 'vorpal';
 
 import Node, { Contract } from 'evm-lite-core';
 import Datadir from 'evm-lite-datadir';
-import utils from 'evm-lite-utils';
+import utils, { Currency } from 'evm-lite-utils';
 
 import Session from '../core/Session';
 
@@ -170,7 +170,7 @@ class POAEvictCommand extends Command<Args> {
 			{
 				from: this.account.address,
 				gas: this.args.options.gas,
-				gasPrice: Number(this.args.options.gasPrice)
+				gasPrice: this.args.options.gasPrice
 			},
 			utils.cleanAddress(this.args.address)
 		);
@@ -179,7 +179,7 @@ class POAEvictCommand extends Command<Args> {
 			{
 				from: this.account.address,
 				gas: this.args.options.gas,
-				gasPrice: Number(this.args.options.gasPrice)
+				gasPrice: this.args.options.gasPrice
 			},
 			utils.cleanAddress(this.args.address),
 			true

@@ -2,7 +2,7 @@ import Inquirer from 'inquirer';
 import Vorpal from 'vorpal';
 
 import Node, { Contract } from 'evm-lite-core';
-import utils from 'evm-lite-utils';
+import utils, { Currency } from 'evm-lite-utils';
 
 import Session from '../core/Session';
 
@@ -99,7 +99,7 @@ class POACheckCommand extends Command<Args> {
 		const tx = contract.methods.checkAuthorised(
 			{
 				gas: this.args.options.gas,
-				gasPrice: Number(this.args.options.gasPrice)
+				gasPrice: this.args.options.gasPrice
 			},
 			utils.cleanAddress(this.args.address)
 		);

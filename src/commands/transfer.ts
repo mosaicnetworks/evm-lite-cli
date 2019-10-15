@@ -5,7 +5,7 @@ import Vorpal from 'vorpal';
 
 import Node from 'evm-lite-core';
 import Datadir from 'evm-lite-datadir';
-import utils, { Currency, IUnits } from 'evm-lite-utils';
+import utils, { Currency, Units } from 'evm-lite-utils';
 
 import color from '../core/color';
 import Session from '../core/Session';
@@ -110,9 +110,9 @@ class TransferCommand extends Command<Args> {
 		this.args.options.to = answers.to;
 		this.args.options.value = answers.value;
 
-		const u = this.args.options.value.toString().slice(-1) as IUnits;
+		const u = this.args.options.value.toString().slice(-1);
 		if (!isLetter(u)) {
-			this.args.options.value = this.args.options.value + 'T';
+			this.args.options.value += 'T';
 		}
 	}
 
@@ -150,6 +150,13 @@ class TransferCommand extends Command<Args> {
 		if (utils.trimHex(this.args.options.to).length !== 40) {
 			throw Error('Invalid `to` address');
 		}
+
+		if (
+			utils.trimHex(this.args.options.to) ===
+			utils.trimHex(this.args.options.from)
+		) {
+			throw Error('`To` address cannot be the same ans `From`');
+		}
 	}
 
 	protected async exec(): Promise<string> {
@@ -171,22 +178,17 @@ class TransferCommand extends Command<Args> {
 				}
 			];
 
-			const gp = new Currency(
-				this.args.options.gasPrice === '0'
-					? 0
-					: this.args.options.gasPrice + 'a'
-			);
 			const tx = {
 				from: this.account!.address,
 				to: this.args.options.to,
 				value: new Currency(this.args.options.value).format('T'),
 				gas: this.args.options.gas,
-				gasPrice: gp.format('T')
+				gasPrice: this.args.options.gasPrice.format('T')
 			};
 
 			color.yellow(JSON.stringify(tx, null, 2));
 			color.yellow(
-				`Transaction fee: ${gp
+				`Transaction fee: ${this.args.options.gasPrice
 					.times(this.args.options.gas || 21000)
 					.format('T')}`
 			);
@@ -205,9 +207,9 @@ class TransferCommand extends Command<Args> {
 		const receipt = await this.node!.transfer(
 			this.account!,
 			this.args.options.to,
-			new Currency(this.args.options.value).format('a').slice(0, -1),
+			new Currency(this.args.options.value),
 			21000,
-			Number(this.args.options.gasPrice)
+			this.args.options.gasPrice
 		);
 
 		this.stopSpinner();

@@ -1,7 +1,7 @@
 import Vorpal from 'vorpal';
 
 import Node, { Contract } from 'evm-lite-core';
-import utils from 'evm-lite-utils';
+import utils, { Currency } from 'evm-lite-utils';
 
 import Session from '../core/Session';
 import Table from '../core/Table';
@@ -53,7 +53,7 @@ class POAWhitelistCommand extends Command<Args> {
 
 		const transaction = contract.methods.getWhiteListCount({
 			gas: this.args.options.gas,
-			gasPrice: Number(this.args.options.gasPrice)
+			gasPrice: this.args.options.gasPrice
 		});
 
 		const countRes: any = await this.node!.callTx(transaction);
@@ -76,7 +76,7 @@ class POAWhitelistCommand extends Command<Args> {
 			const addressTx = contract.methods.getWhiteListAddressFromIdx(
 				{
 					gas: this.args.options.gas,
-					gasPrice: Number(this.args.options.gasPrice)
+					gasPrice: this.args.options.gasPrice
 				},
 				i
 			);
@@ -86,7 +86,7 @@ class POAWhitelistCommand extends Command<Args> {
 			const monikerTx = contract.methods.getMoniker(
 				{
 					gas: this.args.options.gas,
-					gasPrice: Number(this.args.options.gasPrice)
+					gasPrice: this.args.options.gasPrice
 				},
 				entry.address
 			);

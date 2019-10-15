@@ -3,8 +3,9 @@ import * as fs from 'fs';
 import Vorpal from 'vorpal';
 
 import Node, { Contract } from 'evm-lite-core';
+import utils, { Currency } from 'evm-lite-utils';
+
 import Datadir from 'evm-lite-datadir';
-import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
 
@@ -123,7 +124,7 @@ class POAInitCommand extends Command<Args> {
 		const tx = contract.methods.init({
 			from: this.account.address,
 			gas: this.args.options.gas,
-			gasPrice: Number(this.args.options.gasPrice)
+			gasPrice: this.args.options.gasPrice
 		});
 
 		this.startSpinner('Sending Transaction');

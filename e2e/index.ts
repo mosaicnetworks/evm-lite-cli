@@ -34,7 +34,7 @@ const cli = async (cmd: string) => {
 	log('Nominating `other`...');
 	out(
 		await cli(
-			`poa nominate ${otherAddress} --moniker other --pwd ${pwdpath} --from e2e`
+			`poa nominee new ${otherAddress} --moniker other --pwd ${pwdpath} --from e2e`
 		)
 	);
 
@@ -42,7 +42,9 @@ const cli = async (cmd: string) => {
 	out(await cli('poa whitelist -f'));
 
 	log('Evicting second whitelisted address');
-	out(await cli(`poa evict ${otherAddress} --pwd ${pwdpath} --from e2e`));
+	out(
+		await cli(`poa evictee new ${otherAddress} --pwd ${pwdpath} --from e2e`)
+	);
 
 	log('Showing current whitelist...');
 	out(await cli('poa whitelist -f'));

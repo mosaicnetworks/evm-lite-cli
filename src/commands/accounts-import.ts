@@ -6,7 +6,7 @@ import Vorpal from 'vorpal';
 
 import utils from 'evm-lite-utils';
 
-import { IConfiguration } from 'evm-lite-datadir';
+import { Config } from 'evm-lite-datadir';
 
 import Session from '../core/Session';
 
@@ -116,7 +116,7 @@ class AccountImportCommand extends Command<Args> {
 			this.debug(
 				`Setting default 'from' moniker to ${this.args.moniker}`
 			);
-			const newConfig: IConfiguration = {
+			const newConfig: Config = {
 				...this.datadir.config,
 				defaults: {
 					...this.datadir.config.defaults,

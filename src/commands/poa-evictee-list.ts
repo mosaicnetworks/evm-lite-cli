@@ -1,7 +1,7 @@
 import Vorpal from 'vorpal';
 
 import Node, { Contract } from 'evm-lite-core';
-import utils from 'evm-lite-utils';
+import utils, { Currency } from 'evm-lite-utils';
 
 import Session from '../core/Session';
 import Table from '../core/Table';
@@ -58,7 +58,7 @@ class POAEvicteeListCommand extends Command<Args> {
 
 		const transaction = contract.methods.getEvictionCount({
 			gas: this.args.options.gas,
-			gasPrice: Number(this.args.options.gasPrice)
+			gasPrice: this.args.options.gasPrice
 		});
 
 		const countRes: any = await this.node!.callTx(transaction);
@@ -78,7 +78,7 @@ class POAEvicteeListCommand extends Command<Args> {
 			const addressTx = contract.methods.getEvictionAddressFromIdx(
 				{
 					gas: this.args.options.gas,
-					gasPrice: Number(this.args.options.gasPrice)
+					gasPrice: this.args.options.gasPrice
 				},
 				i
 			);
@@ -88,7 +88,7 @@ class POAEvicteeListCommand extends Command<Args> {
 			const monikerTx = contract.methods.getMoniker(
 				{
 					gas: this.args.options.gas,
-					gasPrice: Number(this.args.options.gasPrice)
+					gasPrice: this.args.options.gasPrice
 				},
 				entry.address
 			);
@@ -99,7 +99,7 @@ class POAEvicteeListCommand extends Command<Args> {
 			const votesTx = contract.methods.getCurrentEvictionVotes(
 				{
 					gas: this.args.options.gas,
-					gasPrice: Number(this.args.options.gasPrice)
+					gasPrice: this.args.options.gasPrice
 				},
 				utils.cleanAddress(entry.address)
 			);

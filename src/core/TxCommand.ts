@@ -14,7 +14,7 @@ export { Arguments } from './Command';
 // default options for all commands
 export type TxOptions = Options & {
 	gas: number;
-	gasPrice: string;
+	gasPrice: Currency;
 };
 
 type DecryptPrompt = {
@@ -24,7 +24,6 @@ type DecryptPrompt = {
 
 type GasPrompt = {
 	gas: number;
-	gasPrice: string;
 };
 
 abstract class TxCommand<
@@ -49,7 +48,7 @@ abstract class TxCommand<
 		const info = await this.node.getInfo<any>();
 		const curr = new Currency(parseInt(info.min_gas_price, 10));
 
-		this.args.options.gasPrice = curr.format('a').slice(0, -1);
+		this.args.options.gasPrice = curr;
 
 		return init;
 	}

@@ -10,7 +10,6 @@ type Opts = Options & {
 	port?: number;
 	from?: string;
 	gas?: number;
-	gasprice?: number;
 };
 
 type Args = Arguments<Opts> & {};
@@ -20,7 +19,6 @@ type Answers = {
 	port: number;
 	from: string;
 	gas: number;
-	gasPrice: number;
 };
 
 export default (evmlc: Vorpal, session: Session) => {
@@ -36,7 +34,6 @@ export default (evmlc: Vorpal, session: Session) => {
 		.option('-p, --port <port>', 'default port')
 		.option('--from <moniker>', 'default from moniker')
 		.option('--gas <gas>', 'default gas')
-		.option('--gasprice <gasprice>', 'gas price')
 		.types({
 			string: ['h', 'host', 'from']
 		})
@@ -80,12 +77,6 @@ class ConfigSetCommand extends Command<Args> {
 				message: 'Gas',
 				name: 'gas',
 				type: 'number'
-			},
-			{
-				default: config.defaults.gasPrice,
-				message: 'Gas Price',
-				name: 'gasPrice',
-				type: 'number'
 			}
 		];
 
@@ -94,7 +85,6 @@ class ConfigSetCommand extends Command<Args> {
 		this.args.options.host = answers.host;
 		this.args.options.port = answers.port;
 		this.args.options.gas = answers.gas;
-		this.args.options.gasprice = answers.gasPrice;
 		this.args.options.from = answers.from;
 	}
 
@@ -112,18 +102,14 @@ class ConfigSetCommand extends Command<Args> {
 				host: this.args.options.host || config.connection.host,
 				port: this.args.options.port || config.connection.port
 			},
+
 			defaults: {
 				from: this.args.options.from || config.defaults.from,
 				gas:
 					this.args.options.gas !== undefined &&
 					this.args.options.gas >= 0
 						? this.args.options.gas
-						: config.defaults.gas,
-				gasPrice:
-					this.args.options.gasprice !== undefined &&
-					this.args.options.gasprice >= 0
-						? this.args.options.gasprice
-						: config.defaults.gasPrice
+						: config.defaults.gas
 			}
 		};
 
