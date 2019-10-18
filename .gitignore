@@ -15,3 +15,10 @@ yarn-error.log
 bin
 
 __tests__/datadir
+test.ts
+wordlist.json
+
+badger_db*
+e2e/datadir/babble
+e2e/datadir/eth
+e2e/datadir/monetd.toml

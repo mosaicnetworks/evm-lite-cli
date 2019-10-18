@@ -9,7 +9,7 @@ import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
 
-import { NomineeEntry, POANomineeList } from './poa-nomineelist';
+import { NomineeEntry, POANomineeList } from './poa-nominee-list';
 
 import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
@@ -37,8 +37,8 @@ export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Vote for an nominee currently in election';
 
 	return evmlc
-		.command('poa vote [address]')
-		.alias('p v')
+		.command('poa nominee vote [address]')
+		.alias('p n v')
 		.description(description)
 		.option('-i, --interactive', 'interactive')
 		.option('-d, --debug', 'show debug output')
@@ -162,7 +162,7 @@ class POAVoteCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<string> {
-		if (!this.nominees.length) {
+		if (this.args.options.interactive && !this.nominees.length) {
 			return 'There are no nominees in election';
 		}
 
@@ -211,7 +211,7 @@ class POAVoteCommand extends Command<Args> {
 
 		if (receipt.logs.length > 1) {
 			nomineeDecisionLogs = receipt.logs.filter(
-				log => log.event === 'NomineeVoteCast'
+				log => log.event === 'NomineeDecision'
 			);
 		}
 

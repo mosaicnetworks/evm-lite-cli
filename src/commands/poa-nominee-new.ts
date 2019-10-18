@@ -34,8 +34,8 @@ export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Nominate an address to proceed to election';
 
 	return evmlc
-		.command('poa nominate [address]')
-		.alias('p n')
+		.command('poa nominee new [address]')
+		.alias('p n n')
 		.description(description)
 		.option('-i, --interactive', 'interactive')
 		.option('--pwd <password>', 'passphase file path')
@@ -177,16 +177,55 @@ class POANominateCommand extends Command<Args> {
 			this.args.options.moniker
 		);
 
+		const voteTx = contract.methods.castNomineeVote(
+			{
+				from: this.account.address,
+				gas: this.args.options.gas,
+				gasPrice: Number(this.args.options.gasPrice)
+			},
+			utils.cleanAddress(this.args.address),
+			true
+		);
+
 		this.startSpinner('Sending Transaction');
 
 		this.debug('Sending nominate transaction');
 		const receipt = await this.node!.sendTx(tx, this.account);
 
-		if (!receipt.logs.length) {
+		this.debug('Sending vote transaction');
+		const voteRcpt = await this.node!.sendTx(voteTx, this.account);
+
+		let nomineeDecisionLogs: any[] = [];
+		let nomineeDecisionEvent;
+
+		if (!voteRcpt.logs.length) {
 			throw Error(
-				'No logs were returned. ' +
+				'No logs returned while voting. \n' +
 					'Possibly due to lack of `gas` or may not be whitelisted.'
 			);
+		}
+
+		if (voteRcpt.logs.length > 1) {
+			nomineeDecisionLogs = voteRcpt.logs.filter(
+				log => log.event === 'NomineeDecision'
+			);
+		}
+
+		if (nomineeDecisionLogs.length) {
+			nomineeDecisionEvent = nomineeDecisionLogs[0];
+		}
+
+		let message = '';
+		if (nomineeDecisionEvent) {
+			const accepted = nomineeDecisionEvent.args._accepted
+				? 'Accepted'
+				: 'Rejected';
+
+			message += `\nElection completed with the nominee being '${accepted}'.`;
+		}
+
+		if (!receipt.logs.length) {
+			this.debug('Not voted - Gas or not whitelisted');
 		}
 
 		this.debug('Parsing logs from receipt');
@@ -228,11 +267,13 @@ class POANominateCommand extends Command<Args> {
 
 		this.stopSpinner();
 
-		return `You (${
-			nomineeProposedEvent.args._proposer
-		}) nominated '${utils.hexToString(
-			monikerAnnouceEvent.args._moniker
-		)}' (${nomineeProposedEvent.args._nominee})`;
+		return (
+			`You (${
+				nomineeProposedEvent.args._proposer
+			}) nominated '${utils.hexToString(
+				monikerAnnouceEvent.args._moniker
+			)}' (${nomineeProposedEvent.args._nominee}).` + message
+		);
 	}
 }
 

@@ -82,20 +82,22 @@ abstract class Command<
 
 	// runs the command
 	public async run(): Promise<void> {
-		this.log.debug('init', 'Initializing command');
-		const interactive = await this.initQueue();
-
 		try {
+			// this.log.debug('init', 'Initializing command');
+			const interactive = await this.initQueue();
+
 			if (this.session.interactive || interactive) {
 				// this.log.debug('prompt', 'Showing interactive prompts');
 				await this.promptQueue();
 			}
 
-			this.log.debug('check', 'Parsing arguments');
+			// this.log.debug('check', 'Parsing arguments');
 			await this.check();
 
 			// get out from command
 			const o = await this.exec();
+			this.stopSpinner();
+
 			color.green(o);
 		} catch (e) {
 			let err: Error = e;
@@ -104,12 +106,13 @@ abstract class Command<
 				err = new Error(e);
 			}
 
+			this.stopSpinner();
+
 			this.log.error('', err.message.replace(/(\r\n|\n|\r)/gm, ''));
 		}
 
 		// reset log level
 		this.log.level = this.defaultLogLevel;
-		this.stopSpinner();
 
 		return;
 	}
@@ -130,9 +133,7 @@ abstract class Command<
 	}
 
 	protected async initQueue(): Promise<boolean> {
-		const init = await this.init();
-
-		return init;
+		return await this.init();
 	}
 
 	protected debug(message: string, title: string = 'exec') {

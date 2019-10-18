@@ -18,7 +18,7 @@ type Opts = TxOptions & {
 
 type Args = Arguments<Opts> & {};
 
-export type NomineeEntry = {
+export type EvicteeEntry = {
 	address: string;
 	moniker: string;
 	upVotes: number;
@@ -26,11 +26,11 @@ export type NomineeEntry = {
 };
 
 export default (evmlc: Vorpal, session: Session) => {
-	const description = 'List nominees for a connected node';
+	const description = 'List eviction nominees for a connected node';
 
 	return evmlc
-		.command('poa nomineelist')
-		.alias('p nl')
+		.command('poa evictee list')
+		.alias('p e l')
 		.description(description)
 		.option('-d, --debug', 'show debug output')
 		.option('-f, --formatted', 'format output')
@@ -40,11 +40,11 @@ export default (evmlc: Vorpal, session: Session) => {
 		.types({
 			string: ['host', 'h']
 		})
-		.action((args: Args) => new POANomineeListCommand(session, args).run());
+		.action((args: Args) => new POAEvicteeListCommand(session, args).run());
 };
 
-class POANomineeListCommand extends Command<Args> {
-	public async getNomineeList() {
+class POAEvicteeListCommand extends Command<Args> {
+	public async getEvicteelist() {
 		this.log.http(
 			'GET',
 			`${this.args.options.host}:${this.args.options.port}/poa`
@@ -56,26 +56,26 @@ class POANomineeListCommand extends Command<Args> {
 
 		const contract = Contract.load(JSON.parse(poa.abi), poa.address);
 
-		const transaction = contract.methods.getNomineeCount({
+		const transaction = contract.methods.getEvictionCount({
 			gas: this.args.options.gas,
 			gasPrice: Number(this.args.options.gasPrice)
 		});
 
 		const countRes: any = await this.node!.callTx(transaction);
 		const count = countRes.toNumber();
-		this.debug(`Nominee count -> ${count}`);
+		this.debug(`Evictee count -> ${count}`);
 
-		const entries: NomineeEntry[] = [];
+		const entries: EvicteeEntry[] = [];
 
 		for (const i of Array.from(Array(count).keys())) {
-			const entry: NomineeEntry = {
+			const entry: EvicteeEntry = {
 				address: '',
 				moniker: '',
 				upVotes: 0,
 				downVotes: 0
 			};
 
-			const addressTx = contract.methods.getNomineeAddressFromIdx(
+			const addressTx = contract.methods.getEvictionAddressFromIdx(
 				{
 					gas: this.args.options.gas,
 					gasPrice: Number(this.args.options.gasPrice)
@@ -96,7 +96,7 @@ class POANomineeListCommand extends Command<Args> {
 			const hex = await this.node!.callTx<string>(monikerTx);
 			entry.moniker = utils.hexToString(hex);
 
-			const votesTx = contract.methods.getCurrentNomineeVotes(
+			const votesTx = contract.methods.getCurrentEvictionVotes(
 				{
 					gas: this.args.options.gas,
 					gasPrice: Number(this.args.options.gasPrice)
@@ -110,7 +110,7 @@ class POANomineeListCommand extends Command<Args> {
 			entry.downVotes = parseInt(votes[1], 10);
 
 			this.debug(
-				`Adding nominee -> ${entry.moniker} (${entry.address}) [${entry.upVotes}, ${entry.downVotes}]`
+				`Adding evictee -> ${entry.moniker} (${entry.address}) [${entry.upVotes}, ${entry.downVotes}]`
 			);
 			entries.push(entry);
 		}
@@ -144,7 +144,7 @@ class POANomineeListCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<string> {
-		const entries = await this.getNomineeList();
+		const entries = await this.getEvicteelist();
 		const table = new Table([
 			'Moniker',
 			'Address',
@@ -157,11 +157,16 @@ class POANomineeListCommand extends Command<Args> {
 		}
 
 		for (const entry of entries) {
-			table.push([entry.moniker, entry.address]);
+			table.push([
+				entry.moniker,
+				entry.address,
+				entry.upVotes,
+				entry.downVotes
+			]);
 		}
 
 		return table.toString();
 	}
 }
 
-export const POANomineeList = POANomineeListCommand;
+export const POAEvicteeList = POAEvicteeListCommand;

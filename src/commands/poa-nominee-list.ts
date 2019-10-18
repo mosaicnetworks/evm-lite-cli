@@ -18,18 +18,21 @@ type Opts = TxOptions & {
 
 type Args = Arguments<Opts> & {};
 
-export type WhitelistEntry = {
+export type NomineeEntry = {
 	address: string;
 	moniker: string;
+	upVotes: number;
+	downVotes: number;
 };
 
 export default (evmlc: Vorpal, session: Session) => {
-	const description = 'List whitelist entries for a connected node';
+	const description = 'List nominees for a connected node';
 
 	return evmlc
-		.command('poa whitelist')
-		.alias('p wl')
+		.command('poa nominee list')
+		.alias('p n l')
 		.description(description)
+		.option('-d, --debug', 'show debug output')
 		.option('-f, --formatted', 'format output')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
@@ -37,43 +40,42 @@ export default (evmlc: Vorpal, session: Session) => {
 		.types({
 			string: ['host', 'h']
 		})
-		.action(
-			(args: Args): Promise<void> =>
-				new POAWhitelistCommand(session, args).run()
-		);
+		.action((args: Args) => new POANomineeListCommand(session, args).run());
 };
 
-class POAWhitelistCommand extends Command<Args> {
-	public async getWhitelist() {
+class POANomineeListCommand extends Command<Args> {
+	public async getNomineeList() {
+		this.log.http(
+			'GET',
+			`${this.args.options.host}:${this.args.options.port}/poa`
+		);
+
 		const poa = await this.node!.getPOA();
 
 		this.log.info('POA', poa.address);
 
 		const contract = Contract.load(JSON.parse(poa.abi), poa.address);
 
-		const transaction = contract.methods.getWhiteListCount({
+		const transaction = contract.methods.getNomineeCount({
 			gas: this.args.options.gas,
 			gasPrice: Number(this.args.options.gasPrice)
 		});
 
 		const countRes: any = await this.node!.callTx(transaction);
 		const count = countRes.toNumber();
-		this.debug(`Whitelist count -> ${count}`);
+		this.debug(`Nominee count -> ${count}`);
 
-		if (!count) {
-			return [];
-		}
-
-		// entries
-		const entries: WhitelistEntry[] = [];
+		const entries: NomineeEntry[] = [];
 
 		for (const i of Array.from(Array(count).keys())) {
-			const entry: WhitelistEntry = {
+			const entry: NomineeEntry = {
 				address: '',
-				moniker: ''
+				moniker: '',
+				upVotes: 0,
+				downVotes: 0
 			};
 
-			const addressTx = contract.methods.getWhiteListAddressFromIdx(
+			const addressTx = contract.methods.getNomineeAddressFromIdx(
 				{
 					gas: this.args.options.gas,
 					gasPrice: Number(this.args.options.gasPrice)
@@ -94,10 +96,22 @@ class POAWhitelistCommand extends Command<Args> {
 			const hex = await this.node!.callTx<string>(monikerTx);
 			entry.moniker = utils.hexToString(hex);
 
-			this.debug(
-				`Adding whitelist entry -> ${entry.moniker} (${entry.address})`
+			const votesTx = contract.methods.getCurrentNomineeVotes(
+				{
+					gas: this.args.options.gas,
+					gasPrice: Number(this.args.options.gasPrice)
+				},
+				utils.cleanAddress(entry.address)
 			);
 
+			const votes = await this.node!.callTx<[string, string]>(votesTx);
+
+			entry.upVotes = parseInt(votes[0], 10);
+			entry.downVotes = parseInt(votes[1], 10);
+
+			this.debug(
+				`Adding nominee -> ${entry.moniker} (${entry.address}) [${entry.upVotes}, ${entry.downVotes}]`
+			);
 			entries.push(entry);
 		}
 
@@ -130,28 +144,29 @@ class POAWhitelistCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<string> {
-		this.log.http(
-			'GET',
-			`${this.args.options.host}:${this.args.options.port}/poa`
-		);
-
-		const entries = (await this.getWhitelist()) as WhitelistEntry[];
-		const table = new Table(['Moniker', 'Address']);
-
-		if (!entries.length) {
-			return 'No whitelist entries found';
-		}
+		const entries = await this.getNomineeList();
+		const table = new Table([
+			'Moniker',
+			'Address',
+			'Up Votes',
+			'Down Votes'
+		]);
 
 		if (!this.args.options.formatted && !this.session.interactive) {
 			return JSON.stringify(entries, null, 2);
 		}
 
 		for (const entry of entries) {
-			table.push([entry.moniker, entry.address]);
+			table.push([
+				entry.moniker,
+				entry.address,
+				entry.upVotes,
+				entry.downVotes
+			]);
 		}
 
 		return table.toString();
 	}
 }
 
-export const POAWhitelist = POAWhitelistCommand;
+export const POANomineeList = POANomineeListCommand;

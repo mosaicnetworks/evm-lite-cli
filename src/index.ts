@@ -12,6 +12,7 @@ export { default as accountsGet } from './commands/accounts-get';
 export { default as accountsList } from './commands/accounts-list';
 export { default as accountsUpdate } from './commands/accounts-update';
 export { default as accountsImport } from './commands/accounts-import';
+export { default as accountsPrivateKey } from './commands/accounts-privatekey';
 
 // config
 export { default as configView } from './commands/config-view';
@@ -20,10 +21,14 @@ export { default as configSet } from './commands/config-set';
 // poa
 export { default as poaCheck } from './commands/poa-check';
 export { default as poaWhitelist } from './commands/poa-whitelist';
-export { default as poaNomineelist } from './commands/poa-nomineelist';
-export { default as poaNominate } from './commands/poa-nominate';
-export { default as poaVote } from './commands/poa-vote';
+export { default as poaNomineeList } from './commands/poa-nominee-list';
+export { default as poaNomineeNew } from './commands/poa-nominee-new';
+export { default as poaNomineeVote } from './commands/poa-nominee-vote';
 export { default as poaInit } from './commands/poa-init';
+
+export { default as poaEvicteeList } from './commands/poa-evictee-list';
+export { default as poaEvicteeNew } from './commands/poa-evictee-new';
+export { default as poaEvicteeVote } from './commands/poa-evictee-vote';
 
 // other
 export { default as transfer } from './commands/transfer';
