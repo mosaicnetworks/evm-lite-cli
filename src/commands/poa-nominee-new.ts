@@ -267,13 +267,20 @@ class POANominateCommand extends Command<Args> {
 
 		this.stopSpinner();
 
-		return (
-			`You (${
-				nomineeProposedEvent.args._proposer
-			}) nominated '${utils.hexToString(
-				monikerAnnouceEvent.args._moniker
-			)}' (${nomineeProposedEvent.args._nominee}).` + message
-		);
+		if (this.args.options.json) {
+			return JSON.stringify({
+				proposer: this.account.address,
+				nominee: this.args.address
+			});
+		} else {
+			return (
+				`You (${
+					nomineeProposedEvent.args._proposer
+				}) nominated '${utils.hexToString(
+					monikerAnnouceEvent.args._moniker
+				)}' (${nomineeProposedEvent.args._nominee}).` + message
+			);
+		}
 	}
 }
 

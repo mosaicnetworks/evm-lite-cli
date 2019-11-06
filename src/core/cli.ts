@@ -74,7 +74,8 @@ export default async function init(opts: CLIOptions, commands: any) {
 		command(cli, session)
 			.option('--debug', 'set logging level to debug')
 			.option('--error', 'set logging level to error')
-			.option('--silent', 'silence all logging');
+			.option('--silent', 'silence all logging')
+			.option('-j, --json', 'output unformatted json');
 	});
 
 	if (process.argv[2] === 'interactive' || process.argv[2] === 'i') {

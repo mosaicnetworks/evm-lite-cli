@@ -13,6 +13,9 @@ import Session from './Session';
 export type Options = {
 	interactive?: boolean;
 
+	// output json mode
+	json?: boolean;
+
 	// logging optiosn
 	silent?: boolean;
 	error?: boolean;

@@ -235,7 +235,15 @@ class POAVoteCommand extends Command<Args> {
 
 		this.stopSpinner();
 
-		return message;
+		if (this.args.options.json) {
+			return JSON.stringify({
+				voter: this.account.address,
+				nominee: this.args.address,
+				verdict: this.args.options.verdict
+			});
+		} else {
+			return message;
+		}
 	}
 }
 

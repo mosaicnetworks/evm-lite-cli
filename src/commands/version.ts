@@ -48,7 +48,13 @@ class VersionCommand extends Command {
 			pkg.dependencies[`evm-lite-consensus`]
 		);
 
-		return `v${pkg.version}`;
+		if (this.args.options.json) {
+			return JSON.stringify({
+				version: `v${pkg.version}`
+			});
+		} else {
+			return `v${pkg.version}`;
+		}
 	}
 }
 

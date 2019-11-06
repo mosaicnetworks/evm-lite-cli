@@ -9,8 +9,6 @@ import Table from '../core/Table';
 import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
 type Opts = TxOptions & {
-	formatted?: boolean;
-
 	host: string;
 	port: number;
 	gas: number;
@@ -30,7 +28,6 @@ export default (evmlc: Vorpal, session: Session) => {
 		.command('poa whitelist')
 		.alias('p wl')
 		.description(description)
-		.option('-f, --formatted', 'format output')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.option('--gas <g>', 'override config gas value')
@@ -142,15 +139,15 @@ class POAWhitelistCommand extends Command<Args> {
 			return 'No whitelist entries found';
 		}
 
-		if (!this.args.options.formatted && !this.session.interactive) {
-			return JSON.stringify(entries, null, 2);
-		}
-
 		for (const entry of entries) {
 			table.push([entry.moniker, entry.address]);
 		}
 
-		return table.toString();
+		if (this.args.options.json) {
+			return JSON.stringify(entries);
+		} else {
+			return table.toString();
+		}
 	}
 }
 

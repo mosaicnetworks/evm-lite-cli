@@ -7,7 +7,6 @@ import Table from '../core/Table';
 import Command, { Arguments, Options } from '../core/Command';
 
 type Opts = Options & {
-	formatted?: boolean;
 	remote?: boolean;
 	host?: string;
 	port?: number;
@@ -25,7 +24,6 @@ export default (evmlc: Vorpal, session: Session) => {
 		.command('accounts list')
 		.alias('a l')
 		.description(description)
-		.option('-f, --formatted', 'format output')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.option('-e, --exact', 'show exact balance')
@@ -41,8 +39,6 @@ class AccountListCommand extends Command<Args> {
 			this.args.options.host || this.config.connection.host;
 		this.args.options.port =
 			this.args.options.port || this.config.connection.port;
-
-		this.args.options.formatted = this.args.options.formatted || false;
 
 		// set command level node
 		this.node = new Node(this.args.options.host!, this.args.options.port);
@@ -104,10 +100,6 @@ class AccountListCommand extends Command<Args> {
 			accounts = await Promise.all(promises);
 		}
 
-		if (!this.args.options.formatted && !this.session.interactive) {
-			return JSON.stringify(accounts);
-		}
-
 		const table = new Table(['Moniker', 'Address', 'Balance', 'Nonce']);
 
 		for (const a of accounts) {
@@ -131,6 +123,10 @@ class AccountListCommand extends Command<Args> {
 			table.push([a.moniker, a.address, balance, a.nonce]);
 		}
 
-		return table.toString();
+		if (this.args.options.json) {
+			return JSON.stringify(accounts);
+		} else {
+			return table.toString();
+		}
 	}
 }

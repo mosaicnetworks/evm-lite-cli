@@ -146,7 +146,11 @@ class AccountCreateCommand extends Command<Args> {
 			this.args.options.out
 		);
 
-		return JSON.stringify(account, null, 2);
+		if (this.args.options.json) {
+			return JSON.stringify(account);
+		} else {
+			return `Address: ${utils.cleanAddress(account.address)}`;
+		}
 	}
 }
 

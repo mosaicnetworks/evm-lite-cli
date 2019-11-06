@@ -10,7 +10,6 @@ import Table from '../core/Table';
 import Command, { Arguments, Options } from '../core/Command';
 
 type Opts = Options & {
-	formatted?: boolean;
 	host: string;
 	port: number;
 };
@@ -30,7 +29,6 @@ export default (evmlc: Vorpal, session: Session) => {
 		.command('accounts get [address]')
 		.alias('a g')
 		.description(description)
-		.option('-f, --formatted', 'format output')
 		.option('-i, --interactive', 'enter interactive mode')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
@@ -46,8 +44,6 @@ class AccountGetCommand extends Command<Args> {
 			this.args.options.host || this.config.connection.host;
 		this.args.options.port =
 			this.args.options.port || this.config.connection.port;
-
-		this.args.options.formatted = this.args.options.formatted || false;
 
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
@@ -91,17 +87,17 @@ class AccountGetCommand extends Command<Args> {
 
 		const a = await this.node!.getAccount(this.args.address);
 
-		if (!this.args.options.formatted && !this.args.options.interactive) {
+		const table = new Table(['Address', 'Balance', 'Nonce', 'Bytecode']);
+		table.push([a.address, a.balance.format('T'), a.nonce, a.bytecode]);
+
+		if (this.args.options.json) {
 			return JSON.stringify({
 				...a,
 				balance: a.balance.format('T')
 			});
+		} else {
+			return table.toString();
 		}
-
-		const table = new Table(['Address', 'Balance', 'Nonce', 'Bytecode']);
-		table.push([a.address, a.balance.format('T'), a.nonce, a.bytecode]);
-
-		return table.toString();
 	}
 }
 

@@ -9,8 +9,6 @@ import Table from '../core/Table';
 import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
 type Opts = TxOptions & {
-	formatted?: boolean;
-
 	host: string;
 	port: number;
 	gas: number;
@@ -33,7 +31,6 @@ export default (evmlc: Vorpal, session: Session) => {
 		.alias('p n l')
 		.description(description)
 		.option('-d, --debug', 'show debug output')
-		.option('-f, --formatted', 'format output')
 		.option('-h, --host <ip>', 'override config host value')
 		.option('-p, --port <port>', 'override config port value')
 		.option('--gas <g>', 'override config gas value')
@@ -152,10 +149,6 @@ class POANomineeListCommand extends Command<Args> {
 			'Down Votes'
 		]);
 
-		if (!this.args.options.formatted && !this.session.interactive) {
-			return JSON.stringify(entries, null, 2);
-		}
-
 		for (const entry of entries) {
 			table.push([
 				entry.moniker,
@@ -165,7 +158,11 @@ class POANomineeListCommand extends Command<Args> {
 			]);
 		}
 
-		return table.toString();
+		if (this.args.options.json) {
+			return JSON.stringify(entries);
+		} else {
+			return table.toString();
+		}
 	}
 }
 

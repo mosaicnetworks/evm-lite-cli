@@ -114,6 +114,10 @@ class AccountPrivateKeyCommand extends Command<Args> {
 		const keyfile = await this.datadir.getKeyfile(this.args.moniker);
 		const account = await DataDirectory.decrypt(keyfile, this.passphrase!);
 
-		return account.privateKey;
+		if (this.args.options.json) {
+			return JSON.stringify({ privateKey: account.privateKey });
+		} else {
+			return account.privateKey;
+		}
 	}
 }

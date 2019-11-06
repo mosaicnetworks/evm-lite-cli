@@ -203,12 +203,12 @@ class POAEvictCommand extends Command<Args> {
 		let nomineeDecisionLogs: any[] = [];
 		let nomineeDecisionEvent;
 
-		if (!voteRcpt.logs.length) {
-			throw Error(
-				'No logs returned while voting. \n' +
-					'Possibly due to lack of `gas` or may not be whitelisted.'
-			);
-		}
+		// if (!voteRcpt.logs.length) {
+		// 	throw Error(
+		// 		'No logs returned while voting. \n' +
+		// 			'Possibly due to lack of `gas` or may not be whitelisted.'
+		// 	);
+		// }
 
 		if (voteRcpt.logs.length > 1) {
 			nomineeDecisionLogs = voteRcpt.logs.filter(
@@ -239,10 +239,17 @@ class POAEvictCommand extends Command<Args> {
 
 		this.stopSpinner();
 
-		return (
-			`You (${evicteeProposedEvent.args._proposer}) proposed to evict (${evicteeProposedEvent.args._nominee})` +
-			message
-		);
+		if (this.args.options.json) {
+			return JSON.stringify({
+				proposer: this.account.address,
+				evictee: this.args.address
+			});
+		} else {
+			return (
+				`You (${evicteeProposedEvent.args._proposer}) proposed to evict (${evicteeProposedEvent.args._nominee})` +
+				message
+			);
+		}
 	}
 }
 

@@ -212,7 +212,11 @@ class TransferCommand extends Command<Args> {
 
 		this.stopSpinner();
 
-		return JSON.stringify(receipt, null, 2);
+		if (this.args.options.json) {
+			return JSON.stringify(receipt);
+		} else {
+			return `Transacion Successful`;
+		}
 	}
 }
 

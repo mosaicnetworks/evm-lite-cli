@@ -167,6 +167,10 @@ class AccountUpdateCommand extends Command<Args> {
 			this.newPassphrase
 		);
 
-		return JSON.stringify(keyfile, null, 2);
+		if (this.args.options.json) {
+			return JSON.stringify(keyfile);
+		} else {
+			return `Passphrase updated: ${keyfile.address}`;
+		}
 	}
 }
