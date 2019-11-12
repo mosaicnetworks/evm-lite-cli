@@ -26,8 +26,8 @@ export default (evmlc: Vorpal, session: Session) => {
 	const description = 'Reveal private key for a moniker';
 
 	return evmlc
-		.command('accounts privatekey [moniker]')
-		.alias('a pk')
+		.command('accounts reveal [moniker]')
+		.alias('a r')
 		.description(description)
 		.option('-i, --interactive', 'enter interactive mode')
 		.option('-d, --debug', 'show debug output')
@@ -35,12 +35,10 @@ export default (evmlc: Vorpal, session: Session) => {
 		.types({
 			string: ['_', 'p', 'pwd']
 		})
-		.action((args: Args) =>
-			new AccountPrivateKeyCommand(session, args).run()
-		);
+		.action((args: Args) => new AccountRevealCommand(session, args).run());
 };
 
-class AccountPrivateKeyCommand extends Command<Args> {
+class AccountRevealCommand extends Command<Args> {
 	protected async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
