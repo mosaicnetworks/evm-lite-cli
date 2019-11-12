@@ -37,7 +37,19 @@ $ evmlc --datadir <path> <command>
 
 Commands also have two logging level flags `--silent` and `--debug` which will silence and show debug logs respectively.
 
-**By default all commands will output formatted output. If you wish to script or require a JSON output use the `-j, --json` flag**
+**By default all commands will output formatted output. If you wish to script or require a JSON output use the `-j, --json` flag**.
+
+For example to show JSON and debug output for the `info` command:
+
+```json
+$ evmlc info --json --debug
+
+[DEBUG] evmlc http GET camille.monet.network:8080/info
+
+{"consensus_events":"218","consensus_transactions":"17","events_per_second":"0.00","id":"3048798009","last_block_index":"18","last_consensus_round":"83","last_peer_change":"82","min_gas_price":"10","monik
+er":"mosaic","num_peers":"3","round_events":"0","rounds_per_second":"0.00","state":"Babbling","sync_rate":"1.00","time":"1573554669678999304","transaction_pool":"0","type":"babble","undetermined_events":"
+17"}
+```
 
 ## Data Directory
 
@@ -62,13 +74,27 @@ Example evmlc.toml:
 
 ```toml
 [connection]
+
+# The IP address of the EVM-Lite node
 host = "localhost"
+
+# The listening port of the EVM-Lite service
 port = 8080
 
-# transaction defaults
 [defaults]
+
+# Moniker of the account to be used as default
+# usually the filename of the keyfile
 from = "moniker"
+
+# Gas will only default to this value for contract
+# calls as transfer will take a maximum of 21000 gas
 gas = 1000000
+
+# DEPRECATED
+# Commands requiring gas price will pull the
+# minimum gas price of the requested node and
+# use with the transaction.
 gasPrice = 0
 ```
 
