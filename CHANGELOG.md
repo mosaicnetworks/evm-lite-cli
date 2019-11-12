@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## UNRELEASED
 
+### Added
+
+-   Added `accounts reveal` which will reveal a private key for an accounts
+-   Added `accounts generate` which generates a keyfile based on a private key
+
 ### Changed
 
 -   All commands now by default output formatted data unless specified by the `-j, --json` flag. (Better scripting experience)
