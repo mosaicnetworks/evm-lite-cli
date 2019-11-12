@@ -7,7 +7,8 @@ describe('accounts create', () => {
 		const cmd = new AccountCreate(session, {
 			moniker: '',
 			options: {
-				out: session.datadir.keystorePath
+				out: session.datadir.keystorePath,
+				json: true
 			}
 		});
 
@@ -22,7 +23,8 @@ describe('accounts create', () => {
 		const cmd = new AccountCreate(session, {
 			moniker: 'asd-123',
 			options: {
-				out: session.datadir.keystorePath
+				out: session.datadir.keystorePath,
+				json: true
 			}
 		});
 
@@ -37,7 +39,8 @@ describe('accounts create', () => {
 		const cmd = new AccountCreate(session, {
 			moniker: 'test',
 			options: {
-				out: session.datadir.keystorePath
+				out: session.datadir.keystorePath,
+				json: true
 			}
 		});
 
@@ -53,7 +56,8 @@ describe('accounts create', () => {
 			moniker: 'test',
 			options: {
 				pwd: '/does_not_exist/',
-				out: session.datadir.keystorePath
+				out: session.datadir.keystorePath,
+				json: true
 			}
 		});
 
@@ -71,7 +75,8 @@ describe('accounts create', () => {
 			moniker: 'test',
 			options: {
 				pwd: '/',
-				out: session.datadir.keystorePath
+				out: session.datadir.keystorePath,
+				json: true
 			}
 		});
 
@@ -89,7 +94,8 @@ describe('accounts create', () => {
 			moniker: 'test',
 			options: {
 				pwd: './__tests__/resources/pwd.txt',
-				out: '/path_does_not/exist/'
+				out: '/path_does_not/exist/',
+				json: true
 			}
 		});
 
@@ -105,7 +111,8 @@ describe('accounts create', () => {
 			moniker: 'test',
 			options: {
 				pwd: './__tests__/resources/pwd.txt',
-				out: './__tests__/resources/pwd.txt'
+				out: './__tests__/resources/pwd.txt',
+				json: true
 			}
 		});
 
@@ -121,7 +128,8 @@ describe('accounts create', () => {
 			moniker: 'test',
 			options: {
 				pwd: './__tests__/resources/pwd.txt',
-				out: session.datadir.keystorePath
+				out: session.datadir.keystorePath,
+				json: true
 			}
 		});
 
