@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
--   Added `accounts reveal` which will reveal a private key for an accounts
+-   Added `accounts inspect` which will reveal account information including private key with the `--private` flag
 -   Added `accounts generate` which generates a keyfile based on a private key
 
 ### Changed
