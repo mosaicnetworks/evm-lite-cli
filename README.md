@@ -39,16 +39,14 @@ Commands also have two logging level flags `--silent` and `--debug` which will s
 
 **By default all commands will output formatted output. If you wish to script or require a JSON output use the `-j, --json` flag**.
 
-For example to show JSON and debug output for the `info` command:
+For example to show JSON output for the `info` command:
 
-```json
-$ evmlc info --json --debug
+```console
+$ evmlc info --json
 
-[DEBUG] evmlc http GET camille.monet.network:8080/info
+evmlc http GET camille.monet.network:8080/info
 
-{"consensus_events":"218","consensus_transactions":"17","events_per_second":"0.00","id":"3048798009","last_block_index":"18","last_consensus_round":"83","last_peer_change":"82","min_gas_price":"10","monik
-er":"mosaic","num_peers":"3","round_events":"0","rounds_per_second":"0.00","state":"Babbling","sync_rate":"1.00","time":"1573554669678999304","transaction_pool":"0","type":"babble","undetermined_events":"
-17"}
+{"consensus_events":"4121","consensus_transactions":"99","events_per_second":"0.00","id":"3048798009","last_block_index":"112","last_consensus_round":"445","last_peer_change":"258","min_gas_price":"10","moniker":"mosaic","num_peers":"4","round_events":"0","rounds_per_second":"0.00","state":"Babbling","sync_rate":"1.00","time":"1574268876085188708","transaction_pool":"0","type":"babble","undetermined_events":"19"}
 ```
 
 ## Data Directory
