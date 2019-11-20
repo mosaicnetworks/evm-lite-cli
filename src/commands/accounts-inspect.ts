@@ -12,6 +12,7 @@ import Command, { Arguments, Options } from '../core/Command';
 
 type Opts = Options & {
 	pwd: string;
+	private: boolean;
 };
 
 type Args = Arguments<Opts> & {
@@ -23,22 +24,22 @@ type Answers = {
 };
 
 export default (evmlc: Vorpal, session: Session) => {
-	const description = 'Reveal private key for a moniker';
+	const description = 'Inspect a keyfile';
 
 	return evmlc
-		.command('accounts reveal [moniker]')
-		.alias('a r')
+		.command('accounts inspect [moniker]')
 		.description(description)
 		.option('-i, --interactive', 'enter interactive mode')
 		.option('-d, --debug', 'show debug output')
+		.option('--private', 'show private key')
 		.option('-p, --pwd <path>', 'passphrase file path')
 		.types({
 			string: ['_', 'p', 'pwd']
 		})
-		.action((args: Args) => new AccountRevealCommand(session, args).run());
+		.action((args: Args) => new AccountInspectCommand(session, args).run());
 };
 
-class AccountRevealCommand extends Command<Args> {
+class AccountInspectCommand extends Command<Args> {
 	protected async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
@@ -113,9 +114,23 @@ class AccountRevealCommand extends Command<Args> {
 		const account = await DataDirectory.decrypt(keyfile, this.passphrase!);
 
 		if (this.args.options.json) {
-			return JSON.stringify({ privateKey: account.privateKey });
+			const json: any = { address: account.address, publicKey: '' };
+
+			if (this.args.options.private) {
+				json.privateKey = account.privateKey;
+			}
+
+			return JSON.stringify(json);
 		} else {
-			return account.privateKey;
+			let res = `Address: ${account.address} \n`;
+
+			if (this.args.options.private) {
+				res += `Private Key: ${account.privateKey}`;
+			}
+
+			// add public key
+
+			return res;
 		}
 	}
 }

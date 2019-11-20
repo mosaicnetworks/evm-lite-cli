@@ -12,7 +12,7 @@ export { default as accountsGet } from './commands/accounts-get';
 export { default as accountsList } from './commands/accounts-list';
 export { default as accountsUpdate } from './commands/accounts-update';
 export { default as accountsImport } from './commands/accounts-import';
-export { default as accountsReveal } from './commands/accounts-reveal';
+export { default as accountsInspect } from './commands/accounts-inspect';
 
 // config
 export { default as configView } from './commands/config-view';

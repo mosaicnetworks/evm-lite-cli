@@ -8,7 +8,7 @@ import accountsGenerate from './commands/accounts-generate';
 import accountsGet from './commands/accounts-get';
 import accountsImport from './commands/accounts-import';
 import accountsList from './commands/accounts-list';
-import accountsReveal from './commands/accounts-reveal';
+import accountsInspect from './commands/accounts-inspect';
 import accountsUpdate from './commands/accounts-update';
 
 import configSet from './commands/config-set';
@@ -48,7 +48,7 @@ const commands = [
 	accountsCreate,
 	accountsUpdate,
 	accountsImport,
-	accountsReveal,
+	accountsInspect,
 	accountsGenerate,
 
 	transfer,
