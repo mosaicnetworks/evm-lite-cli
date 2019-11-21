@@ -4,10 +4,11 @@ import { osdatadir } from 'evm-lite-datadir';
 
 // commands
 import accountsCreate from './commands/accounts-create';
+import accountsGenerate from './commands/accounts-generate';
 import accountsGet from './commands/accounts-get';
 import accountsImport from './commands/accounts-import';
+import accountsInspect from './commands/accounts-inspect';
 import accountsList from './commands/accounts-list';
-import accountsPrivateKey from './commands/accounts-privatekey';
 import accountsUpdate from './commands/accounts-update';
 
 import configSet from './commands/config-set';
@@ -47,7 +48,8 @@ const commands = [
 	accountsCreate,
 	accountsUpdate,
 	accountsImport,
-	accountsPrivateKey,
+	accountsInspect,
+	accountsGenerate,
 
 	transfer,
 

@@ -22,7 +22,6 @@ Then we will need to define a function to return a vorpal command object, making
 ```typescript
 // Options for the command
 type Opts = Options & {
-	formatted?: boolean;
 	host: string;
 	port: number;
 };
@@ -35,7 +34,6 @@ export default (evmlc: Vorpal, session: Session) => {
 	return evmlc
 		.command('info')
 		.description('Display information about node')
-		.option('-f, --formatted', 'format output')
 		.option('-h, --host <ip>', 'override config parameter host')
 		.option('-p, --port <port>', 'override config parameter port')
 		.types({
@@ -88,10 +86,6 @@ class InfoCommand extends Command<Args> {
 				// @ts-ignore
 				[key]: info[key]
 			});
-		}
-
-		if (!this.args.options.formatted && !this.session.interactive) {
-			return JSON.stringify(info);
 		}
 
 		return table.toString();

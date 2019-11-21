@@ -9,7 +9,13 @@ import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
 
-import { NomineeEntry, POANomineeList } from './poa-nominee-list';
+import {
+	Logs,
+	NomineeDecision,
+	NomineeEntry,
+	NomineeVoteCast,
+	POA
+} from '../poa';
 
 import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
@@ -17,7 +23,7 @@ type Opts = TxOptions & {
 	interactive?: boolean;
 	pwd?: string;
 
-	verdict: boolean;
+	verdict: string;
 	from: string;
 	host: string;
 	port: number;
@@ -30,7 +36,7 @@ type Args = Arguments<Opts> & {
 
 type Answers = {
 	address: string;
-	verdict: boolean;
+	verdict: string;
 };
 
 export default (evmlc: Vorpal, session: Session) => {
@@ -42,7 +48,7 @@ export default (evmlc: Vorpal, session: Session) => {
 		.description(description)
 		.option('-i, --interactive', 'interactive')
 		.option('-d, --debug', 'show debug output')
-		.option('--verdict <boolean>', 'verdict for given address')
+		.option('--verdict <Yes|No|yes|no>', 'verdict for nominee')
 		.option('--pwd <password>', 'passphrase file path')
 		.option('--from <moniker>', 'from moniker')
 		.option('-h, --host <ip>', 'override config host value')
@@ -84,12 +90,10 @@ class POAVoteCommand extends Command<Args> {
 	}
 
 	protected async prompt(): Promise<void> {
-		const cmd = new POANomineeList(this.session, this.args);
+		const poa = new POA(this.args.options.host, this.args.options.port);
+		await poa.init();
 
-		// initialize cmd execution
-		cmd.init();
-
-		this.nominees = await cmd.getNomineeList();
+		this.nominees = await poa.nominees();
 
 		if (this.nominees.length === 0) {
 			throw Error('No nominees in election');
@@ -105,9 +109,10 @@ class POAVoteCommand extends Command<Args> {
 				type: 'list'
 			},
 			{
+				choices: ['Yes', 'No'],
 				message: 'Verdict: ',
 				name: 'verdict',
-				type: 'confirm'
+				type: 'list'
 			}
 		];
 
@@ -120,6 +125,8 @@ class POAVoteCommand extends Command<Args> {
 	}
 
 	protected async check(): Promise<void> {
+		this.args.options.verdict = this.args.options.verdict.toLowerCase();
+
 		if (!this.args.address) {
 			throw Error('No nominee address provided.');
 		}
@@ -128,7 +135,7 @@ class POAVoteCommand extends Command<Args> {
 			throw Error('Nominee address has an invalid length.');
 		}
 
-		if (!this.args.options.verdict && this.args.options.verdict !== false) {
+		if (!this.args.options.verdict && this.args.options.verdict !== 'no') {
 			throw Error('No verdict provided for nominee.');
 		}
 
@@ -159,6 +166,19 @@ class POAVoteCommand extends Command<Args> {
 					.trim();
 			}
 		}
+
+		if (!this.args.options.verdict) {
+			this.args.options.verdict = 'no';
+		}
+
+		if (
+			this.args.options.verdict !== 'yes' &&
+			this.args.options.verdict !== 'no'
+		) {
+			throw Error(
+				`Verdict argument not recognized: ${this.args.options.verdict}`
+			);
+		}
 	}
 
 	protected async exec(): Promise<string> {
@@ -186,7 +206,7 @@ class POAVoteCommand extends Command<Args> {
 				gasPrice: Number(this.args.options.gasPrice)
 			},
 			utils.cleanAddress(this.args.address),
-			this.args.options.verdict
+			this.args.options.verdict === 'yes' ? true : false
 		);
 
 		this.startSpinner('Sending Transaction');
@@ -201,32 +221,24 @@ class POAVoteCommand extends Command<Args> {
 		}
 
 		this.debug('Parsing logs from transaction');
+		const logs = new Logs(receipt.logs);
 
-		const nomineeVoteCastEvent = receipt.logs.filter(
-			log => log.event === 'NomineeVoteCast'
-		)[0];
+		const evNomineeVoteCast = logs.find<NomineeVoteCast>('NomineeVoteCast');
+		const evNomineeDecision = logs.find<NomineeDecision>('NomineeDecision');
 
-		let nomineeDecisionLogs: any[] = [];
-		let nomineeDecisionEvent;
-
-		if (receipt.logs.length > 1) {
-			nomineeDecisionLogs = receipt.logs.filter(
-				log => log.event === 'NomineeDecision'
+		if (!evNomineeVoteCast) {
+			throw Error(
+				'Vote was not cast. No `NomineeVoteCast` event returned'
 			);
 		}
 
-		if (nomineeDecisionLogs.length) {
-			nomineeDecisionEvent = nomineeDecisionLogs[0];
-		}
-
-		const vote = nomineeVoteCastEvent.args._accepted ? 'Yes' : 'No';
-
+		const vote = evNomineeVoteCast._accepted ? 'Yes' : 'No';
 		let message =
-			`You (${nomineeVoteCastEvent.args._voter}) voted '${vote}'` +
-			` for '${nomineeVoteCastEvent.args._nominee}'. `;
+			`You (${evNomineeVoteCast._voter}) voted '${vote}'` +
+			` for '${evNomineeVoteCast._nominee}'. `;
 
-		if (nomineeDecisionEvent) {
-			const accepted = nomineeDecisionEvent.args._accepted
+		if (evNomineeDecision) {
+			const accepted = evNomineeDecision._accepted
 				? 'Accepted'
 				: 'Rejected';
 
@@ -235,7 +247,15 @@ class POAVoteCommand extends Command<Args> {
 
 		this.stopSpinner();
 
-		return message;
+		if (this.args.options.json) {
+			return JSON.stringify({
+				voter: evNomineeVoteCast._voter,
+				nominee: evNomineeVoteCast._nominee,
+				verdict: vote
+			});
+		} else {
+			return message;
+		}
 	}
 }
 

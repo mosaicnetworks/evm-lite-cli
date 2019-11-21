@@ -8,8 +8,12 @@ import Datadir from 'evm-lite-datadir';
 import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
+import Logs from '../poa/Logs';
+
+import { MonikerAnnounce, NomineeProposed } from '../poa/Events';
 
 import Command, { Arguments, TxOptions } from '../core/TxCommand';
+import { POA } from '../poa';
 
 type Opts = TxOptions & {
 	interactive?: boolean;
@@ -177,103 +181,63 @@ class POANominateCommand extends Command<Args> {
 			this.args.options.moniker
 		);
 
-		const voteTx = contract.methods.castNomineeVote(
-			{
-				from: this.account.address,
-				gas: this.args.options.gas,
-				gasPrice: Number(this.args.options.gasPrice)
-			},
-			utils.cleanAddress(this.args.address),
-			true
-		);
-
 		this.startSpinner('Sending Transaction');
 
 		this.debug('Sending nominate transaction');
 		const receipt = await this.node!.sendTx(tx, this.account);
-
-		this.debug('Sending vote transaction');
-		const voteRcpt = await this.node!.sendTx(voteTx, this.account);
-
-		let nomineeDecisionLogs: any[] = [];
-		let nomineeDecisionEvent;
-
-		if (!voteRcpt.logs.length) {
-			throw Error(
-				'No logs returned while voting. \n' +
-					'Possibly due to lack of `gas` or may not be whitelisted.'
-			);
-		}
-
-		if (voteRcpt.logs.length > 1) {
-			nomineeDecisionLogs = voteRcpt.logs.filter(
-				log => log.event === 'NomineeDecision'
-			);
-		}
-
-		if (nomineeDecisionLogs.length) {
-			nomineeDecisionEvent = nomineeDecisionLogs[0];
-		}
-
-		let message = '';
-		if (nomineeDecisionEvent) {
-			const accepted = nomineeDecisionEvent.args._accepted
-				? 'Accepted'
-				: 'Rejected';
-
-			message += `\nElection completed with the nominee being '${accepted}'.`;
-		}
 
 		if (!receipt.logs.length) {
 			this.debug('Not voted - Gas or not whitelisted');
 		}
 
 		this.debug('Parsing logs from receipt');
+		const logs = new Logs(receipt.logs);
 
-		let monikerAnnouceEvent;
-		const monikerAnnouceEvents = receipt.logs.filter(
-			log => log.event === 'MonikerAnnounce'
-		);
+		let evMonikerAnnouce: MonikerAnnounce | undefined;
 
-		const nomineeProposedEvent = receipt.logs.filter(
-			log => log.event === 'NomineeProposed'
-		)[0];
+		const evs = logs.filter<MonikerAnnounce>('MonikerAnnounce');
 
-		if (monikerAnnouceEvents.length > 1) {
-			try {
-				monikerAnnouceEvent = monikerAnnouceEvents.filter(event => {
-					const moniker = utils
-						.hexToString(event.args._moniker)
-						.toLowerCase();
-
-					if (moniker.trim() === this.args.options.moniker.trim()) {
-						return event;
-					}
-				})[0];
-			} catch (e) {
-				throw Error(
-					'No logs were returned matching the specified `moniker`.'
-				);
-			}
+		if (!evs.length) {
+			throw Error('`MonikerAnnounce` event not found.');
 		} else {
-			monikerAnnouceEvent = monikerAnnouceEvents[0];
+			evMonikerAnnouce = evs.find(
+				e =>
+					utils.hexToString(e._moniker.toLowerCase().trim()) ===
+					this.args.options.moniker.toLowerCase().trim()
+			);
 		}
 
-		if (!monikerAnnouceEvent) {
+		const evNomineeProposed = logs.find<NomineeProposed>('NomineeProposed');
+		if (!evNomineeProposed) {
+			throw Error('Oops! `NomineeProposed` event not found.');
+		}
+
+		if (!evMonikerAnnouce) {
 			throw Error(
-				'No logs were returned matching the specified `moniker`.'
+				'Could not find corresponding `MonikerAnnounce` event for moniker'
 			);
 		}
 
 		this.stopSpinner();
 
-		return (
-			`You (${
-				nomineeProposedEvent.args._proposer
-			}) nominated '${utils.hexToString(
-				monikerAnnouceEvent.args._moniker
-			)}' (${nomineeProposedEvent.args._nominee}).` + message
-		);
+		if (this.args.options.json) {
+			return JSON.stringify({
+				proposer: {
+					moniker: this.args.options.from,
+					address: evNomineeProposed._proposer
+				},
+				nominee: {
+					moniker: utils.hexToString(evMonikerAnnouce._moniker),
+					address: evNomineeProposed._nominee
+				}
+			});
+		} else {
+			return `You (${
+				evNomineeProposed._proposer
+			}) nominated '${utils.hexToString(evMonikerAnnouce._moniker)}' (${
+				evNomineeProposed._nominee
+			}).`;
+		}
 	}
 }
 

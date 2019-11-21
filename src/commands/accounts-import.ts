@@ -127,7 +127,11 @@ class AccountImportCommand extends Command<Args> {
 			await this.datadir.saveConfig(newConfig);
 		}
 
-		return JSON.stringify(keyfile);
+		if (this.args.options.json) {
+			return JSON.stringify(keyfile);
+		} else {
+			return `Imported: ${this.args.moniker} (${keyfile.address})`;
+		}
 	}
 }
 

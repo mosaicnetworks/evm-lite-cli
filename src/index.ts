@@ -6,13 +6,16 @@ export { default as TxCommand, TxOptions } from './core/TxCommand';
 export { default as color } from './core/color';
 export { default as Table } from './core/Table';
 
+export * from './poa';
+
 // accounts
 export { default as accountsCreate } from './commands/accounts-create';
 export { default as accountsGet } from './commands/accounts-get';
 export { default as accountsList } from './commands/accounts-list';
 export { default as accountsUpdate } from './commands/accounts-update';
 export { default as accountsImport } from './commands/accounts-import';
-export { default as accountsPrivateKey } from './commands/accounts-privatekey';
+export { default as accountsInspect } from './commands/accounts-inspect';
+export { default as accountsGenerate } from './commands/accounts-generate';
 
 // config
 export { default as configView } from './commands/config-view';

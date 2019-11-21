@@ -152,7 +152,11 @@ class POAInitCommand extends Command<Args> {
 			);
 		}
 
-		return JSON.stringify(r, null, 2);
+		if (this.args.options.json) {
+			return JSON.stringify(r);
+		} else {
+			return `Successfully initialised POA contract`;
+		}
 	}
 }
 

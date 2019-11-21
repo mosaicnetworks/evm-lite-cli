@@ -107,7 +107,14 @@ class POACheckCommand extends Command<Args> {
 		this.debug('Sending transaction');
 		const response = await this.node!.callTx<boolean>(tx);
 
-		return response.toString();
+		if (this.args.options.json) {
+			return JSON.stringify({
+				address: this.args.address,
+				isValidator: response
+			});
+		} else {
+			return response.toString();
+		}
 	}
 }
 

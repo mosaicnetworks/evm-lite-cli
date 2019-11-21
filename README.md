@@ -27,55 +27,26 @@ $ yarn global add evm-lite-cli
 
 ## Commands
 
-List commands:
-
-```console
-   _____  __     __  __  __   _        ____
- | ____| \ \   / / |  \/  | | |      / ___|
- |  _|    \ \ / /  | |\/| | | |     | |
- | |___    \ V /   | |  | | | |___  | |___
- |_____|    \_/    |_|  |_| |_____|  \____|
-
- Mode:        Interactive
- Data Dir:    /Users/danu/Library/MONET
- Config File: /Users/danu/Library/MONET/evmlc.toml
- Keystore:    /Users/danu/Library/MONET/keystore
-
-  Change datadir by: $ evmlc --datadir [path] [command]
-
-  Commands:
-
-    exit                                     Exit EVMLC
-    help [command...]                        Provides help for a given command.
-    info [options]                           Display information about node
-    config set [options]                     Set values of the configuration inside the data directory
-    config view [options]                    Output current configuration file
-    accounts list [options]                  List all accounts in the local keystore directory
-    accounts get [options] [address]         Fetches account details from a connected node
-    accounts create [options] [moniker]      Creates an encrypted keypair locally
-    accounts update [options] [moniker]      Update passphrase for a local account
-    accounts import [options] [moniker]      Import an encrypted keyfile to the keystore
-    accounts privatekey [options] [moniker]  Reveal private key for a moniker
-    transfer [options]                       Initiate a transfer of token(s) to an address
-    poa init [options]                       Initialize PoA contract
-    poa whitelist [options]                  List whitelist entries for a connected node
-    poa check [options] [address]            Check whether an address is on the whitelist
-    poa nominee list [options]               List nominees for a connected node
-    poa nominee new [options] [address]      Nominate an address to proceed to election
-    poa nominee vote [options] [address]     Vote for an nominee currently in election
-    poa evictee list [options]               List eviction nominees for a connected node
-    poa evictee new [options] [address]      Nominate an address to proceed to an eviction vote
-    poa evictee vote [options] [address]     Vote for an evictee in election
-    version [options]                        Display current version of cli
-    clear [options]                          Clear output on screen
-```
-
 ### Flags
 
 The global flag `-d, --datadir` specifies the directory where `keystore` and `evmlc.toml` are stored unless overwritten by specific flags.
 
 ```bash
 $ evmlc --datadir <path> <command>
+```
+
+Commands also have two logging level flags `--silent` and `--debug` which will silence and show debug logs respectively.
+
+**By default all commands will output formatted output. If you wish to script or require a JSON output use the `-j, --json` flag**.
+
+For example to show JSON output for the `info` command:
+
+```console
+$ evmlc info --json
+
+evmlc http GET camille.monet.network:8080/info
+
+{"consensus_events":"4121","consensus_transactions":"99","events_per_second":"0.00","id":"3048798009","last_block_index":"112","last_consensus_round":"445","last_peer_change":"258","min_gas_price":"10","moniker":"mosaic","num_peers":"4","round_events":"0","rounds_per_second":"0.00","state":"Babbling","sync_rate":"1.00","time":"1574268876085188708","transaction_pool":"0","type":"babble","undetermined_events":"19"}
 ```
 
 ## Data Directory
@@ -101,13 +72,27 @@ Example evmlc.toml:
 
 ```toml
 [connection]
+
+# The IP address of the EVM-Lite node
 host = "localhost"
+
+# The listening port of the EVM-Lite service
 port = 8080
 
-# transaction defaults
 [defaults]
+
+# Moniker of the account to be used as default
+# usually the filename of the keyfile
 from = "moniker"
+
+# Gas will only default to this value for contract
+# calls as transfer will take a maximum of 21000 gas
 gas = 1000000
+
+# DEPRECATED
+# Commands requiring gas price will pull the
+# minimum gas price of the requested node and
+# use with the transaction.
 gasPrice = 0
 ```
 

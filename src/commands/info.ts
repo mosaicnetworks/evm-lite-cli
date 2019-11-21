@@ -8,7 +8,6 @@ import Table from '../core/Table';
 import Command, { Arguments, Options } from '../core/Command';
 
 type Opts = Options & {
-	formatted?: boolean;
 	host: string;
 	port: number;
 };
@@ -19,7 +18,6 @@ export default (evmlc: Vorpal, session: Session) => {
 	return evmlc
 		.command('info')
 		.description('Display information about node')
-		.option('-f, --formatted', 'format output')
 		.option('-h, --host <ip>', 'override config parameter host')
 		.option('-p, --port <port>', 'override config parameter port')
 		.types({
@@ -64,11 +62,11 @@ class InfoCommand extends Command<Args> {
 			});
 		}
 
-		if (!this.args.options.formatted && !this.session.interactive) {
+		if (this.args.options.json) {
 			return JSON.stringify(info);
+		} else {
+			return table.toString();
 		}
-
-		return table.toString();
 	}
 }
 

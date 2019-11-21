@@ -8,10 +8,11 @@ import Datadir from 'evm-lite-datadir';
 import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
+import POA from '../poa/Contract';
+
+import { EvictionProposed, Logs } from '../poa';
 
 import Command, { Arguments, TxOptions } from '../core/TxCommand';
-
-import { POAWhitelist, WhitelistEntry } from './poa-whitelist';
 
 type Opts = TxOptions & {
 	interactive?: boolean;
@@ -54,8 +55,6 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class POAEvictCommand extends Command<Args> {
-	protected whitelist: WhitelistEntry[] = [];
-
 	protected async init(): Promise<boolean> {
 		this.payable = true;
 
@@ -80,20 +79,18 @@ class POAEvictCommand extends Command<Args> {
 	}
 
 	protected async prompt(): Promise<void> {
-		const cmd = new POAWhitelist(this.session, this.args);
+		const poa = new POA(this.args.options.host, this.args.options.port);
+		await poa.init();
 
-		// initialize cmd execution
-		cmd.init();
+		const whitelist = await poa.whitelist();
 
-		this.whitelist = await cmd.getWhitelist();
-
-		if (this.whitelist.length === 0) {
+		if (whitelist.length === 0) {
 			throw Error('No nominees in election');
 		}
 
 		const questions: Inquirer.QuestionCollection<Answers> = [
 			{
-				choices: this.whitelist.map(n => `${n.moniker} (${n.address})`),
+				choices: whitelist.map(n => `${n.moniker} (${n.address})`),
 				message: 'Eviction Address: ',
 				name: 'address',
 				type: 'list'
@@ -175,23 +172,10 @@ class POAEvictCommand extends Command<Args> {
 			utils.cleanAddress(this.args.address)
 		);
 
-		const evictVoteTx = contract.methods.castEvictionVote(
-			{
-				from: this.account.address,
-				gas: this.args.options.gas,
-				gasPrice: Number(this.args.options.gasPrice)
-			},
-			utils.cleanAddress(this.args.address),
-			true
-		);
-
 		this.startSpinner('Sending Transaction');
 
 		this.debug('Sending eviction transaction');
 		const receipt = await this.node!.sendTx(tx, this.account);
-
-		this.debug('Sending evict vote transaction');
-		const voteRcpt = await this.node!.sendTx(evictVoteTx, this.account);
 
 		if (!receipt.logs.length) {
 			throw Error(
@@ -200,49 +184,26 @@ class POAEvictCommand extends Command<Args> {
 			);
 		}
 
-		let nomineeDecisionLogs: any[] = [];
-		let nomineeDecisionEvent;
-
-		if (!voteRcpt.logs.length) {
-			throw Error(
-				'No logs returned while voting. \n' +
-					'Possibly due to lack of `gas` or may not be whitelisted.'
-			);
-		}
-
-		if (voteRcpt.logs.length > 1) {
-			nomineeDecisionLogs = voteRcpt.logs.filter(
-				log => log.event === 'EvictionDecision'
-			);
-		}
-
-		if (nomineeDecisionLogs.length) {
-			nomineeDecisionEvent = nomineeDecisionLogs[0];
-		}
-
-		let message = '';
-		if (nomineeDecisionEvent) {
-			const accepted = nomineeDecisionEvent.args._accepted
-				? 'being removed'
-				: 'not being removed';
-
-			message += `\nEviction ended with the evictee ${accepted}.`;
-		}
-
 		this.debug('Parsing logs from receipt');
+		const logs = new Logs(receipt.logs);
+		const evEvictionProposed = logs.find<EvictionProposed>(
+			'EvictionProposed'
+		);
 
-		// return JSON.stringify(receipt, null, 2);
-
-		const evicteeProposedEvent = receipt.logs.filter(
-			log => log.event === 'EvictionProposed'
-		)[0];
+		if (!evEvictionProposed) {
+			throw Error('Oops! `EvictionProposed` event not found.');
+		}
 
 		this.stopSpinner();
 
-		return (
-			`You (${evicteeProposedEvent.args._proposer}) proposed to evict (${evicteeProposedEvent.args._nominee})` +
-			message
-		);
+		if (this.args.options.json) {
+			return JSON.stringify({
+				proposer: evEvictionProposed._proposer,
+				evictee: evEvictionProposed._nominee
+			});
+		} else {
+			return `You (${evEvictionProposed._proposer}) proposed to evict (${evEvictionProposed._nominee})`;
+		}
 	}
 }
 

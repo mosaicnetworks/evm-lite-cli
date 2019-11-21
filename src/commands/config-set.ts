@@ -129,7 +129,11 @@ class ConfigSetCommand extends Command<Args> {
 
 		await this.datadir.saveConfig(newConfig);
 
-		return this.datadir.configToml;
+		if (this.args.options.json) {
+			return JSON.stringify(this.datadir.config);
+		} else {
+			return this.datadir.configToml;
+		}
 	}
 }
 

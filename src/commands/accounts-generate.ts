@@ -1,5 +1,8 @@
 import * as fs from 'fs';
 
+import { Account } from 'evm-lite-core';
+import Keystore from 'evm-lite-keystore';
+
 import utils from 'evm-lite-utils';
 import Inquirer from 'inquirer';
 import Vorpal from 'vorpal';
@@ -10,15 +13,16 @@ import Command, { Arguments, Options } from '../core/Command';
 
 type Opts = Options & {
 	pwd?: string;
-	out: string;
+	moniker: string;
 };
 
 type Args = Arguments<Opts> & {
 	options: Opts;
-	moniker: string;
+	privKey: string;
 };
 
 type Answers = {
+	privKey: string;
 	moniker: string;
 	outpath: string;
 	passphrase: string;
@@ -26,45 +30,36 @@ type Answers = {
 };
 
 const command = (evmlc: Vorpal, session: Session) => {
-	const description = 'Creates an encrypted keypair locally';
+	const description = 'Generate a keyfile from private key';
 
 	return evmlc
-		.command('accounts create [moniker]')
-		.alias('a c')
+		.command('accounts generate [privkey]')
 		.description(description)
 		.option('-i, --interactive', 'enter interactive mode')
 		.option('--pwd <file_path>', 'passphrase file path')
-		.option('--out <output_path>', 'write keystore to output path')
+		.option('--moniker <name>', 'moniker for generated keyfile')
 		.types({
-			string: ['_', 'pwd', 'out']
+			string: ['_', 'pwd', 'out', 'moniker']
 		})
-		.action((args: Args) => new AccountCreateCommand(session, args).run());
+		.action((args: Args) =>
+			new AccountGenerateCommand(session, args).run()
+		);
 };
 
-class AccountCreateCommand extends Command<Args> {
+class AccountGenerateCommand extends Command<Args> {
 	protected async init(): Promise<boolean> {
 		this.args.options.interactive =
 			this.args.options.interactive || this.session.interactive;
-
-		this.args.moniker = this.args.moniker || this.config.defaults.from;
-		this.args.options.out =
-			this.args.options.out || this.datadir.keystorePath;
 
 		return this.args.options.interactive;
 	}
 
 	protected async prompt(): Promise<void> {
-		const questions: Inquirer.QuestionCollection<Answers> = [
+		let questions = [
 			{
 				message: 'Moniker: ',
 				name: 'moniker',
 				type: 'input'
-			},
-			{
-				message: 'Output Path: ',
-				name: 'outpath',
-				type: 'input',
-				default: this.args.options.out
 			},
 			{
 				message: 'Passphrase: ',
@@ -78,6 +73,17 @@ class AccountCreateCommand extends Command<Args> {
 			}
 		];
 
+		if (!this.args.privKey) {
+			questions = [
+				{
+					message: 'Private Key: ',
+					name: 'privKey',
+					type: 'input'
+				},
+				...questions
+			];
+		}
+
 		const answers = await Inquirer.prompt<Answers>(questions);
 
 		if (!(answers.passphrase && answers.verifyPassphrase)) {
@@ -88,19 +94,31 @@ class AccountCreateCommand extends Command<Args> {
 			throw Error('Passphrases do not match');
 		}
 
-		this.args.moniker = answers.moniker;
-		this.args.options.out = answers.outpath;
+		this.args.privKey = answers.privKey;
+
+		this.args.options.moniker = answers.moniker;
 
 		this.passphrase = answers.passphrase.trim();
 	}
 
 	protected async check(): Promise<void> {
-		if (!this.args.moniker) {
+		if (!this.args.privKey) {
+			throw Error('Private key cannot be empty');
+		}
+
+		if (!this.args.options.moniker) {
 			throw Error('Moniker cannot be empty');
 		}
 
-		if (!utils.validMoniker(this.args.moniker)) {
-			throw Error('Moniker contains illegal characters');
+		if (!utils.validMoniker(this.args.options.moniker)) {
+			throw Error(
+				`Invalid characters in moniker: ${this.args.options.moniker}`
+			);
+		}
+
+		const keystore = await this.datadir.listKeyfiles();
+		if (Object.keys(keystore).includes(this.args.options.moniker)) {
+			throw Error('Moniker already exists');
 		}
 
 		if (!this.passphrase) {
@@ -120,31 +138,20 @@ class AccountCreateCommand extends Command<Args> {
 				.readFileSync(this.args.options.pwd, 'utf8')
 				.trim();
 		}
-
-		if (this.args.options.out) {
-			if (!utils.exists(this.args.options.out)) {
-				throw Error('Output path provided does not exist');
-			}
-
-			if (!utils.isDirectory(this.args.options.out)) {
-				throw Error('Output path provided is a not a directory');
-			}
-		}
 	}
 
 	protected async exec(): Promise<string> {
 		this.log.info('keystore', this.datadir.keystorePath);
 
 		this.debug('Attemping to create keyfile with: ');
-		this.debug(`Moniker -> ${this.args.moniker}`);
+		this.debug(`Private Key -> ${this.args.privKey}`);
+		this.debug(`Moniker -> ${this.args.options.moniker}`);
 		this.debug(`Passphrase -> ${this.passphrase}`);
-		this.debug(`Outpath -> ${this.args.options.out}`);
 
-		const account = await this.datadir.newKeyfile(
-			this.args.moniker,
-			this.passphrase!,
-			this.args.options.out
-		);
+		const account = Account.fromPrivateKey(this.args.privKey);
+		const keyfile = Keystore.encrypt(account, this.passphrase!);
+
+		await this.datadir.importKeyfile(this.args.options.moniker, keyfile);
 
 		if (this.args.options.json) {
 			return JSON.stringify(account);
@@ -154,6 +161,6 @@ class AccountCreateCommand extends Command<Args> {
 	}
 }
 
-export const AccountCreate = AccountCreateCommand;
+export const AccountGenerate = AccountGenerateCommand;
 
 export default command;
