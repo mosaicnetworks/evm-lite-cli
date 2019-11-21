@@ -202,7 +202,7 @@ class POAEvictionVoteCommand extends Command<Args> {
 				gasPrice: Number(this.args.options.gasPrice)
 			},
 			utils.cleanAddress(this.args.address),
-			this.args.options.verdict
+			this.args.options.verdict === 'yes' ? true : false
 		);
 
 		this.startSpinner('Sending Transaction');
