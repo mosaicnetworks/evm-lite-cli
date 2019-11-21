@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
--   All commands now by default output formatted data unless specified by the `-j, --json` flag. (Better scripting experience)
+-   All commands now by default output formatted data unless specified by the `-j, --json` flag.
 -   `poa nominee vote`, `poa evictee vote` now both only take `Yes|No|yes|no` as the `--verdict` flag
     <!-- -   `poa nominee newkv`, `poa evictee new` both have a flag `--vote` which will also vote for the nominee or evictee if the sender is whitelist on the connected network -->
 
