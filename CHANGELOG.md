@@ -11,10 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Added `accounts inspect` which will reveal account information including private key with the `--private` flag
 -   Added `accounts generate` which generates a keyfile based on a private key
+-   POA classes, event types and logs handling class added to core functionality.
 
 ### Changed
 
 -   All commands now by default output formatted data unless specified by the `-j, --json` flag. (Better scripting experience)
+-   `poa nominee vote`, `poa evictee vote` now both only take `Yes|No|yes|no` as the `--verdict` flag
+    <!-- -   `poa nominee newkv`, `poa evictee new` both have a flag `--vote` which will also vote for the nominee or evictee if the sender is whitelist on the connected network -->
 
 ## v1.3.0
 

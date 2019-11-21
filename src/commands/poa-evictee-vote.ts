@@ -8,8 +8,9 @@ import Datadir from 'evm-lite-datadir';
 import utils from 'evm-lite-utils';
 
 import Session from '../core/Session';
+import POA, { EvicteeEntry } from '../poa/Contract';
 
-import { EvicteeEntry, POAEvicteeList } from './poa-evictee-list';
+import { EvictionDecision, EvictionVoteCast, Logs } from '../poa';
 
 import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
@@ -17,7 +18,7 @@ type Opts = TxOptions & {
 	interactive?: boolean;
 	pwd?: string;
 
-	verdict: boolean;
+	verdict: string;
 	from: string;
 	host: string;
 	port: number;
@@ -30,7 +31,7 @@ type Args = Arguments<Opts> & {
 
 type Answers = {
 	address: string;
-	verdict: boolean;
+	verdict: string;
 };
 
 export default (evmlc: Vorpal, session: Session) => {
@@ -42,7 +43,10 @@ export default (evmlc: Vorpal, session: Session) => {
 		.description(description)
 		.option('-i, --interactive', 'interactive')
 		.option('-d, --debug', 'show debug output')
-		.option('--verdict <boolean>', 'verdict for given address')
+		.option(
+			'--verdict <Yes|No|yes|no>',
+			'verdict for given eviction nominee'
+		)
 		.option('--pwd <password>', 'passphrase file path')
 		.option('--from <moniker>', 'from moniker')
 		.option('-h, --host <ip>', 'override config host value')
@@ -84,15 +88,13 @@ class POAEvictionVoteCommand extends Command<Args> {
 	}
 
 	protected async prompt(): Promise<void> {
-		const cmd = new POAEvicteeList(this.session, this.args);
+		const poa = new POA(this.args.options.host, this.args.options.port);
+		await poa.init();
 
-		// initialize cmd execution
-		cmd.init();
-
-		this.evictees = await cmd.getEvicteelist();
+		this.evictees = await poa.evictees();
 
 		if (this.evictees.length === 0) {
-			throw Error('No nominees in election');
+			throw Error('No evictees to vote for.');
 		}
 
 		const questions: Inquirer.QuestionCollection<Answers> = [
@@ -103,9 +105,10 @@ class POAEvictionVoteCommand extends Command<Args> {
 				type: 'list'
 			},
 			{
+				choices: ['Yes', 'No'],
 				message: 'Verdict: ',
 				name: 'verdict',
-				type: 'confirm'
+				type: 'list'
 			}
 		];
 
@@ -118,6 +121,8 @@ class POAEvictionVoteCommand extends Command<Args> {
 	}
 
 	protected async check(): Promise<void> {
+		this.args.options.verdict = this.args.options.verdict.toLowerCase();
+
 		if (!this.args.address) {
 			throw Error('No nominee address provided.');
 		}
@@ -126,7 +131,7 @@ class POAEvictionVoteCommand extends Command<Args> {
 			throw Error('Nominee address has an invalid length.');
 		}
 
-		if (!this.args.options.verdict && this.args.options.verdict !== false) {
+		if (!this.args.options.verdict && this.args.options.verdict !== 'no') {
 			throw Error('No verdict provided for nominee.');
 		}
 
@@ -157,11 +162,24 @@ class POAEvictionVoteCommand extends Command<Args> {
 					.trim();
 			}
 		}
+
+		if (!this.args.options.verdict) {
+			this.args.options.verdict = 'no';
+		}
+
+		if (
+			this.args.options.verdict !== 'yes' &&
+			this.args.options.verdict !== 'no'
+		) {
+			throw Error(
+				`Verdict argument not recognized: ${this.args.options.verdict}`
+			);
+		}
 	}
 
 	protected async exec(): Promise<string> {
 		if (this.args.options.interactive && !this.evictees.length) {
-			return 'There are no evitees in election';
+			return 'There are no evitees to vote for.';
 		}
 
 		const poa = await this.node!.getPOA();
@@ -199,45 +217,42 @@ class POAEvictionVoteCommand extends Command<Args> {
 		}
 
 		this.debug('Parsing logs from transaction');
+		const logs = new Logs(receipt.logs);
 
-		const nomineeVoteCastEvent = receipt.logs.filter(
-			log => log.event === 'EvictionVoteCast'
-		)[0];
+		const evEvictionVoteCast = logs.find<EvictionVoteCast>(
+			'EvictionVoteCast'
+		);
 
-		let nomineeDecisionLogs: any[] = [];
-		let nomineeDecisionEvent;
+		const evEvictionDecision = logs.find<EvictionDecision>(
+			'EvictionDecision'
+		);
 
-		if (receipt.logs.length > 1) {
-			nomineeDecisionLogs = receipt.logs.filter(
-				log => log.event === 'EvictionDecision'
+		if (!evEvictionVoteCast) {
+			throw Error(
+				'Vote was not cast. No `EvictionVoteCast` event returned'
 			);
 		}
 
-		if (nomineeDecisionLogs.length) {
-			nomineeDecisionEvent = nomineeDecisionLogs[0];
-		}
-
-		const vote = nomineeVoteCastEvent.args._accepted ? 'Yes' : 'No';
-
+		const vote = evEvictionVoteCast._accepted ? 'Yes' : 'No';
 		let message =
-			`You (${nomineeVoteCastEvent.args._voter}) voted '${vote}'` +
-			` for '${nomineeVoteCastEvent.args._nominee}'. `;
+			`You (${evEvictionVoteCast._voter}) voted '${vote}'` +
+			` for '${evEvictionVoteCast._nominee}'. `;
 
-		if (nomineeDecisionEvent) {
-			const accepted = nomineeDecisionEvent.args._accepted
+		if (evEvictionDecision) {
+			const accepted = evEvictionDecision._accepted
 				? 'being removed'
 				: 'not being removed';
 
-			message += `\nEviction ended with the evictee ${accepted}.`;
+			message += `\nEviction ended with the nominee ${accepted}.`;
 		}
 
 		this.stopSpinner();
 
 		if (this.args.options.json) {
 			return JSON.stringify({
-				voter: this.account.address,
-				evictee: this.args.address,
-				verdict: this.args.options.verdict
+				voter: evEvictionVoteCast._voter,
+				evictee: evEvictionVoteCast._nominee,
+				verdict: vote
 			});
 		} else {
 			return message;

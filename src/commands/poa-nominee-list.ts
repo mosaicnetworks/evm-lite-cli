@@ -1,10 +1,10 @@
 import Vorpal from 'vorpal';
 
-import Node, { Contract } from 'evm-lite-core';
-import utils from 'evm-lite-utils';
+import Node from 'evm-lite-core';
 
 import Session from '../core/Session';
 import Table from '../core/Table';
+import POA from '../poa/Contract';
 
 import Command, { Arguments, TxOptions } from '../core/TxCommand';
 
@@ -41,80 +41,6 @@ export default (evmlc: Vorpal, session: Session) => {
 };
 
 class POANomineeListCommand extends Command<Args> {
-	public async getNomineeList() {
-		this.log.http(
-			'GET',
-			`${this.args.options.host}:${this.args.options.port}/poa`
-		);
-
-		const poa = await this.node!.getPOA();
-
-		this.log.info('POA', poa.address);
-
-		const contract = Contract.load(JSON.parse(poa.abi), poa.address);
-
-		const transaction = contract.methods.getNomineeCount({
-			gas: this.args.options.gas,
-			gasPrice: Number(this.args.options.gasPrice)
-		});
-
-		const countRes: any = await this.node!.callTx(transaction);
-		const count = countRes.toNumber();
-		this.debug(`Nominee count -> ${count}`);
-
-		const entries: NomineeEntry[] = [];
-
-		for (const i of Array.from(Array(count).keys())) {
-			const entry: NomineeEntry = {
-				address: '',
-				moniker: '',
-				upVotes: 0,
-				downVotes: 0
-			};
-
-			const addressTx = contract.methods.getNomineeAddressFromIdx(
-				{
-					gas: this.args.options.gas,
-					gasPrice: Number(this.args.options.gasPrice)
-				},
-				i
-			);
-
-			entry.address = await this.node!.callTx(addressTx);
-
-			const monikerTx = contract.methods.getMoniker(
-				{
-					gas: this.args.options.gas,
-					gasPrice: Number(this.args.options.gasPrice)
-				},
-				entry.address
-			);
-
-			const hex = await this.node!.callTx<string>(monikerTx);
-			entry.moniker = utils.hexToString(hex);
-
-			const votesTx = contract.methods.getCurrentNomineeVotes(
-				{
-					gas: this.args.options.gas,
-					gasPrice: Number(this.args.options.gasPrice)
-				},
-				utils.cleanAddress(entry.address)
-			);
-
-			const votes = await this.node!.callTx<[string, string]>(votesTx);
-
-			entry.upVotes = parseInt(votes[0], 10);
-			entry.downVotes = parseInt(votes[1], 10);
-
-			this.debug(
-				`Adding nominee -> ${entry.moniker} (${entry.address}) [${entry.upVotes}, ${entry.downVotes}]`
-			);
-			entries.push(entry);
-		}
-
-		return entries;
-	}
-
 	public async init(): Promise<boolean> {
 		this.constant = true;
 
@@ -141,7 +67,10 @@ class POANomineeListCommand extends Command<Args> {
 	}
 
 	protected async exec(): Promise<string> {
-		const entries = await this.getNomineeList();
+		const poa = new POA(this.args.options.host, this.args.options.port);
+		await poa.init();
+
+		const entries = await poa.nominees();
 		const table = new Table([
 			'Moniker',
 			'Address',
@@ -150,6 +79,10 @@ class POANomineeListCommand extends Command<Args> {
 		]);
 
 		for (const entry of entries) {
+			this.debug(
+				`Adding nominee -> ${entry.moniker} (${entry.address}) [${entry.upVotes}, ${entry.downVotes}]`
+			);
+
 			table.push([
 				entry.moniker,
 				entry.address,
