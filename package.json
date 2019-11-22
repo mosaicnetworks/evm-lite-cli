@@ -24,20 +24,19 @@
 		"e2e:monetd": "monetd --datadir ./e2e/datadir run"
 	},
 	"dependencies": {
-		"chalk": "^2.4.2",
-		"cli-table": "^0.3.1",
 		"evm-lite-client": "^1.3.7",
 		"evm-lite-consensus": "^1.3.7",
 		"evm-lite-core": "^1.3.7",
 		"evm-lite-datadir": "^1.3.7",
 		"evm-lite-keystore": "^1.3.7",
 		"evm-lite-utils": "^1.3.7",
+		"cli-table": "^0.3.1",
+		"chalk": "^2.4.2",
 		"figlet": "^1.2.4",
 		"inquirer": "^7.0.0",
 		"mkdirp": "^0.5.1",
 		"npmlog": "^4.1.2",
 		"ora": "^3.4.0",
-		"terminal-image": "^0.2.0",
 		"vorpal": "^1.12.0"
 	},
 	"devDependencies": {

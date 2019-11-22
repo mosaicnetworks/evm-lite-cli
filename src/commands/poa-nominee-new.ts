@@ -13,7 +13,6 @@ import Logs from '../poa/Logs';
 import { MonikerAnnounce, NomineeProposed } from '../poa/Events';
 
 import Command, { Arguments, TxOptions } from '../core/TxCommand';
-import { POA } from '../poa';
 
 type Opts = TxOptions & {
 	interactive?: boolean;
