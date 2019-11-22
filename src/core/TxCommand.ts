@@ -61,13 +61,13 @@ abstract class TxCommand<
 		}
 	}
 
-	protected async callTx<T>(
+	protected async callTx<R>(
 		tx: Transaction,
 		msg: string = 'Sending Call Transaction'
 	) {
 		if (this.node) {
 			this.startSpinner(msg);
-			const receipt = await this.node.callTx<T>(tx);
+			const receipt = await this.node.callTx<R>(tx);
 			this.stopSpinner();
 
 			this.debug(JSON.stringify(receipt));
