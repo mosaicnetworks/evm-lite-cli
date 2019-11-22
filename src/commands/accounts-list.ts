@@ -6,6 +6,8 @@ import Table from '../core/Table';
 
 import Command, { Arguments, Options } from '../core/Command';
 
+const terminalImage = require('terminal-image');
+
 type Opts = Options & {
 	remote?: boolean;
 	host?: string;

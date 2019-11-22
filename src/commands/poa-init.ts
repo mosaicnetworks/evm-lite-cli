@@ -126,10 +126,8 @@ class POAInitCommand extends Command<Args> {
 			gasPrice: Number(this.args.options.gasPrice)
 		});
 
-		this.startSpinner('Sending Transaction');
-
 		this.debug('Sending init transaction');
-		const receipt = await this.node!.sendTx(tx, this.account);
+		const receipt = await this.sendTx(tx, this.account);
 		const r = {
 			...receipt
 		};
@@ -142,8 +140,6 @@ class POAInitCommand extends Command<Args> {
 
 				return log;
 			});
-
-		this.stopSpinner();
 
 		if (!receipt.logs.length) {
 			throw Error(

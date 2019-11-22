@@ -105,7 +105,7 @@ class POACheckCommand extends Command<Args> {
 		);
 
 		this.debug('Sending transaction');
-		const response = await this.node!.callTx<boolean>(tx);
+		const response = await this.callTx<boolean>(tx);
 
 		if (this.args.options.json) {
 			return JSON.stringify({

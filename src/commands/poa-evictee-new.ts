@@ -172,10 +172,8 @@ class POAEvictCommand extends Command<Args> {
 			utils.cleanAddress(this.args.address)
 		);
 
-		this.startSpinner('Sending Transaction');
-
 		this.debug('Sending eviction transaction');
-		const receipt = await this.node!.sendTx(tx, this.account);
+		const receipt = await this.sendTx(tx, this.account);
 
 		if (!receipt.logs.length) {
 			throw Error(
@@ -193,8 +191,6 @@ class POAEvictCommand extends Command<Args> {
 		if (!evEvictionProposed) {
 			throw Error('Oops! `EvictionProposed` event not found.');
 		}
-
-		this.stopSpinner();
 
 		if (this.args.options.json) {
 			return JSON.stringify({

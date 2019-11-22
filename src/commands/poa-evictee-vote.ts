@@ -205,10 +205,9 @@ class POAEvictionVoteCommand extends Command<Args> {
 			this.args.options.verdict === 'yes' ? true : false
 		);
 
-		this.startSpinner('Sending Transaction');
-
 		this.debug('Sending vote transaction');
-		const receipt = await this.node!.sendTx(tx, this.account);
+		const receipt = await this.sendTx(tx, this.account);
+
 		if (!receipt.logs.length) {
 			throw Error(
 				'No logs were returned. ' +
@@ -245,8 +244,6 @@ class POAEvictionVoteCommand extends Command<Args> {
 
 			message += `\nEviction ended with the nominee ${accepted}.`;
 		}
-
-		this.stopSpinner();
 
 		if (this.args.options.json) {
 			return JSON.stringify({

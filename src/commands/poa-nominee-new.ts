@@ -181,10 +181,8 @@ class POANominateCommand extends Command<Args> {
 			this.args.options.moniker
 		);
 
-		this.startSpinner('Sending Transaction');
-
 		this.debug('Sending nominate transaction');
-		const receipt = await this.node!.sendTx(tx, this.account);
+		const receipt = await this.sendTx(tx, this.account);
 
 		if (!receipt.logs.length) {
 			this.debug('Not voted - Gas or not whitelisted');
@@ -217,8 +215,6 @@ class POANominateCommand extends Command<Args> {
 				'Could not find corresponding `MonikerAnnounce` event for moniker'
 			);
 		}
-
-		this.stopSpinner();
 
 		if (this.args.options.json) {
 			return JSON.stringify({

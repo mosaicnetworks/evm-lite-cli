@@ -200,17 +200,10 @@ class TransferCommand extends Command<Args> {
 			return 'Aborted';
 		}
 
-		this.startSpinner('Sending Transaction');
-
-		const receipt = await this.node!.transfer(
-			this.account!,
+		const receipt = await this.transferTo(
 			this.args.options.to,
-			new Currency(this.args.options.value).format('a').slice(0, -1),
-			21000,
-			Number(this.args.options.gasPrice)
+			new Currency(this.args.options.value).format('a').slice(0, -1)
 		);
-
-		this.stopSpinner();
 
 		if (this.args.options.json) {
 			return JSON.stringify(receipt);

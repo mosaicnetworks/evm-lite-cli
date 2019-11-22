@@ -1,10 +1,10 @@
 import Inquirer from 'inquirer';
 
-import { IAbstractConsensus, Solo } from 'evm-lite-consensus';
-import { Currency } from 'evm-lite-utils';
-import { Args } from 'vorpal';
-
 import Datadir from 'evm-lite-datadir';
+
+import { IAbstractConsensus, Solo } from 'evm-lite-consensus';
+import { Account, Transaction } from 'evm-lite-core';
+import { Currency } from 'evm-lite-utils';
 
 import Command, { Arguments, Options } from './Command';
 import Session from './Session';
@@ -37,6 +37,77 @@ abstract class TxCommand<
 
 	constructor(session: Session, args: T) {
 		super(session, args);
+	}
+
+	protected async sendTx(
+		tx: Transaction,
+		account: Account,
+		msg: string = 'Sending Transaction'
+	) {
+		if (this.node) {
+			this.startSpinner(msg);
+			const receipt = await this.node.sendTx(tx, account);
+			this.stopSpinner();
+
+			this.debug(JSON.stringify(receipt));
+
+			return receipt;
+		} else {
+			this.debug(
+				'Node was not instansiated. ' +
+					'Make sure a `Node` object is instansitated in `this.init`'
+			);
+			throw Error('No connection detected!');
+		}
+	}
+
+	protected async callTx<T>(
+		tx: Transaction,
+		msg: string = 'Sending Call Transaction'
+	) {
+		if (this.node) {
+			this.startSpinner(msg);
+			const receipt = await this.node.callTx<T>(tx);
+			this.stopSpinner();
+
+			this.debug(JSON.stringify(receipt));
+
+			return receipt;
+		} else {
+			this.debug(
+				'Node was not instansiated. ' +
+					'Make sure a `Node` object is instansitated in `this.init`'
+			);
+			throw Error('No connection detected!');
+		}
+	}
+
+	protected async transferTo(to: string, amount: string) {
+		if (this.node) {
+			if (!this.account) {
+				this.debug(
+					'`this.account` was not decrypted properly. ' +
+						'Make sure a `this.account` is instansitated'
+				);
+
+				throw Error('No account decryped to transfer coins from');
+			}
+
+			this.startSpinner('Sending Transaction');
+			const receipt = await this.node!.transfer(
+				this.account,
+				to,
+				amount,
+				21000,
+				Number(this.args.options.gasPrice)
+			);
+
+			this.debug(JSON.stringify(receipt));
+
+			return receipt;
+		} else {
+			throw Error('No connection detected!');
+		}
 	}
 
 	protected async initQueue(): Promise<boolean> {
